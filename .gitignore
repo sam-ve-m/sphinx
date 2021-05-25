@@ -50,4 +50,4 @@ Thumbs.db
 
 keys/
 venv/
-.idea/
+.env

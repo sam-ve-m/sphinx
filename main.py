@@ -30,7 +30,7 @@ async def add_process_time_header(request: Request, call_next):
                 token = header_tuple[1].decode()
                 break
         try:
-            payload = JWTHandler.decrpty_to_paylod(token)
+            JWTHandler.decrpty_to_paylod(token)
         except Exception:
             response = Response(
                 content=json.dumps({"message": i18n.get_translate('invalid_token', locale='pt')}),

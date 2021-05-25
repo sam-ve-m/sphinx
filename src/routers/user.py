@@ -1,11 +1,21 @@
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 router = APIRouter()
 
 
+class User(BaseModel):
+    name: str
+    email: str
+    pin: int
+
+
+class ForgotPassword(BaseModel):
+    email: str
+
 @router.post("/user", tags=["user"])
-async def create_user():
-    return 200
+async def create_user(user: User):
+    return user, 200
 
 
 @router.post("/user/admin", tags=["user"])
@@ -29,7 +39,7 @@ async def change_user_password():
 
 
 @router.get("/user/forgot_password", tags=["user"])
-async def change_user_forgot_password():
+async def change_user_forgot_password(forgot_password: ForgotPassword):
     return 200
 
 
