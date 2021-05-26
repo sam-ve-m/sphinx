@@ -10,4 +10,11 @@ pt:
     process_issue: Erro no processo.
   view:
     feature_not_exists: O serviços enviado não existe.
+  user:
+    created: Enviamos para você um e-mail de confirmação.
+    forgot_password: Enviamos para você um e-mail de recuperação de pin.
+  email:
+    subject:
+      created: Confirme a sua conta
+      forgot_password: Recuperação de PIN
   invalid_token: Parece que seu acesso expirou, logue novamente.

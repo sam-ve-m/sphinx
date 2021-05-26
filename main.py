@@ -18,7 +18,7 @@ app = FastAPI()
 
 
 @app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
+async def process_thebes_answer(request: Request, call_next):
     if (
             request.method == 'POST' and
             request.url.path in ['/user', '/user/forgot_password', '/login', '/login/admin']
@@ -27,7 +27,7 @@ async def add_process_time_header(request: Request, call_next):
     else:
         token = None
         for header_tuple in request.headers.raw:
-            if b'token' in header_tuple:
+            if b'thebes_answer' in header_tuple:
                 token = header_tuple[1].decode()
                 break
         try:

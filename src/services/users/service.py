@@ -1,0 +1,52 @@
+from src.repositories.user.repository import UserRepository
+from src.exceptions.exceptions import BadRequestError, InternalServerError
+from src.utils.genarate_id import generate_id, hash_field
+from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
+from src.i18n.i18n_resolver import i18nResolver as i18n
+from fastapi import status
+from decouple import config
+
+
+class UserService:
+
+    @staticmethod
+    def create(
+            payload: dict,
+            user_repository=UserRepository(),
+            email_sender=SendGridEmail
+    ):
+        payload = generate_id('email', payload, must_remove=False)
+        email = payload.get('email')
+        name = payload.get('name')
+        pin = payload.get('pin')
+        if (
+                (len(email) < 1 or email is None) or
+                (len(name) < 1 or name is None) or
+                (len(pin) < 1 or pin is None)
+        ):
+            raise BadRequestError('common.invalid_params')
+        payload = hash_field('pin', payload)
+        if user_repository.find_one({'_id': payload.get('_id')}) is not None:
+            raise BadRequestError('common.register_exists')
+        if user_repository.insert(payload):
+
+            email_sender.send_email_to(
+                target_email=email,
+                message='',
+                subject=i18n.get_translate('email.subject.created', locale='pt')
+            )
+            # TODO: send e-mail
+            return {
+                'status_code': status.HTTP_201_CREATED,
+                'message_key': 'user.created'
+            }
+        else:
+            raise InternalServerError('common.process_issue')
+
+    @staticmethod
+    def update(payload: dict, feature_repository=UserRepository()):
+        pass
+
+    @staticmethod
+    def delete(payload: dict, feature_repository=UserRepository()):
+        pass

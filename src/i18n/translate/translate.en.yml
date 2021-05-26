@@ -10,4 +10,11 @@ en:
     process_issue: Proccesses error.
   view:
     feature_not_exists: The provided features not exists.
+  user:
+    created: We sent you a valition email.
+    forgot_password: We sent you a recover email.
+  email:
+    subject:
+      created: Account confirmation
+      forgot_password: Reconvery PIN
   invalid_token: Seems that your access has expired, try to login again.
