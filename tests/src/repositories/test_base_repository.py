@@ -1,5 +1,4 @@
 from tests.stubby_classes.stubby_base_repository import StubbyBaseRepository
-from pymongo.cursor import Cursor
 from decouple import config
 from unittest.mock import MagicMock
 

@@ -13,14 +13,14 @@ class Feature(BaseModel):
 
 @router.post("/feature", tags=["feature"])
 async def create_feature(feature: Feature, request: Request):
-    return BaseController.run(FeatureController.create, feature, request)
+    return BaseController.run(FeatureController.create, dict(feature), request)
 
 
 @router.put("/feature/{feature_id}", tags=["feature"])
 async def update_feature_data(feature_id: str, feature: Feature, request: Request):
     return BaseController.run(FeatureController.update, {
         "feature_id": feature_id,
-        "model": feature
+        "model": dict(feature)
     }, request)
 
 

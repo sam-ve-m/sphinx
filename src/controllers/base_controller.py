@@ -42,7 +42,7 @@ class BaseController:
                 content=json.dumps({"message": i18n.get_translate(str(e), locale=lang)}),
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        except:
+        except Exception as e:
             return Response(
                 content=json.dumps({"message": i18n.get_translate('internal_error', locale=lang)}),
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR

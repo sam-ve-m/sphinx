@@ -1,2 +1,11 @@
 pt:
+  requests:
+    created: Registrado com sucesso
+    updated: Registro atualizado
+    deleted: Registro deletado
+  common:
+    invalid_params: Parametros invalidos
+    register_exists: Registro já existe
+    register_not_exists: Registro não existe
+    process_issue: Erro no processo
   invalid_token: Parece que seu acesso expirou, logue novamente.

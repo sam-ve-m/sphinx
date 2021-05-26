@@ -21,3 +21,9 @@ class StubbyBaseRepository:
 
     def find_all(self) -> Optional[list]:
         return list
+
+    def update_one(self, old: dict, new: dict) -> bool:
+        pass
+
+    def delete_one(self, entity: dict) -> bool:
+        pass
