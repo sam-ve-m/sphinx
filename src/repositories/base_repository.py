@@ -2,14 +2,14 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from pymongo import MongoClient
 from decouple import config
-
+from pymongo.cursor import Cursor
 
 class BaseRepository(ABC):
 
     client: MongoClient = (
-            eval(config('MONGO_IS_SERVER')) and
-            MongoClient(f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_URI')}:{config('MONGODB_URI')}/") or
-            MongoClient(f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_URI')}:{config('MONGODB_URI')}/")
+            eval(config('MONGO_IS_SERVER')) == True and
+            MongoClient(f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/") or
+            MongoClient(f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/")
     )
 
     def __init__(self, database: str, collection: str) -> None:
@@ -27,24 +27,24 @@ class BaseRepository(ABC):
         try:
             self.collection.insert_many(data)
             return True
-        except Exception as e:
+        except Exception:
             return False
 
     def find_one(self, query: dict) -> Optional[dict]:
         try:
             return self.collection.find_one(query)
-        except Exception as e:
+        except Exception:
             return None
 
-    def find_more_then(self, query: dict) -> Optional[list]:
+    def find_more_than_equal_one(self, query: dict) -> Optional[Cursor]:
         try:
             return self.collection.find(query)
-        except Exception as e:
+        except Exception:
             return None
 
-    def find_all(self) -> Optional[list]:
+    def find_all(self) -> Optional[Cursor]:
         try:
             return self.collection.find()
-        except Exception as e:
+        except Exception:
             return None
 
