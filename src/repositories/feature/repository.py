@@ -1,6 +1,7 @@
 from src.repositories.base_repository import BaseRepository
 from decouple import config
 
+
 class FeatureRepository(BaseRepository):
 
     def __init__(self) -> None:

@@ -18,8 +18,9 @@ class BaseController:
         lang = get_language_from_request(request=request)
         try:
             response_metadata = callback(payload)
+            payload = BaseController.create_response_payload(response_metadata=response_metadata, lang=lang)
             return Response(
-                content=json.dumps({"message": i18n.get_translate(response_metadata.get('message_key'), locale=lang)}),
+                content=json.dumps(payload),
                 status_code=response_metadata.get('status_code')
             )
         except UnauthorizedError as e:
@@ -47,3 +48,12 @@ class BaseController:
                 content=json.dumps({"message": i18n.get_translate('internal_error', locale=lang)}),
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    @staticmethod
+    def create_response_payload(response_metadata: dict, lang: str) -> dict:
+        payload = dict()
+        if "message_key" in response_metadata:
+            payload.update({"message": i18n.get_translate(response_metadata.get('message_key'), locale=lang)})
+        if "payload" in response_metadata:
+            payload.update(response_metadata.get('payload'))
+        return payload

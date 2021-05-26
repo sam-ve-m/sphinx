@@ -9,10 +9,10 @@ class FeatureService:
     @staticmethod
     def create(payload: dict, feature_repository=FeatureRepository()):
         payload = generate_id('name', payload)
-        name = payload.get('name')
+        _id = payload.get('_id')
         display_name = payload.get('display_name')
         if (
-                (len(name) < 1 or name is None) or
+                (len(_id) < 1 or _id is None) or
                 (len(display_name) < 1 or display_name is None)
         ):
             raise BadRequestError('common.invalid_params')

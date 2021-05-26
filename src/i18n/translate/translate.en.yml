@@ -1,11 +1,13 @@
 en:
   requests:
-    created: Create successed
-    updated: Register Updated
-    deleted: Register deleted
+    created: Create successed.
+    updated: Register Updated.
+    deleted: Register deleted.
   common:
-    invalid_params: Invalid Params
-    register_exists: Register alredy exists
-    register_not_exists: Register not exists
-    process_issue: Proccesses error
+    invalid_params: Invalid Params.
+    register_exists: Register alredy exists.
+    register_not_exists: Register not exists.
+    process_issue: Proccesses error.
+  view:
+    feature_not_exists: The provided features not exists.
   invalid_token: Seems that your access has expired, try to login again.
