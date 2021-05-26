@@ -13,6 +13,7 @@ class User(BaseModel):
 class ForgotPassword(BaseModel):
     email: str
 
+
 @router.post("/user", tags=["user"])
 async def create_user(user: User):
     return user, 200

@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Optional
 from pymongo import MongoClient
 from decouple import config
@@ -48,3 +48,16 @@ class BaseRepository(ABC):
         except Exception:
             return None
 
+    def update_one(self, old, new) -> bool:
+        try:
+            self.collection.update_one(old, {'$set': new})
+            return True
+        except Exception:
+            return False
+
+    def delete_one(self, entity) -> bool:
+        try:
+            self.collection.delete_one(entity)
+            return True
+        except Exception:
+            return False

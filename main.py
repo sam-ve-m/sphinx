@@ -12,6 +12,7 @@ from src.routers.pendencies import router as PendenciesRouter
 from src.routers.purchase import router as PurchaseRouter
 from src.routers.view import router as ViewRouter
 from src.i18n.i18n_resolver import i18nResolver as i18n
+from src.utils.language_identifier import get_language_from_request
 
 app = FastAPI()
 
@@ -31,9 +32,10 @@ async def add_process_time_header(request: Request, call_next):
                 break
         try:
             JWTHandler.decrpty_to_paylod(token)
-        except Exception:
+        except:
+            lang = get_language_from_request(request=request)
             response = Response(
-                content=json.dumps({"message": i18n.get_translate('invalid_token', locale='pt')}),
+                content=json.dumps({"message": i18n.get_translate('invalid_token', locale=lang)}),
                 status_code=status.HTTP_401_UNAUTHORIZED
             )
             return response
