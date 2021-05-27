@@ -24,7 +24,9 @@ class JWTHandler:
         try:
             with open("src/keys/id_rsa", "rb") as fh:
                 signing_key = jwk_from_pem(fh.read())
-            compact_jws = JWTHandler.instance.encode(payload, signing_key, alg="RS256")
+            compact_jws = JWTHandler.instance.encode(
+                JWTHandler.filter_payload_to_jwt(payload), signing_key, alg="RS256"
+            )
             print(compact_jws)
             return compact_jws
         except:
@@ -41,3 +43,13 @@ class JWTHandler:
             return payload
         except:
             raise InternalServerError("common.process_issue")
+
+    @staticmethod
+    def filter_payload_to_jwt(payload: dict):
+        new_payload = {
+            "name": payload.get("name"),
+            "email": payload.get("email"),
+            "scope": payload.get("scope"),
+            "is_active": payload.get("is_active"),
+        }
+        return new_payload

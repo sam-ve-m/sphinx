@@ -44,12 +44,9 @@ def test_answer_process_issue():
 
 
 def test_answer():
-    generate_token_value = 'lalala'
+    generate_token_value = "lalala"
     stubby_repository = StubbyRepository(database="", collection="")
-    stubby_repository.find_one = MagicMock(return_value={
-        "pin": '',
-        "_id": '',
-    })
+    stubby_repository.find_one = MagicMock(return_value={"pin": "", "_id": "",})
     stubby_repository.update_one = MagicMock(return_value=True)
     StubbyTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
     response = AuthenticationService.answer(

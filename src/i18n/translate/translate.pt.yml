@@ -14,6 +14,8 @@ pt:
     created: Enviamos para você um e-mail de confirmação.
     forgot_password: Enviamos para você um e-mail de recuperação de pin.
     active: Sua validação foi feita com sucesso.
+    pin_error: PIN invalido, tentenovamente.
+    need_pin: Informe seu PIN.
   email:
     subject:
       created: Confirme a sua conta

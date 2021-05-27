@@ -1,4 +1,5 @@
 from hashlib import sha1
+from typing import Union
 
 
 def generate_id(key: str, payload: dict, must_remove: bool = True) -> dict:
@@ -16,8 +17,12 @@ def generate_list(key: str, payload: dict) -> dict:
     return payload
 
 
-def hash_field(key: str, payload: dict) -> dict:
+def hash_field(payload: Union[dict, str], key: str = None) -> dict:
     _sha1 = sha1()
-    _sha1.update(str(payload[key]).encode())
-    payload[key] = _sha1.hexdigest()
+    if key:
+        _sha1.update(str(payload[key]).encode())
+        payload[key] = _sha1.hexdigest()
+    else:
+        _sha1.update(str(payload).encode())
+        payload = _sha1.hexdigest()
     return payload

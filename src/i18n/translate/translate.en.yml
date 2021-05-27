@@ -14,6 +14,8 @@ en:
     created: We sent you a valition email.
     forgot_password: We sent you a recover email.
     active: Your account was activated successfully.
+    pin_error: Invalid PIN, try again.
+    need_pin: Inform your PIN code.
   email:
     subject:
       created: Account confirmation

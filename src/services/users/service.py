@@ -24,7 +24,7 @@ class UserService:
             or (pin is None)
         ):
             raise BadRequestError("common.invalid_params")
-        payload = hash_field("pin", payload)
+        payload = hash_field(key="pin", payload=payload)
         if user_repository.find_one({"_id": payload.get("_id")}) is not None:
             raise BadRequestError("common.register_exists")
 
@@ -33,8 +33,6 @@ class UserService:
         )
 
         if user_repository.insert(payload):
-            del payload["pin"]
-            del payload["_id"]
             payload_jwt = JWTHandler.generate_token(payload=payload, ttl=10)
             page = HtmlModifier(
                 "src/services/asset",

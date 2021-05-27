@@ -7,7 +7,6 @@ from src.utils.jwt_utils import JWTHandler
 from src.routers.user import router as UserRouter
 from src.routers.feature import router as FeatureRouter
 from src.routers.authenticate import router as AuthenticateRouter
-from src.routers.authorization import router as AuthorizationRouter
 from src.routers.pendencies import router as PendenciesRouter
 from src.routers.purchase import router as PurchaseRouter
 from src.routers.view import router as ViewRouter
@@ -50,7 +49,6 @@ async def process_thebes_answer(request: Request, call_next):
 app.include_router(UserRouter)
 app.include_router(FeatureRouter)
 app.include_router(AuthenticateRouter)
-app.include_router(AuthorizationRouter)
 app.include_router(PendenciesRouter)
 app.include_router(AuthenticateRouter)
 app.include_router(PurchaseRouter)
