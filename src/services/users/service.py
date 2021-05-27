@@ -35,7 +35,6 @@ class UserService:
                 message=page,
                 subject=i18n.get_translate(key='email.subject.created', locale='pt')
             )
-            # TODO: send e-mail
             return {
                 'status_code': status.HTTP_201_CREATED,
                 'message_key': 'user.created'

@@ -19,5 +19,5 @@ class EmailSender:
                 html_content=message,
             )
             EmailSender.sg.client.mail.send.post(request_body=mail.get())
-        except Exception as err:
-            print(err)
+        except:
+            raise InternalServerError('email.trouble.send')

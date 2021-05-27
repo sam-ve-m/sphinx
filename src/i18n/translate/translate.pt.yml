@@ -20,4 +20,6 @@ pt:
     body:
       created: Bem vindo! Clique no link para finalizar seu cadastro.
       forgot_password: Clique no link para atualizar sua senha.
+    trouble:
+      send: Tivemos problema para enviar seu email, por favor tente novamente.
   invalid_token: Parece que seu acesso expirou, logue novamente.

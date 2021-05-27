@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup as bs
+import tempfile
 import os
+
 
 class HtmlModifier:
     def __init__(self, html_path: str, message_text, target_link: str):
@@ -9,6 +11,7 @@ class HtmlModifier:
         self.link_a = None
         self.message_text = message_text
         self.target_link = target_link
+        self.temp_file = None
 
     def modify(self):
         new_link = bs(
@@ -18,14 +21,14 @@ class HtmlModifier:
         new_message_text = bs(f"<p id='message_text'>{self.message_text} <a href='' id='link-auth'></a></p>","html.parser")
         self.soup.find("p", {"id": "message_text"}).replace_with(new_message_text)
         self.soup.find("a", {"id": "link-auth"}).replace_with(new_link)
-
-        with open(os.path.join(self.base, "email.html"), "wb") as f_output:
-            f_output.write(self.soup.prettify("utf-8"))
+        self.temp_file = tempfile.TemporaryFile(mode='wb+')
+        self.temp_file.write(self.soup.prettify("utf-8"))
 
     def return_email_content(self):
-        with open(os.path.join(self.base, "email.html"), "r") as f:
-            template = f.read()
-            return template
+        self.temp_file.seek(0, 0)
+        template = self.temp_file.read().decode()
+        self.temp_file.close()
+        return template
 
     def __call__(self):
         self.modify()
