@@ -13,6 +13,7 @@ pt:
   user:
     created: Enviamos para você um e-mail de confirmação.
     forgot_password: Enviamos para você um e-mail de recuperação de pin.
+    active: Sua validação foi feita com sucesso.
   email:
     subject:
       created: Confirme a sua conta
@@ -23,3 +24,4 @@ pt:
     trouble:
       send: Tivemos problema para enviar seu email, por favor tente novamente.
   invalid_token: Parece que seu acesso expirou, logue novamente.
+  internal_error: Tivemos problema, por favor tente novamente.

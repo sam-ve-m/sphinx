@@ -6,29 +6,38 @@ from src.exceptions.exceptions import InternalServerError
 
 from datetime import timedelta
 
+
 class JWTHandler:
 
     instance = JWT()
 
     @staticmethod
-    def generate_token(payload: dict):
-        payload.update({'exp': get_int_from_datetime(
-        datetime.now(timezone.utc) + timedelta(hours=8760))})
+    def generate_token(payload: dict, ttl: int = 5):
+        """The ttl value in minutes"""
+        payload.update(
+            {
+                "exp": get_int_from_datetime(
+                    datetime.now(timezone.utc) + timedelta(minutes=ttl)
+                )
+            }
+        )
         try:
-            with open('src/keys/id_rsa', 'rb') as fh:
+            with open("src/keys/id_rsa", "rb") as fh:
                 signing_key = jwk_from_pem(fh.read())
-            compact_jws = JWTHandler.instance.encode(payload, signing_key, alg='RS256')
+            compact_jws = JWTHandler.instance.encode(payload, signing_key, alg="RS256")
             print(compact_jws)
             return compact_jws
         except:
-            raise InternalServerError('common.process_issue')
+            raise InternalServerError("common.process_issue")
 
     @staticmethod
     def decrpty_to_paylod(crypted_payload: str):
         try:
-            with open('src/keys/id_rsa.json', 'r') as fh:
+            with open("src/keys/id_rsa.json", "r") as fh:
                 verifying_key = jwk_from_dict(json.load(fh))
-            payload = JWTHandler.instance.decode(crypted_payload, verifying_key, do_time_check=True)
+            payload = JWTHandler.instance.decode(
+                crypted_payload, verifying_key, do_time_check=True
+            )
             return payload
         except:
-            raise InternalServerError('common.process_issue')
+            raise InternalServerError("common.process_issue")

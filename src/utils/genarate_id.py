@@ -4,8 +4,8 @@ from hashlib import sha1
 def generate_id(key: str, payload: dict, must_remove: bool = True) -> dict:
     _id = payload.get(key)
     if _id is None:
-        raise Exception('Error to generate _id')
-    payload.update({'_id': _id})
+        raise Exception("Error to generate _id")
+    payload.update({"_id": _id})
     if must_remove:
         del payload[key]
     return payload

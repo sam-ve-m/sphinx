@@ -4,9 +4,11 @@ from unittest.mock import MagicMock
 
 
 class StubbyUser(StubbyBaseRepository):
-
     def __init__(self) -> None:
-        super().__init__(database=config('MONGODB_DATABASE_NAME'), collection=config('MONGODB_USER_COLLECTION'))
+        super().__init__(
+            database=config("MONGODB_DATABASE_NAME"),
+            collection=config("MONGODB_USER_COLLECTION"),
+        )
 
 
 def test_insert_user() -> None:

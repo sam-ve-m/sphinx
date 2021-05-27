@@ -18,10 +18,13 @@ class HtmlModifier:
             f"<a href={self.target_link} id='link-auth'>Clique Aqui!</a>",
             "html.parser",
         )
-        new_message_text = bs(f"<p id='message_text'>{self.message_text} <a href='' id='link-auth'></a></p>","html.parser")
+        new_message_text = bs(
+            f"<p id='message_text'>{self.message_text} <a href='' id='link-auth'></a></p>",
+            "html.parser",
+        )
         self.soup.find("p", {"id": "message_text"}).replace_with(new_message_text)
         self.soup.find("a", {"id": "link-auth"}).replace_with(new_link)
-        self.temp_file = tempfile.TemporaryFile(mode='wb+')
+        self.temp_file = tempfile.TemporaryFile(mode="wb+")
         self.temp_file.write(self.soup.prettify("utf-8"))
 
     def return_email_content(self):

@@ -19,15 +19,17 @@ app = FastAPI()
 
 @app.middleware("http")
 async def process_thebes_answer(request: Request, call_next):
-    if (
-            (request.method == 'POST' and
-            request.url.path in ['/user', '/user/forgot_password', '/login', '/login/admin'])
-    ):
-            response = await call_next(request)
+    if request.method == "POST" and request.url.path in [
+        "/user",
+        "/user/forgot_password",
+        "/login",
+        "/login/admin",
+    ]:
+        response = await call_next(request)
     else:
         thebes_answer = None
         for header_tuple in request.headers.raw:
-            if b'thebes_answer' in header_tuple:
+            if b"thebes_answer" in header_tuple:
                 thebes_answer = header_tuple[1].decode()
                 break
         try:
@@ -35,12 +37,15 @@ async def process_thebes_answer(request: Request, call_next):
         except:
             lang = get_language_from_request(request=request)
             response = Response(
-                content=json.dumps({"message": i18n.get_translate('invalid_token', locale=lang)}),
-                status_code=status.HTTP_401_UNAUTHORIZED
+                content=json.dumps(
+                    {"message": i18n.get_translate("invalid_token", locale=lang)}
+                ),
+                status_code=status.HTTP_401_UNAUTHORIZED,
             )
             return response
         response = await call_next(request)
     return response
+
 
 app.include_router(UserRouter)
 app.include_router(FeatureRouter)

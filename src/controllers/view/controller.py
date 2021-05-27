@@ -2,7 +2,6 @@ from src.services.views.service import ViewService
 
 
 class ViewController:
-
     @staticmethod
     def create(payload: dict):
         return ViewService.create(payload=payload)

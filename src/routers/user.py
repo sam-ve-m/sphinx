@@ -58,7 +58,7 @@ async def change_user_password(user: UserUpdatePassword, request: Request):
 
 
 @router.get("/user/forgot_password", tags=["user"])
-async def change_user_forgot_password(user: UserSimple, request: Request):
+async def change_user_forgot_password(user: ForgotPassword, request: Request):
     return BaseController.run(UserController.forgot_password, dict(user), request)
 
 

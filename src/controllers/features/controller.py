@@ -2,7 +2,6 @@ from src.services.features.service import FeatureService
 
 
 class FeatureController:
-
     @staticmethod
     def create(payload: dict):
         return FeatureService.create(payload=payload)

@@ -8,9 +8,13 @@ from pymongo.cursor import Cursor
 class BaseRepository(ABC):
 
     client: MongoClient = (
-            eval(config('MONGO_IS_SERVER')) == True and
-            MongoClient(f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/") or
-            MongoClient(f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/")
+        eval(config("MONGO_IS_SERVER")) == True
+        and MongoClient(
+            f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/"
+        )
+        or MongoClient(
+            f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/"
+        )
     )
 
     def __init__(self, database: str, collection: str) -> None:
@@ -51,7 +55,7 @@ class BaseRepository(ABC):
 
     def update_one(self, old, new) -> bool:
         try:
-            self.collection.update_one(old, {'$set': new})
+            self.collection.update_one(old, {"$set": new})
             return True
         except Exception:
             return False

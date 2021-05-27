@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
 from src.utils.jwt_utils import JWTHandler
+from src.controllers.authentications.controller import AuthenticationController
+
 router = APIRouter()
 
 
@@ -19,12 +21,11 @@ async def login_admin(login: Login):
 
 
 @router.get("/thebes_gate", tags=["authenticate"])
-async def answer(request:Request):
+async def answer(request: Request):
     thebes_answer = None
     for header_tuple in request.headers.raw:
-        if b'thebes_answer' in header_tuple:
+        if b"thebes_answer" in header_tuple:
             thebes_answer = header_tuple[1].decode()
             break
     thebes_answer_data = JWTHandler.decrpty_to_paylod(thebes_answer)
-    print(thebes_answer_data)
-    return 200
+    return AuthenticationController.answer(thebes_answer_data)

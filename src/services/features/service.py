@@ -5,62 +5,59 @@ from fastapi import status
 
 
 class FeatureService:
-
     @staticmethod
     def create(payload: dict, feature_repository=FeatureRepository()):
-        payload = generate_id('name', payload)
-        _id = payload.get('_id')
-        display_name = payload.get('display_name')
-        if (
-                (len(_id) < 1 or _id is None) or
-                (len(display_name) < 1 or display_name is None)
+        payload = generate_id("name", payload)
+        _id = payload.get("_id")
+        display_name = payload.get("display_name")
+        if (len(_id) < 1 or _id is None) or (
+            len(display_name) < 1 or display_name is None
         ):
-            raise BadRequestError('common.invalid_params')
+            raise BadRequestError("common.invalid_params")
         if feature_repository.find_one(payload) is not None:
-            raise BadRequestError('common.register_exists')
+            raise BadRequestError("common.register_exists")
         if feature_repository.insert(payload):
             return {
-                'status_code': status.HTTP_201_CREATED,
-                'message_key': 'requests.created'
+                "status_code": status.HTTP_201_CREATED,
+                "message_key": "requests.created",
             }
         else:
-            raise InternalServerError('common.process_issue')
+            raise InternalServerError("common.process_issue")
 
     @staticmethod
     def update(payload: dict, feature_repository=FeatureRepository()):
-        feature_id = payload.get('feature_id')
-        payload_data = payload.get('model')
-        display_name = payload_data.get('display_name')
-        if (
-                (len(feature_id) < 1 or feature_id is None) or
-                (len(display_name) < 1 or display_name is None)
+        feature_id = payload.get("feature_id")
+        payload_data = payload.get("model")
+        display_name = payload_data.get("display_name")
+        if (len(feature_id) < 1 or feature_id is None) or (
+            len(display_name) < 1 or display_name is None
         ):
-            raise BadRequestError('common.invalid_params')
-        old = feature_repository.find_one({'_id': feature_id})
+            raise BadRequestError("common.invalid_params")
+        old = feature_repository.find_one({"_id": feature_id})
         if old is None:
-            raise BadRequestError('common.register_not_exists')
+            raise BadRequestError("common.register_not_exists")
         new = dict(old)
-        new['display_name'] = display_name
+        new["display_name"] = display_name
         if feature_repository.update_one(old=old, new=new):
             return {
-                'status_code': status.HTTP_200_OK,
-                "message_key": 'requests.updated'
+                "status_code": status.HTTP_200_OK,
+                "message_key": "requests.updated",
             }
         else:
-            raise InternalServerError('common.process_issue')
+            raise InternalServerError("common.process_issue")
 
     @staticmethod
     def delete(payload: dict, feature_repository=FeatureRepository()):
-        feature_id = payload.get('feature_id')
+        feature_id = payload.get("feature_id")
         if len(feature_id) < 1 or feature_id is None:
-            raise BadRequestError('common.invalid_params')
-        old = feature_repository.find_one({'_id': feature_id})
+            raise BadRequestError("common.invalid_params")
+        old = feature_repository.find_one({"_id": feature_id})
         if old is None:
-            raise BadRequestError('common.register_not_exists')
-        if feature_repository.delete_one({'_id': feature_id}):
+            raise BadRequestError("common.register_not_exists")
+        if feature_repository.delete_one({"_id": feature_id}):
             return {
-                'status_code': status.HTTP_200_OK,
-                "message_key": 'requests.deleted'
+                "status_code": status.HTTP_200_OK,
+                "message_key": "requests.deleted",
             }
         else:
-            raise InternalServerError('common.process_issue')
+            raise InternalServerError("common.process_issue")

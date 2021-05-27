@@ -2,7 +2,6 @@ from typing import Optional
 
 
 class StubbyBaseRepository:
-
     def __init__(self, database: str, collection: str) -> None:
         self.database = database
         self.collection = collection

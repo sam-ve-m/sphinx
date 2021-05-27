@@ -20,19 +20,13 @@ def test_create_user_without_payload():
 
 
 def test_create_user_partial_payload():
-    payload = {
-        "name": "este"
-    }
+    payload = {"name": "este"}
     response = client.post("/user", data=json.dumps(payload))
     assert response.status_code == 422
 
 
 def test_create_user():
-    payload = {
-        "name": "este",
-        "email": "lala@lele.com",
-        "pin": 1234
-    }
+    payload = {"name": "este", "email": "lala@lele.com", "pin": 1234}
     response = client.post("/user", data=json.dumps(payload))
     assert type(response.text) == str
     assert type(response.status_code) == int
@@ -44,9 +38,7 @@ def test_forgot_password_partial_payload():
 
 
 def test_forgot_password():
-    payload = {
-        "email": "lala@lele.com"
-    }
+    payload = {"email": "lala@lele.com"}
     response = client.post("/user", data=json.dumps(payload))
     assert type(response.text) == str
     assert type(response.status_code) == int
@@ -71,9 +63,11 @@ def test_login_admin_payload():
     response = client.post("/login", data=json.dumps({"email": "lala@li.com"}))
     assert type(response.status_code) == int
 
+
 def test_thebes_gate():
     response = client.get("/thebes_gate")
     assert response.status_code == 404
+
 
 def test_thebes_gate_auth():
     response = client.get("/thebes_gate/alal21889whx2387hn")

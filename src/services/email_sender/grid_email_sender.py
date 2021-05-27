@@ -4,9 +4,10 @@ from sendgrid.helpers.mail import Email, To, Content, Mail
 from decouple import config
 from src.exceptions.exceptions import InternalServerError
 
+
 class EmailSender:
     sg = sendgrid.SendGridAPIClient(api_key=config("MAIL_KEY"))
-    sender_email = Email(config('MAIL_SENDER'))
+    sender_email = Email(config("MAIL_SENDER"))
 
     @staticmethod
     def send_email_to(target_email: str, message: str, subject: str) -> None:
@@ -20,4 +21,4 @@ class EmailSender:
             )
             EmailSender.sg.client.mail.send.post(request_body=mail.get())
         except:
-            raise InternalServerError('email.trouble.send')
+            raise InternalServerError("email.trouble.send")
