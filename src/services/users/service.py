@@ -5,7 +5,7 @@ from src.services.email_sender.grid_email_sender import EmailSender as SendGridE
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from fastapi import status
 from decouple import config
-
+from src.utils.email import HtmlModifier
 
 class UserService:
 
@@ -22,17 +22,17 @@ class UserService:
         if (
                 (len(email) < 1 or email is None) or
                 (len(name) < 1 or name is None) or
-                (len(pin) < 1 or pin is None)
+                (pin is None)
         ):
             raise BadRequestError('common.invalid_params')
         payload = hash_field('pin', payload)
         if user_repository.find_one({'_id': payload.get('_id')}) is not None:
             raise BadRequestError('common.register_exists')
         if user_repository.insert(payload):
-
+            page = HtmlModifier("src/services/asset", i18n.get_translate("email.body.created", locale="pt"), config("TARGET_LINK"))()
             email_sender.send_email_to(
                 target_email=email,
-                message='',
+                message=page,
                 subject=i18n.get_translate('email.subject.created', locale='pt')
             )
             # TODO: send e-mail

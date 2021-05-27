@@ -17,4 +17,7 @@ pt:
     subject:
       created: Confirme a sua conta
       forgot_password: Recuperação de PIN
+    body:
+      created: Bem vindo! Clique no link para finalizar seu cadastro.
+      forgot_password: Clique no link para atualizar sua senha.
   invalid_token: Parece que seu acesso expirou, logue novamente.
