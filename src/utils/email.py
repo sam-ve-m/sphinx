@@ -15,10 +15,10 @@ class HtmlModifier:
             f"""<a href={self.target_link} id='link-auth'>Clique Aqui!</a>""",
             "html.parser",
         )
-        new_message_text = bs(f"<p id='message_text'>{self.message_text}</p>")
+        new_message_text = bs(f"<p id='message_text'>{self.message_text}</p>","html.parser")
         self.soup.find("p", {"id": "message_text"}).replace_with(new_message_text)
         self.soup.find("a", {"id": "link-auth"}).replace_with(new_link)
-        return str(self.soup.prettify("utf-8"))
+        return self.soup.prettify("utf-8")
 
     def __call__(self):
         return self.modify()
