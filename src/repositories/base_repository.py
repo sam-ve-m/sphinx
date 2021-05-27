@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from decouple import config
 from pymongo.cursor import Cursor
 
+
 class BaseRepository(ABC):
 
     client: MongoClient = (
