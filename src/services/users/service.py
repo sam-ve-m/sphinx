@@ -1,6 +1,7 @@
 from src.repositories.user.repository import UserRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.genarate_id import generate_id, hash_field
+from src.utils.jwt_utils import JWTHandler
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from fastapi import status
@@ -28,8 +29,13 @@ class UserService:
         payload = hash_field('pin', payload)
         if user_repository.find_one({'_id': payload.get('_id')}) is not None:
             raise BadRequestError('common.register_exists')
+
+
+        payload_jwt = JWTHandler.generate_token(payload)
+
+
         if user_repository.insert(payload):
-            page = HtmlModifier("src/services/asset", i18n.get_translate(key="email.body.created", locale="pt"), config("TARGET_LINK"))()
+            page = HtmlModifier("src/services/asset", i18n.get_translate(key="email.body.created", locale="pt"), config("TARGET_LINK")+"/"+payload_jwt)()
             email_sender.send_email_to(
                 target_email=email,
                 message=page,

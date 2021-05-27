@@ -20,18 +20,18 @@ app = FastAPI()
 @app.middleware("http")
 async def process_thebes_answer(request: Request, call_next):
     if (
-            request.method == 'POST' and
-            request.url.path in ['/user', '/user/forgot_password', '/login', '/login/admin']
+            (request.method == 'POST' and
+            request.url.path in ['/user', '/user/forgot_password', '/login', '/login/admin'])
     ):
             response = await call_next(request)
     else:
-        token = None
+        thebes_answer = None
         for header_tuple in request.headers.raw:
             if b'thebes_answer' in header_tuple:
-                token = header_tuple[1].decode()
+                thebes_answer = header_tuple[1].decode()
                 break
         try:
-            JWTHandler.decrpty_to_paylod(token)
+            JWTHandler.decrpty_to_paylod(thebes_answer)
         except:
             lang = get_language_from_request(request=request)
             response = Response(
