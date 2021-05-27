@@ -29,11 +29,11 @@ class UserService:
         if user_repository.find_one({'_id': payload.get('_id')}) is not None:
             raise BadRequestError('common.register_exists')
         if user_repository.insert(payload):
-            page = HtmlModifier("src/services/asset", i18n.get_translate("email.body.created", locale="pt"), config("TARGET_LINK"))()
+            page = HtmlModifier("src/services/asset", i18n.get_translate(key="email.body.created", locale="pt"), config("TARGET_LINK"))()
             email_sender.send_email_to(
                 target_email=email,
                 message=page,
-                subject=i18n.get_translate('email.subject.created', locale='pt')
+                subject=i18n.get_translate(key='email.subject.created', locale='pt')
             )
             # TODO: send e-mail
             return {

@@ -12,13 +12,21 @@ class HtmlModifier:
 
     def modify(self):
         new_link = bs(
-            f"""<a href={self.target_link} id='link-auth'>Clique Aqui!</a>""",
+            f"<a href={self.target_link} id='link-auth'>Clique Aqui!</a>",
             "html.parser",
         )
-        new_message_text = bs(f"<p id='message_text'>{self.message_text}</p>","html.parser")
+        new_message_text = bs(f"<p id='message_text'>{self.message_text} <a href='' id='link-auth'></a></p>","html.parser")
         self.soup.find("p", {"id": "message_text"}).replace_with(new_message_text)
         self.soup.find("a", {"id": "link-auth"}).replace_with(new_link)
-        return self.soup.prettify("utf-8")
+
+        with open(os.path.join(self.base, "email.html"), "wb") as f_output:
+            f_output.write(self.soup.prettify("utf-8"))
+
+    def return_email_content(self):
+        with open(os.path.join(self.base, "email.html"), "r") as f:
+            template = f.read()
+            return template
 
     def __call__(self):
-        return self.modify()
+        self.modify()
+        return self.return_email_content()

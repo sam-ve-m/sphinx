@@ -2,7 +2,6 @@ from fastapi import Request
 
 
 def get_language_from_request(request: Request):
-    print(request)
     language = None
     for header_tuple in request.headers.raw:
         if b'language' in header_tuple:

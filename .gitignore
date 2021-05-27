@@ -51,3 +51,4 @@ Thumbs.db
 keys/
 venv/
 .env
+email.html

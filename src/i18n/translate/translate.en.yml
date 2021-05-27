@@ -17,4 +17,6 @@ en:
     subject:
       created: Account confirmation
       forgot_password: Reconvery PIN
+    trouble:
+      send: We have some trouble to send you an email.
   invalid_token: Seems that your access has expired, try to login again.

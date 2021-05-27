@@ -1,7 +1,8 @@
+import i18n.translations
 import sendgrid
 from sendgrid.helpers.mail import Email, To, Content, Mail
 from decouple import config
-
+from src.exceptions.exceptions import InternalServerError
 
 class EmailSender:
     sg = sendgrid.SendGridAPIClient(api_key=config("MAIL_KEY"))
@@ -20,7 +21,3 @@ class EmailSender:
             EmailSender.sg.client.mail.send.post(request_body=mail.get())
         except Exception as err:
             print(err)
-
-
-if __name__ == '__main__':
-    EmailSender.send_email_to(target_email='msa@lionx.com.br', message='oi', subject='Test')
