@@ -11,6 +11,10 @@ class StubbyRepository(StubbyBaseRepository):
     pass
 
 
+class StubbyAuthenticationService:
+    pass
+
+
 class StubbyEmailSender:
     @staticmethod
     def send_email_to(target_email: str, message: str, subject: str):
@@ -21,11 +25,7 @@ def test_create_invalid_params():
     private_payload = {"name": "", "email": ""}
     stubby_repository = StubbyRepository(database="", collection="")
     with pytest.raises(BadRequestError, match="common.invalid_params"):
-        UserService.create(
-            payload=private_payload,
-            user_repository=stubby_repository,
-            email_sender=StubbyEmailSender,
-        )
+        UserService.create(payload=private_payload, user_repository=stubby_repository)
 
 
 payload = {"name": "lala", "email": "Lala", "pin": 1234}
@@ -35,11 +35,7 @@ def test_create_register_exists():
     stubby_repository = StubbyRepository(database="", collection="")
     stubby_repository.find_one = MagicMock(return_value={})
     with pytest.raises(BadRequestError, match="common.register_exists"):
-        UserService.create(
-            payload=payload,
-            user_repository=stubby_repository,
-            email_sender=StubbyEmailSender,
-        )
+        UserService.create(payload=payload, user_repository=stubby_repository)
 
 
 def test_create_process_issue():
@@ -47,21 +43,114 @@ def test_create_process_issue():
     stubby_repository.find_one = MagicMock(return_value=None)
     stubby_repository.insert = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
-        UserService.create(
-            payload=payload,
-            user_repository=stubby_repository,
-            email_sender=StubbyEmailSender,
-        )
+        UserService.create(payload=payload, user_repository=stubby_repository)
 
 
 def test_created():
     stubby_repository = StubbyRepository(database="", collection="")
     stubby_repository.find_one = MagicMock(return_value=None)
     stubby_repository.insert = MagicMock(return_value=True)
+    StubbyAuthenticationService.send_authentication_email = MagicMock(return_value=True)
     response = UserService.create(
         payload=payload,
         user_repository=stubby_repository,
-        email_sender=StubbyEmailSender,
+        authentication_service=StubbyAuthenticationService,
     )
     assert response.get("status_code") == status.HTTP_201_CREATED
     assert response.get("message_key") == "user.created"
+
+
+payload_change_password = {"thebes_answer": {"email": "lalal"}, "new_pin": 1234}
+
+
+def test_change_password_register_exists():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value=None)
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+        UserService.change_password(
+            payload=payload_change_password, user_repository=stubby_repository
+        )
+
+
+def test_change_password_process_issue():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={})
+    stubby_repository.update_one = MagicMock(return_value=False)
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        UserService.change_password(
+            payload=payload_change_password, user_repository=stubby_repository
+        )
+
+
+def test_change_password():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={})
+    stubby_repository.update_one = MagicMock(return_value=True)
+    response = UserService.change_password(
+        payload=payload_change_password, user_repository=stubby_repository
+    )
+    assert response.get("status_code") == status.HTTP_200_OK
+    assert response.get("message_key") == "requests.updated"
+
+
+payload_change_view = {"thebes_answer": {"email": "lalal"}, "new_view": "lite"}
+
+
+def test_change_view_register_exists():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value=None)
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+        UserService.change_view(
+            payload=payload_change_view, user_repository=stubby_repository
+        )
+
+
+def test_change_view_process_issue():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
+    stubby_repository.update_one = MagicMock(return_value=False)
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        UserService.change_view(
+            payload=payload_change_view, user_repository=stubby_repository
+        )
+
+
+def test_change_view():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
+    stubby_repository.update_one = MagicMock(return_value=True)
+    response = UserService.change_view(
+        payload=payload_change_view, user_repository=stubby_repository
+    )
+    assert response.get("status_code") == status.HTTP_200_OK
+    assert "jwt" in response.get("payload")
+
+
+def test_delete_register_exists():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value=None)
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+        UserService.delete(
+            payload=payload_change_view, user_repository=stubby_repository
+        )
+
+
+def test_delete_process_issue():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
+    stubby_repository.update_one = MagicMock(return_value=False)
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        UserService.delete(
+            payload=payload_change_view, user_repository=stubby_repository
+        )
+
+
+def test_delete():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
+    stubby_repository.update_one = MagicMock(return_value=True)
+    response = UserService.delete(
+        payload=payload_change_view, user_repository=stubby_repository
+    )
+    assert response.get("status_code") == status.HTTP_200_OK
+    assert response.get("message_key") == "requests.updated"

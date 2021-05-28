@@ -6,7 +6,7 @@ from fastapi import status
 
 class FeatureService:
     @staticmethod
-    def create(payload: dict, feature_repository=FeatureRepository()):
+    def create(payload: dict, feature_repository=FeatureRepository()) -> dict:
         payload = generate_id("name", payload)
         _id = payload.get("_id")
         display_name = payload.get("display_name")
@@ -25,7 +25,7 @@ class FeatureService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def update(payload: dict, feature_repository=FeatureRepository()):
+    def update(payload: dict, feature_repository=FeatureRepository()) -> dict:
         feature_id = payload.get("feature_id")
         payload_data = payload.get("model")
         display_name = payload_data.get("display_name")
@@ -47,7 +47,7 @@ class FeatureService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def delete(payload: dict, feature_repository=FeatureRepository()):
+    def delete(payload: dict, feature_repository=FeatureRepository()) -> dict:
         feature_id = payload.get("feature_id")
         if len(feature_id) < 1 or feature_id is None:
             raise BadRequestError("common.invalid_params")

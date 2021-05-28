@@ -7,7 +7,7 @@ from fastapi import status
 
 class ViewService:
     @staticmethod
-    def create(payload: dict, view_repository=ViewRepository()):
+    def create(payload: dict, view_repository=ViewRepository()) -> dict:
         payload = generate_id("name", payload)
         payload = generate_list("features", payload)
         _id = payload.get("_id")
@@ -27,7 +27,7 @@ class ViewService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def update(payload: dict, view_repository=ViewRepository()):
+    def update(payload: dict, view_repository=ViewRepository()) -> dict:
         view_id = payload.get("view_id")
         payload_data = payload.get("model")
         display_name = payload_data.get("display_name")
@@ -49,7 +49,7 @@ class ViewService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def delete(payload: dict, view_repository=ViewRepository()):
+    def delete(payload: dict, view_repository=ViewRepository()) -> dict:
         view_id = payload.get("view_id")
         if len(view_id) < 1 or view_id is None:
             raise BadRequestError("common.invalid_params")
@@ -69,7 +69,7 @@ class ViewService:
         payload: dict,
         view_repository=ViewRepository(),
         feature_repository=FeatureRepository(),
-    ):
+    ) -> dict:
         view_id = payload.get("view_id")
         feature_id = payload.get("feature_id")
         if (
@@ -92,7 +92,7 @@ class ViewService:
         return {"status_code": status.HTTP_200_OK, "message_key": "requests.updated"}
 
     @staticmethod
-    def get_view(payload: dict, view_repository=ViewRepository()):
+    def get_view(payload: dict, view_repository=ViewRepository()) -> dict:
         view_id = payload.get("view_id")
         if len(view_id) < 1 or view_id is None:
             raise BadRequestError("common.invalid_params")

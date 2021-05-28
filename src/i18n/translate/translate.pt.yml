@@ -16,6 +16,7 @@ pt:
     active: Sua validação foi feita com sucesso.
     pin_error: PIN invalido, tentenovamente.
     need_pin: Informe seu PIN.
+    not_admin: You are no administrator.
   email:
     subject:
       created: Confirme a sua conta

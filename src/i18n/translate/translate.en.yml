@@ -16,6 +16,7 @@ en:
     active: Your account was activated successfully.
     pin_error: Invalid PIN, try again.
     need_pin: Inform your PIN code.
+    not_admin: Você não é administrador.
   email:
     subject:
       created: Account confirmation

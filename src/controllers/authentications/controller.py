@@ -9,3 +9,7 @@ class AuthenticationController:
     @staticmethod
     def login(payload: dict):
         return AuthenticationService.login(payload=payload)
+
+    @staticmethod
+    def login(payload: dict):
+        return AuthenticationService.forgot_password(payload=payload)

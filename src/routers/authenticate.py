@@ -18,17 +18,16 @@ async def login(payload: Login, request: Request):
     return BaseController.run(AuthenticationController.login, dict(payload), request)
 
 
-@router.post("/login/admin", tags=["authenticate"])
-async def login_admin(login: Login):
-    return 200
-
-
 @router.get("/thebes_gate", tags=["authenticate"])
 async def answer(request: Request):
-    thebes_answer = None
-    for header_tuple in request.headers.raw:
-        if b"thebes_answer" in header_tuple:
-            thebes_answer = header_tuple[1].decode()
-            break
-    thebes_answer_data = JWTHandler.decrpty_to_paylod(thebes_answer)
-    return BaseController.run(AuthenticationController.answer, dict(thebes_answer_data), request)
+    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
+    return BaseController.run(
+        AuthenticationController.answer, thebes_answer_data, request
+    )
+
+
+@router.put("/forgot_password", tags=["authenticate"])
+async def forgot_password(payload: Login, request: Request):
+    return BaseController.run(
+        AuthenticationController.forgot_password, dict(payload), request
+    )

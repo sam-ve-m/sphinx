@@ -7,6 +7,10 @@ class UserController:
         return UserService.create(payload=payload)
 
     @staticmethod
+    def create_admin(payload: dict):
+        return UserService.create_admin(payload=payload)
+
+    @staticmethod
     def update(payload: dict):
         return UserService.update(payload=payload)
 

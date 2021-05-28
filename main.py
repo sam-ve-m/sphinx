@@ -18,32 +18,46 @@ app = FastAPI()
 
 @app.middleware("http")
 async def process_thebes_answer(request: Request, call_next):
-    if request.method == "POST" and request.url.path in [
-        "/user",
-        "/user/forgot_password",
-        "/login",
-        "/login/admin",
-    ]:
-        response = await call_next(request)
+    # TODO: VALIDRA DO BANCO DELETE E TOKEN VALID AFTER
+    if is_public(request=request):
+        pass
     else:
-        thebes_answer = None
-        for header_tuple in request.headers.raw:
-            if b"thebes_answer" in header_tuple:
-                thebes_answer = header_tuple[1].decode()
-                break
         try:
-            JWTHandler.decrpty_to_paylod(thebes_answer)
+            if need_be_admin(request=request):
+                raise Exception("Not allowed")
         except:
-            lang = get_language_from_request(request=request)
             response = Response(
                 content=json.dumps(
-                    {"message": i18n.get_translate("invalid_token", locale=lang)}
+                    {
+                        "message": i18n.get_translate(
+                            "invalid_token",
+                            locale=get_language_from_request(request=request),
+                        )
+                    }
                 ),
                 status_code=status.HTTP_401_UNAUTHORIZED,
             )
             return response
-        response = await call_next(request)
-    return response
+    return await call_next(request)
+
+
+def is_public(request: Request):
+    return request.method == "POST" and request.url.path in [
+        "/user",
+        "/user/forgot_password",
+        "/login",
+        "/login/admin",
+    ]
+
+
+def need_be_admin(request: Request):
+    thebes_answer = JWTHandler.get_payload_from_request(request=request)
+    data = JWTHandler.decrypt_payload(thebes_answer)
+    return (
+        request.url.path == "/user_admin"
+        or request.url.path.startswith("/view")
+        or request.url.path.startswith("/feature")
+    ) and data.get("is_admin") is not True
 
 
 app.include_router(UserRouter)
