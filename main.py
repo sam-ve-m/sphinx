@@ -34,23 +34,23 @@ async def on_shutdown() -> None:
 
 @app.middleware("http")
 async def process_thebes_answer(request: Request, call_next):
-    # TODO: VALIDRA DO BANCO DELETE E TOKEN VALID AFTER
-    if is_public(request=request) is False:
-        thebes_answer = JWTHandler.get_payload_from_request(request=request)
-        data = JWTHandler.decrypt_payload(thebes_answer)
-        if need_be_admin(request=request) and data.get("is_admin") is False:
-            response = Response(
-                content=json.dumps(
-                    {
-                        "message": i18n.get_translate(
-                            "invalid_token",
-                            locale=get_language_from_request(request=request),
-                        )
-                    }
-                ),
-                status_code=status.HTTP_401_UNAUTHORIZED,
-            )
-            return response
+    # # TODO: VALIDRA DO BANCO DELETE E TOKEN VALID AFTER
+    # if is_public(request=request) is False:
+    #     thebes_answer = JWTHandler.get_payload_from_request(request=request)
+    #     data = JWTHandler.decrypt_payload(thebes_answer)
+    #     if need_be_admin(request=request) and data.get("is_admin") is False:
+    #         response = Response(
+    #             content=json.dumps(
+    #                 {
+    #                     "message": i18n.get_translate(
+    #                         "invalid_token",
+    #                         locale=get_language_from_request(request=request),
+    #                     )
+    #                 }
+    #             ),
+    #             status_code=status.HTTP_401_UNAUTHORIZED,
+    #         )
+    #         return response
     return await call_next(request)
 
 

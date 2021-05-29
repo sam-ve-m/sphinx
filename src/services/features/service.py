@@ -6,7 +6,7 @@ from fastapi import status
 
 class FeatureService:
     @staticmethod
-    async def create(payload: dict, feature_repository=FeatureRepository()) -> dict:
+    def create(payload: dict, feature_repository=FeatureRepository()) -> dict:
         payload = generate_id("name", payload)
         if feature_repository.insert(payload):
             return {
@@ -17,7 +17,7 @@ class FeatureService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    async def update(payload: dict, feature_repository=FeatureRepository()) -> dict:
+    def update(payload: dict, feature_repository=FeatureRepository()) -> dict:
         display_name = payload.get("model").get("display_name")
         old = feature_repository.find_one({"_id": payload.get("feature_id")})
         new = dict(old)
@@ -31,7 +31,7 @@ class FeatureService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    async def delete(payload: dict, feature_repository=FeatureRepository()) -> dict:
+    def delete(payload: dict, feature_repository=FeatureRepository()) -> dict:
         feature_id = payload.get("feature_id")
         if feature_repository.delete_one({"_id": feature_id}):
             return {

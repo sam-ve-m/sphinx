@@ -3,13 +3,13 @@ from src.services.features.service import FeatureService
 
 class FeatureController:
     @staticmethod
-    async def create(payload: dict):
-        return await FeatureService.create(payload=payload)
+    def create(payload: dict):
+        return FeatureService.create(payload=payload)
 
     @staticmethod
-    async def update(payload: dict):
-        return await FeatureService.update(payload=payload)
+    def update(payload: dict):
+        return FeatureService.update(payload=payload)
 
     @staticmethod
-    async def delete(payload: dict):
-        return await FeatureService.delete(payload=payload)
+    def delete(payload: dict):
+        return FeatureService.delete(payload=payload)

@@ -13,10 +13,10 @@ import json
 
 class BaseController:
     @staticmethod
-    async def run(callback: callable, payload: Optional[dict], request: Request):
+    def run(callback: callable, payload: Optional[dict], request: Request):
         lang = get_language_from_request(request=request)
         try:
-            response_metadata = await callback(payload)
+            response_metadata = callback(payload)
             payload = BaseController.create_response_payload(
                 response_metadata=response_metadata, lang=lang
             )
