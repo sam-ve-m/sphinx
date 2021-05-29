@@ -7,7 +7,7 @@ class Email(BaseModel):
     email: str
 
     @validator('email', always=True)
-    def validate_email(self, e):
+    def validate_email(cls, e):
         is_valid = validate_email(e, check_mx=True)
         if is_valid:
             return True
@@ -18,7 +18,7 @@ class View(BaseModel):
     view: str
 
     @validator('view', always=True)
-    def validate_email(self, e):
+    def validate_email(cls, e):
         # TODO: VALIDATR COM MODEL
         is_valid = validate_email(e, check_mx=True)
         if is_valid:
@@ -30,12 +30,9 @@ class Feature(BaseModel):
     feature: str
 
     @validator('feature', always=True)
-    def validate_email(self, e):
+    def validate_email(cls, e):
         # TODO: VALIDATR COM MODEL
-        is_valid = validate_email(e, check_mx=True)
-        if is_valid:
-            return True
-        return False
+        return True
 
 
 class OptionalPIN(BaseModel):

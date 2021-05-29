@@ -15,7 +15,7 @@ from decouple import config
 
 class AuthenticationService:
     @staticmethod
-    def answer(
+    async def answer(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
@@ -36,7 +36,7 @@ class AuthenticationService:
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
-    def login(
+    async def login(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         entity = user_repository.find_one({"_id": payload.get("email")})
@@ -63,7 +63,7 @@ class AuthenticationService:
                 raise UnauthorizedError("user.pin_error")
 
     @staticmethod
-    def send_authentication_email(
+    async def send_authentication_email(
         email: str, payload: dict, body: str, ttl: int, email_sender=SendGridEmail
     ) -> None:
         payload_jwt = JWTHandler.generate_token(payload=payload, ttl=ttl)
@@ -79,7 +79,7 @@ class AuthenticationService:
         )
 
     @staticmethod
-    def forgot_password(payload: dict, user_repository=UserRepository()) -> dict:
+    async def forgot_password(payload: dict, user_repository=UserRepository()) -> dict:
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")

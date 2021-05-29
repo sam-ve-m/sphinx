@@ -9,7 +9,7 @@ from fastapi import status
 
 class UserService:
     @staticmethod
-    def create(
+    async def create(
         payload: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
@@ -50,16 +50,16 @@ class UserService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def create_admin(payload: dict) -> dict:
+    async def create_admin(payload: dict) -> dict:
         payload.update({"is_admin": True})
         UserService.create(payload=payload)
 
     @staticmethod
-    def update(payload: dict, user_repository=UserRepository()) -> None:
+    async def update(payload: dict, user_repository=UserRepository()) -> None:
         pass
 
     @staticmethod
-    def delete(payload: dict, user_repository=UserRepository()) -> dict:
+    async def delete(payload: dict, user_repository=UserRepository()) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
@@ -74,7 +74,7 @@ class UserService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def change_password(payload: dict, user_repository=UserRepository()) -> dict:
+    async def change_password(payload: dict, user_repository=UserRepository()) -> dict:
         thebes_answer = payload.get("thebes_answer")
         new_pin = payload.get("new_pin")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
@@ -92,7 +92,7 @@ class UserService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def change_view(
+    async def change_view(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         thebes_answer = payload.get("thebes_answer")

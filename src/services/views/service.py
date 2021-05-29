@@ -7,7 +7,7 @@ from fastapi import status
 
 class ViewService:
     @staticmethod
-    def create(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def create(payload: dict, view_repository=ViewRepository()) -> dict:
         payload = generate_id("name", payload)
         payload = generate_list("features", payload)
         if view_repository.find_one(payload) is not None:
@@ -21,7 +21,7 @@ class ViewService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def update(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def update(payload: dict, view_repository=ViewRepository()) -> dict:
         display_name = payload.get("model").get("display_name")
         old = view_repository.find_one({"_id": payload.get("view_id")})
         if old is None:
@@ -37,7 +37,7 @@ class ViewService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def delete(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def delete(payload: dict, view_repository=ViewRepository()) -> dict:
         view_id = payload.get("view_id")
         old = view_repository.find_one({"_id": view_id})
         if old is None:
@@ -51,7 +51,7 @@ class ViewService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def link_feature(
+    async def link_feature(
         payload: dict,
         view_repository=ViewRepository()
     ) -> dict:
@@ -65,7 +65,7 @@ class ViewService:
         return {"status_code": status.HTTP_200_OK, "message_key": "requests.updated"}
 
     @staticmethod
-    def get_view(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def get_view(payload: dict, view_repository=ViewRepository()) -> dict:
         view = view_repository.find_one({"_id": payload.get("view_id")})
         if view is None:
             raise BadRequestError("common.register_not_exists")

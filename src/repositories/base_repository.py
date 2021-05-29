@@ -24,12 +24,11 @@ class BaseRepository(ABC):
         self.collection = self.database[collection]
 
     @staticmethod
-    def get_cache():
+    async def get_cache():
         cache = caches.get(CACHE_KEY)
         in_cache = await cache.get('some_cached_key')
         if not in_cache:
             await cache.set('some_cached_key', 'new_value', 5)
-
         return cache
 
     def insert(self, data: dict) -> bool:

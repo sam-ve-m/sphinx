@@ -10,7 +10,7 @@ class EmailSender:
     sender_email = Email(config("MAIL_SENDER"))
 
     @staticmethod
-    def send_email_to(target_email: str, message: str, subject: str) -> None:
+    async def send_email_to(target_email: str, message: str, subject: str) -> None:
         try:
             message = Content("text/html", message)
             mail = Mail(

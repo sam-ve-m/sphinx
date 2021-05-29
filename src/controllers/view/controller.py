@@ -3,21 +3,21 @@ from src.services.views.service import ViewService
 
 class ViewController:
     @staticmethod
-    def create(payload: dict):
-        return ViewService.create(payload=payload)
+    async def create(payload: dict):
+        return await ViewService.create(payload=payload)
 
     @staticmethod
-    def update(payload: dict):
-        return ViewService.update(payload=payload)
+    async def update(payload: dict):
+        return await ViewService.update(payload=payload)
 
     @staticmethod
-    def delete(payload: dict):
-        return ViewService.delete(payload=payload)
+    async def delete(payload: dict):
+        return await ViewService.delete(payload=payload)
 
     @staticmethod
-    def link_feature(payload: dict):
-        return ViewService.link_feature(payload=payload)
+    async def link_feature(payload: dict):
+        return await ViewService.link_feature(payload=payload)
 
     @staticmethod
-    def get_view(payload: dict):
-        return ViewService.get_view(payload=payload)
+    async def get_view(payload: dict):
+        return await ViewService.get_view(payload=payload)
