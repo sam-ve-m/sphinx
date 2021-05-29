@@ -3,23 +3,23 @@ from typing import Optional
 from pymongo import MongoClient
 from decouple import config
 from pymongo.cursor import Cursor
-from fastapi_cache import caches
-from fastapi_cache.backends.memory import CACHE_KEY
 
 
 class BaseRepository(ABC):
-
-    client: MongoClient = (
-        eval(config("MONGO_IS_SERVER")) == True
-        and MongoClient(
-            f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/"
-        )
-        or MongoClient(
-            f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/"
-        )
-    )
-
     def __init__(self, database: str, collection: str) -> None:
+        try:
+            self.client: MongoClient = (
+                eval(config("MONGO_IS_SERVER")) == True
+                and MongoClient(
+                    f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/"
+                )
+                or MongoClient(
+                    f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/"
+                )
+            )
+        except Exception as e:
+            print(e)
+
         self.database = self.client[database]
         self.collection = self.database[collection]
 

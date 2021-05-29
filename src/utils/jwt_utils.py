@@ -20,7 +20,7 @@ class JWTHandler:
                 "exp": get_int_from_datetime(
                     datetime.now(timezone.utc) + timedelta(minutes=ttl)
                 ),
-                "created_at": datetime.now()
+                "created_at": datetime.now(),
             }
         )
         try:
@@ -52,7 +52,9 @@ class JWTHandler:
             "name": payload.get("name"),
             "email": payload.get("email"),
             "scope": payload.get("scope"),
-            "is_active": payload.get("is_active")
+            "is_active": payload.get("is_active"),
+            "created_at": str(payload.get("created_at")),
+            "deleted": payload.get("deleted"),
         }
         if payload.get("is_admin"):
             new_payload.update({"is_admin": payload.get("is_admin")})

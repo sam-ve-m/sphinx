@@ -51,10 +51,7 @@ class ViewService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def link_feature(
-        payload: dict,
-        view_repository=ViewRepository()
-    ) -> dict:
+    def link_feature(payload: dict, view_repository=ViewRepository()) -> dict:
         feature_id = payload.get("feature_id")
         old = view_repository.find_one({"_id": payload.get("view_id")})
         if feature_id not in old.get("features"):
