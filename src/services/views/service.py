@@ -10,12 +10,6 @@ class ViewService:
     def create(payload: dict, view_repository=ViewRepository()) -> dict:
         payload = generate_id("name", payload)
         payload = generate_list("features", payload)
-        _id = payload.get("_id")
-        display_name = payload.get("display_name")
-        if (len(_id) < 1 or _id is None) or (
-            len(display_name) < 1 or display_name is None
-        ):
-            raise BadRequestError("common.invalid_params")
         if view_repository.find_one(payload) is not None:
             raise BadRequestError("common.register_exists")
         if view_repository.insert(payload):
@@ -28,14 +22,8 @@ class ViewService:
 
     @staticmethod
     def update(payload: dict, view_repository=ViewRepository()) -> dict:
-        view_id = payload.get("view_id")
-        payload_data = payload.get("model")
-        display_name = payload_data.get("display_name")
-        if (len(view_id) < 1 or view_id is None) or (
-            len(display_name) < 1 or display_name is None
-        ):
-            raise BadRequestError("common.invalid_params")
-        old = view_repository.find_one({"_id": view_id})
+        display_name = payload.get("model").get("display_name")
+        old = view_repository.find_one({"_id": payload.get("view_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = dict(old)
@@ -51,8 +39,6 @@ class ViewService:
     @staticmethod
     def delete(payload: dict, view_repository=ViewRepository()) -> dict:
         view_id = payload.get("view_id")
-        if len(view_id) < 1 or view_id is None:
-            raise BadRequestError("common.invalid_params")
         old = view_repository.find_one({"_id": view_id})
         if old is None:
             raise BadRequestError("common.register_not_exists")
@@ -67,23 +53,10 @@ class ViewService:
     @staticmethod
     def link_feature(
         payload: dict,
-        view_repository=ViewRepository(),
-        feature_repository=FeatureRepository(),
+        view_repository=ViewRepository()
     ) -> dict:
-        view_id = payload.get("view_id")
         feature_id = payload.get("feature_id")
-        if (
-            len(view_id) < 1
-            or view_id is None
-            or len(feature_id) < 1
-            or feature_id is None
-        ):
-            raise BadRequestError("common.invalid_params")
-        old = view_repository.find_one({"_id": view_id})
-        if old is None:
-            raise BadRequestError("common.register_not_exists")
-        if feature_repository.find_one({"_id": feature_id}) is None:
-            raise BadRequestError("view.feature_not_exists")
+        old = view_repository.find_one({"_id": payload.get("view_id")})
         if feature_id not in old.get("features"):
             new = dict(old)
             new.get("features").append(feature_id)
@@ -93,10 +66,7 @@ class ViewService:
 
     @staticmethod
     def get_view(payload: dict, view_repository=ViewRepository()) -> dict:
-        view_id = payload.get("view_id")
-        if len(view_id) < 1 or view_id is None:
-            raise BadRequestError("common.invalid_params")
-        view = view_repository.find_one({"_id": view_id})
-        if view_repository.find_one({"_id": view_id}) is None:
+        view = view_repository.find_one({"_id": payload.get("view_id")})
+        if view is None:
             raise BadRequestError("common.register_not_exists")
         return {"status_code": status.HTTP_200_OK, "payload": view}

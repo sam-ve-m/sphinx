@@ -3,6 +3,8 @@ from typing import Optional
 from pymongo import MongoClient
 from decouple import config
 from pymongo.cursor import Cursor
+from fastapi_cache import caches
+from fastapi_cache.backends.memory import CACHE_KEY
 
 
 class BaseRepository(ABC):
@@ -20,6 +22,15 @@ class BaseRepository(ABC):
     def __init__(self, database: str, collection: str) -> None:
         self.database = self.client[database]
         self.collection = self.database[collection]
+
+    @staticmethod
+    def get_cache():
+        cache = caches.get(CACHE_KEY)
+        in_cache = await cache.get('some_cached_key')
+        if not in_cache:
+            await cache.set('some_cached_key', 'new_value', 5)
+
+        return cache
 
     def insert(self, data: dict) -> bool:
         try:

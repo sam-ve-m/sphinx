@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Request
-from pydantic import BaseModel
-from typing import Optional
+from src.routers.validators.base import Email, PIN, Name, View, OptionalPIN
 from src.utils.jwt_utils import JWTHandler
 
 from src.controllers.base_controller import BaseController
@@ -9,27 +8,8 @@ from src.controllers.users.controller import UserController
 router = APIRouter()
 
 
-class UserSimple(BaseModel):
-    name: str
-    email: str
-    pin: Optional[int]
-
-
-class UserUpdateView(BaseModel):
-    new_view: str
-
-
-class UserUpdatePin(BaseModel):
-    new_pin: str
-
-
-class UserComplete(BaseModel):
-    name: str
-    view: str
-
-
-class ForgotPassword(BaseModel):
-    email: str
+class UserSimple(Email, OptionalPIN, Name):
+    pass
 
 
 @router.post("/user", tags=["user"])
@@ -43,12 +23,12 @@ async def create_admin(user: UserSimple, request: Request):
 
 
 @router.get("/user/forgot_password", tags=["user"])
-async def forgot_password(user: ForgotPassword, request: Request):
+async def forgot_password(user: Email, request: Request):
     return BaseController.run(UserController.forgot_password, dict(user), request)
 
 
 @router.put("/user", tags=["user"])
-async def update_user_data(user: UserComplete, request: Request):
+async def update_user_data(user: UserSimple, request: Request):
     # TODO: complete data
     return BaseController.run(UserController.create_admin, dict(user), request)
 
@@ -60,18 +40,18 @@ async def delete_user(request: Request):
 
 
 @router.put("/user/change_password", tags=["user"])
-async def change_user_password(user: UserUpdatePin, request: Request):
+async def change_user_password(pin: PIN, request: Request):
     payload = {
         "thebes_answer": JWTHandler.get_payload_from_request(request=request),
-        "new_pin": dict(user).get("new_pin"),
+        "new_pin": dict(pin).get("pin"),
     }
     return BaseController.run(UserController.change_password, payload, request)
 
 
 @router.put("/user/view", tags=["user"])
-async def change_user_view(user: UserUpdateView, request: Request):
+async def change_user_view(view: View, request: Request):
     payload = {
         "thebes_answer": JWTHandler.get_payload_from_request(request=request),
-        "new_view": dict(user).get("new_view"),
+        "new_view": dict(view).get("view"),
     }
     return BaseController.run(UserController.change_view, payload, request)

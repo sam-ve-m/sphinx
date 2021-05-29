@@ -1,16 +1,14 @@
 from fastapi import APIRouter, Request
-from pydantic import BaseModel
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
+from src.routers.validators.base import OptionalPIN, Email
 from src.controllers.authentications.controller import AuthenticationController
-from typing import Optional
 
 router = APIRouter()
 
 
-class Login(BaseModel):
-    email: str
-    pin: Optional[int]
+class Login(OptionalPIN, Email):
+    pass
 
 
 @router.post("/login", tags=["authenticate"])

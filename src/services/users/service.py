@@ -14,6 +14,7 @@ class UserService:
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
     ) -> dict:
+        user_repository.get_cache()
         payload = generate_id("email", payload, must_remove=False)
         email = payload.get("email")
         name = payload.get("name")

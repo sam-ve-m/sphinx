@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
+from src.routers.validators.base import Name, DisplayName
 from src.controllers.base_controller import BaseController
 from src.controllers.features.controller import FeatureController
 
 router = APIRouter()
 
 
-class Feature(BaseModel):
-    name: str
-    display_name: str
+class Feature(Name, DisplayName):
+    pass
 
 
 @router.post("/feature", tags=["feature"])

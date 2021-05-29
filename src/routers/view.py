@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Request
-from pydantic import BaseModel
 from src.controllers.base_controller import BaseController
 from src.controllers.view.controller import ViewController
+from src.routers.validators.base import Name, DisplayName
 
 router = APIRouter()
 
 
-class View(BaseModel):
-    name: str
-    display_name: str
+class View(Name, DisplayName):
+    pass
 
 
 @router.post("/view", tags=["view"])
@@ -17,7 +16,7 @@ async def create_view(view: View, request: Request):
 
 
 @router.put("/view/{view_id}", tags=["view"])
-async def update_view(view_id: str, view: View, request: Request):
+async def update_view(view_id: str, view: DisplayName, request: Request):
     return BaseController.run(
         ViewController.update, {"view_id": view_id, "model": dict(view)}, request
     )

@@ -11,5 +11,5 @@ class AuthenticationController:
         return AuthenticationService.login(payload=payload)
 
     @staticmethod
-    def login(payload: dict):
+    def forgot_password(payload: dict):
         return AuthenticationService.forgot_password(payload=payload)

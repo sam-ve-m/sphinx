@@ -8,14 +8,6 @@ class FeatureService:
     @staticmethod
     def create(payload: dict, feature_repository=FeatureRepository()) -> dict:
         payload = generate_id("name", payload)
-        _id = payload.get("_id")
-        display_name = payload.get("display_name")
-        if (len(_id) < 1 or _id is None) or (
-            len(display_name) < 1 or display_name is None
-        ):
-            raise BadRequestError("common.invalid_params")
-        if feature_repository.find_one(payload) is not None:
-            raise BadRequestError("common.register_exists")
         if feature_repository.insert(payload):
             return {
                 "status_code": status.HTTP_201_CREATED,
@@ -26,16 +18,8 @@ class FeatureService:
 
     @staticmethod
     def update(payload: dict, feature_repository=FeatureRepository()) -> dict:
-        feature_id = payload.get("feature_id")
-        payload_data = payload.get("model")
-        display_name = payload_data.get("display_name")
-        if (len(feature_id) < 1 or feature_id is None) or (
-            len(display_name) < 1 or display_name is None
-        ):
-            raise BadRequestError("common.invalid_params")
-        old = feature_repository.find_one({"_id": feature_id})
-        if old is None:
-            raise BadRequestError("common.register_not_exists")
+        display_name = payload.get("model").get("display_name")
+        old = feature_repository.find_one({"_id": payload.get("feature_id")})
         new = dict(old)
         new["display_name"] = display_name
         if feature_repository.update_one(old=old, new=new):
@@ -49,11 +33,6 @@ class FeatureService:
     @staticmethod
     def delete(payload: dict, feature_repository=FeatureRepository()) -> dict:
         feature_id = payload.get("feature_id")
-        if len(feature_id) < 1 or feature_id is None:
-            raise BadRequestError("common.invalid_params")
-        old = feature_repository.find_one({"_id": feature_id})
-        if old is None:
-            raise BadRequestError("common.register_not_exists")
         if feature_repository.delete_one({"_id": feature_id}):
             return {
                 "status_code": status.HTTP_200_OK,
