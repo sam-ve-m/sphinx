@@ -16,14 +16,6 @@ class UserService:
     ) -> dict:
         payload = generate_id("email", payload, must_remove=False)
         email = payload.get("email")
-        name = payload.get("name")
-        pin = payload.get("pin")
-        if (
-            (len(email) < 1 or email is None)
-            or (len(name) < 1 or name is None)
-            or (pin is None)
-        ):
-            raise BadRequestError("common.invalid_params")
         payload = hash_field(key="pin", payload=payload)
         if user_repository.find_one({"_id": payload.get("_id")}) is not None:
             raise BadRequestError("common.register_exists")
@@ -124,3 +116,15 @@ class UserService:
             "status_code": status.HTTP_200_OK,
             "message_key": "email.forgot_password",
         }
+
+    @staticmethod
+    def logout_all(payload: dict, user_repository=UserRepository()):
+        old = user_repository.find_one({"_id": payload.get("email")})
+        if old is None:
+            raise BadRequestError("common.register_not_exists")
+        new = dict(old)
+        new.update({"token_valid_after": datetime.now()})
+        if user_repository.update_one(old=old, new=new):
+            return {"status_code": status.HTTP_200_OK, "message_key": "user.all_logged_out"}
+        else:
+            raise InternalServerError("common.process_issue")

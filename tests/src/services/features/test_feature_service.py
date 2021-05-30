@@ -11,13 +11,6 @@ class StubbyRepository(StubbyBaseRepository):
     pass
 
 
-def test_create_invalid_params():
-    payload = {"name": "", "display_name": ""}
-    stubby_repository = StubbyRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.invalid_params"):
-        FeatureService.create(payload=payload, feature_repository=stubby_repository)
-
-
 def test_create_register_exists():
     payload = {"name": "lala", "display_name": "Lala"}
     stubby_repository = StubbyRepository(database="", collection="")
@@ -47,13 +40,6 @@ def test_created():
     assert response.get("message_key") == "requests.created"
 
 
-def test_update_invalid_params():
-    payload = {"feature_id": "", "model": {"name": "", "display_name": ""}}
-    stubby_repository = StubbyRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.invalid_params"):
-        FeatureService.update(payload=payload, feature_repository=stubby_repository)
-
-
 def test_update_register_not_exists():
     payload = {"feature_id": "lala", "model": {"name": "lala", "display_name": "Lala"}}
     stubby_repository = StubbyRepository(database="", collection="")
@@ -81,15 +67,6 @@ def test_updated():
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "requests.updated"
-
-
-def test_delete_invalid_params():
-    payload = {
-        "feature_id": "",
-    }
-    stubby_repository = StubbyRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.invalid_params"):
-        FeatureService.delete(payload=payload, feature_repository=stubby_repository)
 
 
 def test_delete_register_not_exists():

@@ -16,7 +16,8 @@ pt:
     active: Sua validação foi feita com sucesso.
     pin_error: PIN invalido, tentenovamente.
     need_pin: Informe seu PIN.
-    not_admin: You are no administrator.
+    not_admin: Você não é adminitrador.
+    all_logged_out: Você deslogou de todos os dispositivos logados.
   email:
     login: Enviamos um email para a conta cadastrada, para concluir o login
     forgot_password: Enviamos um email para efetura login e mudança do PIN

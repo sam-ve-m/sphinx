@@ -1,11 +1,12 @@
-import i18n.translations
 import sendgrid
 from sendgrid.helpers.mail import Email, To, Content, Mail
 from decouple import config
+
 from src.exceptions.exceptions import InternalServerError
+from src.interfaces.email_sender.interface import IEmailSender
 
 
-class EmailSender:
+class EmailSender(IEmailSender):
     sg = sendgrid.SendGridAPIClient(api_key=config("MAIL_KEY"))
     sender_email = Email(config("MAIL_SENDER"))
 

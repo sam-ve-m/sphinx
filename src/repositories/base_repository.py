@@ -1,4 +1,3 @@
-from abc import ABC
 from typing import Optional
 from pymongo import MongoClient
 from decouple import config
@@ -6,9 +5,10 @@ from pymongo.cursor import Cursor
 
 from src.repositories.cache.redis import RepositoryRedis
 from src.utils.genarate_id import hash_field
+from src.interfaces.repository.interface import IRepository
 
 
-class BaseRepository(ABC):
+class BaseRepository(IRepository):
     client: MongoClient = (
             eval(config("PRODUCTION")) is True
             and MongoClient(
@@ -23,10 +23,6 @@ class BaseRepository(ABC):
         self.base_identifier = f'{database}:{collection}'
         self.database = self.client[database]
         self.collection = self.database[collection]
-
-    @staticmethod
-    def get_cache():
-        pass
 
     def insert(self, data: dict) -> bool:
         try:
@@ -76,7 +72,8 @@ class BaseRepository(ABC):
         try:
             self.collection.update_one(old, {"$set": new})
             return True
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
 
     def delete_one(self, entity) -> bool:

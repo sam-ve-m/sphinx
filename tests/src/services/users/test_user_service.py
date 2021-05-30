@@ -19,13 +19,6 @@ class StubbyAuthenticationService:
     pass
 
 
-def test_create_invalid_params():
-    private_payload = {"name": "", "email": ""}
-    stubby_repository = StubbyRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.invalid_params"):
-        UserService.create(payload=private_payload, user_repository=stubby_repository)
-
-
 payload = {"name": "lala", "email": "Lala", "pin": 1234}
 
 
@@ -154,7 +147,7 @@ def test_delete():
     assert response.get("message_key") == "requests.updated"
 
 
-def test_forgot_password_password_register_exists():
+def test_forgot_password_register_exists():
     stubby_repository = StubbyRepository(database="", collection="")
     stubby_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="common.register_not_exists"):
@@ -173,3 +166,33 @@ def test_forgot_password():
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "email.forgot_password"
+
+
+def test_logout_all_not_register_exists():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value=None)
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+        UserService.logout_all(
+            payload=payload_change_password, user_repository=stubby_repository
+        )
+
+
+def test_logout_all_process_issue():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={'email': 'lala'})
+    stubby_repository.update_one = MagicMock(return_value=False)
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        UserService.logout_all(
+            payload=payload_change_password, user_repository=stubby_repository
+        )
+
+
+def test_logout_all():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={'email': 'lala'})
+    stubby_repository.update_one = MagicMock(return_value=True)
+    response = UserService.logout_all(
+        payload=payload_change_password, user_repository=stubby_repository
+    )
+    assert response.get("status_code") == status.HTTP_200_OK
+    assert response.get("message_key") == "user.all_logged_out"

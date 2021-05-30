@@ -11,13 +11,6 @@ class StubbyRepository(StubbyBaseRepository):
     pass
 
 
-def test_create_invalid_params():
-    payload = {"name": "", "display_name": ""}
-    stubby_repository = StubbyRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.invalid_params"):
-        ViewService.create(payload=payload, view_repository=stubby_repository)
-
-
 def test_create_register_exists():
     payload = {"name": "lala", "display_name": "Lala"}
     stubby_repository = StubbyRepository(database="", collection="")
@@ -43,13 +36,6 @@ def test_created():
     response = ViewService.create(payload=payload, view_repository=stubby_repository)
     assert response.get("status_code") == status.HTTP_201_CREATED
     assert response.get("message_key") == "requests.created"
-
-
-def test_update_invalid_params():
-    payload = {"view_id": "", "model": {"name": "", "display_name": ""}}
-    stubby_repository = StubbyRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.invalid_params"):
-        ViewService.update(payload=payload, view_repository=stubby_repository)
 
 
 def test_update_register_not_exists():
@@ -79,15 +65,6 @@ def test_updated():
     assert response.get("message_key") == "requests.updated"
 
 
-def test_delete_invalid_params():
-    payload = {
-        "view_id": "",
-    }
-    stubby_repository = StubbyRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.invalid_params"):
-        ViewService.delete(payload=payload, view_repository=stubby_repository)
-
-
 def test_delete_register_not_exists():
     payload = {"view_id": "lala"}
     stubby_repository = StubbyRepository(database="", collection="")
@@ -113,18 +90,6 @@ def test_deleted():
     response = ViewService.delete(payload=payload, view_repository=stubby_repository)
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "requests.deleted"
-
-
-def test_link_feature_invalid_params():
-    payload = {"view_id": "", "feature_id": ""}
-    stubby_repository = StubbyRepository(database="", collection="")
-    feature_repository = StubbyRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.invalid_params"):
-        ViewService.link_feature(
-            payload=payload,
-            view_repository=stubby_repository,
-            feature_repository=feature_repository,
-        )
 
 
 link_feature_payload = {"view_id": "lala", "feature_id": "lele"}
@@ -178,20 +143,10 @@ def test_link_feature():
     view_repository.update_one = MagicMock(return_value=True)
     response = ViewService.link_feature(
         payload=link_feature_payload,
-        view_repository=view_repository,
-        feature_repository=feature_repository,
+        view_repository=view_repository
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "requests.updated"
-
-
-def test_get_view_invalid_params():
-    payload = {
-        "view_id": "",
-    }
-    stubby_repository = StubbyRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.invalid_params"):
-        ViewService.get_view(payload=payload, view_repository=stubby_repository)
 
 
 def test_get_view_register_not_exists():
