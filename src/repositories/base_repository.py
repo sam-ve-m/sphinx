@@ -4,10 +4,13 @@ from pymongo import MongoClient
 from decouple import config
 from pymongo.cursor import Cursor
 
+from src.repositories.cache.redis import RepositoryRedis
+from src.utils.genarate_id import hash_field
+
 
 class BaseRepository(ABC):
     client: MongoClient = (
-            eval(config("MONGO_IS_SERVER")) == True
+            eval(config("PRODUCTION")) is True
             and MongoClient(
         f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
     )
@@ -17,6 +20,7 @@ class BaseRepository(ABC):
     )
 
     def __init__(self, database: str, collection: str) -> None:
+        self.base_identifier = f'{database}:{collection}'
         self.database = self.client[database]
         self.collection = self.database[collection]
 
@@ -38,12 +42,23 @@ class BaseRepository(ABC):
         except Exception:
             return False
 
-    def find_one(self, query: dict) -> Optional[dict]:
+    def find_one(self, query: dict, ttl: int = 0, cache=RepositoryRedis) -> Optional[dict]:
         try:
-            return self.collection.find_one(query)
+            if ttl > 0:
+                query_hash = hash_field(payload=query)
+                cache_value = cache.get(key=f'{self.base_identifier}:{query_hash}')
+                if cache_value:
+                    value = cache_value
+                else:
+                    value = self.collection.find_one(query)
+                    cache.set(key=f'{self.base_identifier}:{query_hash}', value=value, ttl=ttl)
+            else:
+                value = self.collection.find_one(query)
+            return value
         except Exception as e:
             print(e)
             return None
+
 
     def find_more_than_equal_one(self, query: dict) -> Optional[Cursor]:
         try:

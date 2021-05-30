@@ -22,14 +22,6 @@ def need_be_admin(request: Request):
     )
 
 
-def need_be_admin(request: Request):
-    return (
-        request.url.path == "/user_admin"
-        or request.url.path.startswith("/view")
-        or request.url.path.startswith("/feature")
-    )
-
-
 def user_not_allowed(user_data: dict, jwt_data: dict) -> bool:
     try:
         is_deleted = user_data.get("deleted")
@@ -42,12 +34,18 @@ def user_not_allowed(user_data: dict, jwt_data: dict) -> bool:
         return False
 
 
-def validate_user(request: Request):
+def validate_user_and_admin_routes(request: Request):
     user_repository = UserRepository()
     jwt_data = JWTHandler.get_payload_from_request(request=request)
+    user_data = user_repository.find_one({"email": jwt_data["email"]}, ttl=60)
     if user_not_allowed(
-            user_data=user_repository.find_one({"email": jwt_data["email"]}),
+            user_data=user_data,
             jwt_data=jwt_data
     ):
         return "invalid_token"
+    if (
+        need_be_admin(request=request)
+        and user_data.get('is_admin') is False
+    ):
+        return "not_allowed"
     return None

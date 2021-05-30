@@ -51,6 +51,12 @@ def change_user_password(pin: PIN, request: Request):
     return BaseController.run(UserController.change_password, payload, request)
 
 
+@router.put("/user/logout_all", tags=["user"])
+def logout_all(request: Request):
+    payload = JWTHandler.get_payload_from_request(request=request)
+    return BaseController.run(UserController.logout_all, payload, request)
+
+
 @router.put("/user/view", tags=["user"])
 def change_user_view(view: View, request: Request):
     payload = {

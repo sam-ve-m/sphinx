@@ -14,7 +14,6 @@ class UserService:
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
     ) -> dict:
-        user_repository.get_cache()
         payload = generate_id("email", payload, must_remove=False)
         email = payload.get("email")
         name = payload.get("name")
@@ -109,3 +108,19 @@ class UserService:
             return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
         else:
             raise InternalServerError("common.process_issue")
+
+    @staticmethod
+    def forgot_password(payload: dict, user_repository=UserRepository(), authentication_service=AuthenticationService):
+        entity = user_repository.find_one({"_id": payload.get("email")})
+        if entity is None:
+            raise BadRequestError("common.register_not_exists")
+        authentication_service.send_authentication_email(
+            email=entity.get("email"),
+            payload=entity,
+            ttl=10,
+            body="email.body.forgot_password",
+        )
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "email.forgot_password",
+        }

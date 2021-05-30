@@ -19,6 +19,7 @@ pt:
     not_admin: You are no administrator.
   email:
     login: Enviamos um email para a conta cadastrada, para concluir o login
+    forgot_password: Enviamos um email para efetura login e mudança do PIN
     subject:
       created: Confirme a sua conta
       login: Conclua seu login
@@ -29,4 +30,5 @@ pt:
     trouble:
       send: Tivemos problema para enviar seu email, por favor tente novamente.
   invalid_token: Parece que seu acesso expirou, logue novamente.
+  not_allowed: Parece que você não tem eprmissão para isso.
   internal_error: Tivemos problema, por favor tente novamente.

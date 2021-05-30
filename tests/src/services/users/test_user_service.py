@@ -15,10 +15,8 @@ class StubbyAuthenticationService:
     pass
 
 
-class StubbyEmailSender:
-    @staticmethod
-    def send_email_to(target_email: str, message: str, subject: str):
-        pass
+class StubbyAuthenticationService:
+    pass
 
 
 def test_create_invalid_params():
@@ -154,3 +152,24 @@ def test_delete():
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "requests.updated"
+
+
+def test_forgot_password_password_register_exists():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value=None)
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+        UserService.change_password(
+            payload=payload_change_password, user_repository=stubby_repository
+        )
+
+
+def test_forgot_password():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={})
+    stubby_repository.update_one = MagicMock(return_value=True)
+    StubbyAuthenticationService.send_authentication_email = MagicMock(return_value=True)
+    response = UserService.forgot_password(
+        payload=payload_change_password, user_repository=stubby_repository, authentication_service=StubbyAuthenticationService
+    )
+    assert response.get("status_code") == status.HTTP_200_OK
+    assert response.get("message_key") == "email.forgot_password"

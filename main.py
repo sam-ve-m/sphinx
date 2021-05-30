@@ -13,9 +13,8 @@ from src.routers.pendencies import router as pendencies_router
 from src.routers.purchase import router as purchase_router
 from src.routers.view import router as view_router
 from src.i18n.i18n_resolver import i18nResolver as i18n
-from src.utils.jwt_utils import JWTHandler
 from src.utils.language_identifier import get_language_from_request
-from src.utils.middleware import is_public, need_be_admin, validate_user
+from src.utils.middleware import is_public, need_be_admin, validate_user_and_admin_routes
 
 
 app = FastAPI()
@@ -35,7 +34,7 @@ async def on_shutdown() -> None:
 @app.middleware("http")
 def process_thebes_answer(request: Request, call_next):
     if is_public(request=request) is False:
-        not_allowed_user = validate_user(request=request)
+        not_allowed_user = validate_user_and_admin_routes(request=request)
         if not_allowed_user:
             response = Response(
                 content=json.dumps(
@@ -62,4 +61,5 @@ app.include_router(view_router)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, access_log=True, log_config="./log.ini", log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # uvicorn.run(app, host="0.0.0.0", port=8000, access_log=True, log_config="./log.ini", log_level="info")
