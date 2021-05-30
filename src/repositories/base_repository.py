@@ -79,7 +79,7 @@ class BaseRepository(IRepository):
 
     def update_one(self, old, new) -> bool:
         try:
-            self.collection.update_one(old, {"$set": new})
+            self.collection.update_one({'_id': old.get("email")}, {"$set": new})
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
