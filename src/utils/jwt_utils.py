@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from src.exceptions.exceptions import InternalServerError
 from fastapi import Request
 import logging
+from decouple import config
 
 from datetime import timedelta
 
