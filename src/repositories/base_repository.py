@@ -6,10 +6,17 @@ from pymongo.cursor import Cursor
 
 
 class BaseRepository(ABC):
+    client: MongoClient = (
+            eval(config("MONGO_IS_SERVER")) == True
+            and MongoClient(
+        f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
+    )
+            or MongoClient(
+        f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
+    )
+    )
 
     def __init__(self, database: str, collection: str) -> None:
-        self.database = database
-        self.collection = collection
 
     @staticmethod
     def get_cache():

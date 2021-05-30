@@ -49,6 +49,10 @@ class AuthenticationService:
                 ttl=10,
                 body="email.body.created",
             )
+            return {
+                "status_code": status.HTTP_200_OK,
+                "message_key": "email.login",
+            }
         else:
             pin = payload.get("pin")
             if pin is None:

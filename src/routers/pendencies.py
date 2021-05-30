@@ -4,5 +4,5 @@ router = APIRouter()
 
 
 @router.get("/pendencies", tags=["pendencies"])
-async def pendencies():
+def pendencies():
     return 200

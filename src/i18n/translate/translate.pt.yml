@@ -18,8 +18,10 @@ pt:
     need_pin: Informe seu PIN.
     not_admin: You are no administrator.
   email:
+    login: Enviamos um email para a conta cadastrada, para concluir o login
     subject:
       created: Confirme a sua conta
+      login: Conclua seu login
       forgot_password: Recuperação de PIN
     body:
       created: Bem vindo! Clique no link para finalizar seu cadastro.

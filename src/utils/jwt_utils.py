@@ -29,7 +29,6 @@ class JWTHandler:
             compact_jws = JWTHandler.instance.encode(
                 JWTHandler.filter_payload_to_jwt(payload), signing_key, alg="RS256"
             )
-            print(compact_jws)
             return compact_jws
         except:
             raise InternalServerError("common.process_issue")
@@ -54,7 +53,7 @@ class JWTHandler:
             "scope": payload.get("scope"),
             "is_active": payload.get("is_active"),
             "created_at": str(payload.get("created_at")),
-            "deleted": payload.get("deleted"),
+            "deleted": payload.get("deleted")
         }
         if payload.get("is_admin"):
             new_payload.update({"is_admin": payload.get("is_admin")})

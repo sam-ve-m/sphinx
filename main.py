@@ -22,7 +22,7 @@ app = FastAPI()
 
 
 @app.on_event("startup")
-async def on_startup() -> None:
+def on_startup() -> None:
     rc = InMemoryCacheBackend()
     caches.set(CACHE_KEY, rc)
 
@@ -33,7 +33,7 @@ async def on_shutdown() -> None:
 
 
 @app.middleware("http")
-async def process_thebes_answer(request: Request, call_next):
+def process_thebes_answer(request: Request, call_next):
     if is_public(request=request) is False:
         not_allowed_user = validate_user(request=request)
         if not_allowed_user:
@@ -63,3 +63,4 @@ app.include_router(view_router)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+    #uvicorn.run(app, host="0.0.0.0", port=8000, access_log=True, log_config="./log.ini", log_level="info")

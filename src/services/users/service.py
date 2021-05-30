@@ -34,7 +34,8 @@ class UserService:
                 "scope": {"view_type": None, "features": []},
                 "is_active": False,
                 "deleted": False,
-                "token_valid_after": datetime.now(),
+                "use_magic_link": False,
+                "token_valid_after": datetime.now()
             }
         )
 

@@ -18,8 +18,10 @@ en:
     need_pin: Inform your PIN code.
     not_admin: Você não é administrador.
   email:
+    login: We sent an email to the registered account, to conclude login
     subject:
       created: Account confirmation
+      login: Conclude your login
       forgot_password: Reconvery PIN
     body:
       created: Wellcome! Use the link bellow to access and confirm your account.
