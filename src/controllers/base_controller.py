@@ -6,6 +6,8 @@ from src.exceptions.exceptions import (
     InternalServerError,
 )
 from fastapi import Response, status, Request
+import logging
+from decouple import config
 import json
 
 from src.i18n.i18n_resolver import i18nResolver as i18n
@@ -56,6 +58,8 @@ class BaseController(IController):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             return Response(
                 content=json.dumps(
                     {"message": i18n.get_translate("internal_error", locale=lang)}

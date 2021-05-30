@@ -1,6 +1,7 @@
 import sendgrid
 from sendgrid.helpers.mail import Email, To, Content, Mail
 from decouple import config
+import logging
 
 from src.exceptions.exceptions import InternalServerError
 from src.interfaces.email_sender.interface import IEmailSender
@@ -21,5 +22,7 @@ class EmailSender(IEmailSender):
                 html_content=message,
             )
             EmailSender.sg.client.mail.send.post(request_body=mail.get())
-        except:
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             raise InternalServerError("email.trouble.send")

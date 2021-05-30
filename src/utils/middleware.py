@@ -1,5 +1,6 @@
-from fastapi import Request, Response
+from fastapi import Request
 from datetime import datetime
+import logging
 
 from src.repositories.user.repository import UserRepository
 from src.utils.jwt_utils import JWTHandler
@@ -30,7 +31,8 @@ def user_not_allowed(user_data: dict, jwt_data: dict) -> bool:
         is_token_invalid = token_valid_after > token_created_at
         return is_token_invalid or is_deleted
     except Exception as e:
-        print(e)
+        logger = logging.getLogger("uvicorn.error")
+        logger.error(e, exc_info=True)
         return False
 
 

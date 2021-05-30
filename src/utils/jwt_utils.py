@@ -4,6 +4,7 @@ from jwt.utils import get_int_from_datetime
 from datetime import datetime, timezone
 from src.exceptions.exceptions import InternalServerError
 from fastapi import Request
+import logging
 
 from datetime import timedelta
 
@@ -30,7 +31,9 @@ class JWTHandler:
                 JWTHandler.filter_payload_to_jwt(payload), signing_key, alg="RS256"
             )
             return compact_jws
-        except:
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             raise InternalServerError("common.process_issue")
 
     @staticmethod

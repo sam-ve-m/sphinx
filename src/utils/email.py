@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup as bs
 import tempfile
 import os
+import logging
 
 
 class HtmlModifier:
@@ -14,18 +15,22 @@ class HtmlModifier:
         self.temp_file = None
 
     def modify(self):
-        new_link = bs(
-            f"<a href={self.target_link} id='link-auth'>Clique Aqui!</a>",
-            "html.parser",
-        )
-        new_message_text = bs(
-            f"<p id='message_text'>{self.message_text} <a href='' id='link-auth'></a></p>",
-            "html.parser",
-        )
-        self.soup.find("p", {"id": "message_text"}).replace_with(new_message_text)
-        self.soup.find("a", {"id": "link-auth"}).replace_with(new_link)
-        self.temp_file = tempfile.TemporaryFile(mode="wb+")
-        self.temp_file.write(self.soup.prettify("utf-8"))
+        try:
+            new_link = bs(
+                f"<a href={self.target_link} id='link-auth'>Clique Aqui!</a>",
+                "html.parser",
+            )
+            new_message_text = bs(
+                f"<p id='message_text'>{self.message_text} <a href='' id='link-auth'></a></p>",
+                "html.parser",
+            )
+            self.soup.find("p", {"id": "message_text"}).replace_with(new_message_text)
+            self.soup.find("a", {"id": "link-auth"}).replace_with(new_link)
+            self.temp_file = tempfile.TemporaryFile(mode="wb+")
+            self.temp_file.write(self.soup.prettify("utf-8"))
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
 
     def return_email_content(self):
         self.temp_file.seek(0, 0)

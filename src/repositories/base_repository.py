@@ -2,6 +2,7 @@ from typing import Optional
 from pymongo import MongoClient
 from decouple import config
 from pymongo.cursor import Cursor
+import logging
 
 from src.repositories.cache.redis import RepositoryRedis
 from src.utils.genarate_id import hash_field
@@ -29,13 +30,17 @@ class BaseRepository(IRepository):
             self.collection.insert_one(data)
             return True
         except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             return False
 
     def insert_many(self, data: list) -> bool:
         try:
             self.collection.insert_many(data)
             return True
-        except Exception:
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             return False
 
     def find_one(self, query: dict, ttl: int = 0, cache=RepositoryRedis) -> Optional[dict]:
@@ -52,20 +57,24 @@ class BaseRepository(IRepository):
                 value = self.collection.find_one(query)
             return value
         except Exception as e:
-            print(e)
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             return None
-
 
     def find_more_than_equal_one(self, query: dict) -> Optional[Cursor]:
         try:
             return self.collection.find(query)
-        except Exception:
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             return None
 
     def find_all(self) -> Optional[Cursor]:
         try:
             return self.collection.find()
-        except Exception:
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             return None
 
     def update_one(self, old, new) -> bool:
@@ -73,12 +82,15 @@ class BaseRepository(IRepository):
             self.collection.update_one(old, {"$set": new})
             return True
         except Exception as e:
-            print(e)
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             return False
 
     def delete_one(self, entity) -> bool:
         try:
             self.collection.delete_one(entity)
             return True
-        except Exception:
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             return False
