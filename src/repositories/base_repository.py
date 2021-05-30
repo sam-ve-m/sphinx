@@ -6,22 +6,10 @@ from pymongo.cursor import Cursor
 
 
 class BaseRepository(ABC):
-    def __init__(self, database: str, collection: str) -> None:
-        try:
-            self.client: MongoClient = (
-                eval(config("MONGO_IS_SERVER")) == True
-                and MongoClient(
-                    f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/"
-                )
-                or MongoClient(
-                    f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/"
-                )
-            )
-        except Exception as e:
-            print(e)
 
-        self.database = self.client[database]
-        self.collection = self.database[collection]
+    def __init__(self, database: str, collection: str) -> None:
+        self.database = database
+        self.collection = collection
 
     @staticmethod
     def get_cache():
@@ -43,8 +31,14 @@ class BaseRepository(ABC):
 
     def find_one(self, query: dict) -> Optional[dict]:
         try:
-            return self.collection.find_one(query)
-        except Exception:
+            mongo_client = MongoClient(
+                f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}/"
+            )
+            database = mongo_client[self.database]
+            collection = database[self.collection]
+            return collection.find_one(query)
+        except Exception as e:
+            print(e)
             return None
 
     def find_more_than_equal_one(self, query: dict) -> Optional[Cursor]:

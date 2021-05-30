@@ -15,7 +15,7 @@ from src.routers.view import router as view_router
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.jwt_utils import JWTHandler
 from src.utils.language_identifier import get_language_from_request
-from src.utils.middleware import is_public, need_be_admin, validate_user_and_token
+from src.utils.middleware import is_public, need_be_admin, validate_user
 
 
 app = FastAPI()
@@ -35,23 +35,20 @@ async def on_shutdown() -> None:
 @app.middleware("http")
 async def process_thebes_answer(request: Request, call_next):
     if is_public(request=request) is False:
-        # data = JWTHandler.get_payload_from_request(request=request)
-        a = validate_user_and_token(request=request)
-        if a:
-            print("asdas")
-        # if need_be_admin(request=request) and data.get("is_admin") is False:
-        #     response = Response(
-        #         content=json.dumps(
-        #             {
-        #                 "message": i18n.get_translate(
-        #                     "invalid_token",
-        #                     locale=get_language_from_request(request=request),
-        #                 )
-        #             }
-        #         ),
-        #         status_code=status.HTTP_401_UNAUTHORIZED,
-        #     )
-        #     return response
+        not_allowed_user = validate_user(request=request)
+        if not_allowed_user:
+            response = Response(
+                content=json.dumps(
+                    {
+                        "message": i18n.get_translate(
+                            "invalid_token",
+                            locale=get_language_from_request(request=request),
+                        )
+                    }
+                ),
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
+            return response
     return await call_next(request)
 
 

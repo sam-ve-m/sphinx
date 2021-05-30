@@ -1,5 +1,5 @@
 from fastapi import Request, Response
-
+from datetime import datetime
 
 from src.repositories.user.repository import UserRepository
 from src.utils.jwt_utils import JWTHandler
@@ -30,26 +30,23 @@ def need_be_admin(request: Request):
     )
 
 
-def is_deleted(user_data: dict) -> bool:
+def user_is_allowed(user_data: dict, jwt_data: dict) -> bool:
     try:
-        return user_data.get("deleted")
+        is_deleted = user_data.get("deleted")
+        token_valid_after = user_data.get("token_valid_after")
+        token_created_at = datetime.parse(jwt_data.get("created_at"), )
+        is_token_valid = token_valid_after < token_created_at
+        return is_token_valid or is_deleted
     except:
         return False
 
 
-def token_expired(user_data: dict, jwt_data: dict) -> bool:
-    token_valid_after = user_data.get("token_valid_after")
-    token_created_at = jwt_data.get("created_at")
-    return token_valid_after < token_created_at
-
-
-def validate_user_and_token(request: Request, user_repository = UserRepository()):
-
+def validate_user(request: Request):
+    user_repository = UserRepository()
     jwt_data = JWTHandler.get_payload_from_request(request=request)
-    print(jwt_data)
-    print(jwt_data["email"])
-    user_data = user_repository.find_one({"email", jwt_data["email"]})
-    if is_deleted(user_data=user_data):
+    if user_is_allowed(
+            user_data=user_repository.find_one({"email": jwt_data["email"]}),
+            jwt_data=jwt_data
+    ):
         return "invalid_token"
-    if token_expired(user_data=user_data, jwt_data=jwt_data):
-        return "invalid_token"
+    return None
