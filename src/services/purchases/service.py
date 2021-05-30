@@ -25,7 +25,7 @@ class PurchaseService:
                 raise InternalServerError("common.process_issue")
         else:
             jwt = token_handler.generate_token(payload=new, ttl=525600)
-            return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+            return {"status_code": status.HTTP_304_NOT_MODIFIED, "payload": {"jwt": jwt}}
 
 
 
@@ -44,4 +44,4 @@ class PurchaseService:
                 raise InternalServerError("common.process_issue")
         else:
             jwt = token_handler.generate_token(payload=new, ttl=525600)
-            return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+            return {"status_code": status.HTTP_304_NOT_MODIFIED, "payload": {"jwt": jwt}}
