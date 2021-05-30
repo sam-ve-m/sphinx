@@ -3,14 +3,11 @@ from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.routers.validators.base import OptionalPIN, Email
 from src.controllers.authentications.controller import AuthenticationController
-from typing import Optional
-from pydantic import BaseModel
 router = APIRouter()
 
 
-class Login(BaseModel):
-    email: str
-    pin: Optional[int]
+class Login(Email, OptionalPIN):
+    pass
 
 
 @router.post("/login", tags=["authenticate"])
