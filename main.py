@@ -49,7 +49,7 @@ def process_thebes_answer(request: Request, call_next):
                 status_code=status.HTTP_401_UNAUTHORIZED,
             )
             return response
-    return await call_next(request)
+    return call_next(request)
 
 
 app.include_router(user_router)
@@ -62,5 +62,4 @@ app.include_router(view_router)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-    #uvicorn.run(app, host="0.0.0.0", port=8000, access_log=True, log_config="./log.ini", log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8000, access_log=True, log_config="./log.ini", log_level="info")
