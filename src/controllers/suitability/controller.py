@@ -2,4 +2,6 @@ from src.services.suitability.service import SuitabilityService
 
 
 class SuitabilityController:
-    pass
+    @staticmethod
+    def persist(payload: dict):
+        return SuitabilityService.persist(payload=payload)

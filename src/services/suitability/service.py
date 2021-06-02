@@ -1,2 +1,4 @@
 class SuitabilityService:
-    pass
+    @staticmethod
+    def persist(payload: dict) -> dict:
+        pass
