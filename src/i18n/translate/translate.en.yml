@@ -30,6 +30,8 @@ en:
       forgot_password: Hi! Use the link bellow to change your PIN.
     trouble:
       send: We have some trouble to send you an email, please try again.
+  files:
+    error: Problem to process file.
   invalid_token: Seems that your access has expired, try to login again.
   not_allowed: Seems that your can accesse this.
   internal_error: We have some issue, please try again.
