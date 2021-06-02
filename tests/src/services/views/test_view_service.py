@@ -142,8 +142,7 @@ def test_link_feature():
     feature_repository.find_one = MagicMock(return_value={})
     view_repository.update_one = MagicMock(return_value=True)
     response = ViewService.link_feature(
-        payload=link_feature_payload,
-        view_repository=view_repository
+        payload=link_feature_payload, view_repository=view_repository
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "requests.updated"

@@ -57,7 +57,7 @@ class JWTHandler:
             "scope": payload.get("scope"),
             "is_active": payload.get("is_active"),
             "created_at": str(payload.get("created_at")),
-            "deleted": payload.get("deleted")
+            "deleted": payload.get("deleted"),
         }
         if payload.get("is_admin"):
             new_payload.update({"is_admin": payload.get("is_admin")})

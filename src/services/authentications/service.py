@@ -63,7 +63,7 @@ class AuthenticationService:
                 }
             if pin and hash_field(payload=pin) == entity.get("pin"):
                 jwt = token_handler.generate_token(payload=entity, ttl=525600)
-                JwtController.insert_one(jwt, entity.get("email"));
+                JwtController.insert_one(jwt, entity.get("email"))
                 return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
             else:
                 raise UnauthorizedError("user.pin_error")

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from src.routers.validators.base import Email, PIN, Name, View, OptionalPIN
+from src.routers.validators.base import Email, PIN, Name, View, OptionalPIN, Feature
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
@@ -60,3 +60,21 @@ def change_user_view(view: View, request: Request):
         "new_view": dict(view).get("view"),
     }
     return BaseController.run(UserController.change_view, payload, request)
+
+
+@router.put("/user/purchase", tags=["user"])
+def add_features_to_user(feature: Feature, request: Request):
+    payload = {
+        "thebes_answer": JWTHandler.get_payload_from_request(request=request),
+        "feature": dict(feature).get("feature"),
+    }
+    return BaseController.run(UserController.add_feature, dict(payload), request)
+
+
+@router.delete("/user/purchase", tags=["user"])
+def remove_features_to_user(feature: Feature, request: Request):
+    payload = {
+        "thebes_answer": JWTHandler.get_payload_from_request(request=request),
+        "feature": dict(feature).get("feature"),
+    }
+    return BaseController.run(v.delete_feature, dict(payload), request)

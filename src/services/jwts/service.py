@@ -7,13 +7,8 @@ from fastapi import status
 
 class JwtService:
     @staticmethod
-    def insert_one(
-        jwt: str,
-        email: str,
-        jwt_repository=JwtRepository(),
-    ) -> dict:
+    def insert_one(jwt: str, email: str, jwt_repository=JwtRepository(),) -> dict:
         try:
-            jwt_repository.insert({'jwt': jwt, 'email': email})
+            jwt_repository.insert({"jwt": jwt, "email": email})
         except Exception:
             raise InternalServerError("common.process_issue")
-

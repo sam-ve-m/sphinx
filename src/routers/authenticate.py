@@ -3,6 +3,7 @@ from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.routers.validators.base import OptionalPIN, Email
 from src.controllers.authentications.controller import AuthenticationController
+
 router = APIRouter()
 
 

@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 from fastapi import status
 
 from src.exceptions.exceptions import BadRequestError, InternalServerError
+from src.utils.jwt_utils import JWTHandler
 from src.services.users.service import UserService
 from tests.stubby_classes.stubby_base_repository import StubbyBaseRepository
 
@@ -162,7 +163,9 @@ def test_forgot_password():
     stubby_repository.update_one = MagicMock(return_value=True)
     StubbyAuthenticationService.send_authentication_email = MagicMock(return_value=True)
     response = UserService.forgot_password(
-        payload=payload_change_password, user_repository=stubby_repository, authentication_service=StubbyAuthenticationService
+        payload=payload_change_password,
+        user_repository=stubby_repository,
+        authentication_service=StubbyAuthenticationService,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "email.forgot_password"
@@ -179,7 +182,7 @@ def test_logout_all_not_register_exists():
 
 def test_logout_all_process_issue():
     stubby_repository = StubbyRepository(database="", collection="")
-    stubby_repository.find_one = MagicMock(return_value={'email': 'lala'})
+    stubby_repository.find_one = MagicMock(return_value={"email": "lala"})
     stubby_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
         UserService.logout_all(
@@ -189,10 +192,107 @@ def test_logout_all_process_issue():
 
 def test_logout_all():
     stubby_repository = StubbyRepository(database="", collection="")
-    stubby_repository.find_one = MagicMock(return_value={'email': 'lala'})
+    stubby_repository.find_one = MagicMock(return_value={"email": "lala"})
     stubby_repository.update_one = MagicMock(return_value=True)
     response = UserService.logout_all(
         payload=payload_change_password, user_repository=stubby_repository
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "user.all_logged_out"
+
+
+def test_add_feature_already_exists():
+    user_data = {
+        "email": "afl@lionx.com.br",
+        "name": "anderson",
+        "scope": {"view_type": None, "features": ["real_time_data"]},
+        "is_active": True,
+        "deleted": False,
+        "use_magic_link": False,
+        "token_valid_after": {"$date": "2021-05-29T20:00:52.571Z"},
+    }
+
+    jwt = JWTHandler.generate_token(payload=user_data, ttl=525600)
+    payload = {
+        "thebes_answer": JWTHandler.decrypt_payload(jwt),
+        "feature": "real_time_data",
+    }
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.update_one = MagicMock(return_value=True)
+    result = UserService.add_feature(
+        payload=payload, user_repository=stubby_repository, token_handler=JWTHandler
+    )
+    assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
+
+
+def test_add_feature():
+    user_data = {
+        "email": "afl@lionx.com.br",
+        "name": "anderson",
+        "scope": {"view_type": None, "features": ["real_time_data"]},
+        "is_active": True,
+        "deleted": False,
+        "use_magic_link": False,
+        "token_valid_after": {"$date": "2021-05-29T20:00:52.571Z"},
+    }
+
+    jwt = JWTHandler.generate_token(payload=user_data, ttl=525600)
+    payload = {
+        "thebes_answer": JWTHandler.decrypt_payload(jwt),
+        "feature": "test_feature",
+    }
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.update_one = MagicMock(return_value=True)
+    result = UserService.add_feature(
+        payload=payload, user_repository=stubby_repository, token_handler=JWTHandler
+    )
+    assert result.get("status_code") == status.HTTP_200_OK
+
+
+def test_delete_feature_not_exists():
+    user_data = {
+        "email": "afl@lionx.com.br",
+        "name": "anderson",
+        "scope": {"view_type": None, "features": ["real_time_data"]},
+        "is_active": True,
+        "deleted": False,
+        "use_magic_link": False,
+        "token_valid_after": {"$date": "2021-05-29T20:00:52.571Z"},
+    }
+
+    jwt = JWTHandler.generate_token(payload=user_data, ttl=525600)
+    payload = {
+        "thebes_answer": JWTHandler.decrypt_payload(jwt),
+        "feature": "test_feature",
+    }
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.update_one = MagicMock(return_value=True)
+    result = UserService.delete_feature(
+        payload=payload, user_repository=stubby_repository, token_handler=JWTHandler
+    )
+    assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
+
+
+def test_delete_feature_that_exists():
+    user_data = {
+        "email": "afl@lionx.com.br",
+        "name": "anderson",
+        "scope": {"view_type": None, "features": ["real_time_data"]},
+        "is_active": True,
+        "deleted": False,
+        "use_magic_link": False,
+        "token_valid_after": {"$date": "2021-05-29T20:00:52.571Z"},
+    }
+
+    jwt = JWTHandler.generate_token(payload=user_data, ttl=525600)
+    payload = {
+        "thebes_answer": JWTHandler.decrypt_payload(jwt),
+        "feature": "real_time_data",
+    }
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.update_one = MagicMock(return_value=True)
+    result = UserService.delete_feature(
+        payload=payload, user_repository=stubby_repository, token_handler=JWTHandler
+    )
+    assert result.get("status_code") == status.HTTP_200_OK
+

@@ -27,7 +27,9 @@ def user_not_allowed(user_data: dict, jwt_data: dict) -> bool:
     try:
         is_deleted = user_data.get("deleted")
         token_valid_after = user_data.get("token_valid_after")
-        token_created_at = datetime.strptime(jwt_data.get("created_at"), '%Y-%m-%d %H:%M:%S.%f')
+        token_created_at = datetime.strptime(
+            jwt_data.get("created_at"), "%Y-%m-%d %H:%M:%S.%f"
+        )
         is_token_invalid = token_valid_after > token_created_at
         return is_token_invalid or is_deleted
     except Exception as e:
@@ -40,14 +42,8 @@ def validate_user_and_admin_routes(request: Request):
     user_repository = UserRepository()
     jwt_data = JWTHandler.get_payload_from_request(request=request)
     user_data = user_repository.find_one({"email": jwt_data["email"]}, ttl=60)
-    if user_not_allowed(
-            user_data=user_data,
-            jwt_data=jwt_data
-    ):
+    if user_not_allowed(user_data=user_data, jwt_data=jwt_data):
         return "invalid_token"
-    if (
-        need_be_admin(request=request)
-        and user_data.get('is_admin') is False
-    ):
+    if need_be_admin(request=request) and user_data.get("is_admin") is False:
         return "not_allowed"
     return None

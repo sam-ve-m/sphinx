@@ -16,7 +16,6 @@ from src.interfaces.controller.interface import IController
 
 
 class BaseController(IController):
-
     @staticmethod
     def run(callback: callable, payload: Optional[dict], request: Request) -> Response:
         lang = get_language_from_request(request=request)

@@ -26,7 +26,7 @@ class UserService:
                 "is_active": False,
                 "deleted": False,
                 "use_magic_link": False,
-                "token_valid_after": datetime.now()
+                "token_valid_after": datetime.now(),
             }
         )
 
@@ -102,7 +102,11 @@ class UserService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def forgot_password(payload: dict, user_repository=UserRepository(), authentication_service=AuthenticationService):
+    def forgot_password(
+        payload: dict,
+        user_repository=UserRepository(),
+        authentication_service=AuthenticationService,
+    ):
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
@@ -125,6 +129,53 @@ class UserService:
         new = dict(old)
         new.update({"token_valid_after": datetime.now()})
         if user_repository.update_one(old=old, new=new):
-            return {"status_code": status.HTTP_200_OK, "message_key": "user.all_logged_out"}
+            return {
+                "status_code": status.HTTP_200_OK,
+                "message_key": "user.all_logged_out",
+            }
         else:
             raise InternalServerError("common.process_issue")
+
+    @staticmethod
+    def add_feature(
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+    ) -> dict:
+        old = payload.get("thebes_answer")
+        new = dict(old)
+        new_scope = new.get("scope")
+        if payload.get("feature") not in new_scope.get("features"):
+            new_scope.get("features").append(payload.get("feature"))
+            new.update({"scope": new_scope})
+            if user_repository.update_one(old=old, new=new):
+                jwt = token_handler.generate_token(payload=new, ttl=525600)
+                return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+            else:
+                raise InternalServerError("common.process_issue")
+        else:
+            jwt = token_handler.generate_token(payload=new, ttl=525600)
+            return {
+                "status_code": status.HTTP_304_NOT_MODIFIED,
+                "payload": {"jwt": jwt},
+            }
+
+    @staticmethod
+    def delete_feature(
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+    ) -> dict:
+        old = payload.get("thebes_answer")
+        new = dict(old)
+        new_scope = new.get("scope")
+        if payload.get("feature") in new_scope.get("features"):
+            new_scope.get("features").remove(payload.get("feature"))
+            new.update({"scope": new_scope})
+            if user_repository.update_one(old=old, new=new):
+                jwt = token_handler.generate_token(payload=new, ttl=525600)
+                return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+            else:
+                raise InternalServerError("common.process_issue")
+        else:
+            jwt = token_handler.generate_token(payload=new, ttl=525600)
+            return {
+                "status_code": status.HTTP_304_NOT_MODIFIED,
+                "payload": {"jwt": jwt},
+            }

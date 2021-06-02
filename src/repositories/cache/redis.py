@@ -10,14 +10,21 @@ class RepositoryRedis:
     # Behind the scenes, redis-py uses a connection pool to manage connections to a Redis server.
     # https://pypi.org/project/redis/#connection-pools
     redis = (
-            eval(config("PRODUCTION")) is True
-            and Redis(host=config('REDIS_HOST'), port=config('REDIS_PORT'), db=config('REDIS_DB'), password=config('REDIS_PASSWORD'))
-            or Redis(host=config('REDIS_HOST'), port=config('REDIS_PORT'), db=config('REDIS_DB'))
+        eval(config("PRODUCTION")) is True
+        and Redis(
+            host=config("REDIS_HOST"),
+            port=config("REDIS_PORT"),
+            db=config("REDIS_DB"),
+            password=config("REDIS_PASSWORD"),
+        )
+        or Redis(
+            host=config("REDIS_HOST"), port=config("REDIS_PORT"), db=config("REDIS_DB")
+        )
     )
 
     @staticmethod
-    def set(key: str, value: dict, redis=redis, ttl:int = 0):
-        '''ttl in secounds'''
+    def set(key: str, value: dict, redis=redis, ttl: int = 0):
+        """ttl in secounds"""
         if ttl > 0:
             redis.set(name=key, value=pickle.dumps(value), ex=ttl)
         else:

@@ -4,7 +4,6 @@ from typing import Optional
 
 
 class IController(ABC):
-
     @staticmethod
     @abstractmethod
     def run(callback: callable, payload: Optional[dict], request: Request) -> Response:

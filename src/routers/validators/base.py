@@ -1,10 +1,12 @@
 from pydantic import BaseModel, constr, validate_email, validator
 from typing import Optional
+
 # from decouple import config
 # import logging
 
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
+
 
 class Email(BaseModel):
     email: constr(min_length=4, max_length=255)
@@ -25,7 +27,7 @@ class Email(BaseModel):
 class View(BaseModel):
     view: constr(min_length=1)
 
-    @validator('view')
+    @validator("view")
     def validate_view(cls, e):
         view_repository = ViewRepository()
         if view_repository.find_one({"_id": e}, ttl=60):
@@ -36,7 +38,7 @@ class View(BaseModel):
 class Feature(BaseModel):
     feature: constr(min_length=1)
 
-    @validator('feature', always=True)
+    @validator("feature", always=True)
     def validate_feature(cls, e):
         feature_repository = FeatureRepository()
         if feature_repository.find_one({"_id": e}, ttl=60):

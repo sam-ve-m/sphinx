@@ -37,3 +37,11 @@ class UserController:
     @staticmethod
     def logout_all(payload: dict):
         return UserService.logout_all(payload=payload)
+
+    @staticmethod
+    def add_feature(payload: dict):
+        return UserService.add_feature(payload=payload)
+
+    @staticmethod
+    def delete_feature(payload: dict):
+        return UserService.delete_feature(payload=payload)

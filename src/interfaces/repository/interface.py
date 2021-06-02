@@ -1,4 +1,3 @@
-
 from abc import ABC, abstractmethod
 from typing import Optional
 from pymongo.cursor import Cursor
@@ -7,7 +6,6 @@ from src.repositories.cache.redis import RepositoryRedis
 
 
 class IRepository(ABC):
-
     @abstractmethod
     def insert(self, data: dict) -> bool:
         pass
@@ -17,7 +15,9 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def find_one(self, query: dict, ttl: int = 0, cache=RepositoryRedis) -> Optional[dict]:
+    def find_one(
+        self, query: dict, ttl: int = 0, cache=RepositoryRedis
+    ) -> Optional[dict]:
         pass
 
     @abstractmethod
