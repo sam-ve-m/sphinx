@@ -1,6 +1,6 @@
 from pydantic import BaseModel, constr, validate_email, validator
 from typing import Optional
-
+from datetime import datetime
 # from decouple import config
 # import logging
 
@@ -60,3 +60,23 @@ class Name(BaseModel):
 
 class DisplayName(BaseModel):
     display_name: constr(min_length=1, max_length=50)
+
+
+class Version(BaseModel):
+    version: int
+
+
+class Date(BaseModel):
+    date: datetime
+
+
+class Score(BaseModel):
+    score: int
+
+
+class Weight(BaseModel):
+    weight: int
+
+
+class ValueText(BaseModel):
+    value_text: constr(min_length=1, max_length=520)
