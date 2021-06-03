@@ -1,13 +1,17 @@
+from fastapi import Request, Response, status
 import json
 from jwt import JWT, jwk_from_dict, jwk_from_pem
 from jwt.utils import get_int_from_datetime
 from datetime import datetime, timezone
-from src.exceptions.exceptions import InternalServerError
-from fastapi import Request
+from src.exceptions.exceptions import InternalServerError, UnauthorizedError
 import logging
+from datetime import timedelta
 from decouple import config
 
-from datetime import timedelta
+
+from src.i18n.i18n_resolver import i18nResolver as i18n
+from src.utils.language_identifier import get_language_from_request
+
 
 
 class JWTHandler:
@@ -70,4 +74,16 @@ class JWTHandler:
             if b"thebes_answer" in header_tuple:
                 thebes_answer = header_tuple[1].decode()
                 break
-        return dict(JWTHandler.decrypt_payload(thebes_answer))
+        try:
+            payload = dict(JWTHandler.decrypt_payload(thebes_answer))
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
+            lang = get_language_from_request(request=request)
+            return Response(
+                content=json.dumps(
+                    {"message": i18n.get_translate(str(e), locale=lang)}
+                ),
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
+        return payload

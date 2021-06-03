@@ -95,32 +95,6 @@ def test_deleted():
 link_feature_payload = {"view_id": "lala", "feature_id": "lele"}
 
 
-def test_link_feature_register_not_exists_view():
-    view_repository = StubbyRepository(database="", collection="")
-    feature_repository = StubbyRepository(database="", collection="")
-    view_repository.find_one = MagicMock(return_value=None)
-    feature_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
-        ViewService.link_feature(
-            payload=link_feature_payload,
-            view_repository=view_repository,
-            feature_repository=feature_repository,
-        )
-
-
-def test_link_feature_register_not_exists_feature():
-    view_repository = StubbyRepository(database="", collection="")
-    feature_repository = StubbyRepository(database="", collection="")
-    view_repository.find_one = MagicMock(return_value={})
-    feature_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="view.feature_not_exists"):
-        ViewService.link_feature(
-            payload=link_feature_payload,
-            view_repository=view_repository,
-            feature_repository=feature_repository,
-        )
-
-
 def test_link_feature_process_issue():
     view_repository = StubbyRepository(database="", collection="")
     feature_repository = StubbyRepository(database="", collection="")
@@ -131,7 +105,6 @@ def test_link_feature_process_issue():
         ViewService.link_feature(
             payload=link_feature_payload,
             view_repository=view_repository,
-            feature_repository=feature_repository,
         )
 
 
