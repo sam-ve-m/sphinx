@@ -66,7 +66,7 @@ def test_login_admin_payload():
 
 def test_thebes_gate():
     response = client.get("/thebes_gate")
-    assert response.status_code == 404
+    assert response.status_code == 401
 
 
 def test_thebes_gate_auth():

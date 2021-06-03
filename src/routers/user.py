@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 from src.routers.validators.base import Email, PIN, Name, View, OptionalPIN, Feature
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -34,14 +34,19 @@ def update_user_data(user: UserSimple, request: Request):
 
 @router.delete("/user", tags=["user"])
 def delete_user(request: Request):
-    payload = JWTHandler.get_payload_from_request(request=request)
-    return BaseController.run(UserController.delete, payload, request)
+    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(thebes_answer_data, Response):
+        return thebes_answer_data
+    return BaseController.run(UserController.delete, thebes_answer_data, request)
 
 
 @router.put("/user/change_password", tags=["user"])
 def change_user_password(pin: PIN, request: Request):
+    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(thebes_answer_data, Response):
+        return thebes_answer_data
     payload = {
-        "thebes_answer": JWTHandler.get_payload_from_request(request=request),
+        "thebes_answer": thebes_answer_data,
         "new_pin": dict(pin).get("pin"),
     }
     return BaseController.run(UserController.change_password, payload, request)
@@ -49,14 +54,19 @@ def change_user_password(pin: PIN, request: Request):
 
 @router.put("/user/logout_all", tags=["user"])
 def logout_all(request: Request):
-    payload = JWTHandler.get_payload_from_request(request=request)
-    return BaseController.run(UserController.logout_all, payload, request)
+    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(thebes_answer_data, Response):
+        return thebes_answer_data
+    return BaseController.run(UserController.logout_all, thebes_answer_data, request)
 
 
 @router.put("/user/view", tags=["user"])
 def change_user_view(view: View, request: Request):
+    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(thebes_answer_data, Response):
+        return thebes_answer_data
     payload = {
-        "thebes_answer": JWTHandler.get_payload_from_request(request=request),
+        "thebes_answer": thebes_answer_data,
         "new_view": dict(view).get("view"),
     }
     return BaseController.run(UserController.change_view, payload, request)
@@ -64,8 +74,11 @@ def change_user_view(view: View, request: Request):
 
 @router.put("/user/purchase", tags=["user"])
 def add_features_to_user(feature: Feature, request: Request):
+    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(thebes_answer_data, Response):
+        return thebes_answer_data
     payload = {
-        "thebes_answer": JWTHandler.get_payload_from_request(request=request),
+        "thebes_answer": thebes_answer_data,
         "feature": dict(feature).get("feature"),
     }
     return BaseController.run(UserController.add_feature, dict(payload), request)
@@ -73,8 +86,11 @@ def add_features_to_user(feature: Feature, request: Request):
 
 @router.delete("/user/purchase", tags=["user"])
 def remove_features_to_user(feature: Feature, request: Request):
+    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(thebes_answer_data, Response):
+        return thebes_answer_data
     payload = {
-        "thebes_answer": JWTHandler.get_payload_from_request(request=request),
+        "thebes_answer": thebes_answer_data,
         "feature": dict(feature).get("feature"),
     }
-    return BaseController.run(v.delete_feature, dict(payload), request)
+    return BaseController.run(UserController.delete_feature, dict(payload), request)

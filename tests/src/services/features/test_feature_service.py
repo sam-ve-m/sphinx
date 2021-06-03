@@ -14,7 +14,7 @@ class StubbyRepository(StubbyBaseRepository):
 def test_create_register_exists():
     payload = {"name": "lala", "display_name": "Lala"}
     stubby_repository = StubbyRepository(database="", collection="")
-    stubby_repository.find_one = MagicMock(return_value={})
+    stubby_repository.find_one = MagicMock(return_value={'name': 'lili'})
     with pytest.raises(BadRequestError, match="common.register_exists"):
         FeatureService.create(payload=payload, feature_repository=stubby_repository)
 
@@ -40,14 +40,6 @@ def test_created():
     assert response.get("message_key") == "requests.created"
 
 
-def test_update_register_not_exists():
-    payload = {"feature_id": "lala", "model": {"name": "lala", "display_name": "Lala"}}
-    stubby_repository = StubbyRepository(database="", collection="")
-    stubby_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
-        FeatureService.update(payload=payload, feature_repository=stubby_repository)
-
-
 def test_update_process_issue():
     payload = {"feature_id": "lala", "model": {"name": "lala", "display_name": "Lala"}}
     stubby_repository = StubbyRepository(database="", collection="")
@@ -67,14 +59,6 @@ def test_updated():
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "requests.updated"
-
-
-def test_delete_register_not_exists():
-    payload = {"feature_id": "lala"}
-    stubby_repository = StubbyRepository(database="", collection="")
-    stubby_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
-        FeatureService.delete(payload=payload, feature_repository=stubby_repository)
 
 
 def test_delete_process_issue():
