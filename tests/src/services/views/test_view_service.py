@@ -103,8 +103,7 @@ def test_link_feature_process_issue():
     view_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
         ViewService.link_feature(
-            payload=link_feature_payload,
-            view_repository=view_repository,
+            payload=link_feature_payload, view_repository=view_repository,
         )
 
 

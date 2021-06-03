@@ -22,5 +22,3 @@ class Suitability(Version, Date):
 @router.post("/suitability/quiz", tags=["authenticate"])
 def persist_quiz_suitability(suitability: Suitability, request: Request):
     return BaseController.run(SuitabilityController.persist, dict(suitability), request)
-
-

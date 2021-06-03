@@ -9,7 +9,7 @@ class FeatureService:
     def create(payload: dict, feature_repository=FeatureRepository()) -> dict:
         payload = generate_id("name", payload)
         if feature_repository.find_one({"_id": payload.get("feature_id")}):
-            raise BadRequestError('common.register_exists')
+            raise BadRequestError("common.register_exists")
         if feature_repository.insert(payload):
             return {
                 "status_code": status.HTTP_201_CREATED,

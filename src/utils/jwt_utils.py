@@ -13,7 +13,6 @@ from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
 
 
-
 class JWTHandler:
 
     instance = JWT()
