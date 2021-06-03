@@ -45,3 +45,7 @@ class UserController:
     @staticmethod
     def delete_feature(payload: dict):
         return UserService.delete_feature(payload=payload)
+
+    @staticmethod
+    def save_user_self(payload: dict):
+        return UserService.save_user_self(payload=payload)

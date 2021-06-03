@@ -1,6 +1,9 @@
+from __future__ import annotations
 from pydantic import BaseModel, constr, validate_email, validator
-from typing import Optional
+from typing import Optional, Union
 from datetime import datetime
+from fastapi import File, UploadFile, Form
+
 # from decouple import config
 # import logging
 
@@ -80,3 +83,7 @@ class Weight(BaseModel):
 
 class ValueText(BaseModel):
     value_text: constr(min_length=1, max_length=520)
+
+
+class FileType(BaseModel):
+    file_type: str

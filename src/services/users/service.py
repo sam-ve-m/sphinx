@@ -1,10 +1,12 @@
 from src.repositories.user.repository import UserRepository
+from src.repositories.file.repository import FileRepository, FileType
 from src.services.authentications.service import AuthenticationService
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.genarate_id import generate_id, hash_field
 from src.utils.jwt_utils import JWTHandler
 from datetime import datetime
 from fastapi import status
+from decouple import config
 
 
 class UserService:
@@ -179,3 +181,19 @@ class UserService:
                 "status_code": status.HTTP_304_NOT_MODIFIED,
                 "payload": {"jwt": jwt},
             }
+
+    @staticmethod
+    def save_user_self(
+        payload: dict,
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
+    ) -> dict:
+        thebes_answer = payload.get("thebes_answer")
+        file_repository.save_user_file(
+            file_type=FileType.SELF,
+            content=payload.get("file_or_base64"),
+            user_email=thebes_answer.get("email"),
+        )
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "files.uploaded",
+        }

@@ -14,7 +14,7 @@ class StubbyRepository(StubbyBaseRepository):
 def test_create_register_exists():
     payload = {"name": "lala", "display_name": "Lala"}
     stubby_repository = StubbyRepository(database="", collection="")
-    stubby_repository.find_one = MagicMock(return_value={'name': 'lili'})
+    stubby_repository.find_one = MagicMock(return_value={"name": "lili"})
     with pytest.raises(BadRequestError, match="common.register_exists"):
         FeatureService.create(payload=payload, feature_repository=stubby_repository)
 

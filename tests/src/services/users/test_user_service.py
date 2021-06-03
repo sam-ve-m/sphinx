@@ -295,4 +295,3 @@ def test_delete_feature_that_exists():
         payload=payload, user_repository=stubby_repository, token_handler=JWTHandler
     )
     assert result.get("status_code") == status.HTTP_200_OK
-

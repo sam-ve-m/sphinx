@@ -1,8 +1,16 @@
-from fastapi import APIRouter, Request, Response
-from src.routers.validators.base import Email, PIN, Name, View, OptionalPIN, Feature
+from fastapi import APIRouter, Request, Response, UploadFile, File
+from src.routers.validators.base import (
+    Email,
+    PIN,
+    Name,
+    View,
+    OptionalPIN,
+    Feature,
+)
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
+from typing import Union
 
 router = APIRouter()
 
@@ -94,3 +102,19 @@ def remove_features_to_user(feature: Feature, request: Request):
         "feature": dict(feature).get("feature"),
     }
     return BaseController.run(UserController.delete_feature, dict(payload), request)
+
+
+@router.post("/user/self", tags=["user"])
+async def save_user_self(
+    request: Request, file_or_base64: Union[UploadFile, str] = File(...)
+):
+    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(thebes_answer_data, Response):
+        return thebes_answer_data
+    if isinstance(file_or_base64, str) is False:
+        file_or_base64 = await file_or_base64.read()
+    payload = {
+        "thebes_answer": thebes_answer_data,
+        "file_or_base64": file_or_base64,
+    }
+    return BaseController.run(UserController.save_user_self, payload, request)

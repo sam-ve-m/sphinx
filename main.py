@@ -11,6 +11,7 @@ from src.routers.user import router as user_router
 from src.routers.feature import router as feature_router
 from src.routers.authenticate import router as authenticate_router
 from src.routers.pendencies import router as pendencies_router
+from src.routers.term import router as term_router
 from src.routers.suitability import router as suitability_router
 from src.routers.view import router as view_router
 
@@ -49,6 +50,7 @@ app.include_router(pendencies_router)
 app.include_router(authenticate_router)
 app.include_router(view_router)
 app.include_router(suitability_router)
+app.include_router(term_router)
 
 
 if __name__ == "__main__":
