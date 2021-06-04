@@ -27,7 +27,7 @@ class UserService:
                 "scope": {"view_type": None, "features": []},
                 "is_active": False,
                 "deleted": False,
-                "use_magic_link": False,
+                "use_magic_link": True,
                 "token_valid_after": datetime.now(),
             }
         )

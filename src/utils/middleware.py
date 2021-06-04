@@ -1,18 +1,18 @@
 from fastapi import Request
 from datetime import datetime
 import logging
+from decouple import config
 
 from src.repositories.user.repository import UserRepository
 from src.utils.jwt_utils import JWTHandler
 
 
 def is_public(request: Request):
-    return request.method == "POST" and request.url.path in [
-        "/user",
-        "/user/forgot_password",
-        "/login",
-        "/login/admin",
-    ]
+    return (
+        request.method == "POST"
+        and request.url.path
+        in ["/user", "/user/forgot_password", "/login", "/login/admin",]
+    ) or (request.method == "GET" and request.url.path in ["/term",])
 
 
 def need_be_admin(request: Request):
@@ -20,6 +20,7 @@ def need_be_admin(request: Request):
         request.url.path == "/user_admin"
         or request.url.path.startswith("/view")
         or request.url.path.startswith("/feature")
+        or (request.url.path == "/term" and request.method == "POST")
     )
 
 
@@ -33,7 +34,7 @@ def user_not_allowed(user_data: dict, jwt_data: dict) -> bool:
         is_token_invalid = token_valid_after > token_created_at
         return is_token_invalid or is_deleted
     except Exception as e:
-        logger = logging.getLogger("uvicorn.error")
+        logger = logging.getLogger(config("LOG_NAME"))
         logger.error(e, exc_info=True)
         return False
 

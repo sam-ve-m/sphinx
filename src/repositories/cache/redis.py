@@ -1,7 +1,6 @@
 from decouple import config
 from redis import Redis
 from typing import Optional
-from datetime import datetime
 import pickle
 
 

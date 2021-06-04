@@ -6,17 +6,29 @@ from typing import Union, Optional
 from base64 import b64decode
 
 from src.exceptions.exceptions import InternalServerError
+from src.repositories.cache.redis import RepositoryRedis
 
 
 class FileType(Enum):
     SELF = "user_self"
-    TERM = "term"
+    TERM_APPLICATION = "term_application"
+    TERM_OPEN_ACCOUNT = "term_open_account"
+    TERM_REFUSAL = "term_refusal"
+    TERM_NON_COMPLIANCE = "term_non_compliance"
+    TERM_RETAIL_LIQUID_PROVIDER = "term_retail_liquid_provider"
 
 
 class FileRepository:
 
     # This dict keys must be FileType constants
-    file_extension_by_type = {"user_self": ".jpg", "term": ".pdf"}
+    file_extension_by_type = {
+        "user_self": ".jpg",
+        "term_application": ".pdf",
+        "term_open_account": ".pdf",
+        "term_refusal": ".pdf",
+        "term_non_compliance": ".pdf",
+        "term_retail_liquid_provider": ".pdf",
+    }
 
     s3_client = boto3.client(
         "s3",
@@ -56,13 +68,7 @@ class FileRepository:
             Key=f"{path}/{file_name}{file_extension}",
         )
 
-    def save_term_file(
-        self, file_type: FileType, content: Union[str, bytes]
-    ) -> None:
-        if isinstance(file_type, FileType) is False:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(f"The file type {file_type} not exists", exc_info=True)
-            raise InternalServerError("files.error")
+    def save_term_file(self, file_type: FileType, content: Union[str, bytes]) -> None:
         path = FileRepository.resolve_term_path(file_type=file_type)
         file_name = self._get_term_name(file_type=file_type, path=path)
         file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
@@ -71,6 +77,28 @@ class FileRepository:
             Bucket=self.bucket_name,
             Key=f"{path}{file_name}{file_extension}",
         )
+
+    def get_term_file(self, file_type: FileType, cache=RepositoryRedis) -> Optional[str]:
+        ttl = 3600
+        cache_key = f'get_term_file:{file_type.value}'
+        cached_value = cache.get(key=cache_key)
+        if cached_value:
+            return cached_value
+        else:
+            path = FileRepository.resolve_term_path(file_type=file_type)
+            file_path = self._get_last_saved_file_from_folder(path=path)
+            if file_path:
+                value = self.s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={
+                        'Bucket': self.bucket_name,
+                        'Key': file_path,
+                    },
+                    ExpiresIn=ttl
+                )
+                cache.set(key=cache_key, value=value, ttl=ttl)
+                return value
+        return None
 
     @staticmethod
     def resolve_content(content: Union[str, bytes]):
@@ -95,12 +123,20 @@ class FileRepository:
     def _get_term_name(self, file_type: FileType, path: str) -> str:
         base_name = file_type.value
         objects = self.s3_client.list_objects(
-            Bucket=self.bucket_name,
-            Prefix=path,
-            Delimiter='/'
+            Bucket=self.bucket_name, Prefix=path, Delimiter="/"
         )
-        content = objects.get('Contents')
+        content = objects.get("Contents")
         version = 1
         if content:
             version = len(content) + 1
-        return f'{base_name}_v{version}'
+        return f"{base_name}_v{version}"
+
+    def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
+        objects = self.s3_client.list_objects(
+            Bucket=self.bucket_name, Prefix=path, Delimiter="/"
+        )
+        files_metadata = objects.get('Contents')
+        if files_metadata and len(files_metadata) > 0:
+            sorted(files_metadata, key=lambda item: item.get('LastModified'), reverse=True)
+            return files_metadata[0].get('Key')
+        return None

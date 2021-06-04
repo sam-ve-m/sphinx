@@ -1,14 +1,18 @@
 from __future__ import annotations
+from fastapi import Form, Query
 from pydantic import BaseModel, constr, validate_email, validator
-from typing import Optional, Union
+from typing import Optional
 from datetime import datetime
-from fastapi import File, UploadFile, Form
+from decouple import config
+import logging
+
 
 # from decouple import config
 # import logging
 
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
+from src.repositories.file.repository import FileType as RepositoryFileType
 
 
 class Email(BaseModel):
@@ -86,4 +90,28 @@ class ValueText(BaseModel):
 
 
 class FileType(BaseModel):
-    file_type: str
+    file_type: RepositoryFileType
+
+    @validator("file_type")
+    def validate_file_type(cls, file_type: str = Form(...)):
+        try:
+            enum_file_type = eval(f"RepositoryFileType.{file_type.upper()}")
+            return enum_file_type
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
+        return False
+
+
+class FileTypeQuerystring(BaseModel):
+    file_type: RepositoryFileType
+
+    @validator("file_type")
+    def validate_file_type(cls, file_type: str = Query(...)):
+        try:
+            enum_file_type = eval(f"RepositoryFileType.{file_type.upper()}")
+            return enum_file_type
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
+        return False
