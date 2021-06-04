@@ -37,3 +37,5 @@ pt:
   invalid_token: Parece que seu acesso expirou, logue novamente.
   not_allowed: Parece que você não tem eprmissão para isso.
   internal_error: Tivemos problema, por favor tente novamente.
+  suitability:
+    persisted: O suitability foi salvo com sucesso
