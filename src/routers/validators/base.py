@@ -85,6 +85,10 @@ class Weight(BaseModel):
     weight: int
 
 
+class Order(BaseModel):
+    order: int
+
+
 class ValueText(BaseModel):
     value_text: constr(min_length=1, max_length=520)
 
