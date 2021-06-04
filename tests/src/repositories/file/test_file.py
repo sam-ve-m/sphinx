@@ -26,16 +26,6 @@ def test_init() -> None:
     assert file_repository.bucket_name == name
 
 
-def test_save_user_file_error() -> None:
-    name = "XXX"
-    S3Client.list_buckets = MagicMock(return_value={"Buckets": [{"Name": name}]})
-    FileRepository.s3_client = S3Client
-    file_repository = FileRepository(bucket_name=name)
-    file_repository.validate_bucket_name = MagicMock(return_value=name)
-    with pytest.raises(InternalServerError, match="files.error"):
-        file_repository.save_user_file(file_type="", content="", user_email="")
-
-
 def test_save_user_file() -> None:
     name = "XXX"
     S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
@@ -76,7 +66,7 @@ def test_save_term_file_v1() -> None:
 
 
 class StubbyFileType(Enum):
-    TEST = 'test'
+    TEST = "test"
 
 
 class StubbyCache(Enum):
@@ -86,13 +76,15 @@ class StubbyCache(Enum):
 def test_get_term_file_none() -> None:
     name = "dtvm-test"
     S3Client.list_objects = MagicMock(return_value={})
-    S3Client.generate_presigned_url = MagicMock(return_value='link')
+    S3Client.generate_presigned_url = MagicMock(return_value="link")
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
     StubbyCache.get = MagicMock(return_value=None)
     StubbyCache.set = MagicMock(return_value=None)
-    value = file_repository.get_term_file(file_type=StubbyFileType.TEST, cache=StubbyCache)
+    value = file_repository.get_term_file(
+        file_type=StubbyFileType.TEST, cache=StubbyCache
+    )
     assert value is None
 
 
@@ -100,20 +92,26 @@ def test_get_term_file_cache() -> None:
     name = "dtvm-test"
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    StubbyCache.get = MagicMock(return_value='lili')
+    StubbyCache.get = MagicMock(return_value="lili")
     StubbyCache.set = MagicMock(return_value=None)
-    value = file_repository.get_term_file(file_type=StubbyFileType.TEST, cache=StubbyCache)
-    assert value == 'lili'
+    value = file_repository.get_term_file(
+        file_type=StubbyFileType.TEST, cache=StubbyCache
+    )
+    assert value == "lili"
 
 
 def test_get_term_file() -> None:
     name = "dtvm-test"
-    S3Client.list_objects = MagicMock(return_value={"Contents": [{"LastModified": name, "Key": 'lila'}]})
-    S3Client.generate_presigned_url = MagicMock(return_value='link')
+    S3Client.list_objects = MagicMock(
+        return_value={"Contents": [{"LastModified": name, "Key": "lila"}]}
+    )
+    S3Client.generate_presigned_url = MagicMock(return_value="link")
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
     StubbyCache.get = MagicMock(return_value=None)
     StubbyCache.set = MagicMock(return_value=None)
-    value = file_repository.get_term_file(file_type=StubbyFileType.TEST, cache=StubbyCache)
-    assert value == 'link'
+    value = file_repository.get_term_file(
+        file_type=StubbyFileType.TEST, cache=StubbyCache
+    )
+    assert value == "link"

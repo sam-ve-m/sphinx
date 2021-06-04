@@ -9,8 +9,11 @@ from src.exceptions.exceptions import InternalServerError
 from src.repositories.cache.redis import RepositoryRedis
 
 
-class FileType(Enum):
+class UserFileType(Enum):
     SELF = "user_self"
+
+
+class TermsFileType(Enum):
     TERM_APPLICATION = "term_application"
     TERM_OPEN_ACCOUNT = "term_open_account"
     TERM_REFUSAL = "term_refusal"
@@ -51,12 +54,8 @@ class FileRepository:
         return bucket_name
 
     def save_user_file(
-        self, file_type: FileType, content: Union[str, bytes], user_email: str,
+        self, file_type: UserFileType, content: Union[str, bytes], user_email: str,
     ) -> None:
-        if isinstance(file_type, FileType) is False:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(f"The file type {file_type} not exists", exc_info=True)
-            raise InternalServerError("files.error")
         path = FileRepository.resolve_user_path(
             user_email=user_email, file_type=file_type
         )
@@ -68,9 +67,12 @@ class FileRepository:
             Key=f"{path}/{file_name}{file_extension}",
         )
 
-    def save_term_file(self, file_type: FileType, content: Union[str, bytes]) -> None:
+    def save_term_file(
+        self, file_type: TermsFileType, content: Union[str, bytes]
+    ) -> None:
         path = FileRepository.resolve_term_path(file_type=file_type)
-        file_name = self._get_term_name(file_type=file_type, path=path)
+        current_version = self.get_term_version(file_type=file_type)
+        file_name = f"{file_type.value}_v{(current_version+1)}"
         file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
         self.s3_client.put_object(
             Body=FileRepository.resolve_content(content=content),
@@ -78,9 +80,11 @@ class FileRepository:
             Key=f"{path}{file_name}{file_extension}",
         )
 
-    def get_term_file(self, file_type: FileType, cache=RepositoryRedis) -> Optional[str]:
+    def get_term_file(
+        self, file_type: TermsFileType, cache=RepositoryRedis
+    ) -> Optional[str]:
         ttl = 3600
-        cache_key = f'get_term_file:{file_type.value}'
+        cache_key = f"get_term_file:{file_type.value}"
         cached_value = cache.get(key=cache_key)
         if cached_value:
             return cached_value
@@ -89,12 +93,9 @@ class FileRepository:
             file_path = self._get_last_saved_file_from_folder(path=path)
             if file_path:
                 value = self.s3_client.generate_presigned_url(
-                    'get_object',
-                    Params={
-                        'Bucket': self.bucket_name,
-                        'Key': file_path,
-                    },
-                    ExpiresIn=ttl
+                    "get_object",
+                    Params={"Bucket": self.bucket_name, "Key": file_path,},
+                    ExpiresIn=ttl,
                 )
                 cache.set(key=cache_key, value=value, ttl=ttl)
                 return value
@@ -108,35 +109,37 @@ class FileRepository:
         return content
 
     @staticmethod
-    def resolve_user_path(user_email: str, file_type: FileType) -> str:
+    def resolve_user_path(user_email: str, file_type: UserFileType) -> str:
         name, domain = user_email.split("@")
         return f"{domain}/{name[:2]}/{user_email}/{file_type.value}/"
 
     @staticmethod
-    def resolve_term_path(file_type: FileType) -> str:
+    def resolve_term_path(file_type: TermsFileType) -> str:
         return f"{file_type.value}/"
 
     @staticmethod
-    def get_file_extension_by_type(file_type: FileType) -> Optional[str]:
+    def get_file_extension_by_type(file_type) -> Optional[str]:
         return FileRepository.file_extension_by_type.get(file_type.value)
 
-    def _get_term_name(self, file_type: FileType, path: str) -> str:
-        base_name = file_type.value
+    def get_term_version(self, file_type: TermsFileType) -> int:
+        path = FileRepository.resolve_term_path(file_type=file_type)
         objects = self.s3_client.list_objects(
             Bucket=self.bucket_name, Prefix=path, Delimiter="/"
         )
         content = objects.get("Contents")
-        version = 1
+        version = 0
         if content:
-            version = len(content) + 1
-        return f"{base_name}_v{version}"
+            version = len(content)
+        return version
 
     def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
         objects = self.s3_client.list_objects(
             Bucket=self.bucket_name, Prefix=path, Delimiter="/"
         )
-        files_metadata = objects.get('Contents')
+        files_metadata = objects.get("Contents")
         if files_metadata and len(files_metadata) > 0:
-            sorted(files_metadata, key=lambda item: item.get('LastModified'), reverse=True)
-            return files_metadata[0].get('Key')
+            sorted(
+                files_metadata, key=lambda item: item.get("LastModified"), reverse=True
+            )
+            return files_metadata[0].get("Key")
         return None

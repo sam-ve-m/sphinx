@@ -6,6 +6,7 @@ from src.routers.validators.base import (
     View,
     OptionalPIN,
     Feature,
+    TermFileType,
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -118,3 +119,15 @@ async def save_user_self(
         "file_or_base64": file_or_base64,
     }
     return BaseController.run(UserController.save_user_self, payload, request)
+
+
+@router.put("/user/assign_term", tags=["user"])
+async def assign_term(
+    request: Request, file_type: TermFileType,
+):
+    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(thebes_answer_data, Response):
+        return thebes_answer_data
+    payload = file_type.dict()
+    payload.update({"thebes_answer": thebes_answer_data})
+    return BaseController.run(UserController.assign_term, payload, request)

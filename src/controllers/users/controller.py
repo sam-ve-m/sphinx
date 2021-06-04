@@ -49,3 +49,7 @@ class UserController:
     @staticmethod
     def save_user_self(payload: dict):
         return UserService.save_user_self(payload=payload)
+
+    @staticmethod
+    def assign_term(payload: dict):
+        return UserService.assign_term(payload=payload)

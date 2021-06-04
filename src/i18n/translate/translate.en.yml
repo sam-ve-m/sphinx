@@ -34,6 +34,7 @@ en:
     error: Problem to process file.
     uploaded: File uploaded.
     not_suported: This file is not suported.
+    not_exists: This file not exists.
   invalid_token: Seems that your access has expired, try to login again.
   not_allowed: Seems that your can accesse this.
   internal_error: We have some issue, please try again.

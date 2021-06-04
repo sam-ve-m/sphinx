@@ -34,6 +34,7 @@ pt:
     error: Problema para processar o arquivo.
     uploaded: Upload de arquivo feito com sucesso.
     not_suported: Arquivo não suportado.
+    not_exists: Arquivo não existente.
   invalid_token: Parece que seu acesso expirou, logue novamente.
   not_allowed: Parece que você não tem eprmissão para isso.
   internal_error: Tivemos problema, por favor tente novamente.

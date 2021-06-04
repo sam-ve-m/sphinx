@@ -12,7 +12,7 @@ import logging
 
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
-from src.repositories.file.repository import FileType as RepositoryFileType
+from src.repositories.file.repository import TermsFileType as RepositoryTermsFileType
 
 
 class Email(BaseModel):
@@ -93,29 +93,5 @@ class ValueText(BaseModel):
     value_text: constr(min_length=1, max_length=520)
 
 
-class FileType(BaseModel):
-    file_type: RepositoryFileType
-
-    @validator("file_type")
-    def validate_file_type(cls, file_type: str = Form(...)):
-        try:
-            enum_file_type = eval(f"RepositoryFileType.{file_type.upper()}")
-            return enum_file_type
-        except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-        return False
-
-
-class FileTypeQuerystring(BaseModel):
-    file_type: RepositoryFileType
-
-    @validator("file_type")
-    def validate_file_type(cls, file_type: str = Query(...)):
-        try:
-            enum_file_type = eval(f"RepositoryFileType.{file_type.upper()}")
-            return enum_file_type
-        except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-        return False
+class TermFileType(BaseModel):
+    file_type: RepositoryTermsFileType

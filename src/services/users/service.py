@@ -1,5 +1,5 @@
 from src.repositories.user.repository import UserRepository
-from src.repositories.file.repository import FileRepository, FileType
+from src.repositories.file.repository import FileRepository, UserFileType
 from src.services.authentications.service import AuthenticationService
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.genarate_id import generate_id, hash_field
@@ -29,6 +29,14 @@ class UserService:
                 "deleted": False,
                 "use_magic_link": True,
                 "token_valid_after": datetime.now(),
+                "terms": {
+                    # The terms list is available in the FileRepository
+                    "term_application": None,
+                    "term_open_account": None,
+                    "term_retail_liquid_provider": None,
+                    "term_refusal": None,
+                    "term_non_compliance": None,
+                },
             }
         )
 
@@ -189,7 +197,7 @@ class UserService:
     ) -> dict:
         thebes_answer = payload.get("thebes_answer")
         file_repository.save_user_file(
-            file_type=FileType.SELF,
+            file_type=UserFileType.SELF,
             content=payload.get("file_or_base64"),
             user_email=thebes_answer.get("email"),
         )
@@ -197,3 +205,31 @@ class UserService:
             "status_code": status.HTTP_200_OK,
             "message_key": "files.uploaded",
         }
+
+    @staticmethod
+    def assign_term(
+        payload: dict,
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
+        user_repository=UserRepository(),
+        token_handler=JWTHandler,
+    ) -> dict:
+        thebes_answer = payload.get("thebes_answer")
+        old = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if old:
+            file_type = payload.get("file_type")
+            new = dict(old)
+            version = file_repository.get_term_version(file_type=file_type)
+            if version:
+                new["terms"][file_type.value] = {
+                    "version": version,
+                    "date": datetime.now(),
+                    "id_deprecated": False,
+                }
+                if user_repository.update_one(old=old, new=new):
+                    jwt = token_handler.generate_token(payload=new, ttl=525600)
+                    return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+                else:
+                    raise InternalServerError("common.process_issue")
+            else:
+                raise BadRequestError("files.not_exists")
+        raise BadRequestError("common.register_not_exists")

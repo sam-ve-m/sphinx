@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, Response
 from datetime import datetime
 import logging
 from decouple import config
@@ -42,9 +42,13 @@ def user_not_allowed(user_data: dict, jwt_data: dict) -> bool:
 def validate_user_and_admin_routes(request: Request):
     user_repository = UserRepository()
     jwt_data = JWTHandler.get_payload_from_request(request=request)
+    if type(jwt_data) != dict:
+        return "not_allowed"
     user_data = user_repository.find_one({"email": jwt_data["email"]}, ttl=60)
     if user_not_allowed(user_data=user_data, jwt_data=jwt_data):
         return "invalid_token"
-    if need_be_admin(request=request) and user_data.get("is_admin") is False:
+    if need_be_admin(request=request) and (
+        user_data.get("is_admin") is None or user_data.get("is_admin") is False
+    ):
         return "not_allowed"
     return None
