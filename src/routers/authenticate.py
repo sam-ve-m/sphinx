@@ -22,11 +22,11 @@ def login(payload: Login, request: Request):
 
 @router.get("/thebes_gate", tags=["authenticate"])
 def answer(request: Request):
-    thebes_answer_data = JWTHandler.get_payload_from_request(request=request)
-    if isinstance(thebes_answer_data, Response):
-        return thebes_answer_data
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
     return BaseController.run(
-        AuthenticationController.answer, thebes_answer_data, request
+        AuthenticationController.answer, jwt_data_or_error_response, request
     )
 
 

@@ -1,4 +1,3 @@
-
 from fastapi import status
 from datetime import datetime
 
@@ -8,15 +7,8 @@ from src.repositories.suitability.repository import SuitabilityRepository
 
 class SuitabilityService:
     @staticmethod
-    def persist(
-            payload: dict,
-            suitability_repository=SuitabilityRepository()
-    ) -> dict:
-        payload.update(
-            {
-                "date": str(datetime.utcnow())
-            }
-        )
+    def persist(payload: dict, suitability_repository=SuitabilityRepository()) -> dict:
+        payload.update({"date": str(datetime.utcnow())})
 
         if suitability_repository.insert(payload):
             return {

@@ -21,4 +21,6 @@ class Suitability(Version):
 
 @router.post("/suitability/quiz", tags=["suitability"])
 async def persist_quiz_suitability(suitability: Suitability, request: Request):
-    return BaseController.run(SuitabilityController.persist, suitability.dict(), request)
+    return BaseController.run(
+        SuitabilityController.persist, suitability.dict(), request
+    )

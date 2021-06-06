@@ -219,7 +219,7 @@ class UserService:
             file_type = payload.get("file_type")
             new = dict(old)
             version = file_repository.get_term_version(file_type=file_type)
-            if new.get('terms') is None:
+            if new.get("terms") is None:
                 new["terms"] = dict()
             new["terms"][file_type.value] = {
                 "version": version,

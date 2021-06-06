@@ -116,40 +116,35 @@ def test_get_term_file() -> None:
 def test_get_term_version_file_not_exists() -> None:
     name = "dtvm-test"
     S3Client.list_objects = MagicMock(return_value={})
-    S3Client.list_objects = MagicMock(return_value={'Contents': []})
+    S3Client.list_objects = MagicMock(return_value={"Contents": []})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
     with pytest.raises(BadRequestError, match="files.not_exists"):
-        file_repository.get_term_version(
-            file_type=TermsFileType.TERM_REFUSAL
-        )
+        file_repository.get_term_version(file_type=TermsFileType.TERM_REFUSAL)
 
 
 def test_get_term_version() -> None:
     name = "dtvm-test"
     S3Client.list_objects = MagicMock(return_value={})
-    S3Client.list_objects = MagicMock(return_value={'Contents': [1,2,3]})
+    S3Client.list_objects = MagicMock(return_value={"Contents": [1, 2, 3]})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
 
-    value = file_repository.get_term_version(
-        file_type=TermsFileType.TERM_REFUSAL
-    )
+    value = file_repository.get_term_version(file_type=TermsFileType.TERM_REFUSAL)
     assert value == 3
 
 
 def test_get_term_version_is_new_version() -> None:
     name = "dtvm-test"
     S3Client.list_objects = MagicMock(return_value={})
-    S3Client.list_objects = MagicMock(return_value={'Contents': [1,2,3]})
+    S3Client.list_objects = MagicMock(return_value={"Contents": [1, 2, 3]})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
 
     value = file_repository.get_term_version(
-        file_type=TermsFileType.TERM_REFUSAL,
-        is_new_version=True
+        file_type=TermsFileType.TERM_REFUSAL, is_new_version=True
     )
     assert value == 4

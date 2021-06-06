@@ -1,10 +1,6 @@
-# NATIVE LIBRARIES
-import json
-
 # OUTSIDE LIBRARIES
 import uvicorn
 from fastapi import FastAPI, Request, status, Response
-
 
 # ROUTERS
 from src.routers.user import router as user_router
@@ -15,10 +11,9 @@ from src.routers.term import router as term_router
 from src.routers.suitability import router as suitability_router
 from src.routers.view import router as view_router
 
-# UTILS
-from src.i18n.i18n_resolver import i18nResolver as i18n
-from src.utils.language_identifier import get_language_from_request
-from src.utils.middleware import is_public, validate_user_and_admin_routes
+# SPHINX
+from src.utils.middleware import is_public, is_user_not_allowed
+from src.utils.jwt_utils import JWTHandler
 
 app = FastAPI()
 
@@ -27,19 +22,16 @@ app = FastAPI()
 async def process_thebes_answer(request: Request, call_next):
     is_not_public = is_public(request=request) is False
     if is_not_public:
-        user_not_allowed = validate_user_and_admin_routes(request=request)
-        if user_not_allowed:
-            return Response(
-                content=json.dumps(
-                    {
-                        "message": i18n.get_translate(
-                            "invalid_token",
-                            locale=get_language_from_request(request=request),
-                        )
-                    }
-                ),
-                status_code=status.HTTP_401_UNAUTHORIZED,
-            )
+        jwt_data_or_error_response = JWTHandler.get_payload_from_request(
+            request=request
+        )
+        if type(jwt_data_or_error_response) == Response:
+            return jwt_data_or_error_response
+        response = is_user_not_allowed(
+            request=request, jwt_data=jwt_data_or_error_response
+        )
+        if type(response) == Response:
+            return response
     return await call_next(request)
 
 
