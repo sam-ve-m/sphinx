@@ -219,17 +219,16 @@ class UserService:
             file_type = payload.get("file_type")
             new = dict(old)
             version = file_repository.get_term_version(file_type=file_type)
-            if version:
-                new["terms"][file_type.value] = {
-                    "version": version,
-                    "date": datetime.now(),
-                    "id_deprecated": False,
-                }
-                if user_repository.update_one(old=old, new=new):
-                    jwt = token_handler.generate_token(payload=new, ttl=525600)
-                    return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-                else:
-                    raise InternalServerError("common.process_issue")
+            if new.get('terms') is None:
+                new["terms"] = dict()
+            new["terms"][file_type.value] = {
+                "version": version,
+                "date": datetime.now(),
+                "id_deprecated": False,
+            }
+            if user_repository.update_one(old=old, new=new):
+                jwt = token_handler.generate_token(payload=new, ttl=525600)
+                return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
             else:
-                raise BadRequestError("files.not_exists")
+                raise InternalServerError("common.process_issue")
         raise BadRequestError("common.register_not_exists")

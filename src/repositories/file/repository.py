@@ -5,7 +5,7 @@ import logging
 from typing import Union, Optional
 from base64 import b64decode
 
-from src.exceptions.exceptions import InternalServerError
+from src.exceptions.exceptions import InternalServerError, BadRequestError
 from src.repositories.cache.redis import RepositoryRedis
 
 
@@ -71,8 +71,8 @@ class FileRepository:
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
         path = FileRepository.resolve_term_path(file_type=file_type)
-        current_version = self.get_term_version(file_type=file_type)
-        file_name = f"{file_type.value}_v{(current_version+1)}"
+        version = self.get_term_version(file_type=file_type, is_new_version=True)
+        file_name = f"{file_type.value}_v{version}"
         file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
         self.s3_client.put_object(
             Body=FileRepository.resolve_content(content=content),
@@ -121,16 +121,20 @@ class FileRepository:
     def get_file_extension_by_type(file_type) -> Optional[str]:
         return FileRepository.file_extension_by_type.get(file_type.value)
 
-    def get_term_version(self, file_type: TermsFileType) -> int:
+    def get_term_version(self, file_type: TermsFileType, is_new_version=False) -> int:
         path = FileRepository.resolve_term_path(file_type=file_type)
         objects = self.s3_client.list_objects(
             Bucket=self.bucket_name, Prefix=path, Delimiter="/"
         )
-        content = objects.get("Contents")
         version = 0
+        content = objects.get("Contents")
         if content:
             version = len(content)
-        return version
+        if is_new_version:
+            return version + 1
+        if version != 0:
+            return version
+        raise BadRequestError("files.not_exists")
 
     def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
         objects = self.s3_client.list_objects(
