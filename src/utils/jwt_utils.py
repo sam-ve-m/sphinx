@@ -54,17 +54,27 @@ class JWTHandler:
 
     @staticmethod
     def filter_payload_to_jwt(payload: dict):
+        JWTHandler.convert_datetime_field_in_str(payload=payload)
         new_payload = {
             "name": payload.get("name"),
             "email": payload.get("email"),
             "scope": payload.get("scope"),
             "is_active": payload.get("is_active"),
-            "created_at": str(payload.get("created_at")),
+            "created_at": payload.get("created_at"),
             "deleted": payload.get("deleted"),
+            "terms": payload.get("terms"),
         }
         if payload.get("is_admin"):
             new_payload.update({"is_admin": payload.get("is_admin")})
         return new_payload
+
+    @staticmethod
+    def convert_datetime_field_in_str(payload: dict):
+        for key in payload:
+            if isinstance(payload[key], dict):
+                JWTHandler.convert_datetime_field_in_str(payload[key])
+            elif isinstance(payload[key], datetime):
+                payload[key] = str(payload[key])
 
     @staticmethod
     def get_payload_from_request(request: Request):

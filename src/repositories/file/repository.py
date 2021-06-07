@@ -67,7 +67,9 @@ class FileRepository(IFile):
     ) -> None:
         path = FileRepository.resolve_term_path(file_type=file_type)
         version = self.get_term_version(file_type=file_type, is_new_version=True)
-        file_name = f"{file_type.value}_v{version}"
+        file_name = FileRepository.generate_term_file_name(
+            name=file_type.value, version=version
+        )
         file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
         self.s3_client.put_object(
             Body=FileRepository.resolve_content(content=content),
@@ -76,9 +78,8 @@ class FileRepository(IFile):
         )
 
     def get_term_file(
-        self, file_type: TermsFileType, cache=RepositoryRedis
+        self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 3600
     ) -> Optional[str]:
-        ttl = 3600
         cache_key = f"get_term_file:{file_type.value}"
         cached_value = cache.get(key=cache_key)
         if cached_value:
@@ -96,6 +97,36 @@ class FileRepository(IFile):
                 return value
         return None
 
+    def get_term_file_by_version(
+        self, file_type: TermsFileType, version: int, ttl: int = 3600
+    ) -> str:
+        file_name = FileRepository.generate_term_file_name(
+            name=file_type.value, version=version
+        )
+        path = FileRepository.resolve_term_path(file_type=file_type)
+        file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
+        value = self.s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": self.bucket_name,
+                "Key": f"{path}{file_name}{file_extension}",
+            },
+            ExpiresIn=ttl,
+        )
+        return value
+
+    def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
+        objects = self.s3_client.list_objects(
+            Bucket=self.bucket_name, Prefix=path, Delimiter="/"
+        )
+        files_metadata = objects.get("Contents")
+        if files_metadata and len(files_metadata) > 0:
+            sorted(
+                files_metadata, key=lambda item: item.get("LastModified"), reverse=True
+            )
+            return files_metadata[0].get("Key")
+        return None
+
     @staticmethod
     def resolve_content(content: Union[str, bytes]):
         if type(content) == str:
@@ -109,12 +140,16 @@ class FileRepository(IFile):
         return f"{domain}/{name[:2]}/{user_email}/{file_type.value}/"
 
     @staticmethod
-    def resolve_term_path(file_type: TermsFileType) -> str:
-        return f"{file_type.value}/"
-
-    @staticmethod
     def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
         return FileRepository.file_extension_by_type.get(file_type.value)
+
+    @staticmethod
+    def generate_term_file_name(name: str, version: int):
+        return f"{name}_v{version}"
+
+    @staticmethod
+    def resolve_term_path(file_type: TermsFileType) -> str:
+        return f"{file_type.value}/"
 
     def get_term_version(self, file_type: TermsFileType, is_new_version=False) -> int:
         path = FileRepository.resolve_term_path(file_type=file_type)
@@ -130,15 +165,3 @@ class FileRepository(IFile):
         if version != 0:
             return version
         raise BadRequestError("files.not_exists")
-
-    def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
-        objects = self.s3_client.list_objects(
-            Bucket=self.bucket_name, Prefix=path, Delimiter="/"
-        )
-        files_metadata = objects.get("Contents")
-        if files_metadata and len(files_metadata) > 0:
-            sorted(
-                files_metadata, key=lambda item: item.get("LastModified"), reverse=True
-            )
-            return files_metadata[0].get("Key")
-        return None

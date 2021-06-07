@@ -1,4 +1,10 @@
-from fastapi import APIRouter, Request, Response, UploadFile, File
+# STANDARD LIBS
+from typing import Union
+
+# OUTSIDE LIBRARIES
+from fastapi import APIRouter, Request, Response, UploadFile, File, Depends
+
+# SPHINX
 from src.routers.validators.base import (
     Email,
     PIN,
@@ -6,12 +12,11 @@ from src.routers.validators.base import (
     View,
     OptionalPIN,
     Feature,
-    TermFileType,
+    TermFile,
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
-from typing import Union
 
 router = APIRouter()
 
@@ -125,13 +130,25 @@ async def save_user_self(
     return BaseController.run(UserController.save_user_self, payload, request)
 
 
-@router.put("/user/assign_term", tags=["user"])
-async def assign_term(
-    request: Request, file_type: TermFileType,
+@router.put("/user/sign_term", tags=["user"])
+async def sign_term(
+    request: Request, file_type: TermFile,
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = file_type.dict()
     payload.update({"thebes_answer": jwt_data_or_error_response})
-    return BaseController.run(UserController.assign_term, payload, request)
+    return BaseController.run(UserController.sign_term, payload, request)
+
+
+@router.get("/user/signed_term", tags=["user"])
+async def get_assigned_term(
+    request: Request, file_type: TermFile = Depends(TermFile),
+):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = file_type.dict()
+    payload.update({"thebes_answer": jwt_data_or_error_response})
+    return BaseController.run(UserController.get_signed_term, payload, request)

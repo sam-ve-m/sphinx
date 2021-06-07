@@ -1,18 +1,18 @@
-from fastapi import APIRouter, Request, Depends, UploadFile, File, Query
+from fastapi import APIRouter, Request, Depends, UploadFile, File, Form
 from typing import Union
 
 from src.controllers.base_controller import BaseController
 from src.controllers.terms.controller import TermsController
-from src.routers.validators.base import TermFileType
+from src.routers.validators.base import TermFile
 
 
 router = APIRouter()
 
 
 @router.post("/term", tags=["term"])
-async def save_user_self(
+async def save_term(
     request: Request,
-    file_type: TermFileType = Depends(TermFileType),
+    file_type: TermFile = Depends(TermFile.as_form),
     file_or_base64: Union[UploadFile, str] = File(...),
 ):
     if isinstance(file_or_base64, str) is False:
@@ -25,7 +25,5 @@ async def save_user_self(
 
 
 @router.get("/term", tags=["term"])
-async def get_term_file(
-    request: Request, file_type: TermFileType = Depends(TermFileType)
-):
+async def get_term_file(request: Request, file_type: TermFile = Depends(TermFile)):
     return BaseController.run(TermsController.get_term, file_type.dict(), request)

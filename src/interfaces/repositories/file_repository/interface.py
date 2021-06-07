@@ -11,11 +11,10 @@ from src.repositories.file.enum.user_file import UserFileType
 
 
 class IFile(ABC):
-
     @staticmethod
     @abstractmethod
     def validate_bucket_name(bucket_name: str) -> str:
-       pass
+        pass
 
     @abstractmethod
     def save_user_file(
@@ -27,7 +26,7 @@ class IFile(ABC):
     def save_term_file(
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
-       pass
+        pass
 
     @abstractmethod
     def get_term_file(
@@ -61,4 +60,4 @@ class IFile(ABC):
 
     @abstractmethod
     def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
-      pass
+        pass

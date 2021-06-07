@@ -9,10 +9,13 @@ from src.repositories.file.repository import FileRepository
 
 
 class IUser(ABC):
-
     @staticmethod
     @abstractmethod
-    def create(payload: dict, user_repository: UserRepository,authentication_service:AuthenticationService) -> dict:
+    def create(
+        payload: dict,
+        user_repository: UserRepository,
+        authentication_service: AuthenticationService,
+    ) -> dict:
         pass
 
     @staticmethod
@@ -22,55 +25,70 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def update(payload: dict, user_repository:UserRepository) -> dict:
+    def update(payload: dict, user_repository: UserRepository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def delete(payload: dict, user_repository:UserRepository) -> dict:
+    def delete(payload: dict, user_repository: UserRepository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def create_admin(payload: dict, user_repository:UserRepository) -> dict:
+    def create_admin(payload: dict, user_repository: UserRepository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def change_password(payload: dict, user_repository:UserRepository) -> dict:
+    def change_password(payload: dict, user_repository: UserRepository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def forgot_password(payload: dict, user_repository:UserRepository, authentication_service:AuthenticationService) -> dict:
+    def forgot_password(
+        payload: dict,
+        user_repository: UserRepository,
+        authentication_service: AuthenticationService,
+    ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def change_view(payload: dict, user_repository:UserRepository, token_handler:JWTHandler) -> dict:
+    def change_view(
+        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+    ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def logout_all(payload: dict, user_repository:UserRepository) -> dict:
+    def logout_all(payload: dict, user_repository: UserRepository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def add_feature(payload: dict, user_repository:UserRepository, token_handler:JWTHandler) -> dict:
+    def add_feature(
+        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+    ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def delete_feature(payload: dict, user_repository:UserRepository, token_handler:JWTHandler) -> dict:
+    def delete_feature(
+        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+    ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def save_user_self(payload: dict, file_repository:FileRepository) -> dict:
+    def save_user_self(payload: dict, file_repository: FileRepository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def assign_term(payload: dict, user_repository:UserRepository, token_handler:JWTHandler, file_repository:FileRepository) -> dict:
+    def assign_term(
+        payload: dict,
+        user_repository: UserRepository,
+        token_handler: JWTHandler,
+        file_repository: FileRepository,
+    ) -> dict:
         pass

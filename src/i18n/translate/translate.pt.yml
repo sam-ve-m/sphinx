@@ -18,6 +18,8 @@ pt:
     need_pin: Informe seu PIN.
     not_admin: Você não é adminitrador.
     all_logged_out: Você deslogou de todos os dispositivos logados.
+    files:
+      term_not_signed: Você ainda não assinou estes termos.
   email:
     login: Enviamos um email para a conta cadastrada, para concluir o login
     forgot_password: Enviamos um email para efetura login e mudança do PIN

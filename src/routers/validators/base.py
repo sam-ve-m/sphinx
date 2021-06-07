@@ -1,4 +1,5 @@
 from __future__ import annotations
+from fastapi import Form
 from pydantic import BaseModel, constr, validate_email, validator
 from typing import Optional
 from datetime import datetime
@@ -6,7 +7,7 @@ from datetime import datetime
 
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
-from src.repositories.file.repository import TermsFileType as RepositoryTermsFileType
+from src.repositories.file.enum.term_file import TermsFileType
 
 
 class Email(BaseModel):
@@ -87,5 +88,9 @@ class ValueText(BaseModel):
     value_text: constr(min_length=1, max_length=520)
 
 
-class TermFileType(BaseModel):
-    file_type: RepositoryTermsFileType
+class TermFile(BaseModel):
+    file_type: TermsFileType
+
+    @classmethod
+    def as_form(cls, file_type: str = Form(...)) -> TermFile:
+        return cls(file_type=file_type)

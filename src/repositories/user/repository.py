@@ -1,4 +1,3 @@
-
 # OUTSIDE LIBRARIES
 from decouple import config
 

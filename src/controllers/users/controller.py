@@ -51,5 +51,9 @@ class UserController:
         return UserService.save_user_self(payload=payload)
 
     @staticmethod
-    def assign_term(payload: dict):
-        return UserService.assign_term(payload=payload)
+    def sign_term(payload: dict):
+        return UserService.sign_term(payload=payload)
+
+    @staticmethod
+    def get_signed_term(payload: dict):
+        return UserService.get_signed_term(payload=payload)

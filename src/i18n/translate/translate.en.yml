@@ -18,6 +18,8 @@ en:
     need_pin: Inform your PIN code.
     not_admin: You are not administrator.
     all_logged_out: You disconnect all your allowed devices.
+    files:
+      term_not_signed: You did not sign this term yet.
   email:
     login: We sent an email to the registered account, to conclude login
     forgot_password: We sent an email to login and change your PIN

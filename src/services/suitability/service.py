@@ -11,7 +11,6 @@ from src.interfaces.services.suitability.interface import ISuitability
 
 
 class SuitabilityService(ISuitability):
-
     @staticmethod
     def persist(payload: dict, suitability_repository=SuitabilityRepository()) -> dict:
         payload.update({"date": str(datetime.utcnow())})

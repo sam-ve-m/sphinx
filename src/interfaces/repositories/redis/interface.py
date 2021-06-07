@@ -4,11 +4,10 @@ from typing import Optional
 
 
 class IRedis(ABC):
-
     @staticmethod
     @abstractmethod
     def set(key: str, value: dict, redis: any, ttl: int = 0) -> bool:
-       pass
+        pass
 
     @staticmethod
     @abstractmethod
@@ -18,7 +17,7 @@ class IRedis(ABC):
     @staticmethod
     @abstractmethod
     def get_keys(pattern: str, redis: any) -> Optional[list]:
-       pass
+        pass
 
     @staticmethod
     @abstractmethod

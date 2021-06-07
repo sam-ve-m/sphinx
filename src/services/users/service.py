@@ -1,5 +1,6 @@
 # STANDARD LIBS
 from datetime import datetime
+import logging
 
 # OUTSIDE LIBRARIES
 from fastapi import status
@@ -214,7 +215,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def assign_term(
+    def sign_term(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
         user_repository=UserRepository(),
@@ -239,3 +240,28 @@ class UserService(IUser):
             else:
                 raise InternalServerError("common.process_issue")
         raise BadRequestError("common.register_not_exists")
+
+    @staticmethod
+    def get_signed_term(
+        payload: dict,
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
+    ) -> dict:
+        file_type = payload.get("file_type")
+        try:
+            version = (
+                payload.get("thebes_answer")
+                .get("terms")
+                .get(file_type.value)
+                .get("version")
+            )
+        except:
+            raise BadRequestError("user.files.term_not_signed")
+        try:
+            link = file_repository.get_term_file_by_version(
+                file_type=file_type, version=version
+            )
+            return {"status_code": status.HTTP_200_OK, "payload": {"link": link}}
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
+            raise InternalServerError("common.process_issue")

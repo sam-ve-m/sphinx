@@ -281,26 +281,26 @@ def test_save_user_self():
     assert response.get("message_key") == "files.uploaded"
 
 
-def test_assign_term_register_not_exists():
+def test_sign_term_register_not_exists():
     stubby_user_repository = StubbyRepository(database="", collection="")
     stubby_user_repository.find_one = MagicMock(return_value=None)
     stubby_file_repository = StubbyRepository(database="", collection="")
     with pytest.raises(BadRequestError, match="common.register_not_exists"):
-        UserService.assign_term(
+        UserService.sign_term(
             payload={"thebes_answer": {"email": "lala"}},
             file_repository=stubby_file_repository,
             user_repository=stubby_user_repository,
         )
 
 
-def test_assign_term_process_issue():
+def test_sign_term_process_issue():
     stubby_user_repository = StubbyRepository(database="", collection="")
     stubby_user_repository.find_one = MagicMock(return_value={"email": "lala"})
     stubby_user_repository.update_one = MagicMock(return_value=False)
     stubby_file_repository = StubbyRepository(database="", collection="")
     stubby_file_repository.get_term_version = MagicMock(return_value=1)
     with pytest.raises(InternalServerError, match="common.process_issu"):
-        UserService.assign_term(
+        UserService.sign_term(
             payload={
                 "thebes_answer": {"email": "lala"},
                 "file_type": TermsFileType.TERM_REFUSAL,
@@ -310,13 +310,13 @@ def test_assign_term_process_issue():
         )
 
 
-def test_assign_term():
+def test_sign_term():
     stubby_user_repository = StubbyRepository(database="", collection="")
     stubby_user_repository.find_one = MagicMock(return_value={"email": "lala"})
     stubby_user_repository.update_one = MagicMock(return_value=True)
     stubby_file_repository = StubbyRepository(database="", collection="")
     stubby_file_repository.get_term_version = MagicMock(return_value=1)
-    response = UserService.assign_term(
+    response = UserService.sign_term(
         payload={
             "thebes_answer": {"email": "lala"},
             "file_type": TermsFileType.TERM_REFUSAL,
@@ -326,3 +326,41 @@ def test_assign_term():
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert type(response.get("payload").get("jwt")) == str
+
+
+def test_get_signed_term_not_signed():
+    payload = {"file_type": TermsFileType.TERM_REFUSAL}
+    stubby_user_repository = StubbyRepository(database="", collection="")
+    with pytest.raises(BadRequestError, match="user.files.term_not_signed"):
+        UserService.get_signed_term(
+            payload=payload, file_repository=stubby_user_repository
+        )
+
+
+def test_get_signed_term_not_signed():
+    payload = {
+        "file_type": TermsFileType.TERM_REFUSAL,
+        "thebes_answer": {"terms": {"term_refusal": {"version": 1}}},
+    }
+    stubby_user_repository = StubbyRepository(database="", collection="")
+    stubby_user_repository.get_term_file_by_version = MagicMock(return_value="lala")
+    response = UserService.get_signed_term(
+        payload=payload, file_repository=stubby_user_repository
+    )
+    assert response.get("status_code") == status.HTTP_200_OK
+    assert type(response.get("payload").get("link")) == str
+
+
+def test_get_signed_term_error():
+    payload = {
+        "file_type": TermsFileType.TERM_REFUSAL,
+        "thebes_answer": {"terms": {"term_refusal": {"version": 1}}},
+    }
+    stubby_user_repository = StubbyRepository(database="", collection="")
+    stubby_user_repository.get_term_file_by_version = MagicMock(
+        side_effect=Exception(";)")
+    )
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        UserService.get_signed_term(
+            payload=payload, file_repository=stubby_user_repository
+        )
