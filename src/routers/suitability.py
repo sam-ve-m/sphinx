@@ -19,8 +19,17 @@ class Suitability(Version):
     questions: List[Question]
 
 
-@router.post("/suitabilities/quiz", tags=["suitabilities"])
-async def persist_quiz_suitability(suitability: Suitability, request: Request):
+@router.post("/suitability/quiz", tags=["suitability"])
+async def create_quiz_suitability(suitability: Suitability, request: Request):
     return BaseController.run(
-        SuitabilityController.persist, suitability.dict(), request
+        SuitabilityController.create_quiz, suitability.dict(), request
     )
+
+
+@router.post("/suitability/profile", tags=["suitability"])
+async def crate_user_profile_suitability(suitability: Suitability, request: Request):
+    return BaseController.run(
+        SuitabilityController.create_profile, suitability.dict(), request
+    )
+
+

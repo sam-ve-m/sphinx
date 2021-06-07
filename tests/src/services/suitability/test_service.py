@@ -32,7 +32,7 @@ def test_insert_error_in_suitability_db():
     stubby_repository = StubbyRepository(database="", collection="")
     stubby_repository.insert = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
-        SuitabilityService.persist(
+        SuitabilityService.create_quiz(
             payload=basic_payload, suitability_repository=stubby_repository
         )
 
@@ -40,7 +40,7 @@ def test_insert_error_in_suitability_db():
 def test_insert_in_suitability_db():
     stubby_repository = StubbyRepository(database="", collection="")
     stubby_repository.insert = MagicMock(return_value=True)
-    response = SuitabilityService.persist(
+    response = SuitabilityService.create_quiz(
         payload=basic_payload, suitability_repository=stubby_repository
     )
     assert response.get("status_code") == status.HTTP_201_CREATED

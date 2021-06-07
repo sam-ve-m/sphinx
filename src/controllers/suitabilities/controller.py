@@ -3,5 +3,9 @@ from src.services.suitability.service import SuitabilityService
 
 class SuitabilityController:
     @staticmethod
-    def persist(payload: dict):
-        return SuitabilityService.persist(payload=payload)
+    def create_quiz(payload: dict):
+        return SuitabilityService.create_quiz(payload=payload)
+
+    @staticmethod
+    def create_profile(payload: dict):
+        return SuitabilityService.create_profile(payload=payload)

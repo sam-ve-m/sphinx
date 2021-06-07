@@ -36,9 +36,9 @@ async def process_thebes_answer(request: Request, call_next):
 app.include_router(user_router)
 app.include_router(feature_router)
 app.include_router(authenticate_router)
-app.include_router(pendencies_router)
-app.include_router(authenticate_router)
 app.include_router(view_router)
+app.include_router(authenticate_router)
+app.include_router(pendencies_router)
 app.include_router(suitability_router)
 app.include_router(term_router)
 
