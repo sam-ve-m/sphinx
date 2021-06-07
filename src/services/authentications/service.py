@@ -5,6 +5,7 @@ from decouple import config
 # SPHINX
 from src.utils.email import HtmlModifier
 from src.repositories.user.repository import UserRepository
+from src.repositories.file.repository import FileRepository
 from src.controllers.jwts.controller import JwtController
 from src.utils.jwt_utils import JWTHandler
 from src.exceptions.exceptions import (
@@ -103,3 +104,19 @@ class AuthenticationService(IAuthentication):
             "status_code": status.HTTP_200_OK,
             "message_key": "user.forgot_password",
         }
+
+    @staticmethod
+    def hall(
+        payload: dict,
+        user_repository=UserRepository(),
+        token_handler=JWTHandler
+        # file_repository=FileRepository(config("AWS_BUCKET_TERMS"))
+    ) -> dict:
+        old = user_repository.find_one({"_id": payload.get("email")})
+        if old is None:
+            raise BadRequestError("common.register_not_exists")
+        new = dict(old)
+        # CALL BUILDER
+        # terms_versions = file_repository.get_terms_version()
+        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}

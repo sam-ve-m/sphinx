@@ -13,3 +13,7 @@ class AuthenticationController:
     @staticmethod
     def forgot_password(payload: dict):
         return AuthenticationService.forgot_password(payload=payload)
+
+    @staticmethod
+    def hall(payload: dict):
+        return AuthenticationService.hall(payload=payload)
