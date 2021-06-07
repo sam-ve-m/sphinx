@@ -34,7 +34,7 @@ class Email(BaseModel):
 class View(BaseModel):
     view: constr(min_length=1)
 
-    @validator("view")
+    @validator("views")
     def validate_view(cls, e):
         view_repository = ViewRepository()
         if view_repository.find_one({"_id": e}, ttl=60):

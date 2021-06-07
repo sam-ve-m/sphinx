@@ -6,7 +6,7 @@ import logging
 
 from src.repositories.cache.redis import RepositoryRedis
 from src.utils.genarate_id import hash_field
-from src.interfaces.repository.interface import IRepository
+from src.interfaces.repositories.base_repository.interface import IRepository
 
 
 class BaseRepository(IRepository):

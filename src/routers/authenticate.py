@@ -15,12 +15,12 @@ class Login(Email, OptionalPIN):
     pass
 
 
-@router.post("/login", tags=["authenticate"])
+@router.post("/login", tags=["authentication"])
 def login(payload: Login, request: Request):
     return BaseController.run(AuthenticationController.login, dict(payload), request)
 
 
-@router.get("/thebes_gate", tags=["authenticate"])
+@router.get("/thebes_gate", tags=["authentication"])
 def answer(request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -30,7 +30,7 @@ def answer(request: Request):
     )
 
 
-@router.put("/forgot_password", tags=["authenticate"])
+@router.put("/forgot_password", tags=["authentication"])
 def forgot_password(payload: Login, request: Request):
     return BaseController.run(
         AuthenticationController.forgot_password, dict(payload), request

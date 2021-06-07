@@ -25,7 +25,7 @@ def is_public(request: Request) -> bool:
 def need_be_admin(request: Request) -> bool:
     return (
         request.url.path == "/user_admin"
-        or request.url.path.startswith("/view")
+        or request.url.path.startswith("/views")
         or request.url.path.startswith("/feature")
         or (request.url.path == "/term" and request.method == "POST")
     )

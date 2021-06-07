@@ -3,9 +3,9 @@ from fastapi import status
 import logging
 
 from src.repositories.file.repository import FileRepository
+from src.interfaces.services.term.interface import ITerm
 
-
-class TermsService:
+class TermsService(ITerm):
     @staticmethod
     def save_term(
         payload: dict,

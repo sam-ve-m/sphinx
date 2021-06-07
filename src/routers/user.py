@@ -73,14 +73,14 @@ def logout_all(request: Request):
     )
 
 
-@router.put("/user/view", tags=["user"])
+@router.put("/user/views", tags=["user"])
 def change_user_view(view: View, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
         "thebes_answer": jwt_data_or_error_response,
-        "new_view": dict(view).get("view"),
+        "new_view": dict(view).get("views"),
     }
     return BaseController.run(UserController.change_view, payload, request)
 

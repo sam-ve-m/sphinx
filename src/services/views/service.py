@@ -3,9 +3,9 @@ from src.repositories.feature.repository import FeatureRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.genarate_id import generate_id, generate_list
 from fastapi import status
+from src.interfaces.services.view.interface import IView
 
-
-class ViewService:
+class ViewService(IView):
     @staticmethod
     def create(payload: dict, view_repository=ViewRepository()) -> dict:
         payload = generate_id("name", payload)

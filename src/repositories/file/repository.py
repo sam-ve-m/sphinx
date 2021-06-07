@@ -7,7 +7,7 @@ from base64 import b64decode
 
 from src.exceptions.exceptions import InternalServerError, BadRequestError
 from src.repositories.cache.redis import RepositoryRedis
-
+from src.interfaces.repositories.file_repository.interface import IFile
 
 class UserFileType(Enum):
     SELF = "user_self"
@@ -21,7 +21,7 @@ class TermsFileType(Enum):
     TERM_RETAIL_LIQUID_PROVIDER = "term_retail_liquid_provider"
 
 
-class FileRepository:
+class FileRepository(IFile):
 
     # This dict keys must be FileType constants
     file_extension_by_type = {

@@ -2,9 +2,10 @@ from decouple import config
 from redis import Redis
 from typing import Optional
 import pickle
+from src.interfaces.repositories.redis.interface import IRedis
 
 
-class RepositoryRedis:
+class RepositoryRedis(IRedis):
 
     # Behind the scenes, redis-py uses a connection pool to manage connections to a Redis server.
     # https://pypi.org/project/redis/#connection-pools

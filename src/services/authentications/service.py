@@ -12,9 +12,10 @@ from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
 from src.utils.genarate_id import hash_field
 from decouple import config
+from src.interfaces.services.authentication.interface import IAuthentication
 
 
-class AuthenticationService:
+class AuthenticationService(IAuthentication):
     @staticmethod
     def answer(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler

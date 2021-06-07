@@ -2,9 +2,9 @@ from src.repositories.feature.repository import FeatureRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.genarate_id import generate_id
 from fastapi import status
+from src.interfaces.services.feature.interface import IFeature
 
-
-class FeatureService:
+class FeatureService(IFeature):
     @staticmethod
     def create(payload: dict, feature_repository=FeatureRepository()) -> dict:
         payload = generate_id("name", payload)

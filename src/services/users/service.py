@@ -7,9 +7,10 @@ from src.utils.jwt_utils import JWTHandler
 from datetime import datetime
 from fastapi import status
 from decouple import config
+from src.interfaces.services.user.interface import IUser
 
 
-class UserService:
+class UserService(IUser):
     @staticmethod
     def create(
         payload: dict,
