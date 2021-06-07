@@ -1,3 +1,9 @@
+# OUTSIDE LIBRARIES
+from fastapi import status
+from decouple import config
+
+# SPHINX
+from src.utils.email import HtmlModifier
 from src.repositories.user.repository import UserRepository
 from src.controllers.jwts.controller import JwtController
 from src.utils.jwt_utils import JWTHandler
@@ -6,12 +12,9 @@ from src.exceptions.exceptions import (
     UnauthorizedError,
     InternalServerError,
 )
-from fastapi import status
-from src.utils.email import HtmlModifier
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
 from src.utils.genarate_id import hash_field
-from decouple import config
 from src.interfaces.services.authentication.interface import IAuthentication
 
 

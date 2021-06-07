@@ -1,13 +1,19 @@
+# STANDARD LIBS
+from datetime import datetime
+
+# OUTSIDE LIBRARIES
+from fastapi import status
+from decouple import config
+
+# SPHINX
+from src.interfaces.services.user.interface import IUser
 from src.repositories.user.repository import UserRepository
-from src.repositories.file.repository import FileRepository, UserFileType
+from src.repositories.file.repository import FileRepository
+from src.repositories.file.enum.user_file import UserFileType
 from src.services.authentications.service import AuthenticationService
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.genarate_id import generate_id, hash_field
 from src.utils.jwt_utils import JWTHandler
-from datetime import datetime
-from fastapi import status
-from decouple import config
-from src.interfaces.services.user.interface import IUser
 
 
 class UserService(IUser):

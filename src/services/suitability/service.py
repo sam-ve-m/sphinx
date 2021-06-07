@@ -1,6 +1,10 @@
-from fastapi import status
+# STANDARD LIBS
 from datetime import datetime
 
+# OUTSIDE LIBRARIES
+from fastapi import status
+
+# SPHINX
 from src.exceptions.exceptions import InternalServerError
 from src.repositories.suitability.repository import SuitabilityRepository
 from src.interfaces.services.suitability.interface import ISuitability

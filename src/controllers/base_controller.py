@@ -1,18 +1,22 @@
+# STANDARD LIBS
 from typing import Optional
+import logging
+import json
+
+# OUTSIDE LIBRARIES
+from fastapi import Response, status, Request
+from decouple import config
+
+# SPHINX
 from src.exceptions.exceptions import (
     UnauthorizedError,
     ForbiddenError,
     BadRequestError,
     InternalServerError,
 )
-from fastapi import Response, status, Request
-import logging
-from decouple import config
-import json
-
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
-from src.interfaces.services.base_controller.interface import IController
+from src.interfaces.controllers.base_controller.interface import IController
 
 
 class BaseController(IController):

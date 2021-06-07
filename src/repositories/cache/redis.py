@@ -1,7 +1,12 @@
+# STANDARD LIBS
+import pickle
+from typing import Optional
+
+# OUTSIDE LIBRARIES
 from decouple import config
 from redis import Redis
-from typing import Optional
-import pickle
+
+# SPHINX
 from src.interfaces.repositories.redis.interface import IRedis
 
 

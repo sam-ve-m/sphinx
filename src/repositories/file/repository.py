@@ -1,29 +1,24 @@
-import boto3
-from decouple import config
-from enum import Enum
+# STANDARD LIBS
 import logging
 from typing import Union, Optional
 from base64 import b64decode
+from enum import Enum
 
+# OUTSIDE LIBRARIES
+import boto3
+from decouple import config
+
+# SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError
 from src.repositories.cache.redis import RepositoryRedis
 from src.interfaces.repositories.file_repository.interface import IFile
-
-class UserFileType(Enum):
-    SELF = "user_self"
-
-
-class TermsFileType(Enum):
-    TERM_APPLICATION = "term_application"
-    TERM_OPEN_ACCOUNT = "term_open_account"
-    TERM_REFUSAL = "term_refusal"
-    TERM_NON_COMPLIANCE = "term_non_compliance"
-    TERM_RETAIL_LIQUID_PROVIDER = "term_retail_liquid_provider"
+from src.repositories.file.enum.term_file import TermsFileType
+from src.repositories.file.enum.user_file import UserFileType
 
 
 class FileRepository(IFile):
 
-    # This dict keys must be FileType constants
+    # This dict keys must be TermsFileType, UserFileType constants
     file_extension_by_type = {
         "user_self": ".jpg",
         "term_application": ".pdf",
@@ -118,7 +113,7 @@ class FileRepository(IFile):
         return f"{file_type.value}/"
 
     @staticmethod
-    def get_file_extension_by_type(file_type) -> Optional[str]:
+    def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
         return FileRepository.file_extension_by_type.get(file_type.value)
 
     def get_term_version(self, file_type: TermsFileType, is_new_version=False) -> int:

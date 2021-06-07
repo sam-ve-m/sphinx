@@ -1,9 +1,13 @@
+# STANDARD LIBS
 from typing import Optional
-from pymongo import MongoClient
-from decouple import config
-from pymongo.cursor import Cursor
 import logging
 
+# OUTSIDE LIBRARIES
+from decouple import config
+from pymongo.cursor import Cursor
+from pymongo import MongoClient
+
+# SPHINX
 from src.repositories.cache.redis import RepositoryRedis
 from src.utils.genarate_id import hash_field
 from src.interfaces.repositories.base_repository.interface import IRepository

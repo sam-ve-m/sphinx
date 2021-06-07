@@ -1,12 +1,18 @@
+# STANDARD LIBS
 from abc import ABC, abstractmethod
 from typing import Optional, Union
+from enum import Enum
 
+
+# SPHINX
 from src.repositories.cache.redis import RepositoryRedis
-from src.repositories.file.repository import TermsFileType, UserFileType
+from src.repositories.file.enum.term_file import TermsFileType
+from src.repositories.file.enum.user_file import UserFileType
 
 
 class IFile(ABC):
 
+    @staticmethod
     @abstractmethod
     def validate_bucket_name(bucket_name: str) -> str:
        pass
@@ -29,20 +35,24 @@ class IFile(ABC):
     ) -> Optional[str]:
         pass
 
+    @staticmethod
     @abstractmethod
     def resolve_content(content: Union[str, bytes]):
         pass
 
+    @staticmethod
     @abstractmethod
     def resolve_user_path(user_email: str, file_type: UserFileType) -> str:
         pass
 
+    @staticmethod
     @abstractmethod
     def resolve_term_path(file_type: TermsFileType) -> str:
         pass
 
+    @staticmethod
     @abstractmethod
-    def get_file_extension_by_type(file_type: TermsFileType) -> Optional[str]:
+    def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
         pass
 
     @abstractmethod

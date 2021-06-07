@@ -2,7 +2,7 @@
 import uvicorn
 from fastapi import FastAPI, Request, status, Response
 
-# ROUTERS
+# SPHINX
 from src.routers.user import router as user_router
 from src.routers.feature import router as feature_router
 from src.routers.authenticate import router as authenticate_router
@@ -10,8 +10,6 @@ from src.routers.pendencies import router as pendencies_router
 from src.routers.term import router as term_router
 from src.routers.suitability import router as suitability_router
 from src.routers.view import router as view_router
-
-# SPHINX
 from src.utils.middleware import is_public, is_user_not_allowed
 from src.utils.jwt_utils import JWTHandler
 

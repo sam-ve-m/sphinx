@@ -1,9 +1,11 @@
+# OUTSIDE LIBRARIES
 from decouple import config
 from fastapi import status
-import logging
 
+# SPHINX
 from src.repositories.file.repository import FileRepository
 from src.interfaces.services.term.interface import ITerm
+
 
 class TermsService(ITerm):
     @staticmethod

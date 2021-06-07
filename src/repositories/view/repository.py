@@ -1,5 +1,8 @@
-from src.repositories.base_repository import BaseRepository
+# OUTSIDE LIBRARIES
 from decouple import config
+
+# SPHINX
+from src.repositories.base_repository import BaseRepository
 
 
 class ViewRepository(BaseRepository):

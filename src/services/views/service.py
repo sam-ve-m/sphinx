@@ -1,9 +1,12 @@
+# OUTSIDE LIBRARIES
+from fastapi import status
+
+# SPHINX
 from src.repositories.view.repository import ViewRepository
-from src.repositories.feature.repository import FeatureRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.genarate_id import generate_id, generate_list
-from fastapi import status
 from src.interfaces.services.view.interface import IView
+
 
 class ViewService(IView):
     @staticmethod
