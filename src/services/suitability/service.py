@@ -10,8 +10,9 @@ from src.repositories.base_repository import BaseRepository
 from src.repositories.suitability.repository import SuitabilityRepository, SuitabilityUserProfileRepository
 from src.repositories.user.repository import UserRepository
 from src.services.builders.suitability.builder import SuitabilityProfileBuilder
-ASCENDING_ORDER = 1
 from src.interfaces.services.suitability.interface import ISuitability
+
+ASCENDING_ORDER = 1
 
 
 class SuitabilityService(ISuitability):
@@ -48,7 +49,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def create_profile(
-            payload: dict,
+            payload,
             user_repository=UserRepository(),
             suitability_repository=SuitabilityRepository(),
             suitability_user_profile_repository=SuitabilityUserProfileRepository(),
