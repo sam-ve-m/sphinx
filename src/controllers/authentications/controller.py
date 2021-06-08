@@ -3,8 +3,8 @@ from src.services.authentications.service import AuthenticationService
 
 class AuthenticationController:
     @staticmethod
-    def answer(payload: dict):
-        return AuthenticationService.answer(payload=payload)
+    def thebes_gate(payload: dict):
+        return AuthenticationService.thebes_gate(payload=payload)
 
     @staticmethod
     def login(payload: dict):
@@ -13,3 +13,7 @@ class AuthenticationController:
     @staticmethod
     def forgot_password(payload: dict):
         return AuthenticationService.forgot_password(payload=payload)
+
+    @staticmethod
+    def thebes_hall(payload: dict):
+        return AuthenticationService.thebes_hall(payload=payload)

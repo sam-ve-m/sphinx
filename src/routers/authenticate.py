@@ -22,11 +22,12 @@ def login(payload: Login, request: Request):
 
 @router.get("/thebes_gate", tags=["authentication"])
 def answer(request: Request):
+    # This will be called from the frontend after open TARGET_LINK (.env) received on the email confirmation
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     return BaseController.run(
-        AuthenticationController.answer, jwt_data_or_error_response, request
+        AuthenticationController.thebes_gate, jwt_data_or_error_response, request
     )
 
 
@@ -34,4 +35,14 @@ def answer(request: Request):
 def forgot_password(payload: Login, request: Request):
     return BaseController.run(
         AuthenticationController.forgot_password, dict(payload), request
+    )
+
+
+@router.get("/thebes_hall", tags=["authentication"])
+def thebes_hall(request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    return BaseController.run(
+        AuthenticationController.thebes_hall, jwt_data_or_error_response, request
     )

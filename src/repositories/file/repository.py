@@ -97,6 +97,20 @@ class FileRepository(IFile):
                 return value
         return None
 
+    def get_terms_version(
+        self, term_types=TermsFileType, cache=RepositoryRedis, ttl: int = 3600
+    ) -> dict:
+        cache_key = "all_terms_version"
+        value = cache.get(key=cache_key)
+        if value is None:
+            value = dict()
+            for file_type in term_types:
+                value.update(
+                    {file_type.value: self.get_term_version(file_type=file_type)}
+                )
+            cache.set(key=cache_key, value=value)
+        return value
+
     def get_term_file_by_version(
         self, file_type: TermsFileType, version: int, ttl: int = 3600
     ) -> str:

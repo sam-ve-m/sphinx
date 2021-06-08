@@ -5,6 +5,7 @@ from decouple import config
 # SPHINX
 from src.utils.email import HtmlModifier
 from src.repositories.user.repository import UserRepository
+from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 from src.controllers.jwts.controller import JwtController
 from src.utils.jwt_utils import JWTHandler
 from src.exceptions.exceptions import (
@@ -20,7 +21,7 @@ from src.interfaces.services.authentication.interface import IAuthentication
 
 class AuthenticationService(IAuthentication):
     @staticmethod
-    def answer(
+    def thebes_gate(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
@@ -103,3 +104,16 @@ class AuthenticationService(IAuthentication):
             "status_code": status.HTTP_200_OK,
             "message_key": "user.forgot_password",
         }
+
+    @staticmethod
+    def thebes_hall(
+        payload: dict,
+        user_repository=UserRepository(),
+        token_handler=JWTHandler,
+        thebes_hall=ThebesHall,
+    ) -> dict:
+        user = user_repository.find_one({"_id": payload.get("email")})
+        if user is None:
+            raise BadRequestError("common.register_not_exists")
+        jwt = token_handler.generate_token(payload=user, ttl=525600)
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}

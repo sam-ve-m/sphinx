@@ -10,7 +10,9 @@ from src.services.builders.suitability.builder import SuitabilityProfileBuilder
 class ISuitability(ABC):
     @staticmethod
     @abstractmethod
-    def create_quiz(payload: dict, suitability_repository: SuitabilityRepository) -> dict:
+    def create_quiz(
+        payload: dict, suitability_repository: SuitabilityRepository
+    ) -> dict:
         pass
 
     @staticmethod

@@ -32,7 +32,7 @@ def test_answer_register_exists():
     stubby_repository = StubbyRepository(database="", collection="")
     stubby_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="common.register_not_exists"):
-        AuthenticationService.answer(
+        AuthenticationService.thebes_gate(
             payload=payload,
             user_repository=stubby_repository,
             token_handler=StubbyTokenHandler,
@@ -44,7 +44,7 @@ def test_answer_process_issue():
     stubby_repository.find_one = MagicMock(return_value={"is_active": False})
     stubby_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
-        AuthenticationService.answer(
+        AuthenticationService.thebes_gate(
             payload=payload,
             user_repository=stubby_repository,
             token_handler=StubbyTokenHandler,
@@ -59,7 +59,7 @@ def test_answer_is_active():
     )
     stubby_repository.update_one = MagicMock(return_value=True)
     StubbyTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
-    response = AuthenticationService.answer(
+    response = AuthenticationService.thebes_gate(
         payload=payload,
         user_repository=stubby_repository,
         token_handler=StubbyTokenHandler,
@@ -76,7 +76,7 @@ def test_answer_is_not_active():
     )
     stubby_repository.update_one = MagicMock(return_value=True)
     StubbyTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
-    response = AuthenticationService.answer(
+    response = AuthenticationService.thebes_gate(
         payload=payload,
         user_repository=stubby_repository,
         token_handler=StubbyTokenHandler,
@@ -173,3 +173,35 @@ def test_forgot_password():
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "user.forgot_password"
+
+
+class StubbyThebesHall:
+    pass
+
+
+def test_thebes_hall_not_register_exists():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value=None)
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+        AuthenticationService.thebes_hall(
+            payload=payload,
+            user_repository=stubby_repository,
+            token_handler=StubbyTokenHandler,
+            thebes_hall=StubbyThebesHall,
+        )
+
+
+def test_thebes_hall():
+    stubby_repository = StubbyRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={})
+    StubbyThebesHall.validate = MagicMock(return_value=True)
+    StubbyTokenHandler.generate_token = MagicMock(return_value="lallalala")
+    AuthenticationService.send_authentication_email = MagicMock(return_value=True)
+    response = AuthenticationService.thebes_hall(
+        payload=payload,
+        user_repository=stubby_repository,
+        thebes_hall=StubbyThebesHall,
+        token_handler=StubbyTokenHandler,
+    )
+    assert response.get("status_code") == status.HTTP_200_OK
+    assert "jwt" in response.get("payload")

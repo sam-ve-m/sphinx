@@ -1,16 +1,19 @@
-from fastapi import Request, Response, status
+# STANDARD LIBS
+from datetime import datetime, timezone, timedelta
+import logging
+from decouple import config
 import json
+
+# OUTSIDE LIBRARIES
+from fastapi import Request, Response, status
 from jwt import JWT, jwk_from_dict, jwk_from_pem
 from jwt.utils import get_int_from_datetime
-from datetime import datetime, timezone
-from src.exceptions.exceptions import InternalServerError, UnauthorizedError
-import logging
-from datetime import timedelta
-from decouple import config
 
-
+# SPHINX
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
+from src.exceptions.exceptions import InternalServerError
+from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 
 
 class JWTHandler:
@@ -54,18 +57,32 @@ class JWTHandler:
 
     @staticmethod
     def filter_payload_to_jwt(payload: dict):
-        JWTHandler.convert_datetime_field_in_str(payload=payload)
+        new_payload = JWTHandler.filter_payload_helper(payload=payload)
+        JWTHandler.convert_datetime_field_in_str(payload=new_payload)
+        if payload.get("is_admin"):
+            new_payload.update({"is_admin": payload.get("is_admin")})
+        return new_payload
+
+    @staticmethod
+    def filter_payload_helper(payload: dict):
+        ThebesHall.validate(payload=payload)
+        suitability = payload.get("suitability")
+        suitability_months_past = None
+        if suitability:
+            suitability_months_past = suitability.get("months_past")
+        user_account_data = payload.get("user_account_data")
+        user_account_data_months_past = None
+        if user_account_data:
+            user_account_data_months_past = user_account_data.get("months_past")
         new_payload = {
             "name": payload.get("name"),
             "email": payload.get("email"),
             "scope": payload.get("scope"),
             "is_active": payload.get("is_active"),
-            "created_at": payload.get("created_at"),
-            "deleted": payload.get("deleted"),
             "terms": payload.get("terms"),
+            "suitability_months_past": suitability_months_past,
+            "user_account_data_months_past": user_account_data_months_past,
         }
-        if payload.get("is_admin"):
-            new_payload.update({"is_admin": payload.get("is_admin")})
         return new_payload
 
     @staticmethod

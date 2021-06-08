@@ -1,8 +1,10 @@
+# STANDARD LIBS
 import pytest
 from unittest.mock import MagicMock
 from base64 import b64encode
 from enum import Enum
 
+# SPHINX
 from src.repositories.file.repository import FileRepository, UserFileType, TermsFileType
 from src.exceptions.exceptions import InternalServerError, BadRequestError
 
@@ -65,7 +67,7 @@ def test_save_term_file() -> None:
     assert True
 
 
-class StubbyCache(Enum):
+class StubbyCache:
     pass
 
 
@@ -115,7 +117,6 @@ def test_get_term_file() -> None:
 
 def test_get_term_version_file_not_exists() -> None:
     name = "dtvm-test"
-    S3Client.list_objects = MagicMock(return_value={})
     S3Client.list_objects = MagicMock(return_value={"Contents": []})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
@@ -126,7 +127,6 @@ def test_get_term_version_file_not_exists() -> None:
 
 def test_get_term_version() -> None:
     name = "dtvm-test"
-    S3Client.list_objects = MagicMock(return_value={})
     S3Client.list_objects = MagicMock(return_value={"Contents": [1, 2, 3]})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
@@ -138,7 +138,6 @@ def test_get_term_version() -> None:
 
 def test_get_term_version_is_new_version() -> None:
     name = "dtvm-test"
-    S3Client.list_objects = MagicMock(return_value={})
     S3Client.list_objects = MagicMock(return_value={"Contents": [1, 2, 3]})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
@@ -148,3 +147,35 @@ def test_get_term_version_is_new_version() -> None:
         file_type=TermsFileType.TERM_REFUSAL, is_new_version=True
     )
     assert value == 4
+
+
+def test_get_terms_version_without_cache() -> None:
+    name = "dtvm-test"
+    S3Client.list_objects = MagicMock(return_value={"Contents": [1, 2, 3]})
+    FileRepository.s3_client = S3Client
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    file_repository = FileRepository(bucket_name=name)
+    StubbyCache.get = MagicMock(return_value=None)
+    StubbyCache.set = MagicMock(return_value=None)
+    result = file_repository.get_terms_version(cache=StubbyCache)
+    sum_version = 0
+    for key, value in result.items():
+        sum_version += value
+    assert len(result) == 5
+    assert sum_version == 15
+
+
+def test_get_terms_version_with_cache() -> None:
+    name = "dtvm-test"
+    FileRepository.s3_client = S3Client
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    file_repository = FileRepository(bucket_name=name)
+    StubbyCache.get = MagicMock(
+        return_value={"la": 1, "le": 1, "li": 1, "lo": 1, "lu": 1}
+    )
+    result = file_repository.get_terms_version(cache=StubbyCache)
+    sum_version = 0
+    for key, value in result.items():
+        sum_version += value
+    assert len(result) == 5
+    assert sum_version == 5
