@@ -42,7 +42,7 @@ class SuitabilityService(ISuitability):
         if suitability_repository.insert(payload):
             return {
                 "status_code": status.HTTP_201_CREATED,
-                "message_key": "suitabilities.persisted",
+                "message_key": "suitabilities.create_quiz",
             }
         else:
             raise InternalServerError("common.process_issue")
@@ -56,22 +56,25 @@ class SuitabilityService(ISuitability):
             builder_suitability_profile=SuitabilityProfileBuilder(),
     ) -> dict:
         """TODO IMPLEMENT"""
-        # suitability_submission_date = datetime.utcnow()
-        # current_suitability = SuitabilityService.__get_current_suitability(suitability_repository)
-        # user_profile = (builder_suitability_profile
-        #                 .set_user_data({})
-        #                 .set_current_suitability(current_suitability)
-        #                 .get_profile())
-        # answers = user_profile.get("answers")
-        # score = user_profile.get("score")
-        # SuitabilityService.__update_score_and_suitability_submission_date_in_db(
-        #     user_repository,
-        #     int(),
-        #     suitability_submission_date
-        # )
-        # SuitabilityService.__insert_suitability_answers_and_submission_date_in_db(
-        #     suitability_user_profile_repository,
-        #     {},
-        #     suitability_submission_date
-        # )
-        pass
+        suitability_submission_date = datetime.utcnow()
+        current_suitability = SuitabilityService.__get_current_suitability(suitability_repository)
+        user_profile = (builder_suitability_profile
+                        .set_user_data({})
+                        .set_current_suitability(current_suitability)
+                        .get_profile())
+        answers = user_profile.get("answers")
+        score = user_profile.get("score")
+        SuitabilityService.__update_score_and_suitability_submission_date_in_db(
+            user_repository,
+            score,
+            suitability_submission_date
+        )
+        SuitabilityService.__insert_suitability_answers_and_submission_date_in_db(
+            suitability_user_profile_repository,
+            answers,
+            suitability_submission_date
+        )
+        return {
+            "status_code": status.HTTP_201_CREATED,
+            "message_key": "suitabilities.create_profile",
+        }

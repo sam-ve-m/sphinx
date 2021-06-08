@@ -41,4 +41,5 @@ pt:
   not_allowed: Parece que você não tem eprmissão para isso.
   internal_error: Tivemos problema, por favor tente novamente.
   suitability:
-    persisted: O suitability foi salvo com sucesso
+    create_quiz: O suitability foi salvo com sucesso.
+    create_profile: O perfil suitability foi salvo com sucesso.

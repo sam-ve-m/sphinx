@@ -41,4 +41,5 @@ en:
   not_allowed: Seems that your can accesse this.
   internal_error: We have some issue, please try again.
   suitability:
-    persisted: Suitability was been saved successfully
+    create_quiz: Suitability was been saved successfully
+    create_profile: Suitability profile was been saved successfully

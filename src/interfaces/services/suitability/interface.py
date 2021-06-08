@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 # SPHINX
 from src.repositories.base_repository import BaseRepository
 from src.repositories.suitability.repository import SuitabilityRepository
+from src.services.builders.suitability.builder import SuitabilityProfileBuilder
 
 
 class ISuitability(ABC):
@@ -19,6 +20,6 @@ class ISuitability(ABC):
             user_repository: BaseRepository,
             suitability_repository: BaseRepository,
             suitability_user_profile_repository: BaseRepository,
-            builder_suitability_profile: BaseRepository,
+            builder_suitability_profile: SuitabilityProfileBuilder,
     ) -> dict:
         pass
