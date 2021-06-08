@@ -27,7 +27,7 @@ def answer(request: Request):
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     return BaseController.run(
-        AuthenticationController.answer, jwt_data_or_error_response, request
+        AuthenticationController.thebes_gate, jwt_data_or_error_response, request
     )
 
 
@@ -39,10 +39,10 @@ def forgot_password(payload: Login, request: Request):
 
 
 @router.get("/thebes_hall", tags=["authentication"])
-def hall(request: Request):
+def thebes_hall(request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     return BaseController.run(
-        AuthenticationController.hall, jwt_data_or_error_response, request
+        AuthenticationController.thebes_hall, jwt_data_or_error_response, request
     )

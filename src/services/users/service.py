@@ -232,7 +232,7 @@ class UserService(IUser):
             new["terms"][file_type.value] = {
                 "version": version,
                 "date": datetime.now(),
-                "id_deprecated": False,
+                "is_deprecated": False,
             }
             if user_repository.update_one(old=old, new=new):
                 jwt = token_handler.generate_token(payload=new, ttl=525600)
