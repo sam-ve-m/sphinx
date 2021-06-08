@@ -31,5 +31,3 @@ async def crate_user_profile_suitability(suitability: Suitability, request: Requ
     return BaseController.run(
         SuitabilityController.create_profile, suitability.dict(), request
     )
-
-

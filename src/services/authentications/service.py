@@ -110,12 +110,10 @@ class AuthenticationService(IAuthentication):
         payload: dict,
         user_repository=UserRepository(),
         token_handler=JWTHandler,
-        thebes_hall=ThebesHall
+        thebes_hall=ThebesHall,
     ) -> dict:
-        old = user_repository.find_one({"_id": payload.get("email")})
-        if old is None:
+        user = user_repository.find_one({"_id": payload.get("email")})
+        if user is None:
             raise BadRequestError("common.register_not_exists")
-        new = dict(old)
-        thebes_hall.validate(payload=new)
-        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        jwt = token_handler.generate_token(payload=user, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}

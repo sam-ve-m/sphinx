@@ -30,10 +30,17 @@ class IAuthentication(ABC):
 
     @staticmethod
     @abstractmethod
-    def send_authentication_email(email: str, payload: dict, body: str, ttl: int, email_sender=SendGridEmail) -> None:
+    def send_authentication_email(
+        email: str, payload: dict, body: str, ttl: int, email_sender=SendGridEmail
+    ) -> None:
         pass
 
     @staticmethod
     @abstractmethod
-    def thebes_hall(payload: dict, user_repository: UserRepository, token_handler: JWTHandler, thebes_hall: ThebesHall) -> dict:
+    def thebes_hall(
+        payload: dict,
+        user_repository: UserRepository,
+        token_handler: JWTHandler,
+        thebes_hall: ThebesHall,
+    ) -> dict:
         pass

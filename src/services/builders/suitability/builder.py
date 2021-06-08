@@ -16,4 +16,3 @@ class SuitabilityProfileBuilder:
     def get_profile(self) -> dict:
         """TODO: IMPLEMENT"""
         pass
-

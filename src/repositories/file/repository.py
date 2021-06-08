@@ -105,7 +105,9 @@ class FileRepository(IFile):
         if value is None:
             value = dict()
             for file_type in term_types:
-                value.update({file_type.value: self.get_term_version(file_type=file_type)})
+                value.update(
+                    {file_type.value: self.get_term_version(file_type=file_type)}
+                )
             cache.set(key=cache_key, value=value)
         return value
 

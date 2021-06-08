@@ -67,7 +67,7 @@ def test_save_term_file() -> None:
     assert True
 
 
-class StubbyCache():
+class StubbyCache:
     pass
 
 
@@ -157,9 +157,7 @@ def test_get_terms_version_without_cache() -> None:
     file_repository = FileRepository(bucket_name=name)
     StubbyCache.get = MagicMock(return_value=None)
     StubbyCache.set = MagicMock(return_value=None)
-    result = file_repository.get_terms_version(
-        cache=StubbyCache
-    )
+    result = file_repository.get_terms_version(cache=StubbyCache)
     sum_version = 0
     for key, value in result.items():
         sum_version += value
@@ -172,10 +170,10 @@ def test_get_terms_version_with_cache() -> None:
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    StubbyCache.get = MagicMock(return_value={'la': 1, 'le': 1, 'li': 1, 'lo': 1, 'lu': 1})
-    result = file_repository.get_terms_version(
-        cache=StubbyCache
+    StubbyCache.get = MagicMock(
+        return_value={"la": 1, "le": 1, "li": 1, "lo": 1, "lu": 1}
     )
+    result = file_repository.get_terms_version(cache=StubbyCache)
     sum_version = 0
     for key, value in result.items():
         sum_version += value
