@@ -19,3 +19,11 @@ class SuitabilityUserProfileRepository(BaseRepository):
             database=config("MONGODB_DATABASE_NAME"),
             collection=config("MONGODB_SUITABILITY_USER_PROFILE_COLLECTION"),
         )
+
+
+class SuitabilityAnswersRepository(BaseRepository):
+    def __init__(self):
+        super().__init__(
+            database=config("MONGODB_DATABASE_NAME"),
+            collection=config("MONGODB_SUITABILITY_ANSWERS_COLLECTION"),
+        )

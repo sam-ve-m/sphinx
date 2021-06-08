@@ -1,8 +1,9 @@
 from typing import List
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 from src.routers.validators.base import Version, Weight, Score, ValueText, Order
 from src.controllers.suitabilities.controller import SuitabilityController
 from src.controllers.base_controller import BaseController
+from src.utils.jwt_utils import JWTHandler
 
 router = APIRouter()
 
@@ -27,7 +28,15 @@ async def create_quiz_suitability(suitability: Suitability, request: Request):
 
 
 @router.post("/suitability/profile", tags=["suitability"])
-async def crate_user_profile_suitability(suitability: Suitability, request: Request):
+async def crate_user_profile_suitability(request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    payload = {
+        "thebes_answer": jwt_data_or_error_response
+    }
+
     return BaseController.run(
-        SuitabilityController.create_profile, suitability.dict(), request
+        SuitabilityController.create_profile, payload, request
     )
