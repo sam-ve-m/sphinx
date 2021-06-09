@@ -4,10 +4,10 @@ from fastapi import status
 
 from src.exceptions.exceptions import InternalServerError
 from src.services.suitability.service import SuitabilityService
-from tests.stubby_classes.stubby_base_repository import StubbyBaseRepository
+from tests.stub_classes.stub_base_repository import StubBaseRepository
 
 
-class StubbyRepository(StubbyBaseRepository):
+class StubRepository(StubBaseRepository):
     pass
 
 
@@ -29,19 +29,19 @@ basic_payload = {
 
 
 def test_insert_error_in_suitability_db():
-    stubby_repository = StubbyRepository(database="", collection="")
-    stubby_repository.insert = MagicMock(return_value=False)
+    stub_repository = StubRepository(database="", collection="")
+    stub_repository.insert = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
         SuitabilityService.create_quiz(
-            payload=basic_payload, suitability_repository=stubby_repository
+            payload=basic_payload, suitability_repository=stub_repository
         )
 
 
 def test_insert_in_suitability_db():
-    stubby_repository = StubbyRepository(database="", collection="")
-    stubby_repository.insert = MagicMock(return_value=True)
+    stub_repository = StubRepository(database="", collection="")
+    stub_repository.insert = MagicMock(return_value=True)
     response = SuitabilityService.create_quiz(
-        payload=basic_payload, suitability_repository=stubby_repository
+        payload=basic_payload, suitability_repository=stub_repository
     )
     assert response.get("status_code") == status.HTTP_201_CREATED
     assert response.get("message_key") == "suitabilities.create_quiz"

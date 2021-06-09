@@ -15,6 +15,7 @@ from src.services.authentications.service import AuthenticationService
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.genarate_id import generate_id, hash_field
 from src.utils.jwt_utils import JWTHandler
+from src.utils.stone_age import StoneAge
 
 
 class UserService(IUser):
@@ -265,3 +266,48 @@ class UserService(IUser):
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
             raise InternalServerError("common.process_issue")
+
+    @staticmethod
+    def user_identifier_data(
+        payload: dict, user_repository=UserRepository(), stone_age=StoneAge
+    ) -> dict:
+        thebes_answer = payload.get("thebes_answer")
+        old = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if old:
+            user_identifier = payload.get("user_identifier")
+            quiz = stone_age.send_user_identifier_data(
+                user_identifier_data=user_identifier
+            )
+            if quiz:
+                new = dict(old)
+                new["user_account_data"] = user_identifier
+                if user_repository.update_one(old=old, new=new):
+                    return {
+                        "status_code": status.HTTP_200_OK,
+                        "payload": {"quiz": quiz},
+                    }
+            raise InternalServerError("common.process_issue")
+        raise BadRequestError("common.register_not_exists")
+
+    @staticmethod
+    def fill_user_data(
+        payload: dict, user_repository=UserRepository(), stone_age=StoneAge
+    ) -> dict:
+        thebes_answer = payload.get("thebes_answer")
+        old = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if old:
+            user_data = stone_age.send_user_quiz_responses(quiz=payload.get("quiz"))
+            if user_data:
+                new = dict(old)
+                for key, value in stone_age.get_only_values_from_user_data(
+                    user_data=user_data.get('userData')
+                ).items():
+                    new["user_account_data"].update({key: value})
+                new["concluded_at"] = datetime.now()
+                if user_repository.update_one(old=old, new=new):
+                    return {
+                        "status_code": status.HTTP_200_OK,
+                        "message_key": "user.creating_account",
+                    }
+            raise InternalServerError("common.process_issue")
+        raise BadRequestError("common.register_not_exists")

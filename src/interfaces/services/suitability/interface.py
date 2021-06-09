@@ -18,10 +18,10 @@ class ISuitability(ABC):
     @staticmethod
     @abstractmethod
     def create_profile(
-            payload: dict,
-            user_repository: BaseRepository,
-            suitability_repository: BaseRepository,
-            suitability_user_profile_repository: BaseRepository,
-            builder_suitability_profile: SuitabilityProfileBuilder,
+        payload: dict,
+        user_repository: BaseRepository,
+        suitability_repository: BaseRepository,
+        suitability_user_profile_repository: BaseRepository,
+        builder_suitability_profile: SuitabilityProfileBuilder,
     ) -> dict:
         pass

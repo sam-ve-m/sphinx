@@ -66,22 +66,21 @@ class SuitabilityService(ISuitability):
     ) -> dict:
         """TODO IMPLEMENT"""
         suitability_submission_date = datetime.utcnow()
-        current_suitability = SuitabilityService.__get_current_suitability(suitability_repository)
-        user_profile = (builder_suitability_profile
-                        .set_user_data({})
-                        .set_current_suitability(current_suitability)
-                        .get_profile())
+        current_suitability = SuitabilityService.__get_current_suitability(
+            suitability_repository
+        )
+        user_profile = (
+            builder_suitability_profile.set_user_data({})
+            .set_current_suitability(current_suitability)
+            .get_profile()
+        )
         answers = user_profile.get("answers")
         score = user_profile.get("score")
         SuitabilityService.__update_score_and_suitability_submission_date_in_db(
-            user_repository,
-            score,
-            suitability_submission_date
+            user_repository, score, suitability_submission_date
         )
         SuitabilityService.__insert_suitability_answers_and_submission_date_in_db(
-            suitability_user_profile_repository,
-            answers,
-            suitability_submission_date
+            suitability_user_profile_repository, answers, suitability_submission_date
         )
         return {
             "status_code": status.HTTP_201_CREATED,

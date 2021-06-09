@@ -18,6 +18,7 @@ pt:
     need_pin: Informe seu PIN.
     not_admin: Você não é adminitrador.
     all_logged_out: Você deslogou de todos os dispositivos logados.
+    creating_account: Iremos criar sua conta bancaria, espere o email.
     files:
       term_not_signed: Você ainda não assinou estes termos.
   email:

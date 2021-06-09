@@ -108,4 +108,3 @@ def test_suitability_payload_without_answer_weight():
     del payload["questions"][1]["answers"][0]["weight"]
     response = client.post("/suitability/quiz", data=json.dumps(payload))
     assert response.status_code == 422
-

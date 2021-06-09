@@ -16,87 +16,87 @@ from src.utils.middleware import (
     invalidate_user,
     is_user_not_allowed,
 )
-from tests.stubby_classes.stubby_base_repository import StubbyBaseRepository
+from tests.stub_classes.stub_base_repository import StubBaseRepository
 
 
-class StubbyURL:
+class StubURL:
     path = "/"
 
 
-class StubbyHeaders:
+class StubHeaders:
     raw = []
 
 
-class StubbyRequest:
+class StubRequest:
     method = "POST"
-    headers = StubbyHeaders()
+    headers = StubHeaders()
 
-    def __init__(self, url: Type[StubbyURL]):
+    def __init__(self, url: Type[StubURL]):
         self.url = url
 
 
 def test_is_public_true_post():
-    stubby_url = StubbyURL
-    stubby_url.path = "/user"
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    stub_url.path = "/user"
+    request = StubRequest(url=stub_url)
     route_public = is_public(request=request)
     assert route_public
 
 
 def test_is_public_true_get():
-    stubby_url = StubbyURL
-    stubby_url.path = "/term"
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    stub_url.path = "/term"
+    request = StubRequest(url=stub_url)
     request.method = "GET"
     route_public = is_public(request=request)
     assert route_public
 
 
 def test_is_public_false_post():
-    stubby_url = StubbyURL
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    request = StubRequest(url=stub_url)
     route_public = is_public(request=request)
     assert route_public is False
 
 
 def test_is_public_false_get():
-    stubby_url = StubbyURL
-    stubby_url.path = "/xxx"
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    stub_url.path = "/xxx"
+    request = StubRequest(url=stub_url)
     request.method = "GET"
     route_public = is_public(request=request)
     assert route_public is False
 
 
 def test_need_be_admin_false():
-    stubby_url = StubbyURL
-    stubby_url.path = "/xx"
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    stub_url.path = "/xx"
+    request = StubRequest(url=stub_url)
     is_admin_route = need_be_admin(request=request)
     assert is_admin_route is False
 
 
 def test_need_be_admin_false_post():
-    stubby_url = StubbyURL
-    stubby_url.path = "/xxx"
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    stub_url.path = "/xxx"
+    request = StubRequest(url=stub_url)
     request.method = "POST"
     is_admin_route = need_be_admin(request=request)
     assert is_admin_route is False
 
 
 def test_need_be_admin_true():
-    stubby_url = StubbyURL
-    stubby_url.path = "/user_admin"
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    stub_url.path = "/user_admin"
+    request = StubRequest(url=stub_url)
     is_admin_route = need_be_admin(request=request)
     assert is_admin_route
 
 
 def test_need_be_admin_true_post():
-    stubby_url = StubbyURL
-    stubby_url.path = "/term"
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    stub_url.path = "/term"
+    request = StubRequest(url=stub_url)
     request.method = "POST"
     is_admin_route = need_be_admin(request=request)
     assert is_admin_route
@@ -153,20 +153,20 @@ def test_invalidate_user_false():
     assert is_invalidate_user is False
 
 
-class StubbyRepository(StubbyBaseRepository):
+class StubRepository(StubBaseRepository):
     pass
 
 
 def test_is_user_not_allowed_true():
-    stubby_url = StubbyURL
-    stubby_url.path = "/xxx"
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    stub_url.path = "/xxx"
+    request = StubRequest(url=stub_url)
     request.method = "GET"
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10),
         "deleted": False,
     }
-    user_repository = StubbyRepository(database="", collection="")
+    user_repository = StubRepository(database="", collection="")
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01 12:10:10.0000", "email": "test@test.com"}
     is_user_not_allowed_value = is_user_not_allowed(
@@ -176,15 +176,15 @@ def test_is_user_not_allowed_true():
 
 
 def test_is_user_not_allowed_false():
-    stubby_url = StubbyURL
-    stubby_url.path = "/xxx"
-    request = StubbyRequest(url=stubby_url)
+    stub_url = StubURL
+    stub_url.path = "/xxx"
+    request = StubRequest(url=stub_url)
     request.method = "GET"
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10),
         "deleted": True,
     }
-    user_repository = StubbyRepository(database="", collection="")
+    user_repository = StubRepository(database="", collection="")
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01 12:10:10.0000", "email": "test@test.com"}
     is_user_not_allowed_value = is_user_not_allowed(

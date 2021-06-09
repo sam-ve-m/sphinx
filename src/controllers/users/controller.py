@@ -57,3 +57,11 @@ class UserController:
     @staticmethod
     def get_signed_term(payload: dict):
         return UserService.get_signed_term(payload=payload)
+
+    @staticmethod
+    def user_identifier_data(payload: dict):
+        return UserService.user_identifier_data(payload=payload)
+
+    @staticmethod
+    def fill_user_data(payload: dict):
+        return UserService.fill_user_data(payload=payload)

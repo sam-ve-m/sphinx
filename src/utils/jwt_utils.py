@@ -52,7 +52,9 @@ class JWTHandler:
                 encrypted_payload, verifying_key, do_time_check=True
             )
             return payload
-        except:
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
             raise InternalServerError("common.process_issue")
 
     @staticmethod

@@ -14,6 +14,7 @@ from src.repositories.file.enum.term_file import TermsFileType
 from src.utils.brazil_register_number_validator import is_cpf_valid
 from src.routers.validators.enum_template import MaritalStatusEnum
 
+
 class Email(BaseModel):
     email: constr(min_length=4, max_length=255)
     # TODO: DNS lib not found
@@ -38,7 +39,7 @@ class View(BaseModel):
         view_repository = ViewRepository()
         if view_repository.find_one({"_id": e}, ttl=60):
             return e
-        raise ValueError('view not exists')
+        raise ValueError("view not exists")
 
 
 class Feature(BaseModel):
@@ -49,7 +50,7 @@ class Feature(BaseModel):
         feature_repository = FeatureRepository()
         if feature_repository.find_one({"_id": e}, ttl=60):
             return e
-        raise ValueError('feature not exists')
+        raise ValueError("feature not exists")
 
 
 class OptionalPIN(BaseModel):
@@ -107,7 +108,7 @@ class Cpf(BaseModel):
     def validate_cpf(cls, e):
         if is_cpf_valid(cpf=e):
             return e
-        raise ValueError('invalid cpf')
+        raise ValueError("invalid cpf")
 
 
 class MaritalStatus(BaseModel):

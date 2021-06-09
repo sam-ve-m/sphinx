@@ -17,7 +17,7 @@ from src.routers.validators.base import (
     Cpf,
     MaritalStatus,
     Nationality,
-    QuizQuestionOption
+    QuizQuestionOption,
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -58,22 +58,33 @@ def forgot_password(user: Email, request: Request):
 
 
 @router.put("/user/identifier_data", tags=["user"])
-def update_user_data(user_identifier: UserIdentifierData, request: Request):
-    # TODO: salvar dados minimos para envio para STONEAGE e retornar quiz
-    return BaseController.run(UserController.create_admin, user_identifier.dict(), request)
+def update_user_identifier_data(user_identifier: UserIdentifierData, request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "thebes_answer": jwt_data_or_error_response,
+        "user_identifier": user_identifier.dict(),
+    }
+    return BaseController.run(UserController.user_identifier_data, payload, request)
 
 
 @router.put("/user/fill_user_data", tags=["user"])
-def update_user_data(quiz_response: QuizResponses, request: Request):
-    # TODO: recebe respostas do quiz e manda apra STONEAGE espera o retorno com dados ou um retorno async
-    return BaseController.run(UserController.create_admin, quiz_response.dict(), request)
+def update_fill_user_data(quiz_response: QuizResponses, request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "thebes_answer": jwt_data_or_error_response,
+        "quiz": quiz_response.dict(),
+    }
+    return BaseController.run(UserController.fill_user_data, payload, request)
 
 
 @router.put("/user/table_callback", tags=["user"])
 def update_user_data(user: UserSimple, request: Request):
     # TODO: Callback da STONEAGE
     pass
-    # return BaseController.run(UserController.create_admin, dict(user), request)
 
 
 @router.delete("/user", tags=["user"])

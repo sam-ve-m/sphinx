@@ -67,7 +67,7 @@ def test_save_term_file() -> None:
     assert True
 
 
-class StubbyCache:
+class StubCache:
     pass
 
 
@@ -78,10 +78,10 @@ def test_get_term_file_none() -> None:
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    StubbyCache.get = MagicMock(return_value=None)
-    StubbyCache.set = MagicMock(return_value=None)
+    StubCache.get = MagicMock(return_value=None)
+    StubCache.set = MagicMock(return_value=None)
     value = file_repository.get_term_file(
-        file_type=TermsFileType.TERM_REFUSAL, cache=StubbyCache
+        file_type=TermsFileType.TERM_REFUSAL, cache=StubCache
     )
     assert value is None
 
@@ -90,10 +90,10 @@ def test_get_term_file_cache() -> None:
     name = "dtvm-test"
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    StubbyCache.get = MagicMock(return_value="lili")
-    StubbyCache.set = MagicMock(return_value=None)
+    StubCache.get = MagicMock(return_value="lili")
+    StubCache.set = MagicMock(return_value=None)
     value = file_repository.get_term_file(
-        file_type=TermsFileType.TERM_REFUSAL, cache=StubbyCache
+        file_type=TermsFileType.TERM_REFUSAL, cache=StubCache
     )
     assert value == "lili"
 
@@ -107,10 +107,10 @@ def test_get_term_file() -> None:
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    StubbyCache.get = MagicMock(return_value=None)
-    StubbyCache.set = MagicMock(return_value=None)
+    StubCache.get = MagicMock(return_value=None)
+    StubCache.set = MagicMock(return_value=None)
     value = file_repository.get_term_file(
-        file_type=TermsFileType.TERM_REFUSAL, cache=StubbyCache
+        file_type=TermsFileType.TERM_REFUSAL, cache=StubCache
     )
     assert value == "link"
 
@@ -155,9 +155,9 @@ def test_get_terms_version_without_cache() -> None:
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    StubbyCache.get = MagicMock(return_value=None)
-    StubbyCache.set = MagicMock(return_value=None)
-    result = file_repository.get_terms_version(cache=StubbyCache)
+    StubCache.get = MagicMock(return_value=None)
+    StubCache.set = MagicMock(return_value=None)
+    result = file_repository.get_terms_version(cache=StubCache)
     sum_version = 0
     for key, value in result.items():
         sum_version += value
@@ -170,10 +170,10 @@ def test_get_terms_version_with_cache() -> None:
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    StubbyCache.get = MagicMock(
+    StubCache.get = MagicMock(
         return_value={"la": 1, "le": 1, "li": 1, "lo": 1, "lu": 1}
     )
-    result = file_repository.get_terms_version(cache=StubbyCache)
+    result = file_repository.get_terms_version(cache=StubCache)
     sum_version = 0
     for key, value in result.items():
         sum_version += value
