@@ -1,4 +1,5 @@
 # STANDARD LIBS
+from typing import Union, Optional
 from datetime import datetime, timezone, timedelta
 import logging
 from decouple import config
@@ -21,7 +22,7 @@ class JWTHandler:
     instance = JWT()
 
     @staticmethod
-    def generate_token(payload: dict, ttl: int = 5):
+    def generate_token(payload: dict, ttl: int = 5) -> Optional[str]:
         """The ttl value in minutes"""
         payload.update(
             {
@@ -44,7 +45,7 @@ class JWTHandler:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def decrypt_payload(encrypted_payload: str):
+    def decrypt_payload(encrypted_payload: str) -> Optional[dict]:
         try:
             with open("src/keys/id_rsa.json", "r") as fh:
                 verifying_key = jwk_from_dict(json.load(fh))
@@ -56,7 +57,7 @@ class JWTHandler:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def filter_payload_to_jwt(payload: dict):
+    def filter_payload_to_jwt(payload: dict) -> dict:
         new_payload = JWTHandler.filter_payload_helper(payload=payload)
         JWTHandler.convert_datetime_field_in_str(payload=new_payload)
         if payload.get("is_admin"):
@@ -64,7 +65,7 @@ class JWTHandler:
         return new_payload
 
     @staticmethod
-    def filter_payload_helper(payload: dict):
+    def filter_payload_helper(payload: dict) -> dict:
         ThebesHall.validate(payload=payload)
         suitability = payload.get("suitability")
         suitability_months_past = None
@@ -86,7 +87,7 @@ class JWTHandler:
         return new_payload
 
     @staticmethod
-    def convert_datetime_field_in_str(payload: dict):
+    def convert_datetime_field_in_str(payload: dict) -> None:
         for key in payload:
             if isinstance(payload[key], dict):
                 JWTHandler.convert_datetime_field_in_str(payload[key])
@@ -94,7 +95,7 @@ class JWTHandler:
                 payload[key] = str(payload[key])
 
     @staticmethod
-    def get_payload_from_request(request: Request):
+    def get_payload_from_request(request: Request) -> Union[dict, Response]:
         thebes_answer = None
         for header_tuple in request.headers.raw:
             if b"thebes_answer" in header_tuple:

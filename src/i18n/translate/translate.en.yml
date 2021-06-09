@@ -43,3 +43,9 @@ en:
   suitability:
     create_quiz: Suitability was been saved successfully
     create_profile: Suitability profile was been saved successfully
+    error:
+      no_answers: There is no list of responses in the database.
+      answers_format: The reply list format is incorrect.
+      answers_incomplete_data: Response list data is incomplete.
+      no_data: Empty data.
+      update_error: Was not possible update data.

@@ -2,7 +2,7 @@
 from datetime import datetime
 
 # OUTSIDE LIBRARIES
-from typing import List
+from typing import List, Tuple
 
 from fastapi import status
 
@@ -18,20 +18,30 @@ from src.interfaces.services.suitability.interface import ISuitability
 
 class SuitabilityService(ISuitability):
     @staticmethod
-    def __get_last_suitability_answers(
+    def __get_last_suitability_answers_and_score(
             suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository()
-    ) -> List[dict]:
-        pass
+    ) -> Tuple[List[dict], int] or Exception:
+        _answers = list(suitability_answers_repository.find_all().sort("_id", -1).limit(1))
+        if not _answers:
+            raise InternalServerError("suitability.error.no_answers")
 
-    @staticmethod
-    def __get_score_for_aggressive_profile() -> int:
-        pass
+        if type(_answers[0]) is not dict:
+            raise InternalServerError("suitability.error.answers_format")
+
+        if not ('answers' and 'score' in list(_answers[0].keys())):
+            raise InternalServerError("suitability.error.answers_incomplete_data")
+
+        score, answers = _answers[0].get("answers"), _answers[0].get("score")
+
+        if not all([score, answers]):
+            raise InternalServerError("suitability.error.no_data")
+
+        return answers, score
 
     @staticmethod
     def __update_suitability_score_and_submission_date_in_user_db(
             user_repository: BaseRepository, user_email: str, score: int, submission_date: datetime
     ) -> None or Exception:
-        """TODO IMPLEMENT EXCEPTIONS"""
         old = user_repository.find_one({"_id": user_email})
         if not old:
             raise BadRequestError("common.register_not_exists")
@@ -45,6 +55,8 @@ class SuitabilityService(ISuitability):
         if user_repository.update_one(old=old, new=new):
             return
 
+        raise InternalServerError("suitability.error.update_error")
+
     @staticmethod
     def __insert_suitability_answers_and_submission_date_in_user_profile_db(
             suitability_user_profile_repository: BaseRepository,
@@ -52,7 +64,6 @@ class SuitabilityService(ISuitability):
             submission_date: datetime,
             user_email: str
     ) -> None or Exception:
-        """TODO IMPLEMENT EXCEPTIONS"""
         payload = {
             "email": user_email,
             "date": submission_date,
@@ -61,6 +72,8 @@ class SuitabilityService(ISuitability):
         }
         if suitability_user_profile_repository.insert(payload):
             return
+
+        raise InternalServerError("suitability.error.update_error")
 
     @staticmethod
     def create_quiz(payload: dict, suitability_repository=SuitabilityRepository()) -> dict:
@@ -76,18 +89,16 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def create_profile(
-        payload,
-        user_repository=UserRepository(),
-        suitability_repository=SuitabilityRepository(),
-        suitability_user_profile_repository=SuitabilityUserProfileRepository(),
-        builder_suitability_profile=SuitabilityProfileBuilder(),
+            payload,
+            user_repository=UserRepository(),
+            suitability_repository=SuitabilityRepository(),
+            suitability_user_profile_repository=SuitabilityUserProfileRepository(),
+            builder_suitability_profile=SuitabilityProfileBuilder(),
     ) -> dict:
-        """TODO IMPLEMENT"""
         thebes_answer = payload.get("thebes_answer")
         user_email = thebes_answer.get("email")
         suitability_submission_date = datetime.utcnow()
-        answers = SuitabilityService.__get_last_suitability_answers()
-        score = SuitabilityService.__get_score_for_aggressive_profile()
+        answers, score = SuitabilityService.__get_last_suitability_answers_and_score()
         (SuitabilityService
          .__update_suitability_score_and_submission_date_in_user_db(user_repository=user_repository,
                                                                     user_email=user_email,
@@ -96,10 +107,10 @@ class SuitabilityService(ISuitability):
          )
         (SuitabilityService
             .__insert_suitability_answers_and_submission_date_in_user_profile_db(
-            suitability_user_profile_repository=suitability_user_profile_repository,
-            user_email=user_email,
-            answers=answers,
-            submission_date=suitability_submission_date)
+                suitability_user_profile_repository=suitability_user_profile_repository,
+                user_email=user_email,
+                answers=answers,
+                submission_date=suitability_submission_date)
         )
 
         return {

@@ -43,3 +43,9 @@ pt:
   suitability:
     create_quiz: O suitability foi salvo com sucesso.
     create_profile: O perfil suitability foi salvo com sucesso.
+    error:
+      no_answers: Não existe nenhuma lista de respostas no banco de dados.
+      answers_format: O formato da lista de resposta está incorreto.
+      answers_incomplete_data: Os dados da lista de resposta está incompleto.
+      no_data: Dados vazio.
+      update_error: Não foi possivel fazer o update dos dados.

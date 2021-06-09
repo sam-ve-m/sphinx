@@ -1,10 +1,8 @@
 import json
 
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.routers.suitability import router as suitability_router
 
 app = FastAPI()
@@ -114,6 +112,6 @@ def test_suitability_quiz_payload_without_answer_weight():
     assert response.status_code == 422
 
 
-# def test_suitability_profile_without_payload():
-#     with pytest.raises(InternalServerError, match="common.process_issue"):
-#         client.post("/suitability/profile", data=json.dumps({}))
+def test_suitability_profile_without_payload():
+    res = client.post("/suitability/profile", data=json.dumps({}))
+    assert res.status_code == 401
