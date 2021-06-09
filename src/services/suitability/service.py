@@ -1,9 +1,8 @@
 # STANDARD LIBS
 from datetime import datetime
-
-# OUTSIDE LIBRARIES
 from typing import List, Tuple, Union, Optional
 
+# OUTSIDE LIBRARIES
 from fastapi import status
 
 # SPHINX
@@ -16,21 +15,37 @@ from src.repositories.suitability.repository import (
 )
 from src.repositories.user.repository import UserRepository
 from src.interfaces.services.suitability.interface import ISuitability
+from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
 
 
 class SuitabilityService(ISuitability):
     @staticmethod
-    def create_quiz(payload: dict, suitability_repository=SuitabilityRepository()) -> dict:
+    def create_quiz(
+            payload: dict,
+            suitability_repository: BaseRepository = SuitabilityRepository(),
+            suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository(),
+            suitability_answers_profile_builder=SuitabilityAnswersProfileBuilder()
+    ) -> dict:
         suitability = payload.get("suitability")
-        suitability.update({"date": datetime.utcnow()})
-
-        if suitability_repository.insert(suitability):
-            return {
-                "status_code": status.HTTP_201_CREATED,
-                "message_key": "suitabilities.create_quiz",
-            }
-        else:
+        if not suitability:
             raise InternalServerError("common.process_issue")
+
+        suitability.update({"date": datetime.utcnow()})
+        SuitabilityService.__insert_new_suitability(
+            suitability_repository=suitability_repository,
+            suitability=suitability
+        )
+
+        suitability_answers_profile_builder.suitability = suitability
+        answers_profile_composition = suitability_answers_profile_builder.profile
+        SuitabilityService.__insert_new_answers_suitability(
+            suitability_answers_repository=suitability_answers_repository,
+            answers_profile_composition=answers_profile_composition
+        )
+        return {
+            "status_code": status.HTTP_201_CREATED,
+            "message_key": "suitabilities.create_quiz",
+        }
 
     @staticmethod
     def create_profile(
@@ -42,20 +57,21 @@ class SuitabilityService(ISuitability):
         thebes_answer: dict = payload.get("thebes_answer")
         user_email: str = thebes_answer.get("email")
         suitability_submission_date = datetime.utcnow()
-        answers, score = SuitabilityService.__get_last_suitability_answers_and_score()
+        answers, score, suitability_version = SuitabilityService.__get_last_suitability_answers_metadata()
         (SuitabilityService
          .__update_suitability_score_and_submission_date_in_user_db(user_repository=user_repository,
                                                                     user_email=user_email,
                                                                     score=score,
-                                                                    submission_date=suitability_submission_date)
-         )
+                                                                    suitability_version=suitability_version,
+                                                                    submission_date=suitability_submission_date))
         (SuitabilityService
-            .__insert_suitability_answers_and_submission_date_in_user_profile_db(
-                suitability_user_profile_repository=suitability_user_profile_repository,
-                user_email=user_email,
-                answers=answers,
-                submission_date=suitability_submission_date)
-        )
+         .__insert_suitability_answers_in_user_profile_db(
+                                                        suitability_user_profile_repository=
+                                                        suitability_user_profile_repository,
+                                                        user_email=user_email,
+                                                        suitability_version=suitability_version,
+                                                        answers=answers,
+                                                        submission_date=suitability_submission_date))
 
         return {
             "status_code": status.HTTP_201_CREATED,
@@ -74,13 +90,27 @@ class SuitabilityService(ISuitability):
         return user_profile
 
     @staticmethod
-    def __insert_new_suitability_answers_list():
-        pass
+    def __insert_new_suitability(
+            suitability_repository: BaseRepository, suitability: dict
+    ) -> Optional[Exception]:
+        if suitability_repository.insert(suitability):
+            return
+
+        raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def __get_last_suitability_answers_and_score(
+    def __insert_new_answers_suitability(
+            suitability_answers_repository: BaseRepository, answers_profile_composition: dict
+    ) -> Optional[Exception]:
+        if suitability_answers_repository.insert(answers_profile_composition):
+            return
+
+        raise InternalServerError("common.process_issue")
+
+    @staticmethod
+    def __get_last_suitability_answers_metadata(
             suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository()
-    ) -> Union[Tuple[List[dict], int], Exception]:
+    ) -> Union[Tuple[List[dict], int, int], Exception]:
         _answers = list(suitability_answers_repository.find_all().sort("_id", -1).limit(1))
         if not _answers:
             raise InternalServerError("suitability.error.no_answers")
@@ -88,19 +118,25 @@ class SuitabilityService(ISuitability):
         if type(_answers[0]) is not dict:
             raise InternalServerError("suitability.error.answers_format")
 
-        if not ('answers' and 'score' in list(_answers[0].keys())):
+        if not ('answers' and 'score' and 'suitability_version' in list(_answers[0].keys())):
             raise InternalServerError("suitability.error.answers_incomplete_data")
 
-        score, answers = _answers[0].get("answers"), _answers[0].get("score")
+        score = _answers[0].get("answers")
+        answers = _answers[0].get("score")
+        suitability_version = _answers[0].get("suitability_version")
 
-        if not all([score, answers]):
+        if not all([score, answers, suitability_version]):
             raise InternalServerError("suitability.error.no_data")
 
-        return answers, score
+        return answers, score, suitability_version
 
     @staticmethod
     def __update_suitability_score_and_submission_date_in_user_db(
-            user_repository: BaseRepository, user_email: str, score: int, submission_date: datetime
+            user_repository: BaseRepository,
+            user_email: str,
+            score: int,
+            suitability_version: int,
+            submission_date: datetime
     ) -> Optional[Exception]:
         old = user_repository.find_one({"_id": user_email})
         if not old:
@@ -109,7 +145,8 @@ class SuitabilityService(ISuitability):
         new.update({
             "suitability": {
                 "score": score,
-                "submission_date": submission_date
+                "submission_date": submission_date,
+                "suitability_version": suitability_version
             }
         })
         if user_repository.update_one(old=old, new=new):
@@ -118,17 +155,18 @@ class SuitabilityService(ISuitability):
         raise InternalServerError("suitability.error.update_error")
 
     @staticmethod
-    def __insert_suitability_answers_and_submission_date_in_user_profile_db(
+    def __insert_suitability_answers_in_user_profile_db(
             suitability_user_profile_repository: BaseRepository,
             answers: List[dict],
+            suitability_version: int,
+            user_email: str,
             submission_date: datetime,
-            user_email: str
     ) -> Optional[Exception]:
         payload = {
             "email": user_email,
             "date": submission_date,
-            "answers": answers
-
+            "answers": answers,
+            "suitability_version": suitability_version
         }
         if suitability_user_profile_repository.insert(payload):
             return
@@ -155,4 +193,3 @@ class SuitabilityService(ISuitability):
             raise InternalServerError("suitability.error.last_user_profile_incomplete_data")
 
         return last_user_profile[0]
-
