@@ -11,9 +11,7 @@ class AccountData(IValidator):
         user_account_data = payload.get("user_account_data")
         if user_account_data:
             concluded_at = user_account_data.get("concluded_at")
-            months_past = AccountData.months_past(
-                concluded_at=concluded_at
-            )
+            months_past = AccountData.months_past(concluded_at=concluded_at)
             user_account_data["months_past"] = months_past
         return payload
 

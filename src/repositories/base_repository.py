@@ -1,6 +1,7 @@
 # STANDARD LIBS
 from typing import Optional
 import logging
+from enum import Enum
 
 # OUTSIDE LIBRARIES
 from decouple import config
@@ -87,6 +88,7 @@ class BaseRepository(IRepository):
 
     def update_one(self, old, new) -> bool:
         try:
+            BaseRepository.normalize_enum_types(payload=new)
             self.collection.update_one(old, {"$set": new})
             return True
         except Exception as e:
@@ -102,3 +104,11 @@ class BaseRepository(IRepository):
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
             return False
+
+    @staticmethod
+    def normalize_enum_types(payload: dict):
+        for key in payload:
+            if isinstance(payload[key], Enum):
+                payload[key] = payload[key].value
+            elif type(payload[key]) == dict:
+                BaseRepository.normalize_enum_types(payload=payload[key])

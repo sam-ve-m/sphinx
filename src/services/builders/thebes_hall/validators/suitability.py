@@ -11,9 +11,7 @@ class Suitability(IValidator):
         suitability = payload.get("suitability")
         if suitability:
             submission_date = suitability.get("submission_date")
-            months_past = Suitability.months_past(
-                submission_date=submission_date
-            )
+            months_past = Suitability.months_past(submission_date=submission_date)
             suitability["months_past"] = months_past
         return payload
 

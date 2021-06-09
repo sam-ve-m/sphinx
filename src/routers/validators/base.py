@@ -1,13 +1,18 @@
+# STANDARD LIBS
 from __future__ import annotations
-from fastapi import Form
-from pydantic import BaseModel, constr, validate_email, validator
 from typing import Optional
 from datetime import datetime
 
+# OUTSIDE LIBRARIES
+from fastapi import Form
+from pydantic import BaseModel, constr, validate_email, validator, UUID1
 
+# SPHIX
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
 from src.repositories.file.enum.term_file import TermsFileType
+from src.utils.brazil_register_number_validator import is_cpf_valid
+from src.routers.validators.enum_template import MaritalStatusEnum
 
 
 class Email(BaseModel):
@@ -34,7 +39,7 @@ class View(BaseModel):
         view_repository = ViewRepository()
         if view_repository.find_one({"_id": e}, ttl=60):
             return e
-        return False
+        raise ValueError("view not exists")
 
 
 class Feature(BaseModel):
@@ -45,7 +50,7 @@ class Feature(BaseModel):
         feature_repository = FeatureRepository()
         if feature_repository.find_one({"_id": e}, ttl=60):
             return e
-        return False
+        raise ValueError("feature not exists")
 
 
 class OptionalPIN(BaseModel):
@@ -94,3 +99,26 @@ class TermFile(BaseModel):
     @classmethod
     def as_form(cls, file_type: str = Form(...)) -> TermFile:
         return cls(file_type=file_type)
+
+
+class Cpf(BaseModel):
+    cpf: int
+
+    @validator("cpf", always=True, allow_reuse=True)
+    def validate_cpf(cls, e):
+        if is_cpf_valid(cpf=e):
+            return e
+        raise ValueError("invalid cpf")
+
+
+class MaritalStatus(BaseModel):
+    marital_status: MaritalStatusEnum
+
+
+class Nationality(BaseModel):
+    nationality: str
+
+
+class QuizQuestionOption(BaseModel):
+    quiz_question_id: UUID1
+    quiz_option_id: UUID1

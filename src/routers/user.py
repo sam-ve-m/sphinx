@@ -1,8 +1,9 @@
 # STANDARD LIBS
-from typing import Union
+from typing import Union, List
 
 # OUTSIDE LIBRARIES
 from fastapi import APIRouter, Request, Response, UploadFile, File, Depends
+from pydantic import BaseModel
 
 # SPHINX
 from src.routers.validators.base import (
@@ -13,6 +14,10 @@ from src.routers.validators.base import (
     OptionalPIN,
     Feature,
     TermFile,
+    Cpf,
+    MaritalStatus,
+    Nationality,
+    QuizQuestionOption,
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -23,6 +28,18 @@ router = APIRouter()
 
 class UserSimple(Email, Name, OptionalPIN):
     pass
+
+
+class Spouse(Name, Cpf, Nationality):
+    pass
+
+
+class UserIdentifierData(Cpf, MaritalStatus):
+    spouse: Spouse
+
+
+class QuizResponses(BaseModel):
+    responses: List[QuizQuestionOption]
 
 
 @router.post("/user", tags=["user"])
@@ -37,13 +54,37 @@ def create_admin(user: UserSimple, request: Request):
 
 @router.get("/user/forgot_password", tags=["user"])
 def forgot_password(user: Email, request: Request):
-    return BaseController.run(UserController.forgot_password, dict(user), request)
+    return BaseController.run(UserController.forgot_password, user.dict(), request)
 
 
-@router.put("/user", tags=["user"])
+@router.put("/user/identifier_data", tags=["user"])
+def update_user_identifier_data(user_identifier: UserIdentifierData, request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "thebes_answer": jwt_data_or_error_response,
+        "user_identifier": user_identifier.dict(),
+    }
+    return BaseController.run(UserController.user_identifier_data, payload, request)
+
+
+@router.put("/user/fill_user_data", tags=["user"])
+def update_fill_user_data(quiz_response: QuizResponses, request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "thebes_answer": jwt_data_or_error_response,
+        "quiz": quiz_response.dict(),
+    }
+    return BaseController.run(UserController.fill_user_data, payload, request)
+
+
+@router.put("/user/table_callback", tags=["user"])
 def update_user_data(user: UserSimple, request: Request):
-    # TODO: complete data
-    return BaseController.run(UserController.create_admin, dict(user), request)
+    # TODO: Callback da STONEAGE
+    pass
 
 
 @router.delete("/user", tags=["user"])
@@ -63,7 +104,7 @@ def change_user_password(pin: PIN, request: Request):
         return jwt_data_or_error_response
     payload = {
         "thebes_answer": jwt_data_or_error_response,
-        "new_pin": dict(pin).get("pin"),
+        "new_pin": pin.dict().get("pin"),
     }
     return BaseController.run(UserController.change_password, payload, request)
 
@@ -85,7 +126,7 @@ def change_user_view(view: View, request: Request):
         return jwt_data_or_error_response
     payload = {
         "thebes_answer": jwt_data_or_error_response,
-        "new_view": dict(view).get("views"),
+        "new_view": view.dict().get("views"),
     }
     return BaseController.run(UserController.change_view, payload, request)
 
@@ -97,7 +138,7 @@ def add_features_to_user(feature: Feature, request: Request):
         return jwt_data_or_error_response
     payload = {
         "thebes_answer": jwt_data_or_error_response,
-        "feature": dict(feature).get("feature"),
+        "feature": feature.dict().get("feature"),
     }
     return BaseController.run(UserController.add_feature, dict(payload), request)
 
@@ -109,7 +150,7 @@ def remove_features_to_user(feature: Feature, request: Request):
         return jwt_data_or_error_response
     payload = {
         "thebes_answer": jwt_data_or_error_response,
-        "feature": dict(feature).get("feature"),
+        "feature": feature.dict().get("feature"),
     }
     return BaseController.run(UserController.delete_feature, dict(payload), request)
 
