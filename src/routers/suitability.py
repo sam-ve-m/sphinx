@@ -22,8 +22,17 @@ class Suitability(Version):
 
 @router.post("/suitability/quiz", tags=["suitability"])
 async def create_quiz_suitability(suitability: Suitability, request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    payload = {
+        "thebes_answer": jwt_data_or_error_response,
+        "suitability": suitability.dict()
+    }
+
     return BaseController.run(
-        SuitabilityController.create_quiz, suitability.dict(), request
+        SuitabilityController.create_quiz, payload, request
     )
 
 
@@ -39,4 +48,19 @@ async def crate_user_profile_suitability(request: Request):
 
     return BaseController.run(
         SuitabilityController.create_profile, payload, request
+    )
+
+
+@router.get("/suitability/profile", tags=["suitability"])
+async def get_user_profile_suitability(request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    payload = {
+        "thebes_answer": jwt_data_or_error_response
+    }
+
+    return BaseController.run(
+        SuitabilityController.get_user_profile, payload, request
     )
