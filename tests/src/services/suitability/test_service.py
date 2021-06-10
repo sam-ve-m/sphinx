@@ -31,8 +31,8 @@ basic_payload = {
 
 
 def test_insert_error_in_suitability_db():
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.insert = MagicMock(return_value=False)
+    stubby_repository = StubRepository(database="", collection="")
+    stubby_repository.insert = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
         SuitabilityService.create_quiz(
             payload=basic_payload,
