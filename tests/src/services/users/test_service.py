@@ -1,6 +1,6 @@
 # OUTSIDE LIBRARIES
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from fastapi import status
 
 # SPHINX
@@ -9,7 +9,6 @@ from src.utils.jwt_utils import JWTHandler
 from src.services.users.service import UserService
 from tests.stub_classes.stub_base_repository import StubBaseRepository
 from src.repositories.file.repository import TermsFileType
-from src.utils.stone_age import StoneAge
 
 
 class StubRepository(StubBaseRepository):
@@ -426,6 +425,10 @@ def test_user_identifier_data():
     assert type(response.get("payload").get("quiz")) == list
 
 
+class StubPersephoneClient:
+    pass
+
+
 def test_user_quiz_responses_register_not_exists():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value=None)
@@ -435,49 +438,57 @@ def test_user_quiz_responses_register_not_exists():
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
             stone_age=StubStoneAge,
+            persephone_client=StubPersephoneClient
         )
 
 
+@patch("src.services.users.service.get_user_account_template_with_data", MagicMock(return_value={}))
 def test_user_quiz_responses_process_issue_v1():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
+    StubPersephoneClient.run = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
         UserService.fill_user_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
             stone_age=StubStoneAge,
+            persephone_client=StubPersephoneClient
         )
 
 
+@patch("src.services.users.service.get_user_account_template_with_data", MagicMock(return_value={}))
 def test_user_quiz_responses_process_issue_v2():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(
         return_value={"user_account_data": {"data": "lalal"}}
     )
-    StubStoneAge.send_user_quiz_responses = MagicMock(return_value={"li": "lo"})
-    StubStoneAge.get_only_values_from_user_data = MagicMock(return_value={"li": "lo"})
     stub_user_repository.update_one = MagicMock(return_value=False)
+    StubPersephoneClient.run = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
         UserService.fill_user_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
             stone_age=StubStoneAge,
+            persephone_client=StubPersephoneClient
         )
 
 
+@patch("src.services.users.service.get_user_account_template_with_data", MagicMock(return_value={}))
 def test_user_quiz_responses():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(
         return_value={"user_account_data": {"data": "lalal"}}
     )
-    StubStoneAge.send_user_quiz_responses = MagicMock(return_value={"li": "lo"})
-    StubStoneAge.get_only_values_from_user_data = MagicMock(return_value={"li": "lo"})
     stub_user_repository.update_one = MagicMock(return_value=True)
+    StubPersephoneClient.run = MagicMock(return_value=True)
+    stone_age = StubStoneAge()
+    stone_age.send_user_quiz_responses = MagicMock(return_value={})
     response = UserService.fill_user_data(
         payload=payload_user_identifier_data,
         user_repository=stub_user_repository,
-        stone_age=StubStoneAge,
+        stone_age=stone_age,
+        persephone_client=StubPersephoneClient
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "user.creating_account"

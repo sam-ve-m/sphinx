@@ -7,11 +7,11 @@ from src.utils.stone_age import StoneAge
 
 def test_get_only_values_from_user_data():
     data = {
-        "name": {"origin": "XXX", "value": "Andre"},
+        "name": {"source": "XXX", "value": "Andre"},
         "date": 123,
         "address": {
-            "street": {"origin": "XXX", "value": "R. imbuia"},
-            "number": {"origin": "XXX", "value": "153"},
+            "street": {"source": "XXX", "value": "R. imbuia"},
+            "number": {"source": "XXX", "value": "153"},
         },
     }
     expected = {
