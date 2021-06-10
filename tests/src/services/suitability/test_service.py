@@ -42,14 +42,14 @@ def test_insert_error_in_suitability_db():
         )
 
 
-# def test_insert_in_suitability_db():
-#     stubby_repository = StubbyRepository(database="", collection="")
-#     stubby_repository.insert = MagicMock(return_value=True)
-#     response = SuitabilityService.create_quiz(
-#         payload=basic_payload,
-#         suitability_repository=stubby_repository,
-#         suitability_answers_repository=stubby_repository,
-#
-#     )
-#     assert response.get("status_code") == status.HTTP_201_CREATED
-#     assert response.get("message_key") == "suitabilities.create_quiz"
+def test_insert_in_suitability_db():
+    stubby_repository = StubRepository(database="", collection="")
+    stubby_repository.insert = MagicMock(return_value=True)
+    response = SuitabilityService.create_quiz(
+        payload=basic_payload,
+        suitability_repository=stubby_repository,
+        suitability_answers_repository=stubby_repository,
+
+    )
+    assert response.get("status_code") == status.HTTP_201_CREATED
+    assert response.get("message_key") == "suitabilities.create_quiz"

@@ -30,7 +30,8 @@ class SuitabilityService(ISuitability):
         if not suitability:
             raise InternalServerError("common.process_issue")
 
-        suitability.update({"date": datetime.utcnow()})
+        suitability_submission_date = datetime.utcnow()
+        suitability.update({"date": suitability_submission_date})
         SuitabilityService.__insert_new_suitability(
             suitability_repository=suitability_repository,
             suitability=suitability
@@ -69,6 +70,7 @@ class SuitabilityService(ISuitability):
                                                         suitability_user_profile_repository=
                                                         suitability_user_profile_repository,
                                                         user_email=user_email,
+                                                        user_score=score,
                                                         suitability_version=suitability_version,
                                                         answers=answers,
                                                         submission_date=suitability_submission_date))
@@ -160,11 +162,13 @@ class SuitabilityService(ISuitability):
             answers: List[dict],
             suitability_version: int,
             user_email: str,
+            user_score: int,
             submission_date: datetime,
     ) -> Optional[Exception]:
         payload = {
             "email": user_email,
             "date": submission_date,
+            "user_score": user_score,
             "answers": answers,
             "suitability_version": suitability_version
         }

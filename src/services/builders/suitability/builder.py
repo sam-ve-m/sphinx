@@ -1,14 +1,10 @@
 # STANDARD LIBS
-from typing import Optional, Tuple, List
-
-# SPHINX
-from src.exceptions.exceptions import InternalServerError
-from src.utils.suitability_calc import SuitabilityCalc
+from functools import reduce
+from typing import Optional, List
 
 
 class SuitabilityAnswersProfileBuilder:
-    def __init__(self, suitability_calc=SuitabilityCalc()):
-        self.__suitability_calc = suitability_calc
+    def __init__(self):
         self.__suitability: dict = {}
 
     @property
@@ -26,31 +22,38 @@ class SuitabilityAnswersProfileBuilder:
 
     @property
     def profile(self) -> dict:
-        best_answer = self.__get_questions_with_best_answer()
-        answers = self.__calc_suitability_profile(best_answer)
+        questions_with_best_answers = self.__get_questions_with_best_answer()
+        score_profile = self.__calc_suitability_score_profile(questions_with_best_answers)
         answers_profile_composition = {
-            "score": 0,
+            "score": score_profile,
             "suitability_version": self.suitability.get("version"),
-            "answers": answers,
+            "suitability_submission_date": self.suitability.get("date"),
+            "answers": questions_with_best_answers
         }
         return answers_profile_composition
 
     def __get_questions_with_best_answer(self) -> List[dict]:
-        """TODO IMPLEMENT"""
-        pass
+        questions_with_best_answers = []
+        for question in self.__suitability.get("questions"):
+            buffer_answer = {"value_text": "", "weight": 0}
+            for answer in question.get("answers"):
+                if answer.get("weight") > buffer_answer.get("weight"):
+                    buffer_answer["weight"] = answer.get("weight")
+                    buffer_answer["value_text"] = answer.get("value_text")
+            questions_with_best_answers.append({
+                "question": question.get("value_text"),
+                "question_score": question.get("score"),
+                "answer": buffer_answer.get("value_text"),
+                "answer_weight": buffer_answer.get("weight")
+            })
+        return questions_with_best_answers
 
     @staticmethod
-    def __calc_suitability_profile(questions: List[dict]) -> List[dict]:
-        """TODO IMPLEMENT"""
-        pass
-
-    @staticmethod
-    def __get_more_value_from_answers(answers: dict) -> int:
-        highest_value = 0
-        for answer in answers:
-            weight = answer.get('weight')
-            if weight > highest_value:
-                highest_value = weight
-
-        return highest_value
-
+    def __calc_suitability_score_profile(questions: List[dict]) -> float:
+        _question_score_with_max_response_wight = [
+            question.get("question_score") * question.get("answer_weight")
+            for question in questions
+        ]
+        question_score_with_max_response_wight = reduce(lambda x, y: x + y, _question_score_with_max_response_wight)
+        score_profile = question_score_with_max_response_wight / question_score_with_max_response_wight
+        return score_profile
