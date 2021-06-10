@@ -1,5 +1,5 @@
 # STANDARD LIBS
-from typing import Union, List
+from typing import Union, List, Optional
 
 # OUTSIDE LIBRARIES
 from fastapi import APIRouter, Request, Response, UploadFile, File, Depends
@@ -18,6 +18,9 @@ from src.routers.validators.base import (
     MaritalStatus,
     Nationality,
     QuizQuestionOption,
+    IsUsPerson,
+    UsTin,
+    IsCvmQualifiedInvestor,
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -34,8 +37,8 @@ class Spouse(Name, Cpf, Nationality):
     pass
 
 
-class UserIdentifierData(Cpf, MaritalStatus):
-    spouse: Spouse
+class UserIdentifierData(Cpf, MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedInvestor):
+    spouse: Optional[Spouse]
 
 
 class QuizResponses(BaseModel):
@@ -82,9 +85,13 @@ def update_fill_user_data(quiz_response: QuizResponses, request: Request):
 
 
 @router.put("/user/table_callback", tags=["user"])
-def update_user_data(user: UserSimple, request: Request):
-    # TODO: Callback da STONEAGE
-    pass
+def user_table_callback(request: Request):
+    # TODO: Callback da STONEAGE MAKE BASEMODEL
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {"thebes_answer": jwt_data_or_error_response}
+    return BaseController.run(UserController.table_callback, payload, request)
 
 
 @router.delete("/user", tags=["user"])

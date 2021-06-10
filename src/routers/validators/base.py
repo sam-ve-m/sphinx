@@ -122,3 +122,15 @@ class Nationality(BaseModel):
 class QuizQuestionOption(BaseModel):
     quiz_question_id: UUID1
     quiz_option_id: UUID1
+
+
+class IsCvmQualifiedInvestor(BaseModel):
+    is_cvm_qualified_investor: bool
+
+
+class IsUsPerson(BaseModel):
+    is_us_person: bool
+
+
+class UsTin(BaseModel):
+    us_tin: Optional[bool]

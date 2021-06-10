@@ -126,9 +126,7 @@ def test_delete_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="common.register_not_exists"):
-        UserService.delete(
-            payload=payload_change_view, user_repository=stub_repository
-        )
+        UserService.delete(payload=payload_change_view, user_repository=stub_repository)
 
 
 def test_delete_process_issue():
@@ -136,9 +134,7 @@ def test_delete_process_issue():
     stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
     stub_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
-        UserService.delete(
-            payload=payload_change_view, user_repository=stub_repository
-        )
+        UserService.delete(payload=payload_change_view, user_repository=stub_repository)
 
 
 def test_delete():
@@ -375,7 +371,7 @@ payload_user_identifier_data = {
 }
 
 
-class StubStoneAge():
+class StubStoneAge:
     pass
 
 
@@ -456,7 +452,9 @@ def test_user_quiz_responses_process_issue_v1():
 
 def test_user_quiz_responses_process_issue_v2():
     stub_user_repository = StubRepository(database="", collection="")
-    stub_user_repository.find_one = MagicMock(return_value={"user_account_data": {"data": "lalal"}})
+    stub_user_repository.find_one = MagicMock(
+        return_value={"user_account_data": {"data": "lalal"}}
+    )
     StubStoneAge.send_user_quiz_responses = MagicMock(return_value={"li": "lo"})
     StubStoneAge.get_only_values_from_user_data = MagicMock(return_value={"li": "lo"})
     stub_user_repository.update_one = MagicMock(return_value=False)

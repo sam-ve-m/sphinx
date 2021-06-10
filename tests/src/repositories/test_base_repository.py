@@ -51,16 +51,16 @@ def test_find_one() -> None:
 
 
 class T(Enum):
-    TESTE = 'teste'
+    TESTE = "teste"
 
 
 def test_normalize_enum_types():
-    payload = {'a': T.TESTE}
+    payload = {"a": T.TESTE}
     BaseRepository.normalize_enum_types(payload=payload)
-    assert payload == {'a': 'teste'}
+    assert payload == {"a": "teste"}
 
 
 def test_normalize_enum_types_deep():
-    payload = {'a': {'b': T.TESTE}}
+    payload = {"a": {"b": T.TESTE}}
     BaseRepository.normalize_enum_types(payload=payload)
-    assert payload == {'a': {'b': 'teste'}}
+    assert payload == {"a": {"b": "teste"}}

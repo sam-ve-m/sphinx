@@ -23,12 +23,14 @@ class SuitabilityAnswersProfileBuilder:
     @property
     def profile(self) -> dict:
         questions_with_best_answers = self.__get_questions_with_best_answer()
-        score_profile = self.__calc_suitability_score_profile(questions_with_best_answers)
+        score_profile = self.__calc_suitability_score_profile(
+            questions_with_best_answers
+        )
         answers_profile_composition = {
             "score": score_profile,
             "suitability_version": self.suitability.get("version"),
             "suitability_submission_date": self.suitability.get("date"),
-            "answers": questions_with_best_answers
+            "answers": questions_with_best_answers,
         }
         return answers_profile_composition
 
@@ -40,12 +42,15 @@ class SuitabilityAnswersProfileBuilder:
                 if answer.get("weight") > buffer_answer.get("weight"):
                     buffer_answer["weight"] = answer.get("weight")
                     buffer_answer["value_text"] = answer.get("value_text")
-            questions_with_best_answers.append({
-                "question": question.get("value_text"),
-                "question_score": question.get("score"),
-                "answer": buffer_answer.get("value_text"),
-                "answer_weight": buffer_answer.get("weight")
-            })
+            questions_with_best_answers.append(
+                {
+                    "question": question.get("value_text"),
+                    "question_id": question.get("order"),
+                    "question_score": question.get("score"),
+                    "answer": buffer_answer.get("value_text"),
+                    "answer_weight": buffer_answer.get("weight"),
+                }
+            )
         return questions_with_best_answers
 
     @staticmethod
@@ -54,6 +59,11 @@ class SuitabilityAnswersProfileBuilder:
             question.get("question_score") * question.get("answer_weight")
             for question in questions
         ]
-        question_score_with_max_response_wight = reduce(lambda x, y: x + y, _question_score_with_max_response_wight)
-        score_profile = question_score_with_max_response_wight / question_score_with_max_response_wight
+        question_score_with_max_response_wight = reduce(
+            lambda x, y: x + y, _question_score_with_max_response_wight
+        )
+        score_profile = (
+            question_score_with_max_response_wight
+            / question_score_with_max_response_wight
+        )
         return score_profile

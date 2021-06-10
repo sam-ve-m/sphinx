@@ -38,7 +38,6 @@ def test_insert_error_in_suitability_db():
             payload=basic_payload,
             suitability_repository=stubby_repository,
             suitability_answers_repository=stubby_repository,
-
         )
 
 
@@ -49,7 +48,6 @@ def test_insert_in_suitability_db():
         payload=basic_payload,
         suitability_repository=stubby_repository,
         suitability_answers_repository=stubby_repository,
-
     )
     assert response.get("status_code") == status.HTTP_201_CREATED
     assert response.get("message_key") == "suitabilities.create_quiz"

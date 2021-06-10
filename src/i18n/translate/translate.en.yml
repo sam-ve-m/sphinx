@@ -1,4 +1,5 @@
 en:
+  ok: OK.
   requests:
     created: Create successed.
     updated: Register Updated.

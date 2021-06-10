@@ -65,3 +65,7 @@ class UserController:
     @staticmethod
     def fill_user_data(payload: dict):
         return UserService.fill_user_data(payload=payload)
+
+    @staticmethod
+    def table_callback(payload: dict):
+        return UserService.table_callback(payload=payload)

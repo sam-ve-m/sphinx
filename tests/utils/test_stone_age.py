@@ -14,6 +14,10 @@ def test_get_only_values_from_user_data():
             "number": {"origin": "XXX", "value": "153"},
         },
     }
-    expected = {"name": "Andre", "date": 123, "address": {"street": "R. imbuia", "number": "153"}}
+    expected = {
+        "name": "Andre",
+        "date": 123,
+        "address": {"street": "R. imbuia", "number": "153"},
+    }
     result = StoneAge.get_only_values_from_user_data(user_data=data)
     assert expected == result

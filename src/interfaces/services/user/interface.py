@@ -6,6 +6,7 @@ from src.repositories.user.repository import UserRepository
 from src.services.authentications.service import AuthenticationService
 from src.utils.jwt_utils import JWTHandler
 from src.repositories.file.repository import FileRepository
+from persephone_client.main import Persephone
 
 
 class IUser(ABC):
@@ -15,6 +16,7 @@ class IUser(ABC):
         payload: dict,
         user_repository: UserRepository,
         authentication_service: AuthenticationService,
+        persephone_client: Persephone,
     ) -> dict:
         pass
 
@@ -31,11 +33,6 @@ class IUser(ABC):
     @staticmethod
     @abstractmethod
     def delete(payload: dict, user_repository: UserRepository) -> dict:
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def create_admin(payload: dict, user_repository: UserRepository) -> dict:
         pass
 
     @staticmethod
@@ -85,7 +82,7 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def assign_term(
+    def sign_term(
         payload: dict,
         user_repository: UserRepository,
         token_handler: JWTHandler,

@@ -64,60 +64,51 @@ class StoneAge:
     def send_user_quiz_responses(quiz: dict, requests=requests) -> Optional[dict]:
         """this functions will send the user_identifier_data and will return a quiz"""
         return {
-            "status": {"origin": "XXX", "value": "R. imbuia"},
-            "userData": {
-                "name": {"origin": "XXX", "value": "R. imbuia"},
-                "maritalStatus": {"origin": "XXX", "value": "R. imbuia"},
-                "spouse": {
-                    "name": {"origin": "XXX", "value": "R. imbuia"},
-                    "nationality": {"origin": "XXX", "value": "R. imbuia"},
-                    "cpf": {"origin": "XXX", "value": 123},
+            "gender": {"value": "string", "source": "string"},
+            "birthDate": {"value": 5465465456456456, "source": "string"},
+            "naturalness": {"value": "string", "source": "string"},
+            "nationality": {"value": "string", "source": "string"},
+            "mother_name": {"value": "string", "source": "string"},
+            "identifier_document": {
+                "type": {"value": "string", "source": "string"},
+                "document_data": {
+                    "number": {"value": "string", "source": "string"},
+                    "date": {"value": 5456456, "source": "string"},
+                    "state": {"value": "string", "source": "string"},
+                    "issuer": {"value": "string", "source": "string"},
                 },
-                "cpf": {"origin": "XXX", "value": 123},
-                "email": {"origin": "XXX", "value": "R. imbuia"},
-                "gender": {"origin": "XXX", "value": "R. imbuia"},
-                "birthDate": {"origin": "XXX", "value": "123"},
-                "naturalness": {"origin": "XXX", "value": "R. imbuia"},
-                "nationality": {"origin": "XXX", "value": "R. imbuia"},
-                "motherName": {"origin": "XXX", "value": "R. imbuia"},
-                "identifierDocument": {
-                    "type": {"origin": "XXX", "value": "R. imbuia"},
-                    "documentData": {
-                        "number": {"origin": "XXX", "value": "R. imbuia"},
-                        "date": {"origin": "XXX", "value": "R. imbuia"},
-                        "state": {"origin": "XXX", "value": "R. imbuia"},
-                        "issuer": {"origin": "XXX", "value": "R. imbuia"},
-                    },
-                },
-                "address": {
-                    "streetName": {"origin": "XXX", "value": "R. imbuia"},
-                    "number": {"origin": "XXX", "value": 123},
-                    "state": {"origin": "XXX", "value": "R. imbuia"},
-                    "city": {"origin": "XXX", "value": "R. imbuia"},
-                    "zipCode": {"origin": "XXX", "value": "R. imbuia"},
-                    "phone_number": {"origin": "XXX", "value": "R. imbuia"},
-                },
-                "occupation": {
-                    "status": {"origin": "XXX", "value": "R. imbuia"},
-                    "company": {
-                        "name": {"origin": "XXX", "value": "R. imbuia"},
-                        "cpnj": {"origin": "XXX", "value": 123},
-                    },
-                },
-                "assets": {
-                    "patrimony": {"origin": "XXX", "value": 123},
-                    "income": {"origin": "XXX", "value": 123},
-                },
-                "education": {
-                    "level": {"origin": "XXX", "value": "R. imbuia"},
-                    "course": {"origin": "XXX", "value": "R. imbuia"},
-                },
-                "documentsPhotos": {
-                    "identifier_document": {"origin": "XXX", "value": "R. imbuia"},
-                    "address_document": {"origin": "XXX", "value": "R. imbuia"},
-                },
-                "politicallyExposedPerson": {"origin": "XXX", "value": True},
             },
+            "address": {
+                "street_name": {"value": "string", "source": "string"},
+                "number": {"value": 5464564, "source": "string"},
+                "state": {"value": "string", "source": "string"},
+                "city": {"value": "string", "source": "string"},
+                "zipCode": {"value": "string", "source": "string"},
+                "phone_number": {"value": "string", "source": "string"},
+            },
+            "occupation": {
+                "status": {"value": "Assalariado", "source": "string"},
+                "company": {
+                    "name": {"value": "string", "source": "string"},
+                    "cpnj": {"value": 46564564564656544, "source": "string"},
+                },
+            },
+            "assets": {
+                "patrimony": {"value": 5446456.44, "source": "string"},
+                "income": {"value": 5446456.44, "source": "string"},
+            },
+            "education": {
+                "level": {"value": "Médio incompleto", "source": "string"},
+                "course": {"value": "string", "source": "string"},
+            },
+            "documents_photos": {
+                "identifier_document": {"value": "string", "source": "string"},
+                "address_document": {"value": "string", "source": "string"},
+            },
+            "politically_exposed_person": {
+                "is_politically_exposed_person": {"value": False, "source": "string"}
+            },
+            "date_of_acquisition": {"value": 5465465456456456, "source": "string"},
         }
         # try:
         #     response = requests.post(url=config('STONE_AGE_RESPONSE_ENDPOINT'), data=quiz)
@@ -133,7 +124,7 @@ class StoneAge:
     @staticmethod
     def get_only_values_from_user_data(user_data: dict, new_user_data=dict()) -> dict:
         for key, value in user_data.items():
-            if type(value) == dict and "origin" in value and "value" in value:
+            if type(value) == dict and "source" in value and "value" in value:
                 new_user_data.update({key: value.get("value")})
             elif type(value) == dict:
                 new_user_data[key] = dict()

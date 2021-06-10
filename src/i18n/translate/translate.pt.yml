@@ -1,4 +1,5 @@
 pt:
+  ok: OK.
   requests:
     created: Registrado com sucesso.
     updated: Registro atualizado.
