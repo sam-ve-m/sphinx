@@ -32,8 +32,9 @@ class SuitabilityService(ISuitability):
         if not suitability:
             raise InternalServerError("common.process_issue")
 
+        version = SuitabilityService.__get_suitability_version()
         suitability_submission_date = datetime.utcnow()
-        suitability.update({"date": suitability_submission_date})
+        suitability.update({"date": suitability_submission_date, "version": version})
         SuitabilityService.__insert_new_suitability(
             suitability_repository=suitability_repository, suitability=suitability
         )
@@ -119,7 +120,32 @@ class SuitabilityService(ISuitability):
             suitability_user_profile_repository=suitability_user_profile_repository,
             email=user_email,
         )
-        return user_profile
+        del user_profile['_id']
+        user_profile['date'] = str(user_profile['date'])
+        return {
+            "status_code": status.HTTP_201_CREATED,
+            "message_key": "ok",
+            "payload": user_profile
+        }
+
+    @staticmethod
+    def __get_suitability_version(
+            suitability_repository=SuitabilityRepository()
+    ) -> int:
+        last_suitability = list(suitability_repository.find_all().sort("_id", -1).limit(1))
+        if not last_suitability:
+            return 1
+
+        if type(last_suitability[0]) is not dict:
+            raise InternalServerError("common.process_issue")
+
+        last_version = last_suitability[0].get("version")
+
+        if type(last_version) is not int:
+            raise InternalServerError("common.process_issue")
+
+        last_version += 1
+        return last_version
 
     @staticmethod
     def __insert_new_suitability(
@@ -220,7 +246,7 @@ class SuitabilityService(ISuitability):
     ) -> Union[dict, Exception]:
         _last_user_profile = (
             suitability_user_profile_repository.find_more_than_equal_one(
-                {"email": {"$eq": email}}
+                {"email": email}
             )
             .sort("_id", -1)
             .limit(1)

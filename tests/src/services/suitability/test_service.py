@@ -13,7 +13,6 @@ class StubRepository(StubBaseRepository):
 
 basic_payload = {
     "suitability": {
-        "version": 1,
         "questions": [
             {
                 "value_text": "primeira pergunta",

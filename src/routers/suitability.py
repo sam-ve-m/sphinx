@@ -1,5 +1,11 @@
+# STANDARD LIBS
 from typing import List
+
+# OUTSIDE LIBRARIES
 from fastapi import APIRouter, Request, Response
+from pydantic import BaseModel
+
+# SPHINX
 from src.routers.validators.base import Version, Weight, Score, ValueText, Order
 from src.controllers.suitabilities.controller import SuitabilityController
 from src.controllers.base_controller import BaseController
@@ -16,7 +22,7 @@ class Question(Score, ValueText, Order):
     answers: List[Answer]
 
 
-class Suitability(Version):
+class Suitability(BaseModel):
     questions: List[Question]
 
 

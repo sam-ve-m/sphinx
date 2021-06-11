@@ -9,7 +9,6 @@ app = FastAPI()
 app.include_router(suitability_router)
 client = TestClient(app)
 basic_payload_data_for_replace_values = {
-    "version": 1,
     "questions": [
         {
             "value_text": "primeira pergunta",
@@ -35,7 +34,6 @@ basic_payload_data_for_replace_values = {
 }
 
 basic_payload_data_for_mutable_type = {
-    "version": 1,
     "questions": [
         {
             "value_text": "primeira pergunta",
@@ -53,13 +51,6 @@ basic_payload_data_for_mutable_type = {
 
 def test_suitability_quiz_without_payload():
     response = client.post("/suitability/quiz", data=json.dumps({}))
-    assert response.status_code == 422
-
-
-def test_suitability_quiz_payload_without_version():
-    payload = dict(basic_payload_data_for_replace_values)
-    del payload["version"]
-    response = client.post("/suitability/quiz", data=json.dumps(payload))
     assert response.status_code == 422
 
 
