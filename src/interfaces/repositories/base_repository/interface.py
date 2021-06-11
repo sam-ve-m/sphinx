@@ -15,9 +15,7 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def find_one(
-        self, query: dict, ttl: int = 0, cache=RepositoryRedis
-    ) -> Optional[dict]:
+    def find_one(self, query: dict, ttl: int = 0) -> Optional[dict]:
         pass
 
     @abstractmethod
