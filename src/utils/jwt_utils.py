@@ -27,9 +27,9 @@ class JWTHandler:
         payload.update(
             {
                 "exp": get_int_from_datetime(
-                    datetime.now(timezone.utc) + timedelta(minutes=ttl)
+                    datetime.utcnow() + timedelta(minutes=ttl)
                 ),
-                "created_at": datetime.now(),
+                "created_at": datetime.utcnow(),
             }
         )
         try:
@@ -85,6 +85,8 @@ class JWTHandler:
             "terms": payload.get("terms"),
             "suitability_months_past": suitability_months_past,
             "user_account_data_months_past": user_account_data_months_past,
+            "exp": payload.get("exp"),
+            "created_at": payload.get("created_at"),
         }
         return new_payload
 
