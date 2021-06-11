@@ -53,15 +53,7 @@ class BaseRepository(IRepository):
     ) -> Optional[dict]:
         try:
             if ttl > 0:
-                query_hash = hash_field(payload=query)
-                cache_value = cache.get(key=f"{self.base_identifier}:{query_hash}")
-                if cache_value:
-                    value = cache_value
-                else:
-                    value = self.collection.find_one(query)
-                    cache.set(
-                        key=f"{self.base_identifier}:{query_hash}", value=value, ttl=ttl
-                    )
+                value = self._get_from_cache(query=query, cache=cache, ttl=ttl)
             else:
                 value = self.collection.find_one(query)
             return value
@@ -112,3 +104,15 @@ class BaseRepository(IRepository):
                 payload[key] = payload[key].value
             elif type(payload[key]) == dict:
                 BaseRepository.normalize_enum_types(payload=payload[key])
+
+    def _get_from_cache(self, query: dict, ttl: int, cache=RepositoryRedis):
+        query_hash = hash_field(payload=query)
+        cache_value = cache.get(key=f"{self.base_identifier}:{query_hash}")
+        if cache_value:
+            return cache_value
+        else:
+            cache_value = self.collection.find_one(query)
+            cache.set(
+                key=f"{self.base_identifier}:{query_hash}", value=cache_value, ttl=ttl
+            )
+        return cache_value

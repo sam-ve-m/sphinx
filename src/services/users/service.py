@@ -350,7 +350,7 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
         stone_age=StoneAge,
-        persephone_client=PersephoneService.get_client()
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("thebes_answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})

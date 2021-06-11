@@ -120,19 +120,21 @@ class SuitabilityService(ISuitability):
             suitability_user_profile_repository=suitability_user_profile_repository,
             email=user_email,
         )
-        del user_profile['_id']
-        user_profile['date'] = str(user_profile['date'])
+        del user_profile["_id"]
+        user_profile["date"] = str(user_profile["date"])
         return {
             "status_code": status.HTTP_201_CREATED,
             "message_key": "ok",
-            "payload": user_profile
+            "payload": user_profile,
         }
 
     @staticmethod
     def __get_suitability_version(
-            suitability_repository=SuitabilityRepository()
+        suitability_repository=SuitabilityRepository(),
     ) -> int:
-        last_suitability = list(suitability_repository.find_all().sort("_id", -1).limit(1))
+        last_suitability = list(
+            suitability_repository.find_all().sort("_id", -1).limit(1)
+        )
         if not last_suitability:
             return 1
 

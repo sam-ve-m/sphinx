@@ -438,11 +438,14 @@ def test_user_quiz_responses_register_not_exists():
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
             stone_age=StubStoneAge,
-            persephone_client=StubPersephoneClient
+            persephone_client=StubPersephoneClient,
         )
 
 
-@patch("src.services.users.service.get_user_account_template_with_data", MagicMock(return_value={}))
+@patch(
+    "src.services.users.service.get_user_account_template_with_data",
+    MagicMock(return_value={}),
+)
 def test_user_quiz_responses_process_issue_v1():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
@@ -453,11 +456,14 @@ def test_user_quiz_responses_process_issue_v1():
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
             stone_age=StubStoneAge,
-            persephone_client=StubPersephoneClient
+            persephone_client=StubPersephoneClient,
         )
 
 
-@patch("src.services.users.service.get_user_account_template_with_data", MagicMock(return_value={}))
+@patch(
+    "src.services.users.service.get_user_account_template_with_data",
+    MagicMock(return_value={}),
+)
 def test_user_quiz_responses_process_issue_v2():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(
@@ -470,11 +476,14 @@ def test_user_quiz_responses_process_issue_v2():
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
             stone_age=StubStoneAge,
-            persephone_client=StubPersephoneClient
+            persephone_client=StubPersephoneClient,
         )
 
 
-@patch("src.services.users.service.get_user_account_template_with_data", MagicMock(return_value={}))
+@patch(
+    "src.services.users.service.get_user_account_template_with_data",
+    MagicMock(return_value={}),
+)
 def test_user_quiz_responses():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(
@@ -488,7 +497,7 @@ def test_user_quiz_responses():
         payload=payload_user_identifier_data,
         user_repository=stub_user_repository,
         stone_age=stone_age,
-        persephone_client=StubPersephoneClient
+        persephone_client=StubPersephoneClient,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "user.creating_account"
