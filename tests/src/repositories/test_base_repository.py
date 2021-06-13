@@ -62,12 +62,11 @@ def test_find_one_false_without_cache() -> None:
     stub_mongo_collection = StubMongoCollection()
     stub_mongo_collection.find_one = MagicMock(side_effect=Exception())
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
-    stub_base_repository._get_from_cache = MagicMock(return_value={})
+    stub_base_repository._get_from_cache = MagicMock(return_value=False)
     stub_cache = StubCache()
     assert (
         stub_base_repository.find_one(
             query={"test_insert_user_false": "test_insert_user_false"},
-            ttl=0,
             cache=stub_cache,
         )
         is None
@@ -78,11 +77,10 @@ def test_find_one_true_without_cache() -> None:
     stub_mongo_collection = StubMongoCollection()
     stub_mongo_collection.find_one = MagicMock(return_value=True)
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
-    stub_base_repository._get_from_cache = MagicMock(return_value={})
+    stub_base_repository._get_from_cache = MagicMock(return_value=False)
     stub_cache = StubCache()
     assert stub_base_repository.find_one(
         query={"test_insert_user_false": "test_insert_user_false"},
-        ttl=0,
         cache=stub_cache,
     )
 
@@ -172,13 +170,17 @@ class T(Enum):
 
 def test_normalize_enum_types():
     payload = {"a": T.TEST}
-    BaseRepository.normalize_enum_types(payload=payload)
+    stub_mongo_collection = StubMongoCollection()
+    base_repository = StubBaseRepository(collection=stub_mongo_collection)
+    base_repository.normalize_enum_types(payload=payload)
     assert payload == {"a": "test"}
 
 
 def test_normalize_enum_types_deep():
     payload = {"a": {"b": T.TEST}}
-    BaseRepository.normalize_enum_types(payload=payload)
+    stub_mongo_collection = StubMongoCollection()
+    base_repository = StubBaseRepository(collection=stub_mongo_collection)
+    base_repository.normalize_enum_types(payload=payload)
     assert payload == {"a": {"b": "test"}}
 
 

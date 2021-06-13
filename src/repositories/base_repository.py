@@ -79,8 +79,8 @@ class BaseRepository(IRepository):
             return None
 
     def update_one(self, old, new) -> bool:
+        self.normalize_enum_types(payload=new)
         try:
-            BaseRepository.normalize_enum_types(payload=new)
             self.collection.update_one(old, {"$set": new})
             return True
         except Exception as e:
@@ -97,22 +97,22 @@ class BaseRepository(IRepository):
             logger.error(e, exc_info=True)
             return False
 
-    @staticmethod
-    def normalize_enum_types(payload: dict):
+    def normalize_enum_types(self, payload: dict):
         for key in payload:
             if isinstance(payload[key], Enum):
                 payload[key] = payload[key].value
             elif type(payload[key]) == dict:
-                BaseRepository.normalize_enum_types(payload=payload[key])
+                self.normalize_enum_types(payload=payload[key])
 
     def _get_from_cache(self, query: dict, ttl: int, cache=RepositoryRedis):
         query_hash = hash_field(payload=query)
-        cache_value = cache.get(key=f"{self.base_identifier}:{query_hash}")
-        if cache_value:
+        if query_hash:
+            cache_value = cache.get(key=f"{self.base_identifier}:{query_hash}")
+            if cache_value:
+                return cache_value
+            else:
+                cache_value = self.collection.find_one(query)
+                cache.set(
+                    key=f"{self.base_identifier}:{query_hash}", value=cache_value, ttl=ttl
+                )
             return cache_value
-        else:
-            cache_value = self.collection.find_one(query)
-            cache.set(
-                key=f"{self.base_identifier}:{query_hash}", value=cache_value, ttl=ttl
-            )
-        return cache_value
