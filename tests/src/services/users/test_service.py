@@ -23,6 +23,14 @@ class StubAuthenticationService:
     pass
 
 
+class StubPersephoneClient:
+    pass
+
+
+class StubJWTHandler:
+    pass
+
+
 payload = {"name": "lala", "email": "Lala", "pin": 1234}
 
 
@@ -45,11 +53,15 @@ def test_created():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
     stub_repository.insert = MagicMock(return_value=True)
-    StubAuthenticationService.send_authentication_email = MagicMock(return_value=True)
+    stub_authentication_service = StubAuthenticationService()
+    stub_authentication_service.send_authentication_email = MagicMock(return_value=True)
+    stub_persephone_client = StubPersephoneClient()
+    stub_persephone_client.run = MagicMock(return_value=True)
     response = UserService.create(
         payload=payload,
         user_repository=stub_repository,
-        authentication_service=StubAuthenticationService,
+        authentication_service=stub_authentication_service,
+        persephone_client=stub_persephone_client,
     )
     assert response.get("status_code") == status.HTTP_201_CREATED
     assert response.get("message_key") == "user.created"
@@ -114,8 +126,12 @@ def test_change_view():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
     stub_repository.update_one = MagicMock(return_value=True)
+    stub_jwt_handler = StubJWTHandler()
+    stub_jwt_handler.generate_token = MagicMock(return_value={"view_change": True})
     response = UserService.change_view(
-        payload=payload_change_view, user_repository=stub_repository
+        payload=payload_change_view,
+        user_repository=stub_repository,
+        token_handler=stub_jwt_handler,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert "jwt" in response.get("payload")
@@ -212,58 +228,61 @@ user_data = {
 
 
 def test_add_feature_already_exists():
-
-    jwt = JWTHandler.generate_token(payload=user_data, ttl=525600)
     payload = {
-        "thebes_answer": JWTHandler.decrypt_payload(jwt),
+        "thebes_answer": user_data,
         "feature": "real_time_data",
     }
+    stub_jwt_handler = StubJWTHandler()
+    stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
     stub_repository = StubRepository(database="", collection="")
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.add_feature(
-        payload=payload, user_repository=stub_repository, token_handler=JWTHandler
+        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
     )
     assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
 
 
 def test_add_feature():
-    jwt = JWTHandler.generate_token(payload=user_data, ttl=525600)
     payload = {
-        "thebes_answer": JWTHandler.decrypt_payload(jwt),
+        "thebes_answer": user_data,
         "feature": "test_feature",
     }
+    stub_jwt_handler = StubJWTHandler()
+    stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
     stub_repository = StubRepository(database="", collection="")
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.add_feature(
-        payload=payload, user_repository=stub_repository, token_handler=JWTHandler
+        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
     )
     assert result.get("status_code") == status.HTTP_200_OK
 
 
 def test_delete_feature_not_exists():
-    jwt = JWTHandler.generate_token(payload=user_data, ttl=525600)
     payload = {
-        "thebes_answer": JWTHandler.decrypt_payload(jwt),
-        "feature": "test_feature",
+        "thebes_answer": user_data,
+        "feature": "test_feature_xxx",
     }
     stub_repository = StubRepository(database="", collection="")
-    stub_repository.update_one = MagicMock(return_value=True)
+    stub_repository.update_one = MagicMock(return_value=False)
+    stub_jwt_handler = StubJWTHandler()
+    stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
     result = UserService.delete_feature(
-        payload=payload, user_repository=stub_repository, token_handler=JWTHandler
+        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
     )
     assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
 
 
 def test_delete_feature_that_exists():
-    jwt = JWTHandler.generate_token(payload=user_data, ttl=525600)
     payload = {
-        "thebes_answer": JWTHandler.decrypt_payload(jwt),
+        "thebes_answer": user_data,
         "feature": "real_time_data",
     }
+    stub_jwt_handler = StubJWTHandler()
+    stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
     stub_repository = StubRepository(database="", collection="")
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.delete_feature(
-        payload=payload, user_repository=stub_repository, token_handler=JWTHandler
+        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
     )
     assert result.get("status_code") == status.HTTP_200_OK
 
@@ -312,8 +331,13 @@ def test_sign_term():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"email": "lala"})
     stub_user_repository.update_one = MagicMock(return_value=True)
+
     stub_file_repository = StubRepository(database="", collection="")
     stub_file_repository.get_term_version = MagicMock(return_value=1)
+
+    StubPersephoneClient.run = MagicMock(return_value=True)
+    stub_jwt_handler = StubJWTHandler()
+    stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
     response = UserService.sign_term(
         payload={
             "thebes_answer": {"email": "lala"},
@@ -321,9 +345,12 @@ def test_sign_term():
         },
         file_repository=stub_file_repository,
         user_repository=stub_user_repository,
+        token_handler=stub_jwt_handler,
+        persephone_client=StubPersephoneClient
+
     )
     assert response.get("status_code") == status.HTTP_200_OK
-    assert type(response.get("payload").get("jwt")) == str
+    assert response.get("payload").get("jwt") == user_data
 
 
 def test_get_signed_term_not_signed():

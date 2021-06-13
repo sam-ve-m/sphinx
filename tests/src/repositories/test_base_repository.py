@@ -171,13 +171,13 @@ class T(Enum):
 
 
 def test_normalize_enum_types():
-    payload = {"a": T.TESTE}
+    payload = {"a": T.TEST}
     BaseRepository.normalize_enum_types(payload=payload)
     assert payload == {"a": "test"}
 
 
 def test_normalize_enum_types_deep():
-    payload = {"a": {"b": T.TESTE}}
+    payload = {"a": {"b": T.TEST}}
     BaseRepository.normalize_enum_types(payload=payload)
     assert payload == {"a": {"b": "test"}}
 
