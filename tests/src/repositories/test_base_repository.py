@@ -80,8 +80,7 @@ def test_find_one_true_without_cache() -> None:
     stub_base_repository._get_from_cache = MagicMock(return_value=False)
     stub_cache = StubCache()
     assert stub_base_repository.find_one(
-        query={"test_insert_user_false": "test_insert_user_false"},
-        cache=stub_cache,
+        query={"test_insert_user_false": "test_insert_user_false"}, cache=stub_cache,
     )
 
 

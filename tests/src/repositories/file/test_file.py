@@ -35,7 +35,7 @@ def test_save_user_file() -> None:
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
     file_repository.save_user_file(
-        file_type=UserFileType.SELF, content="", user_email="test@validator"
+        file_type=UserFileType.SELF, content="data", user_email="test@validator"
     )
     assert True
 

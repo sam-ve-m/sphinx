@@ -346,8 +346,7 @@ def test_sign_term():
         file_repository=stub_file_repository,
         user_repository=stub_user_repository,
         token_handler=stub_jwt_handler,
-        persephone_client=StubPersephoneClient
-
+        persephone_client=StubPersephoneClient,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("payload").get("jwt") == user_data

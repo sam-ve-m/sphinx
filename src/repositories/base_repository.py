@@ -113,6 +113,8 @@ class BaseRepository(IRepository):
             else:
                 cache_value = self.collection.find_one(query)
                 cache.set(
-                    key=f"{self.base_identifier}:{query_hash}", value=cache_value, ttl=ttl
+                    key=f"{self.base_identifier}:{query_hash}",
+                    value=cache_value,
+                    ttl=ttl,
                 )
             return cache_value

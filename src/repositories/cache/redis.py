@@ -15,11 +15,11 @@ class RepositoryRedis(IRedis):
     # Behind the scenes, redis-py uses a connection pool to manage connections to a Redis server.
     # https://pypi.org/project/redis/#connection-pools
     redis = Redis(
-            host=config("REDIS_HOST"),
-            port=config("REDIS_PORT"),
-            db=config("REDIS_DB"),
-            password=config("REDIS_PASSWORD"),
-        )
+        host=config("REDIS_HOST"),
+        port=config("REDIS_PORT"),
+        db=config("REDIS_DB"),
+        password=config("REDIS_PASSWORD"),
+    )
 
     @staticmethod
     def set(key: str, value: dict, redis=redis, ttl: int = 0):

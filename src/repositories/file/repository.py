@@ -35,6 +35,8 @@ class FileRepository(IFile):
         region_name=config("REGION_NAME"),
     )
 
+    valid_files = None
+
     def __init__(self, bucket_name: str):
         self.bucket_name = FileRepository.validate_bucket_name(bucket_name)
 
@@ -56,6 +58,8 @@ class FileRepository(IFile):
         )
         file_name = file_type.value
         file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
+        if all([path, file_name, file_extension]) is False:
+            raise InternalServerError("files.error")
         self.s3_client.put_object(
             Body=FileRepository.resolve_content(content=content),
             Bucket=self.bucket_name,
@@ -71,6 +75,8 @@ class FileRepository(IFile):
             name=file_type.value, version=version
         )
         file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
+        if all([path, file_name, file_extension]) is False:
+            raise InternalServerError("files.error")
         self.s3_client.put_object(
             Body=FileRepository.resolve_content(content=content),
             Bucket=self.bucket_name,
@@ -155,6 +161,11 @@ class FileRepository(IFile):
 
     @staticmethod
     def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
+        valid_files = list()
+        for file_enum in [UserFileType, TermsFileType]:
+            FileRepository.valid_files += [item.value for item in file_enum]
+        if file_type.value not in valid_files:
+            raise InternalServerError("files.error")
         return FileRepository.file_extension_by_type.get(file_type.value)
 
     @staticmethod
