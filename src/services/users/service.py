@@ -34,7 +34,6 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         payload = generate_id("email", payload, must_remove=False)
-        email = payload.get("email")
         payload = hash_field(key="pin", payload=payload)
         if user_repository.find_one({"_id": payload.get("_id")}) is not None:
             raise BadRequestError("common.register_exists")
@@ -49,7 +48,7 @@ class UserService(IUser):
 
         if sent_to_persephone and user_repository.insert(payload):
             authentication_service.send_authentication_email(
-                email=email, payload=payload, ttl=10, body="email.body.created"
+                email=payload.get("email"), payload=payload, ttl=10, body="email.body.created"
             )
             return {
                 "status_code": status.HTTP_201_CREATED,
@@ -296,6 +295,8 @@ class UserService(IUser):
                 .get(file_type.value)
                 .get("version")
             )
+            if version is None:
+                raise Exception()
         except:
             raise BadRequestError("user.files.term_not_signed")
         try:

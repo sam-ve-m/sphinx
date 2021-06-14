@@ -5,7 +5,6 @@ from fastapi import status
 
 # SPHINX
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-from src.utils.jwt_utils import JWTHandler
 from src.services.users.service import UserService
 from tests.stub_classes.stub_base_repository import StubBaseRepository
 from src.repositories.file.repository import TermsFileType
@@ -127,7 +126,7 @@ def test_change_view():
     stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
     stub_repository.update_one = MagicMock(return_value=True)
     stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value={"view_change": True})
+    stub_jwt_handler.generate_token = MagicMock(return_value='toaskjdg1.233213.123123')
     response = UserService.change_view(
         payload=payload_change_view,
         user_repository=stub_repository,
@@ -135,6 +134,7 @@ def test_change_view():
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert "jwt" in response.get("payload")
+    assert type(response.get("payload").get('jwt')) == str
 
 
 def test_delete_register_exists():
@@ -248,13 +248,14 @@ def test_add_feature():
         "feature": "test_feature",
     }
     stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
+    stub_jwt_handler.generate_token = MagicMock(return_value='jkasdh71283.12938712.1029873912')
     stub_repository = StubRepository(database="", collection="")
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.add_feature(
         payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
     )
     assert result.get("status_code") == status.HTTP_200_OK
+    assert type(result.get("payload").get('jwt')) == str
 
 
 def test_delete_feature_not_exists():
@@ -278,13 +279,14 @@ def test_delete_feature_that_exists():
         "feature": "real_time_data",
     }
     stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
+    stub_jwt_handler.generate_token = MagicMock(return_value='asdkjash761.asd98y7139.123y7129h')
     stub_repository = StubRepository(database="", collection="")
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.delete_feature(
         payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
     )
     assert result.get("status_code") == status.HTTP_200_OK
+    assert type(result.get("payload").get('jwt')) == str
 
 
 def test_save_user_self():
@@ -427,8 +429,8 @@ def test_user_identifier_data_process_issue_v1():
 def test_user_identifier_data_process_issue_v2():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
-    StubStoneAge.send_user_identifier_data = MagicMock(return_value=[1, 2])
     stub_user_repository.update_one = MagicMock(return_value=False)
+    StubStoneAge.send_user_identifier_data = MagicMock(return_value=[1, 2])
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
@@ -527,3 +529,29 @@ def test_user_quiz_responses():
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "user.creating_account"
+
+
+def test_fill_term_signed_empty_terms_on_payload():
+    payload = dict()
+    UserService.fill_term_signed(payload=payload, file_type='xxx', version=1)
+    assert type(payload.get('terms')) == dict
+    assert len(payload.get('terms')) == 1
+    assert type(payload.get('terms').get('xxx')) == dict
+    assert payload.get('terms').get('xxx').get('version') == 1
+    assert payload.get('terms').get('xxx').get('is_deprecated') is False
+
+
+def test_fill_term_signed_filled_terms_on_payload():
+    payload = {
+        "terms": {
+            'aaa': {
+                "version": 2,
+                "date": None,
+                "is_deprecated": False,
+            }
+        }
+    }
+    UserService.fill_term_signed(payload=payload, file_type='xxx', version=1)
+    assert type(payload.get('terms')) == dict
+    assert len(payload.get('terms')) == 2
+

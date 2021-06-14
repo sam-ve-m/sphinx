@@ -79,6 +79,8 @@ class BaseRepository(IRepository):
             return None
 
     def update_one(self, old, new) -> bool:
+        if old is None or new is None:
+            return False
         self.normalize_enum_types(payload=new)
         try:
             self.collection.update_one(old, {"$set": new})
