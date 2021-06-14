@@ -204,6 +204,12 @@ class SuitabilityService(ISuitability):
         if not _answers:
             raise InternalServerError("suitability.error.no_answers")
 
+        if type(_answers) is not list:
+            raise InternalServerError("suitability.error.no_answers")
+
+        if len(_answers) != 1:
+            raise InternalServerError("suitability.error.no_answers")
+
         if type(_answers[0]) is not dict:
             raise InternalServerError("suitability.error.answers_format")
 
@@ -229,7 +235,7 @@ class SuitabilityService(ISuitability):
         except AttributeError:
             raise InternalServerError("common.process_issue")
 
-        if not old:
+        if type(old) is not dict:
             raise BadRequestError("common.register_not_exists")
 
         if not all([
@@ -238,9 +244,6 @@ class SuitabilityService(ISuitability):
             suitability_version,
             submission_date,
         ]):
-            raise InternalServerError("common.process_issue")
-
-        if type(old) is not dict:
             raise InternalServerError("common.process_issue")
 
         new = dict(old)
