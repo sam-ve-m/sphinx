@@ -402,7 +402,7 @@ def test_update_suitability_metadata_in_user_db_with_update_error():
     stubby_repository = MySuitabilityStubRepository(database="", collection="")
     stubby_repository.find_one = MagicMock(return_value={"test": "test"})
     stubby_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="suitability.error.update_error"):
+    with pytest.raises(BadRequestError, match="suitability.error.update_error"):
         SuitabilityService._SuitabilityService__update_suitability_score_and_submission_date_in_user_db(
             user_repository=stubby_repository,
             user_email="lla@lala.com",
@@ -412,7 +412,7 @@ def test_update_suitability_metadata_in_user_db_with_update_error():
         )
 
 
-def test_update_suitability_metadata_in_user_db_with_update_error():
+def test_update_suitability_metadata_in_user_db():
     stubby_repository = MySuitabilityStubRepository(database="", collection="")
     stubby_repository.find_one = MagicMock(return_value={"test": "test"})
     stubby_repository.update_one = MagicMock(return_value=True)
@@ -425,3 +425,63 @@ def test_update_suitability_metadata_in_user_db_with_update_error():
         )
 
     assert response is None
+
+
+def test_insert_suitability_answers_in_user_profile_db_without_data():
+    stubby_repository = MySuitabilityStubRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={"test": "test"})
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        SuitabilityService._SuitabilityService__insert_suitability_answers_in_user_profile_db(
+            suitability_user_profile_repository=stubby_repository,
+            answers=None,
+            suitability_version=None,
+            user_email=None,
+            user_score=None,
+            submission_date=None,
+        )
+
+
+def test_insert_suitability_answers_in_user_profile_db_with():
+    stubby_repository = MySuitabilityStubRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={"test": "test"})
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        SuitabilityService._SuitabilityService__insert_suitability_answers_in_user_profile_db(
+            suitability_user_profile_repository=stubby_repository,
+            answers=None,
+            suitability_version=None,
+            user_email=None,
+            user_score=None,
+            submission_date=None,
+        )
+
+
+def test_insert_suitability_answers_in_user_profile_db_with_mongo_error():
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        SuitabilityService._SuitabilityService__insert_suitability_answers_in_user_profile_db(
+            suitability_user_profile_repository=None,
+            answers={"t": "t"},
+            suitability_version=1,
+            user_email="lala@lala.com",
+            user_score=1.0,
+            submission_date=datetime.utcnow(),
+        )
+
+
+def test_get_last_user_profile_with_empty_email():
+    stubby_repository = MySuitabilityStubRepository(database="", collection="")
+    stubby_repository.insert = MagicMock(return_value=False)
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        SuitabilityService._SuitabilityService__get_last_user_profile(
+            suitability_user_profile_repository=stubby_repository,
+            email=None
+        )
+
+
+def test_get_last_user_profile_with_mongo_error():
+    stubby_repository = MySuitabilityStubRepository(database="", collection="")
+    stubby_repository.insert = MagicMock(return_value=False)
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        SuitabilityService._SuitabilityService__get_last_user_profile(
+            suitability_user_profile_repository=None,
+            email="email"
+        )

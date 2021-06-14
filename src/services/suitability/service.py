@@ -271,6 +271,15 @@ class SuitabilityService(ISuitability):
             user_score: int,
             submission_date: datetime,
     ) -> Optional[Exception]:
+        if not all([
+            answers,
+            suitability_version,
+            user_email,
+            user_score,
+            submission_date,
+        ]):
+            raise InternalServerError("common.process_issue")
+
         payload = {
             "email": user_email,
             "date": submission_date,
@@ -278,23 +287,38 @@ class SuitabilityService(ISuitability):
             "answers": answers,
             "suitability_version": suitability_version,
         }
-        if suitability_user_profile_repository.insert(payload):
-            return
-
-        raise InternalServerError("suitability.error.update_error")
+        try:
+            inserted = suitability_user_profile_repository.insert(payload)
+        except AttributeError:
+            raise InternalServerError("common.process_issue")
+        else:
+            if not inserted:
+                raise InternalServerError("suitability.error.update_error")
+        return
 
     @staticmethod
     def __get_last_user_profile(
             suitability_user_profile_repository: BaseRepository, email: str
     ) -> Union[dict, Exception]:
-        _last_user_profile = (
-            suitability_user_profile_repository.find_more_than_equal_one(
-                {"email": email}
-            )
+        if not email:
+            raise InternalServerError("common.process_issue")
+
+        try:
+            _last_user_profile = (
+                suitability_user_profile_repository.find_more_than_equal_one(
+                    {"email": email}
+                )
                 .sort("_id", -1)
                 .limit(1)
-        )
+            )
+        except (TypeError, AttributeError):
+            raise InternalServerError("common.process_issue")
+
+        if not _last_user_profile:
+            raise BadRequestError("common.register_not_exists")
+
         last_user_profile = list(_last_user_profile)
+
         if not last_user_profile:
             raise BadRequestError("common.register_not_exists")
 
