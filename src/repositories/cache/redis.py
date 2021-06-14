@@ -8,6 +8,7 @@ from redis import Redis
 
 # SPHINX
 from src.interfaces.repositories.redis.interface import IRedis
+from src.exceptions.exceptions import InternalServerError
 
 
 class RepositoryRedis(IRedis):
@@ -31,6 +32,8 @@ class RepositoryRedis(IRedis):
 
     @staticmethod
     def get(key: str, redis=redis) -> Optional[dict]:
+        if type(key) != str:
+            raise InternalServerError("cache.error.key")
         value = redis.get(name=key)
         return value and pickle.loads(value) or value
 

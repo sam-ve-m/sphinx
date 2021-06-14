@@ -53,3 +53,6 @@ en:
       update_error: Was not possible update data.
       last_user_profile_format: User profile format is incorrect.
       last_user_profile_incomplete_data: User profile response data is incomplete.
+  cache:
+    error:
+      key: Invalid key sent to cache class

@@ -35,8 +35,6 @@ class FileRepository(IFile):
         region_name=config("REGION_NAME"),
     )
 
-    valid_files = None
-
     def __init__(self, bucket_name: str):
         self.bucket_name = FileRepository.validate_bucket_name(bucket_name)
 
@@ -136,11 +134,13 @@ class FileRepository(IFile):
         return value
 
     def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
+        if type(path) != str:
+            raise InternalServerError("files.error")
         objects = self.s3_client.list_objects(
             Bucket=self.bucket_name, Prefix=path, Delimiter="/"
         )
         files_metadata = objects.get("Contents")
-        if files_metadata and len(files_metadata) > 0:
+        if type(files_metadata) == list and len(files_metadata) > 0:
             sorted(
                 files_metadata, key=lambda item: item.get("LastModified"), reverse=True
             )
@@ -163,13 +163,15 @@ class FileRepository(IFile):
     def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
         valid_files = list()
         for file_enum in [UserFileType, TermsFileType]:
-            FileRepository.valid_files += [item.value for item in file_enum]
+            valid_files += [item.value for item in file_enum]
         if file_type.value not in valid_files:
             raise InternalServerError("files.error")
         return FileRepository.file_extension_by_type.get(file_type.value)
 
     @staticmethod
     def generate_term_file_name(name: str, version: int):
+        if version is None or name is None:
+            raise InternalServerError("files.error")
         return f"{name}_v{version}"
 
     @staticmethod
@@ -177,16 +179,16 @@ class FileRepository(IFile):
         return f"{file_type.value}/"
 
     def get_term_version(self, file_type: TermsFileType, is_new_version=False) -> int:
-        path = FileRepository.resolve_term_path(file_type=file_type)
         objects = self.s3_client.list_objects(
-            Bucket=self.bucket_name, Prefix=path, Delimiter="/"
+            Bucket=self.bucket_name,
+            Prefix=FileRepository.resolve_term_path(file_type=file_type),
+            Delimiter="/",
         )
-        version = 0
         content = objects.get("Contents")
-        if content:
+        if type(content) == list:
             version = len(content)
-        if is_new_version:
-            return version + 1
-        if version != 0:
-            return version
+            if is_new_version:
+                return version + 1
+            if version != 0:
+                return version
         raise BadRequestError("files.not_exists")

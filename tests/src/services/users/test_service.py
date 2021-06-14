@@ -37,7 +37,7 @@ payload = {"name": "lala", "email": "Lala", "pin": 1234}
 def test_create_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={})
-    with pytest.raises(BadRequestError, match="common.register_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_exists"):
         UserService.create(payload=payload, user_repository=stub_repository)
 
 
@@ -45,7 +45,7 @@ def test_create_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
     stub_repository.insert = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.create(payload=payload, user_repository=stub_repository)
 
 
@@ -73,7 +73,7 @@ payload_change_password = {"thebes_answer": {"email": "lalal"}, "new_pin": 1234}
 def test_change_password_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.change_password(
             payload=payload_change_password, user_repository=stub_repository
         )
@@ -83,7 +83,7 @@ def test_change_password_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={})
     stub_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.change_password(
             payload=payload_change_password, user_repository=stub_repository
         )
@@ -106,7 +106,7 @@ payload_change_view = {"thebes_answer": {"email": "lalal"}, "new_view": "lite"}
 def test_change_view_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.change_view(
             payload=payload_change_view, user_repository=stub_repository
         )
@@ -116,7 +116,7 @@ def test_change_view_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
     stub_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.change_view(
             payload=payload_change_view, user_repository=stub_repository
         )
@@ -140,7 +140,7 @@ def test_change_view():
 def test_delete_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.delete(payload=payload_change_view, user_repository=stub_repository)
 
 
@@ -148,7 +148,7 @@ def test_delete_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
     stub_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.delete(payload=payload_change_view, user_repository=stub_repository)
 
 
@@ -166,7 +166,7 @@ def test_delete():
 def test_forgot_password_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.change_password(
             payload=payload_change_password, user_repository=stub_repository
         )
@@ -189,7 +189,7 @@ def test_forgot_password():
 def test_logout_all_not_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.logout_all(
             payload=payload_change_password, user_repository=stub_repository
         )
@@ -199,7 +199,7 @@ def test_logout_all_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"email": "lala"})
     stub_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.logout_all(
             payload=payload_change_password, user_repository=stub_repository
         )
@@ -302,7 +302,7 @@ def test_sign_term_register_not_exists():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value=None)
     stub_file_repository = StubRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.sign_term(
             payload={"thebes_answer": {"email": "lala"}},
             file_repository=stub_file_repository,
@@ -316,7 +316,7 @@ def test_sign_term_process_issue():
     stub_user_repository.update_one = MagicMock(return_value=False)
     stub_file_repository = StubRepository(database="", collection="")
     stub_file_repository.get_term_version = MagicMock(return_value=1)
-    with pytest.raises(InternalServerError, match="common.process_issu"):
+    with pytest.raises(InternalServerError, match="^common.process_issu"):
         UserService.sign_term(
             payload={
                 "thebes_answer": {"email": "lala"},
@@ -355,7 +355,7 @@ def test_sign_term():
 def test_get_signed_term_not_signed():
     payload = {"file_type": TermsFileType.TERM_REFUSAL}
     stub_user_repository = StubRepository(database="", collection="")
-    with pytest.raises(BadRequestError, match="user.files.term_not_signed"):
+    with pytest.raises(BadRequestError, match="^user.files.term_not_signed"):
         UserService.get_signed_term(
             payload=payload, file_repository=stub_user_repository
         )
@@ -384,7 +384,7 @@ def test_get_signed_term_error():
     stub_user_repository.get_term_file_by_version = MagicMock(
         side_effect=Exception(";)")
     )
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.get_signed_term(
             payload=payload, file_repository=stub_user_repository
         )
@@ -404,7 +404,7 @@ def test_user_identifier_data_register_not_exists():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value=None)
     StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
@@ -416,7 +416,7 @@ def test_user_identifier_data_process_issue_v1():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
@@ -429,7 +429,7 @@ def test_user_identifier_data_process_issue_v2():
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     StubStoneAge.send_user_identifier_data = MagicMock(return_value=[1, 2])
     stub_user_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
@@ -459,7 +459,7 @@ def test_user_quiz_responses_register_not_exists():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value=None)
     StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.fill_user_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
@@ -477,7 +477,7 @@ def test_user_quiz_responses_process_issue_v1():
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
     StubPersephoneClient.run = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.fill_user_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
@@ -497,7 +497,7 @@ def test_user_quiz_responses_process_issue_v2():
     )
     stub_user_repository.update_one = MagicMock(return_value=False)
     StubPersephoneClient.run = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.fill_user_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,

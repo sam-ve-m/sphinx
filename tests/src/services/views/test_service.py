@@ -15,7 +15,7 @@ def test_create_register_exists():
     payload = {"name": "lala", "display_name": "Lala"}
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={})
-    with pytest.raises(BadRequestError, match="common.register_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_exists"):
         ViewService.create(payload=payload, view_repository=stub_repository)
 
 
@@ -24,7 +24,7 @@ def test_create_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
     stub_repository.insert = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         ViewService.create(payload=payload, view_repository=stub_repository)
 
 
@@ -42,7 +42,7 @@ def test_update_register_not_exists():
     payload = {"view_id": "lala", "model": {"name": "lala", "display_name": "Lala"}}
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         ViewService.update(payload=payload, view_repository=stub_repository)
 
 
@@ -51,7 +51,7 @@ def test_update_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={})
     stub_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         ViewService.update(payload=payload, view_repository=stub_repository)
 
 
@@ -69,7 +69,7 @@ def test_delete_register_not_exists():
     payload = {"view_id": "lala"}
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         ViewService.delete(payload=payload, view_repository=stub_repository)
 
 
@@ -78,7 +78,7 @@ def test_delete_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={})
     stub_repository.delete_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         ViewService.delete(payload=payload, view_repository=stub_repository)
 
 
@@ -101,7 +101,7 @@ def test_link_feature_process_issue():
     view_repository.find_one = MagicMock(return_value={"features": list()})
     feature_repository.find_one = MagicMock(return_value={})
     view_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         ViewService.link_feature(
             payload=link_feature_payload, view_repository=view_repository,
         )
@@ -124,7 +124,7 @@ def test_get_view_register_not_exists():
     payload = {"view_id": "lala"}
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         ViewService.get_view(payload=payload, view_repository=stub_repository)
 
 

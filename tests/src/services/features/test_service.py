@@ -15,7 +15,7 @@ def test_create_register_exists():
     payload = {"name": "lala", "display_name": "Lala"}
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"name": "lili"})
-    with pytest.raises(BadRequestError, match="common.register_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_exists"):
         FeatureService.create(payload=payload, feature_repository=stub_repository)
 
 
@@ -24,7 +24,7 @@ def test_create_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
     stub_repository.insert = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         FeatureService.create(payload=payload, feature_repository=stub_repository)
 
 
@@ -45,7 +45,7 @@ def test_update_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={})
     stub_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         FeatureService.update(payload=payload, feature_repository=stub_repository)
 
 
@@ -66,7 +66,7 @@ def test_delete_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={})
     stub_repository.delete_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         FeatureService.delete(payload=payload, feature_repository=stub_repository)
 
 

@@ -26,6 +26,7 @@ iniconfig
 jmespath
 jwt
 packaging
+persephone-client
 pluggy
 py
 py3-validate-email

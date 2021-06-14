@@ -16,7 +16,7 @@ class S3Client:
 def test_init_error() -> None:
     S3Client.list_buckets = MagicMock(return_value={"Buckets": [{"Name": ""}]})
     FileRepository.s3_client = S3Client
-    with pytest.raises(InternalServerError, match="files.error"):
+    with pytest.raises(InternalServerError, match="^files.error"):
         FileRepository(bucket_name="XXX")
 
 
@@ -57,7 +57,7 @@ def test_resolve_content_str():
 def test_save_term_file() -> None:
     name = "XXX"
     S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
-    S3Client.list_objects = MagicMock(return_value={})
+    S3Client.list_objects = MagicMock(return_value={"Contents": list()})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
@@ -73,7 +73,7 @@ class StubCache:
 
 def test_get_term_file_none() -> None:
     name = "dtvm-test"
-    S3Client.list_objects = MagicMock(return_value={})
+    S3Client.list_objects = MagicMock(return_value={"Contents": list()})
     S3Client.generate_presigned_url = MagicMock(return_value="link")
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
@@ -121,7 +121,7 @@ def test_get_term_version_file_not_exists() -> None:
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    with pytest.raises(BadRequestError, match="files.not_exists"):
+    with pytest.raises(BadRequestError, match="^files.not_exists"):
         file_repository.get_term_version(file_type=TermsFileType.TERM_REFUSAL)
 
 
@@ -179,3 +179,19 @@ def test_get_terms_version_with_cache() -> None:
         sum_version += value
     assert len(result) == 5
     assert sum_version == 5
+
+
+def test_generate_term_file_name_version_none():
+    name = "dtvm-test"
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    file_repository = FileRepository(bucket_name=name)
+    with pytest.raises(InternalServerError, match="^files.error"):
+        file_repository.generate_term_file_name(name="lala", version=None)
+
+
+def test_generate_term_file_name_name_none():
+    name = "dtvm-test"
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    file_repository = FileRepository(bucket_name=name)
+    with pytest.raises(InternalServerError, match="^files.error"):
+        file_repository.generate_term_file_name(name=None, version=1)

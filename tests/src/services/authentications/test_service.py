@@ -31,7 +31,7 @@ payload = {"email": ""}
 def test_answer_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         AuthenticationService.thebes_gate(
             payload=payload,
             user_repository=stub_repository,
@@ -43,7 +43,7 @@ def test_answer_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"is_active": False})
     stub_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
         AuthenticationService.thebes_gate(
             payload=payload,
             user_repository=stub_repository,
@@ -88,7 +88,7 @@ def test_answer_is_not_active():
 def test_login_not_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         AuthenticationService.login(
             payload=payload,
             user_repository=stub_repository,
@@ -127,7 +127,7 @@ def test_login_pin_error():
             "pin": "7110eda4d09e062aa5e4sa390b0a572ac0d2c0220",
         }
     )
-    with pytest.raises(UnauthorizedError, match="user.pin_error"):
+    with pytest.raises(UnauthorizedError, match="^user.pin_error"):
         AuthenticationService.login(
             payload={"pin": "1234", "email": "lala"},
             user_repository=stub_repository,
@@ -156,7 +156,7 @@ def test_login_with_pin():
 def test_forgot_password_not_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         AuthenticationService.login(
             payload=payload,
             user_repository=stub_repository,
@@ -182,7 +182,7 @@ class StubThebesHall:
 def test_thebes_hall_not_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         AuthenticationService.thebes_hall(
             payload=payload,
             user_repository=stub_repository,
