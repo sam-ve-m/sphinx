@@ -73,7 +73,7 @@ class FileRepository(IFile):
             name=file_type.value, version=version
         )
         file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
-        if not all([path, file_name, file_extension]):
+        if all([path, file_name, file_extension]) is False:
             raise InternalServerError("files.error")
         self.s3_client.put_object(
             Body=FileRepository.resolve_content(content=content),
@@ -145,6 +145,7 @@ class FileRepository(IFile):
                 files_metadata, key=lambda item: item.get("LastModified"), reverse=True
             )
             return files_metadata[0].get("Key")
+        return None
 
     @staticmethod
     def resolve_content(content: Union[str, bytes]):
@@ -184,9 +185,10 @@ class FileRepository(IFile):
             Delimiter="/",
         )
         content = objects.get("Contents")
-        if type(content) != list:
-            raise BadRequestError("files.not_exists")
-        version = len(content)
-        if is_new_version:
-            return version + 1
-        return version
+        if type(content) == list:
+            version = len(content)
+            if is_new_version:
+                return version + 1
+            if version != 0:
+                return version
+        raise BadRequestError("files.not_exists")

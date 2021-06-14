@@ -28,16 +28,37 @@ def test_init() -> None:
     assert file_repository.bucket_name == name
 
 
-def test_save_user_file() -> None:
+def test_save_valid_user_file() -> None:
     name = "XXX"
     S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    file_repository.save_user_file(
+    assert file_repository.save_user_file(
         file_type=UserFileType.SELF, content="data", user_email="test@validator"
-    )
-    assert True
+    ) is None
+
+
+def test_save_user_file_with_invalid_user_path() -> None:
+    name = "XXX"
+    S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
+    FileRepository.s3_client = S3Client
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    FileRepository.resolve_user_path = MagicMock(return_value=None)
+    file_repository = FileRepository(bucket_name=name)
+    with pytest.raises(InternalServerError, match="^files.error"):
+        file_repository.save_user_file(file_type=UserFileType.SELF, content="data", user_email="test@validator")
+
+
+def test_save_user_file_with_invalid_file_extension() -> None:
+    name = "XXX"
+    S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
+    FileRepository.s3_client = S3Client
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    FileRepository.get_file_extension_by_type = MagicMock(return_value=None)
+    file_repository = FileRepository(bucket_name=name)
+    with pytest.raises(InternalServerError, match="^files.error"):
+        file_repository.save_user_file(file_type=UserFileType.SELF, content="data", user_email="test@validator")
 
 
 def test_resolve_path() -> None:
@@ -54,17 +75,40 @@ def test_resolve_content_str():
     assert str_value == value
 
 
-def test_save_term_file() -> None:
+def test_save_valid_term_file() -> None:
     name = "XXX"
     S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
     S3Client.list_objects = MagicMock(return_value={"Contents": list()})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
-    file_repository.save_term_file(
+    assert file_repository.save_term_file(
         file_type=TermsFileType.TERM_REFUSAL, content="",
-    )
-    assert True
+    ) is None
+
+
+def test_save_term_file_with_invalid_user_path() -> None:
+    name = "XXX"
+    S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
+    S3Client.list_objects = MagicMock(return_value={"Contents": list()})
+    FileRepository.s3_client = S3Client
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    FileRepository.resolve_term_path = MagicMock(return_value=None)
+    file_repository = FileRepository(bucket_name=name)
+    with pytest.raises(InternalServerError, match="^files.error"):
+        file_repository.save_term_file(file_type=TermsFileType.TERM_REFUSAL, content="")
+
+
+def test_save_term_file_with_invalid_file_extension() -> None:
+    name = "XXX"
+    S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
+    S3Client.list_objects = MagicMock(return_value={"Contents": list()})
+    FileRepository.s3_client = S3Client
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    FileRepository.get_file_extension_by_type = MagicMock(return_value=None)
+    file_repository = FileRepository(bucket_name=name)
+    with pytest.raises(InternalServerError, match="^files.error"):
+        file_repository.save_term_file(file_type=TermsFileType.TERM_REFUSAL, content="")
 
 
 class StubCache:
@@ -117,7 +161,7 @@ def test_get_term_file() -> None:
 
 def test_get_term_version_file_not_exists() -> None:
     name = "dtvm-test"
-    S3Client.list_objects = MagicMock(return_value={"Contents": {}})
+    S3Client.list_objects = MagicMock(return_value={"Contents": []})
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     file_repository = FileRepository(bucket_name=name)
@@ -195,52 +239,3 @@ def test_generate_term_file_name_name_none():
     file_repository = FileRepository(bucket_name=name)
     with pytest.raises(InternalServerError, match="^files.error"):
         file_repository.generate_term_file_name(name=None, version=1)
-
-
-class StubFileType(Enum):
-    LALA = "lala"
-
-
-def test_get_file_extension_by_type_files_error():
-    with pytest.raises(InternalServerError, match="^files.error"):
-        FileRepository.get_file_extension_by_type(file_type=StubFileType.LALA)
-
-
-def test_get_file_extension_by_type():
-    assert type(FileRepository.get_file_extension_by_type(file_type=UserFileType.SELF)) == str
-
-
-def test_resolve_content_is_bytes():
-    result = FileRepository.resolve_content(content=b'b2k=')
-    assert type(result) == bytes
-
-
-def test_resolve_content_is_str():
-    result = FileRepository.resolve_content(content='b2k=')
-    assert type(result) == bytes
-
-
-def test_get_last_saved_file_from_folder_invalid_path_param():
-    name = "dtvm-test"
-    FileRepository.validate_bucket_name = MagicMock(return_value=name)
-    file_repository = FileRepository(bucket_name=name)
-    with pytest.raises(InternalServerError, match="^files.error"):
-        file_repository._get_last_saved_file_from_folder(path=None)
-
-
-def test_get_last_saved_file_from_folder_contents_is_not_list():
-    name = "dtvm-test"
-    FileRepository.validate_bucket_name = MagicMock(return_value=name)
-    S3Client.list_objects = MagicMock(return_value={"Contents": {}})
-    FileRepository.s3_client = S3Client
-    file_repository = FileRepository(bucket_name=name)
-    assert file_repository._get_last_saved_file_from_folder(path='lala') is None
-
-
-def test_get_last_saved_file_from_folder():
-    name = "dtvm-test"
-    FileRepository.validate_bucket_name = MagicMock(return_value=name)
-    S3Client.list_objects = MagicMock(return_value={"Contents": [{"LastModified": 1, "Key": "value1"}, {"LastModified": 2, "Key": "value2"}]})
-    FileRepository.s3_client = S3Client
-    file_repository = FileRepository(bucket_name=name)
-    assert file_repository._get_last_saved_file_from_folder(path='lala') == 'value1'
