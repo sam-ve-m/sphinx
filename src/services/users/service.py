@@ -46,16 +46,15 @@ class UserService(IUser):
             schema_key="prospect_user_schema",
         )
 
-        if sent_to_persephone and user_repository.insert(payload):
-            authentication_service.send_authentication_email(
-                email=payload.get("email"), payload=payload, ttl=10, body="email.body.created"
-            )
-            return {
-                "status_code": status.HTTP_201_CREATED,
-                "message_key": "user.created",
-            }
-        else:
+        if (sent_to_persephone and user_repository.insert(payload)) is False:
             raise InternalServerError("common.process_issue")
+        authentication_service.send_authentication_email(
+            email=payload.get("email"), payload=payload, ttl=10, body="email.body.created"
+        )
+        return {
+            "status_code": status.HTTP_201_CREATED,
+            "message_key": "user.created",
+        }
 
     @staticmethod
     def add_user_control_metadata(payload: dict):
@@ -100,13 +99,12 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
         new = dict(old)
         new.update({"deleted": True})
-        if user_repository.update_one(old=old, new=new):
-            return {
-                "status_code": status.HTTP_200_OK,
-                "message_key": "requests.updated",
-            }
-        else:
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
 
     @staticmethod
     def change_password(payload: dict, user_repository=UserRepository()) -> dict:
@@ -118,13 +116,13 @@ class UserService(IUser):
         new = dict(old)
         new["pin"] = new_pin
         new = hash_field(key="pin", payload=new)
-        if user_repository.update_one(old=old, new=new):
-            return {
-                "status_code": status.HTTP_200_OK,
-                "message_key": "requests.updated",
-            }
-        else:
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
+
 
     @staticmethod
     def change_view(
@@ -138,11 +136,11 @@ class UserService(IUser):
         new = dict(old)
         new["scope"] = dict(old.get("scope"))
         new["scope"]["view_type"] = new_view
-        if user_repository.update_one(old=old, new=new):
-            jwt = token_handler.generate_token(payload=new, ttl=525600)
-            return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-        else:
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
+        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+
 
     @staticmethod
     def forgot_password(
@@ -171,13 +169,12 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
         new = dict(old)
         new.update({"token_valid_after": datetime.now()})
-        if user_repository.update_one(old=old, new=new):
-            return {
-                "status_code": status.HTTP_200_OK,
-                "message_key": "user.all_logged_out",
-            }
-        else:
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "user.all_logged_out",
+        }
 
     @staticmethod
     def add_feature(
@@ -189,17 +186,15 @@ class UserService(IUser):
         if payload.get("feature") not in new_scope.get("features"):
             new_scope.get("features").append(payload.get("feature"))
             new.update({"scope": new_scope})
-            if user_repository.update_one(old=old, new=new):
-                jwt = token_handler.generate_token(payload=new, ttl=525600)
-                return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-            else:
+            if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
-        else:
             jwt = token_handler.generate_token(payload=new, ttl=525600)
-            return {
-                "status_code": status.HTTP_304_NOT_MODIFIED,
-                "payload": {"jwt": jwt},
-            }
+            return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        return {
+            "status_code": status.HTTP_304_NOT_MODIFIED,
+            "payload": {"jwt": jwt},
+        }
 
     @staticmethod
     def delete_feature(
@@ -216,12 +211,11 @@ class UserService(IUser):
                 return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
             else:
                 raise InternalServerError("common.process_issue")
-        else:
-            jwt = token_handler.generate_token(payload=new, ttl=525600)
-            return {
-                "status_code": status.HTTP_304_NOT_MODIFIED,
-                "payload": {"jwt": jwt},
-            }
+        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        return {
+            "status_code": status.HTTP_304_NOT_MODIFIED,
+            "payload": {"jwt": jwt},
+        }
 
     @staticmethod
     def save_user_self(
@@ -249,28 +243,28 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("thebes_answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
-        if old:
-            file_type = payload.get("file_type")
-            new = dict(old)
-            UserService.fill_term_signed(
-                payload=new,
-                file_type=file_type.value,
-                version=file_repository.get_term_version(file_type=file_type),
-            )
-            sent_to_persephone = persephone_client.run(
-                topic="thebes.sphinx_persephone.topic",
-                partition=1,
-                payload=get_user_signed_term_template_with_data(
-                    payload=new, file_type=file_type.value
-                ),
-                schema_key="term_schema",
-            )
-            if sent_to_persephone and user_repository.update_one(old=old, new=new):
-                jwt = token_handler.generate_token(payload=new, ttl=525600)
-                return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-            else:
-                raise InternalServerError("common.process_issue")
-        raise BadRequestError("common.register_not_exists")
+        if type(old) is not dict:
+            raise BadRequestError("common.register_not_exists")
+        file_type = payload.get("file_type")
+        new = dict(old)
+        UserService.fill_term_signed(
+            payload=new,
+            file_type=file_type.value,
+            version=file_repository.get_term_version(file_type=file_type),
+        )
+        sent_to_persephone = persephone_client.run(
+            topic="thebes.sphinx_persephone.topic",
+            partition=1,
+            payload=get_user_signed_term_template_with_data(
+                payload=new, file_type=file_type.value
+            ),
+            schema_key="term_schema",
+        )
+        if (sent_to_persephone and user_repository.update_one(old=old, new=new)) is False:
+            raise InternalServerError("common.process_issue")
+        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+
 
     @staticmethod
     def fill_term_signed(payload: dict, file_type: str, version: int):
@@ -315,23 +309,24 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("thebes_answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
-        if old:
-            user_identifier = payload.get("user_identifier")
-            quiz = stone_age.send_user_identifier_data(
-                user_identifier_data=user_identifier
-            )
-            if quiz:
-                new = dict(old)
-                UserService.update_user_identifier_data(
-                    payload=new, user_identifier=user_identifier
-                )
-                if user_repository.update_one(old=old, new=new):
-                    return {
-                        "status_code": status.HTTP_200_OK,
-                        "payload": {"quiz": quiz},
-                    }
+        if old is None:
+            raise BadRequestError("common.register_not_exists")
+        user_identifier = payload.get("user_identifier")
+        quiz = stone_age.send_user_identifier_data(
+            user_identifier_data=user_identifier
+        )
+        if type(quiz) is not dict:
             raise InternalServerError("common.process_issue")
-        raise BadRequestError("common.register_not_exists")
+        new = dict(old)
+        UserService.update_user_identifier_data(
+            payload=new, user_identifier=user_identifier
+        )
+        if user_repository.update_one(old=old, new=new) is False:
+            raise InternalServerError("common.process_issue")
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"quiz": quiz},
+        }
 
     @staticmethod
     def update_user_identifier_data(payload: dict, user_identifier: dict):
@@ -355,33 +350,34 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("thebes_answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
-        if old:
-            stone_age_user_data = stone_age.send_user_quiz_responses(
-                quiz=payload.get("quiz")
-            )
-            sent_to_persephone = persephone_client.run(
-                topic="thebes.sphinx_persephone.topic",
-                partition=3,
-                payload=get_user_account_template_with_data(
-                    payload={
-                        "stone_age_user_data": stone_age_user_data,
-                        "user_data": dict(old),
-                    }
-                ),
-                schema_key="dtvm_user_schema",
-            )
-            if sent_to_persephone:
-                new = dict(old)
-                UserService.fill_account_data_on_user_document(
-                    payload=new, stone_age_user_data=stone_age_user_data
-                )
-                if user_repository.update_one(old=old, new=new):
-                    return {
-                        "status_code": status.HTTP_200_OK,
-                        "message_key": "user.creating_account",
-                    }
+        if type(old) is not dict:
+            raise BadRequestError("common.register_not_exists")
+        stone_age_user_data = stone_age.send_user_quiz_responses(
+            quiz=payload.get("quiz")
+        )
+        sent_to_persephone = persephone_client.run(
+            topic="thebes.sphinx_persephone.topic",
+            partition=3,
+            payload=get_user_account_template_with_data(
+                payload={
+                    "stone_age_user_data": stone_age_user_data,
+                    "user_data": dict(old),
+                }
+            ),
+            schema_key="dtvm_user_schema",
+        )
+        if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
-        raise BadRequestError("common.register_not_exists")
+        new = dict(old)
+        UserService.fill_account_data_on_user_document(
+            payload=new, stone_age_user_data=stone_age_user_data
+        )
+        if user_repository.update_one(old=old, new=new) is False:
+            raise InternalServerError("common.process_issue")
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "user.creating_account",
+        }
 
     @staticmethod
     def fill_account_data_on_user_document(

@@ -417,7 +417,7 @@ def test_user_identifier_data_register_not_exists():
 def test_user_identifier_data_process_issue_v1():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
-    StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
+    stub_user_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
@@ -430,7 +430,7 @@ def test_user_identifier_data_process_issue_v2():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     stub_user_repository.update_one = MagicMock(return_value=False)
-    StubStoneAge.send_user_identifier_data = MagicMock(return_value=[1, 2])
+    StubStoneAge.send_user_identifier_data = MagicMock(return_value={'a': 123})
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
@@ -442,7 +442,7 @@ def test_user_identifier_data_process_issue_v2():
 def test_user_identifier_data():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
-    StubStoneAge.send_user_identifier_data = MagicMock(return_value=[1, 2])
+    StubStoneAge.send_user_identifier_data = MagicMock(return_value={'a': 123})
     stub_user_repository.update_one = MagicMock(return_value=True)
     response = UserService.user_identifier_data(
         payload=payload_user_identifier_data,
@@ -450,7 +450,7 @@ def test_user_identifier_data():
         stone_age=StubStoneAge,
     )
     assert response.get("status_code") == status.HTTP_200_OK
-    assert type(response.get("payload").get("quiz")) == list
+    assert type(response.get("payload").get("quiz")) == dict
 
 
 class StubPersephoneClient:

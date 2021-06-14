@@ -1,9 +1,11 @@
 # STANDARD LIBS
+import os.path
 from typing import Union, Optional
 from datetime import datetime, timezone, timedelta
 import logging
 from decouple import config
 import json
+from pathlib import Path
 
 # OUTSIDE LIBRARIES
 from fastapi import Request, Response, status
@@ -47,7 +49,9 @@ class JWTHandler:
     @staticmethod
     def decrypt_payload(encrypted_payload: str) -> Optional[dict]:
         try:
-            with open("src/keys/id_rsa.json", "r") as fh:
+            base_path = Path(__file__).parents[1]
+            path = os.path.join(base_path, "keys", "id_rsa.json")
+            with open(path, "r") as fh:
                 verifying_key = jwk_from_dict(json.load(fh))
             payload = JWTHandler.instance.decode(
                 encrypted_payload, verifying_key, do_time_check=True
