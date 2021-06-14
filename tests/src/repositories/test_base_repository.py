@@ -135,18 +135,28 @@ def test_find_all_true() -> None:
     assert stub_base_repository.find_all()
 
 
-def test_update_one_false() -> None:
+def test_update_one_expect_false_because_is_none() -> None:
     stub_mongo_collection = StubMongoCollection()
-    stub_mongo_collection.update_one = MagicMock(side_effect=Exception())
+    stub_mongo_collection.update_one = MagicMock(return_value=True)
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
-    assert stub_base_repository.update_one(old={}, new={}) is False
+    response = stub_base_repository.update_one(old=None, new=None)
+    assert response is False
+
+
+def test_update_one_expect_false_because_is_blank_object() -> None:
+    stub_mongo_collection = StubMongoCollection()
+    stub_mongo_collection.update_one = MagicMock(return_value=True)
+    stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
+    response = stub_base_repository.update_one(old={}, new={})
+    assert response is False
 
 
 def test_update_one_true() -> None:
     stub_mongo_collection = StubMongoCollection()
     stub_mongo_collection.update_one = MagicMock(return_value=True)
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
-    assert stub_base_repository.update_one(old={}, new={})
+    response = stub_base_repository.update_one(old={}, new={})
+    assert response is False
 
 
 def test_delete_one_false() -> None:

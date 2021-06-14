@@ -33,7 +33,8 @@ class BaseRepository(IRepository):
     def insert(self, data: dict) -> bool:
         try:
             self.collection.insert_one(data)
-            return True
+            #return True
+            return None
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
@@ -79,10 +80,10 @@ class BaseRepository(IRepository):
             return None
 
     def update_one(self, old, new) -> bool:
-        if old is None or new is None:
+        if (old is None or new is None) or (len(old) == 0 or len(new) == 0):
             return False
-        self.normalize_enum_types(payload=new)
         try:
+            self.normalize_enum_types(payload=new)
             self.collection.update_one(old, {"$set": new})
             return True
         except Exception as e:
