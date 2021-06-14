@@ -59,19 +59,18 @@ class AuthenticationService(IAuthentication):
                 "status_code": status.HTTP_200_OK,
                 "message_key": "email.login",
             }
-        else:
-            pin = payload.get("pin")
-            if pin is None:
-                return {
-                    "status_code": status.HTTP_200_OK,
-                    "message_key": "user.need_pin",
-                }
-            if pin and hash_field(payload=pin) == entity.get("pin"):
-                jwt = token_handler.generate_token(payload=entity, ttl=525600)
-                JwtController.insert_one(jwt, entity.get("email"))
-                return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-            else:
-                raise UnauthorizedError("user.pin_error")
+
+        pin = payload.get("pin")
+        if pin is None:
+            return {
+                "status_code": status.HTTP_200_OK,
+                "message_key": "user.need_pin",
+            }
+        if pin and hash_field(payload=pin) == entity.get("pin"):
+            jwt = token_handler.generate_token(payload=entity, ttl=525600)
+            JwtController.insert_one(jwt, entity.get("email"))
+            return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+        raise UnauthorizedError("user.pin_error")
 
     @staticmethod
     def send_authentication_email(

@@ -157,10 +157,9 @@ def test_forgot_password_not_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
-        AuthenticationService.login(
+        AuthenticationService.forgot_password(
             payload=payload,
-            user_repository=stub_repository,
-            token_handler=StubTokenHandler,
+            user_repository=stub_repository
         )
 
 
