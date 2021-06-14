@@ -147,6 +147,12 @@ class SuitabilityService(ISuitability):
         if not last_suitability:
             return 1
 
+        if type(last_suitability) is not list:
+            raise InternalServerError("suitability.error.not_found")
+
+        if len(last_suitability) != 1:
+            raise InternalServerError("suitability.error.not_found")
+
         if type(last_suitability[0]) is not dict:
             raise InternalServerError("suitability.error.not_found")
 
@@ -200,9 +206,6 @@ class SuitabilityService(ISuitability):
             )
         except (TypeError, AttributeError):
             raise InternalServerError("common.process_issue")
-
-        if not _answers:
-            raise InternalServerError("suitability.error.no_answers")
 
         if type(_answers) is not list:
             raise InternalServerError("suitability.error.no_answers")
