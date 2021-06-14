@@ -377,7 +377,7 @@ def test_update_suitability_metadata_in_user_db_without_user_value():
 def test_update_suitability_metadata_in_user_db_without_values():
     stubby_repository = MySuitabilityStubRepository(database="", collection="")
     stubby_repository.find_one = MagicMock(return_value=[{"test": "test"}])
-    with pytest.raises(InternalServerError, match="common.process_issue"):
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
         SuitabilityService._SuitabilityService__update_suitability_score_and_submission_date_in_user_db(
             user_repository=stubby_repository,
             user_email=None,
