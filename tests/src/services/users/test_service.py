@@ -498,6 +498,7 @@ def test_user_quiz_responses_process_issue_v2():
         return_value={"user_account_data": {"data": "lalal"}}
     )
     stub_user_repository.update_one = MagicMock(return_value=False)
+    StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
     StubPersephoneClient.run = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.fill_user_data(

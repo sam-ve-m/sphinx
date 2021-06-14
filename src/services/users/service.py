@@ -289,8 +289,6 @@ class UserService(IUser):
                 .get(file_type.value)
                 .get("version")
             )
-            if version is None:
-                raise Exception()
         except:
             raise BadRequestError("user.files.term_not_signed")
         try:
@@ -366,7 +364,7 @@ class UserService(IUser):
             ),
             schema_key="dtvm_user_schema",
         )
-        if sent_to_persephone is False:
+        if not sent_to_persephone:
             raise InternalServerError("common.process_issue")
         new = dict(old)
         UserService.fill_account_data_on_user_document(
