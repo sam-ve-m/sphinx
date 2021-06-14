@@ -27,10 +27,15 @@ class SuitabilityService(ISuitability):
         suitability_repository: BaseRepository = SuitabilityRepository(),
         suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository(),
         suitability_answers_profile_builder=SuitabilityAnswersProfileBuilder(),
-    ) -> dict:
+    ) -> Union[dict, Exception]:
+
+        if payload is None:
+            raise InternalServerError("suitability.error.not_found")
+
         suitability = payload.get("suitability")
+
         if not suitability:
-            raise InternalServerError("common.process_issue")
+            raise InternalServerError("suitability.error.not_found")
 
         version = SuitabilityService.__get_suitability_version()
         suitability_submission_date = datetime.utcnow()
@@ -40,10 +45,10 @@ class SuitabilityService(ISuitability):
         )
 
         suitability_answers_profile_builder.suitability = suitability
-        answers_profile_composition = suitability_answers_profile_builder.profile
+        answers = suitability_answers_profile_builder.profile
         SuitabilityService.__insert_new_answers_suitability(
             suitability_answers_repository=suitability_answers_repository,
-            answers_profile_composition=answers_profile_composition,
+            answers=answers,
         )
         return {
             "status_code": status.HTTP_201_CREATED,
@@ -131,67 +136,83 @@ class SuitabilityService(ISuitability):
     @staticmethod
     def __get_suitability_version(
         suitability_repository=SuitabilityRepository(),
-    ) -> int:
-        last_suitability = list(
-            suitability_repository.find_all().sort("_id", -1).limit(1)
-        )
+    ) -> Union[int, Exception]:
+        try:
+            last_suitability = list(
+                suitability_repository.find_all().sort("_id", -1).limit(1)
+            )
+        except (TypeError, AttributeError):
+            raise InternalServerError("common.process_issue")
+
         if not last_suitability:
             return 1
 
         if type(last_suitability[0]) is not dict:
-            raise InternalServerError("common.process_issue")
+            raise InternalServerError("suitability.error.not_found")
 
         last_version = last_suitability[0].get("version")
 
         if type(last_version) is not int:
-            raise InternalServerError("common.process_issue")
+            raise InternalServerError("common.invalid_params")
 
-        last_version += 1
-        return last_version
+        new_version = last_version + 1
+        return new_version
 
     @staticmethod
     def __insert_new_suitability(
         suitability_repository: BaseRepository, suitability: dict
     ) -> Optional[Exception]:
-        if suitability_repository.insert(suitability):
-            return
-
-        raise InternalServerError("common.process_issue")
+        if type(suitability) is not dict:
+            raise InternalServerError("common.invalid_params")
+        try:
+            inserted = suitability_repository.insert(suitability)
+        except AttributeError:
+            raise InternalServerError("common.process_issue")
+        else:
+            if not inserted:
+                raise InternalServerError("common.process_issue")
+            else:
+                return
 
     @staticmethod
     def __insert_new_answers_suitability(
-        suitability_answers_repository: BaseRepository,
-        answers_profile_composition: dict,
+        suitability_answers_repository: BaseRepository, answers: dict,
     ) -> Optional[Exception]:
-        if suitability_answers_repository.insert(answers_profile_composition):
-            return
-
-        raise InternalServerError("common.process_issue")
+        if type(answers) is not dict:
+            raise InternalServerError("common.invalid_params")
+        try:
+            inserted = suitability_answers_repository.insert(answers)
+        except AttributeError:
+            raise InternalServerError("common.process_issue")
+        else:
+            if not inserted:
+                raise InternalServerError("common.process_issue")
+            else:
+                return
 
     @staticmethod
     def __get_last_suitability_answers_metadata(
         suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository(),
     ) -> Union[Tuple[List[dict], int, int], Exception]:
-        _answers = list(
-            suitability_answers_repository.find_all().sort("_id", -1).limit(1)
-        )
+        try:
+            _answers = list(
+                suitability_answers_repository.find_all().sort("_id", -1).limit(1)
+            )
+        except (TypeError, AttributeError):
+            raise InternalServerError("common.process_issue")
+
         if not _answers:
             raise InternalServerError("suitability.error.no_answers")
 
         if type(_answers[0]) is not dict:
             raise InternalServerError("suitability.error.answers_format")
 
-        if not (
-            "answers" and "score" and "suitability_version" in list(_answers[0].keys())
-        ):
-            raise InternalServerError("suitability.error.answers_incomplete_data")
-
         answers = _answers[0].get("answers")
         score = _answers[0].get("score")
         suitability_version = _answers[0].get("suitability_version")
 
         if not all([score, answers, suitability_version]):
-            raise InternalServerError("suitability.error.no_data")
+            raise InternalServerError("suitability.error.answers_incomplete_data")
 
         return answers, score, suitability_version
 

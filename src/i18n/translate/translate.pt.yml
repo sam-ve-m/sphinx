@@ -53,6 +53,7 @@ pt:
       update_error: Não foi possivel fazer o update dos dados.
       last_user_profile_format: O formato do perfil de usuário está incorreto.
       last_user_profile_incomplete_data: Os dados de resposta de perfil de usuário está incompleto.
+      not_found: Suitability não encontrad.
   cache:
     error:
       key: Chave invalida enviada para classe ce cache
