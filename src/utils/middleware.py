@@ -55,18 +55,18 @@ def invalidate_user(user_data: dict, jwt_data: dict) -> bool:
     return is_token_invalid or is_deleted
 
 
-def is_user_not_allowed(
+def check_if_is_user_not_allowed_to_access_route(
     request: Request, jwt_data: dict, user_repository: UserRepository = UserRepository()
 ) -> Optional[Response]:
     user_data = user_repository.find_one({"email": jwt_data["email"]}, ttl=60)
-
     user_not_allowed = invalidate_user(user_data=user_data, jwt_data=jwt_data)
     is_user_not_admin = (
         user_data.get("is_admin") is None or user_data.get("is_admin") is False
     )
     is_admin_route = need_be_admin(request=request)
+    is_not_admin_user_accessing_admin_route = (is_admin_route and is_user_not_admin)
 
-    if user_not_allowed or (is_admin_route and is_user_not_admin):
+    if user_not_allowed or is_not_admin_user_accessing_admin_route:
         return Response(
             content=json.dumps(
                 {

@@ -9,7 +9,7 @@ junit-xml
 junit2html
 kafka-python
 MarkupSafe
-mutmut
+mutatest
 parso
 pony
 pyrsistent

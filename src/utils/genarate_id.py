@@ -2,7 +2,7 @@ from hashlib import sha1
 from typing import Union
 
 
-def generate_id(key: str, payload: dict, must_remove: bool = True) -> dict:
+def generate_id(key: str, payload: dict, must_remove: bool = False) -> dict:
     _id = payload.get(key)
     if _id is None:
         raise Exception("Error to generate _id")

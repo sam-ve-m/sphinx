@@ -10,7 +10,7 @@ from src.routers.pendencies import router as pendencies_router
 from src.routers.term import router as term_router
 from src.routers.suitability import router as suitability_router
 from src.routers.view import router as view_router
-from src.utils.middleware import is_public, is_user_not_allowed
+from src.utils.middleware import is_public, check_if_is_user_not_allowed_to_access_route
 from src.utils.jwt_utils import JWTHandler
 
 app = FastAPI()
@@ -25,9 +25,7 @@ async def process_thebes_answer(request: Request, call_next):
         )
         if type(jwt_data_or_error_response) == Response:
             return jwt_data_or_error_response
-        response = is_user_not_allowed(
-            request=request, jwt_data=jwt_data_or_error_response
-        )
+        response = check_if_is_user_not_allowed_to_access_route(request=request, jwt_data=jwt_data_or_error_response)
         if type(response) == Response:
             return response
     return await call_next(request)
