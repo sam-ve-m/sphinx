@@ -23,10 +23,10 @@ from src.services.persephone.service import PersephoneService
 class SuitabilityService(ISuitability):
     @staticmethod
     def create_quiz(
-        payload: dict,
-        suitability_repository: BaseRepository = SuitabilityRepository(),
-        suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository(),
-        suitability_answers_profile_builder=SuitabilityAnswersProfileBuilder(),
+            payload: dict,
+            suitability_repository: BaseRepository = SuitabilityRepository(),
+            suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository(),
+            suitability_answers_profile_builder=SuitabilityAnswersProfileBuilder(),
     ) -> Union[dict, Exception]:
 
         if payload is None:
@@ -57,11 +57,11 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def create_profile(
-        payload,
-        user_repository=UserRepository(),
-        suitability_repository=SuitabilityRepository(),
-        suitability_user_profile_repository=SuitabilityUserProfileRepository(),
-        persephone_client=PersephoneService.get_client(),
+            payload,
+            user_repository=UserRepository(),
+            suitability_repository=SuitabilityRepository(),
+            suitability_user_profile_repository=SuitabilityUserProfileRepository(),
+            persephone_client=PersephoneService.get_client(),
     ) -> Union[dict, Exception]:
         thebes_answer: dict = payload.get("thebes_answer")
         user_email: str = thebes_answer.get("email")
@@ -116,8 +116,8 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def get_user_profile(
-        payload: dict,
-        suitability_user_profile_repository=SuitabilityUserProfileRepository(),
+            payload: dict,
+            suitability_user_profile_repository=SuitabilityUserProfileRepository(),
     ) -> Union[dict, Exception]:
         thebes_answer: dict = payload.get("thebes_answer")
         user_email: str = thebes_answer.get("email")
@@ -135,7 +135,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __get_suitability_version(
-        suitability_repository=SuitabilityRepository(),
+            suitability_repository=SuitabilityRepository(),
     ) -> Union[int, Exception]:
         try:
             last_suitability = list(
@@ -160,7 +160,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __insert_new_suitability(
-        suitability_repository: BaseRepository, suitability: dict
+            suitability_repository: BaseRepository, suitability: dict
     ) -> Optional[Exception]:
         if type(suitability) is not dict:
             raise InternalServerError("common.invalid_params")
@@ -176,7 +176,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __insert_new_answers_suitability(
-        suitability_answers_repository: BaseRepository, answers: dict,
+            suitability_answers_repository: BaseRepository, answers: dict,
     ) -> Optional[Exception]:
         if type(answers) is not dict:
             raise InternalServerError("common.invalid_params")
@@ -192,7 +192,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __get_last_suitability_answers_metadata(
-        suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository(),
+            suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository(),
     ) -> Union[Tuple[List[dict], int, int], Exception]:
         try:
             _answers = list(
@@ -218,15 +218,31 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __update_suitability_score_and_submission_date_in_user_db(
-        user_repository: BaseRepository,
-        user_email: str,
-        score: int,
-        suitability_version: int,
-        submission_date: datetime,
+            user_repository: BaseRepository,
+            user_email: str,
+            score: int,
+            suitability_version: int,
+            submission_date: datetime,
     ) -> Optional[Exception]:
-        old = user_repository.find_one({"_id": user_email})
+        try:
+            old = user_repository.find_one({"_id": user_email})
+        except AttributeError:
+            raise InternalServerError("common.process_issue")
+
         if not old:
             raise BadRequestError("common.register_not_exists")
+
+        if not all([
+            user_email,
+            score,
+            suitability_version,
+            submission_date,
+        ]):
+            raise InternalServerError("common.process_issue")
+
+        if type(old) is not dict:
+            raise InternalServerError("common.process_issue")
+
         new = dict(old)
         new.update(
             {
@@ -237,19 +253,23 @@ class SuitabilityService(ISuitability):
                 }
             }
         )
-        if user_repository.update_one(old=old, new=new):
-            return
-
-        raise InternalServerError("suitability.error.update_error")
+        try:
+            updated = user_repository.update_one(old=old, new=new)
+        except AttributeError:
+            raise InternalServerError("common.process_issue")
+        else:
+            if not updated:
+                raise BadRequestError("suitability.error.update_error")
+        return
 
     @staticmethod
     def __insert_suitability_answers_in_user_profile_db(
-        suitability_user_profile_repository: BaseRepository,
-        answers: List[dict],
-        suitability_version: int,
-        user_email: str,
-        user_score: int,
-        submission_date: datetime,
+            suitability_user_profile_repository: BaseRepository,
+            answers: List[dict],
+            suitability_version: int,
+            user_email: str,
+            user_score: int,
+            submission_date: datetime,
     ) -> Optional[Exception]:
         payload = {
             "email": user_email,
@@ -265,14 +285,14 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __get_last_user_profile(
-        suitability_user_profile_repository: BaseRepository, email: str
+            suitability_user_profile_repository: BaseRepository, email: str
     ) -> Union[dict, Exception]:
         _last_user_profile = (
             suitability_user_profile_repository.find_more_than_equal_one(
                 {"email": email}
             )
-            .sort("_id", -1)
-            .limit(1)
+                .sort("_id", -1)
+                .limit(1)
         )
         last_user_profile = list(_last_user_profile)
         if not last_user_profile:

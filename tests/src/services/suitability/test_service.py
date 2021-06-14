@@ -1,8 +1,10 @@
+from datetime import datetime
+
 import pytest
 from unittest.mock import MagicMock
 from fastapi import status
 
-from src.exceptions.exceptions import InternalServerError
+from src.exceptions.exceptions import InternalServerError, BadRequestError
 from src.services.suitability.service import SuitabilityService
 from tests.stub_classes.stub_base_repository import StubBaseRepository
 
@@ -195,9 +197,9 @@ def test_insert_new_suitability():
     stubby_repository = StubRepository(database="", collection="")
     stubby_repository.insert = MagicMock(return_value=True)
     response = SuitabilityService._SuitabilityService__insert_new_suitability(
-            suitability_repository=stubby_repository,
-            suitability={}
-        )
+        suitability_repository=stubby_repository,
+        suitability={}
+    )
 
     assert response is None
 
@@ -256,9 +258,9 @@ def test_insert_new_answers():
     stubby_repository = StubRepository(database="", collection="")
     stubby_repository.insert = MagicMock(return_value=True)
     response = SuitabilityService._SuitabilityService__insert_new_answers_suitability(
-            suitability_answers_repository=stubby_repository,
-            answers={}
-        )
+        suitability_answers_repository=stubby_repository,
+        answers={}
+    )
 
     assert response is None
 
@@ -357,3 +359,69 @@ def test_get_last_suitability_answers_metadata():
     )
 
     assert (True, 1.0, 2) == response
+
+
+def test_update_suitability_metadata_in_user_db_without_user_value():
+    stubby_repository = MySuitabilityStubRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value=[])
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+        SuitabilityService._SuitabilityService__update_suitability_score_and_submission_date_in_user_db(
+            user_repository=stubby_repository,
+            user_email=None,
+            score=None,
+            suitability_version=None,
+            submission_date=None,
+        )
+
+
+def test_update_suitability_metadata_in_user_db_without_values():
+    stubby_repository = MySuitabilityStubRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value=[{"test": "test"}])
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        SuitabilityService._SuitabilityService__update_suitability_score_and_submission_date_in_user_db(
+            user_repository=stubby_repository,
+            user_email=None,
+            score=None,
+            suitability_version=None,
+            submission_date=None,
+        )
+
+
+def test_update_suitability_metadata_in_user_db_with_mongo_error():
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        SuitabilityService._SuitabilityService__update_suitability_score_and_submission_date_in_user_db(
+            user_repository=None,
+            user_email=None,
+            score=None,
+            suitability_version=None,
+            submission_date=None,
+        )
+
+
+def test_update_suitability_metadata_in_user_db_with_update_error():
+    stubby_repository = MySuitabilityStubRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={"test": "test"})
+    stubby_repository.update_one = MagicMock(return_value=False)
+    with pytest.raises(InternalServerError, match="suitability.error.update_error"):
+        SuitabilityService._SuitabilityService__update_suitability_score_and_submission_date_in_user_db(
+            user_repository=stubby_repository,
+            user_email="lla@lala.com",
+            score=1.0,
+            suitability_version=500,
+            submission_date=datetime.utcnow()
+        )
+
+
+def test_update_suitability_metadata_in_user_db_with_update_error():
+    stubby_repository = MySuitabilityStubRepository(database="", collection="")
+    stubby_repository.find_one = MagicMock(return_value={"test": "test"})
+    stubby_repository.update_one = MagicMock(return_value=True)
+    response = SuitabilityService._SuitabilityService__update_suitability_score_and_submission_date_in_user_db(
+            user_repository=stubby_repository,
+            user_email="lla@lala.com",
+            score=1.0,
+            suitability_version=500,
+            submission_date=datetime.utcnow()
+        )
+
+    assert response is None
