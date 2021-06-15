@@ -33,8 +33,7 @@ class BaseRepository(IRepository):
     def insert(self, data: dict) -> bool:
         try:
             self.collection.insert_one(data)
-            #return True
-            return None
+            return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)

@@ -36,7 +36,7 @@ class FileRepository(IFile):
     )
 
     def __init__(self, bucket_name: str):
-        self.bucket_name = FileRepository.validate_bucket_name(bucket_name)
+        self.bucket_name = self.validate_bucket_name(bucket_name)
 
     @staticmethod
     def validate_bucket_name(bucket_name: str):
@@ -51,15 +51,15 @@ class FileRepository(IFile):
     def save_user_file(
         self, file_type: UserFileType, content: Union[str, bytes], user_email: str,
     ) -> None:
-        path = FileRepository.resolve_user_path(
+        path = self.resolve_user_path(
             user_email=user_email, file_type=file_type
         )
         file_name = file_type.value
-        file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
+        file_extension = self.get_file_extension_by_type(file_type=file_type)
         if all([path, file_name, file_extension]) is False:
             raise InternalServerError("files.error")
         self.s3_client.put_object(
-            Body=FileRepository.resolve_content(content=content),
+            Body=self.resolve_content(content=content),
             Bucket=self.bucket_name,
             Key=f"{path}/{file_name}{file_extension}",
         )
@@ -67,16 +67,16 @@ class FileRepository(IFile):
     def save_term_file(
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
-        path = FileRepository.resolve_term_path(file_type=file_type)
+        path = self.resolve_term_path(file_type=file_type)
         version = self.get_term_version(file_type=file_type, is_new_version=True)
-        file_name = FileRepository.generate_term_file_name(
+        file_name = self.generate_term_file_name(
             name=file_type.value, version=version
         )
-        file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
+        file_extension = self.get_file_extension_by_type(file_type=file_type)
         if all([path, file_name, file_extension]) is False:
             raise InternalServerError("files.error")
         self.s3_client.put_object(
-            Body=FileRepository.resolve_content(content=content),
+            Body=self.resolve_content(content=content),
             Bucket=self.bucket_name,
             Key=f"{path}{file_name}{file_extension}",
         )
@@ -88,18 +88,16 @@ class FileRepository(IFile):
         cached_value = cache.get(key=cache_key)
         if cached_value:
             return cached_value
-        else:
-            path = FileRepository.resolve_term_path(file_type=file_type)
-            file_path = self._get_last_saved_file_from_folder(path=path)
-            if file_path:
-                value = self.s3_client.generate_presigned_url(
-                    "get_object",
-                    Params={"Bucket": self.bucket_name, "Key": file_path,},
-                    ExpiresIn=ttl,
-                )
-                cache.set(key=cache_key, value=value, ttl=ttl)
-                return value
-        return None
+        path = self.resolve_term_path(file_type=file_type)
+        file_path = self._get_last_saved_file_from_folder(path=path)
+        if file_path:
+            value = self.s3_client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": self.bucket_name, "Key": file_path},
+                ExpiresIn=ttl,
+            )
+            cache.set(key=cache_key, value=value, ttl=ttl)
+            return value
 
     def get_terms_version(
         self, term_types=TermsFileType, cache=RepositoryRedis, ttl: int = 3600
@@ -118,11 +116,11 @@ class FileRepository(IFile):
     def get_term_file_by_version(
         self, file_type: TermsFileType, version: int, ttl: int = 3600
     ) -> str:
-        file_name = FileRepository.generate_term_file_name(
+        file_name = self.generate_term_file_name(
             name=file_type.value, version=version
         )
-        path = FileRepository.resolve_term_path(file_type=file_type)
-        file_extension = FileRepository.get_file_extension_by_type(file_type=file_type)
+        path = self.resolve_term_path(file_type=file_type)
+        file_extension = self.get_file_extension_by_type(file_type=file_type)
         value = self.s3_client.generate_presigned_url(
             "get_object",
             Params={
