@@ -6,7 +6,7 @@ from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel
 
 # SPHINX
-from src.routers.validators.base import Version, Weight, Score, ValueText, Order
+from src.routers.validators.base import Weight, Score, ValueText, Order
 from src.controllers.suitabilities.controller import SuitabilityController
 from src.controllers.base_controller import BaseController
 from src.utils.jwt_utils import JWTHandler

@@ -1,6 +1,10 @@
 # STANDARD LIBS
 from functools import reduce
+from operator import mul
 from typing import Optional, List
+
+# SPHINX
+from src.exceptions.exceptions import InternalServerError
 
 
 class SuitabilityAnswersProfileBuilder:
@@ -13,15 +17,16 @@ class SuitabilityAnswersProfileBuilder:
 
     @suitability.setter
     def suitability(self, suitability: dict) -> Optional[Exception]:
-        if not suitability:
-            # Exception
-            pass
-
+        if type(suitability) is not dict:
+            raise InternalServerError("common.process_issue")
         self.__suitability = suitability
         return
 
     @property
     def profile(self) -> dict:
+        if not self.suitability:
+            raise InternalServerError("common.process_issue")
+
         questions_with_best_answers = self.__get_questions_with_best_answer()
         score_profile = self.__calc_suitability_score_profile(
             questions_with_best_answers
@@ -55,6 +60,7 @@ class SuitabilityAnswersProfileBuilder:
 
     @staticmethod
     def __calc_suitability_score_profile(questions: List[dict]) -> float:
+
         _question_score_with_max_response_wight = [
             question.get("question_score") * question.get("answer_weight")
             for question in questions
