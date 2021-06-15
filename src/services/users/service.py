@@ -49,7 +49,10 @@ class UserService(IUser):
         if (sent_to_persephone and user_repository.insert(payload)) is False:
             raise InternalServerError("common.process_issue")
         authentication_service.send_authentication_email(
-            email=payload.get("email"), payload=payload, ttl=10, body="email.body.created"
+            email=payload.get("email"),
+            payload=payload,
+            ttl=10,
+            body="email.body.created",
         )
         return {
             "status_code": status.HTTP_201_CREATED,
@@ -123,7 +126,6 @@ class UserService(IUser):
             "message_key": "requests.updated",
         }
 
-
     @staticmethod
     def change_view(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
@@ -140,7 +142,6 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
         jwt = token_handler.generate_token(payload=new, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-
 
     @staticmethod
     def forgot_password(
@@ -260,11 +261,12 @@ class UserService(IUser):
             ),
             schema_key="term_schema",
         )
-        if (sent_to_persephone and user_repository.update_one(old=old, new=new)) is False:
+        if (
+            sent_to_persephone and user_repository.update_one(old=old, new=new)
+        ) is False:
             raise InternalServerError("common.process_issue")
         jwt = token_handler.generate_token(payload=new, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-
 
     @staticmethod
     def fill_term_signed(payload: dict, file_type: str, version: int):
@@ -310,9 +312,7 @@ class UserService(IUser):
         if old is None:
             raise BadRequestError("common.register_not_exists")
         user_identifier = payload.get("user_identifier")
-        quiz = stone_age.send_user_identifier_data(
-            user_identifier_data=user_identifier
-        )
+        quiz = stone_age.send_user_identifier_data(user_identifier_data=user_identifier)
         if type(quiz) is not dict:
             raise InternalServerError("common.process_issue")
         new = dict(old)

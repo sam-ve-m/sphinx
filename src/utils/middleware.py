@@ -64,7 +64,7 @@ def check_if_is_user_not_allowed_to_access_route(
         user_data.get("is_admin") is None or user_data.get("is_admin") is False
     )
     is_admin_route = need_be_admin(request=request)
-    is_not_admin_user_accessing_admin_route = (is_admin_route and is_user_not_admin)
+    is_not_admin_user_accessing_admin_route = is_admin_route and is_user_not_admin
 
     if user_not_allowed or is_not_admin_user_accessing_admin_route:
         return Response(

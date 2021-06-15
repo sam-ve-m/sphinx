@@ -25,7 +25,9 @@ async def process_thebes_answer(request: Request, call_next):
         )
         if type(jwt_data_or_error_response) == Response:
             return jwt_data_or_error_response
-        response = check_if_is_user_not_allowed_to_access_route(request=request, jwt_data=jwt_data_or_error_response)
+        response = check_if_is_user_not_allowed_to_access_route(
+            request=request, jwt_data=jwt_data_or_error_response
+        )
         if type(response) == Response:
             return response
     return await call_next(request)

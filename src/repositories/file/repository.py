@@ -51,9 +51,7 @@ class FileRepository(IFile):
     def save_user_file(
         self, file_type: UserFileType, content: Union[str, bytes], user_email: str,
     ) -> None:
-        path = self.resolve_user_path(
-            user_email=user_email, file_type=file_type
-        )
+        path = self.resolve_user_path(user_email=user_email, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if all([path, file_name, file_extension]) is False:
@@ -69,9 +67,7 @@ class FileRepository(IFile):
     ) -> None:
         path = self.resolve_term_path(file_type=file_type)
         version = self.get_term_version(file_type=file_type, is_new_version=True)
-        file_name = self.generate_term_file_name(
-            name=file_type.value, version=version
-        )
+        file_name = self.generate_term_file_name(name=file_type.value, version=version)
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if all([path, file_name, file_extension]) is False:
             raise InternalServerError("files.error")
@@ -116,9 +112,7 @@ class FileRepository(IFile):
     def get_term_file_by_version(
         self, file_type: TermsFileType, version: int, ttl: int = 3600
     ) -> str:
-        file_name = self.generate_term_file_name(
-            name=file_type.value, version=version
-        )
+        file_name = self.generate_term_file_name(name=file_type.value, version=version)
         path = self.resolve_term_path(file_type=file_type)
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         value = self.s3_client.generate_presigned_url(

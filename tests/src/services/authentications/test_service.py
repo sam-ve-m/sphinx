@@ -100,11 +100,13 @@ def test_login_use_magic_link():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"use_magic_link": True})
     AuthenticationService.send_authentication_email = MagicMock(return_value=True)
-    AuthenticationService.login(
+    response = AuthenticationService.login(
         payload=payload,
         user_repository=stub_repository,
         token_handler=StubTokenHandler,
     )
+    assert response.get("status_code") == status.HTTP_200_OK
+    assert response.get("message_key") == "email.login"
 
 
 def test_login_without_pin():
@@ -158,8 +160,7 @@ def test_forgot_password_not_register_exists():
     stub_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         AuthenticationService.forgot_password(
-            payload=payload,
-            user_repository=stub_repository
+            payload=payload, user_repository=stub_repository
         )
 
 

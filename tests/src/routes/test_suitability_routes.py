@@ -112,5 +112,3 @@ def test_create_user_profile_is_active():
 def test_get_user_profile_is_active():
     response = client.get("/suitability/profile", data=json.dumps({}))
     assert response.status_code == 401
-
-

@@ -187,21 +187,33 @@ def test_is_user_token_valid_error():
 
 
 def test_is_user_token_valid_false_because_created_at_date_is_invalid():
-    user_data = {"token_valid_after": datetime(year=2020, month=10, day=10, hour=0, minute=0, second=0)}
+    user_data = {
+        "token_valid_after": datetime(
+            year=2020, month=10, day=10, hour=0, minute=0, second=0
+        )
+    }
     jwt_data = {"created_at": "2020-01-01"}
     token_valid = is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
     assert token_valid is False
 
 
 def test_is_user_token_valid_false_because_token_is_expired():
-    user_data = {"token_valid_after": datetime(year=2020, month=10, day=10, hour=0, minute=0, second=0)}
+    user_data = {
+        "token_valid_after": datetime(
+            year=2020, month=10, day=10, hour=0, minute=0, second=0
+        )
+    }
     jwt_data = {"created_at": "2020-10-10 00:00:00.0000"}
     token_valid = is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
     assert token_valid is False
 
 
 def test_is_user_token_valid_true():
-    user_data = {"token_valid_after": datetime(year=2020, month=10, day=10, hour=0, minute=0, second=0)}
+    user_data = {
+        "token_valid_after": datetime(
+            year=2020, month=10, day=10, hour=0, minute=0, second=0
+        )
+    }
     jwt_data = {"created_at": "2020-01-01 12:10:10.0000"}
     token_valid = is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
     assert token_valid
@@ -239,14 +251,16 @@ def test_check_if_is_user_not_allowed_to_access_route_expect_request_because_use
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10),
         "deleted": False,
-        "is_admin": False
+        "is_admin": False,
     }
     user_repository = StubRepository(database="", collection="")
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01 12:10:10.0000", "email": "test@test.com"}
-    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(request=request, jwt_data=jwt_data,
-                                                                             user_repository=user_repository)
+    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
+        request=request, jwt_data=jwt_data, user_repository=user_repository
+    )
     assert isinstance(is_user_not_allowed_value, Response) is True
+
 
 def test_check_if_is_user_not_allowed_to_access_route_expect_none_because_user_not_is_admin_accessing_not_admin_route():
     stub_url = StubURL
@@ -256,14 +270,16 @@ def test_check_if_is_user_not_allowed_to_access_route_expect_none_because_user_n
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10),
         "deleted": False,
-        "is_admin": False
+        "is_admin": False,
     }
     user_repository = StubRepository(database="", collection="")
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01 12:10:10.0000", "email": "test@test.com"}
-    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(request=request, jwt_data=jwt_data,
-                                                                             user_repository=user_repository)
+    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
+        request=request, jwt_data=jwt_data, user_repository=user_repository
+    )
     assert is_user_not_allowed_value is None
+
 
 def test_check_if_is_user_not_allowed_to_access_route_expect_none_because_user_is_admin_accessing_admin_route():
     stub_url = StubURL
@@ -273,14 +289,16 @@ def test_check_if_is_user_not_allowed_to_access_route_expect_none_because_user_i
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10),
         "deleted": False,
-        "is_admin": True
+        "is_admin": True,
     }
     user_repository = StubRepository(database="", collection="")
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01 12:10:10.0000", "email": "test@test.com"}
-    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(request=request, jwt_data=jwt_data,
-                                                                             user_repository=user_repository)
+    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
+        request=request, jwt_data=jwt_data, user_repository=user_repository
+    )
     assert is_user_not_allowed_value is None
+
 
 def test_check_if_is_user_not_allowed_to_access_route_expect_request_because_admin_user_is_not_allowed():
     stub_url = StubURL
@@ -290,15 +308,15 @@ def test_check_if_is_user_not_allowed_to_access_route_expect_request_because_adm
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10),
         "deleted": True,
-        "is_admin": False
+        "is_admin": False,
     }
     user_repository = StubRepository(database="", collection="")
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01 12:10:10.0000", "email": "test@test.com"}
-    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(request=request, jwt_data=jwt_data,
-                                                                             user_repository=user_repository)
+    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
+        request=request, jwt_data=jwt_data, user_repository=user_repository
+    )
     assert isinstance(is_user_not_allowed_value, Response) is True
-
 
 
 def test_check_if_is_user_not_allowed_to_access_route_expect_request_because_not_admin_user_is_not_allowed():
@@ -309,11 +327,12 @@ def test_check_if_is_user_not_allowed_to_access_route_expect_request_because_not
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10),
         "deleted": True,
-        "is_admin": True
+        "is_admin": True,
     }
     user_repository = StubRepository(database="", collection="")
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01 12:10:10.0000", "email": "test@test.com"}
-    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(request=request, jwt_data=jwt_data,
-                                                                             user_repository=user_repository)
+    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
+        request=request, jwt_data=jwt_data, user_repository=user_repository
+    )
     assert isinstance(is_user_not_allowed_value, Response) is True
