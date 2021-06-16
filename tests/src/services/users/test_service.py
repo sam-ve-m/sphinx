@@ -163,11 +163,20 @@ def test_delete():
     assert response.get("message_key") == "requests.updated"
 
 
-def test_forgot_password_register_exists():
+def test_change_password_register_not_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.change_password(
+            payload=payload_change_password, user_repository=stub_repository
+        )
+
+
+def test_forgot_password_register_exists():
+    stub_repository = StubRepository(database="", collection="")
+    stub_repository.find_one = MagicMock(return_value=None)
+    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
+        UserService.forgot_password(
             payload=payload_change_password, user_repository=stub_repository
         )
 
@@ -538,8 +547,8 @@ def test_user_quiz_responses_process_issue_v2():
         return_value={"user_account_data": {"data": "lalal"}}
     )
     stub_user_repository.update_one = MagicMock(return_value=False)
-    StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
-    StubPersephoneClient.run = MagicMock(return_value=False)
+    StubStoneAge.send_user_quiz_responses = MagicMock(return_value={})
+    StubPersephoneClient.run = MagicMock(return_value=True)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.fill_user_data(
             payload=payload_user_identifier_data,
