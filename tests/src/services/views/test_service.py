@@ -123,9 +123,9 @@ def test_link_feature():
 def test_link_feature_not_have_feature():
     view_repository = StubRepository(database="", collection="")
     feature_repository = StubRepository(database="", collection="")
-    view_repository.find_one = MagicMock(return_value={})
+    view_repository.find_one = MagicMock(return_value={"view":"12313"})
     feature_repository.find_one = MagicMock(return_value={})
-    view_repository.update_one = MagicMock(return_value=True)
+    view_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         ViewService.link_feature(
             payload=link_feature_payload, view_repository=view_repository,
@@ -134,7 +134,7 @@ def test_link_feature_not_have_feature():
 def test_link_feature_not_modified():
     view_repository = StubRepository(database="", collection="")
     feature_repository = StubRepository(database="", collection="")
-    view_repository.find_one = MagicMock(return_value={"features": list()})
+    view_repository.find_one = MagicMock(return_value={"features": ["lele"]})
     feature_repository.find_one = MagicMock(return_value=None)
     response = ViewService.link_feature(
         payload=link_feature_payload, view_repository=view_repository
