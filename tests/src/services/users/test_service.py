@@ -115,7 +115,7 @@ def test_change_view_process_issue():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
     stub_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="^common.process_issue"):
+    with pytest.raises(InternalServerError, match="^common.unable_to_process"):
         UserService.change_view(
             payload=payload_change_view, user_repository=stub_repository
         )
@@ -242,6 +242,22 @@ def test_add_feature_already_exists():
     assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
 
 
+def test_add_feature_process_issue():
+    copy = dict(user_data)
+    copy.update({"view_type": None, "features": []},)
+    payload = {
+        "thebes_answer": copy,
+        "feature": "real_time_data",
+    }
+    stub_jwt_handler = StubJWTHandler()
+    stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
+    stub_repository = StubRepository(database="", collection="")
+    stub_repository.update_one = MagicMock(return_value=True)
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
+        UserService.add_feature(
+            payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        )
+
 def test_add_feature():
     payload = {
         "thebes_answer": user_data,
@@ -322,7 +338,7 @@ def test_sign_term_process_issue():
     stub_user_repository.update_one = MagicMock(return_value=False)
     stub_file_repository = StubRepository(database="", collection="")
     stub_file_repository.get_term_version = MagicMock(return_value=1)
-    with pytest.raises(InternalServerError, match="^common.process_issu"):
+    with pytest.raises(InternalServerError, match="^common.unable_to_process"):
         UserService.sign_term(
             payload={
                 "thebes_answer": {"email": "lala"},
@@ -340,7 +356,7 @@ def test_sign_term_process_issue_v2():
     stub_file_repository = StubRepository(database="", collection="")
     stub_file_repository.get_term_version = MagicMock(return_value=1)
     StubPersephoneClient.run = MagicMock(return_value=True)
-    with pytest.raises(InternalServerError, match="^common.process_issu"):
+    with pytest.raises(InternalServerError, match="^common.unable_to_process"):
         UserService.sign_term(
             payload={
                 "thebes_answer": {"email": "lala"},
@@ -441,6 +457,7 @@ def test_user_identifier_data_process_issue_v1():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     stub_user_repository.update_one = MagicMock(return_value=False)
+    StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,

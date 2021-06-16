@@ -151,12 +151,52 @@ def test_update_one_expect_false_because_is_blank_object() -> None:
     assert response is False
 
 
-def test_update_one_true() -> None:
+def test_update_one_false() -> None:
     stub_mongo_collection = StubMongoCollection()
     stub_mongo_collection.update_one = MagicMock(return_value=True)
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
     response = stub_base_repository.update_one(old={}, new={})
     assert response is False
+
+
+def test_update_one_expect_false_because_one_is_blank_object_v1() -> None:
+    stub_mongo_collection = StubMongoCollection()
+    stub_mongo_collection.update_one = MagicMock(return_value=True)
+    stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
+    response = stub_base_repository.update_one(old={"oi": 12}, new={})
+    assert response is False
+
+
+def test_update_one_expect_false_because_one_is_none_v1() -> None:
+    stub_mongo_collection = StubMongoCollection()
+    stub_mongo_collection.update_one = MagicMock(return_value=True)
+    stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
+    response = stub_base_repository.update_one(old={"oi": 12}, new=None)
+    assert response is False
+
+
+def test_update_one_expect_false_because_one_is_blank_object_v2() -> None:
+    stub_mongo_collection = StubMongoCollection()
+    stub_mongo_collection.update_one = MagicMock(return_value=True)
+    stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
+    response = stub_base_repository.update_one(old={}, new={"oi": 12})
+    assert response is False
+
+
+def test_update_one_expect_false_because_one_is_none_v2() -> None:
+    stub_mongo_collection = StubMongoCollection()
+    stub_mongo_collection.update_one = MagicMock(return_value=True)
+    stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
+    response = stub_base_repository.update_one(old=None, new={"oi": 12})
+    assert response is False
+
+
+def test_update_one_true() -> None:
+    stub_mongo_collection = StubMongoCollection()
+    stub_mongo_collection.update_one = MagicMock(return_value=True)
+    stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
+    response = stub_base_repository.update_one(old={"oi": 12}, new={"oi": 12})
+    assert response
 
 
 def test_delete_one_false() -> None:
@@ -207,6 +247,22 @@ def test__get_from_cache_not_cached() -> None:
         ttl=1,
         cache=stub_cache,
     )
+
+
+def test__get_from_cache_query_is_none() -> None:
+    stub_mongo_collection = StubMongoCollection()
+    stub_mongo_collection.find_one = MagicMock(return_value=True)
+
+    stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
+    stub_base_repository.base_identifier = "test"
+    stub_cache = StubCache()
+    stub_cache.get = MagicMock(return_value=None)
+    stub_cache.set = MagicMock(return_value=None)
+    assert stub_base_repository._get_from_cache(
+        query=None,
+        ttl=1,
+        cache=stub_cache,
+    ) is None
 
 
 def test__get_from_cache_cached() -> None:

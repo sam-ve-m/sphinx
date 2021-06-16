@@ -57,12 +57,17 @@ class ViewService(IView):
     def link_feature(payload: dict, view_repository=ViewRepository()) -> dict:
         feature_id = payload.get("feature_id")
         old = view_repository.find_one({"_id": payload.get("view_id")})
-        if feature_id not in old.get("features"):
-            new = dict(old)
-            new.get("features").append(feature_id)
-            if view_repository.update_one(old=old, new=new) is False:
+        if old:
+            features = old.get("features")
+            if features is None:
                 raise InternalServerError("common.process_issue")
-        return {"status_code": status.HTTP_200_OK, "message_key": "requests.updated"}
+            if feature_id not in features:
+                new = dict(old)
+                new.get("features").append(feature_id)
+                if view_repository.update_one(old=old, new=new) is False:
+                    raise InternalServerError("common.process_issue")
+                return {"status_code": status.HTTP_200_OK, "message_key": "requests.updated"}
+        return {"status_code": status.HTTP_304_NOT_MODIFIED, "message_key": "requests.not_modified"}
 
     @staticmethod
     def get_view(payload: dict, view_repository=ViewRepository()) -> dict:

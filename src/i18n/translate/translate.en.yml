@@ -4,11 +4,13 @@ en:
     created: Create successed.
     updated: Register Updated.
     deleted: Register deleted.
+    not_modified: Nothing to change.
   common:
     invalid_params: Invalid Params.
     register_exists: Register alredy exists.
     register_not_exists: Register not exists.
     process_issue: Proccesses error.
+    unable_to_process: Unable to proccess.
   view:
     feature_not_exists: The provided features not exists.
   user:

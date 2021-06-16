@@ -79,7 +79,9 @@ class BaseRepository(IRepository):
             return None
 
     def update_one(self, old, new) -> bool:
-        if (old is None or new is None) or (len(old) == 0 or len(new) == 0):
+        is_none = (old is None or new is None)
+        empty = (len(old) == 0 or len(new) == 0)
+        if is_none or empty:
             return False
         try:
             self.normalize_enum_types(payload=new)
@@ -107,16 +109,17 @@ class BaseRepository(IRepository):
                 self.normalize_enum_types(payload=payload[key])
 
     def _get_from_cache(self, query: dict, ttl: int, cache=RepositoryRedis):
+        if query is None:
+            return
         query_hash = hash_field(payload=query)
-        if query_hash:
-            cache_value = cache.get(key=f"{self.base_identifier}:{query_hash}")
-            if cache_value:
-                return cache_value
-            else:
-                cache_value = self.collection.find_one(query)
-                cache.set(
-                    key=f"{self.base_identifier}:{query_hash}",
-                    value=cache_value,
-                    ttl=ttl,
-                )
+        cache_value = cache.get(key=f"{self.base_identifier}:{query_hash}")
+        if cache_value:
             return cache_value
+        else:
+            cache_value = self.collection.find_one(query)
+            cache.set(
+                key=f"{self.base_identifier}:{query_hash}",
+                value=cache_value,
+                ttl=ttl,
+            )
+        return cache_value

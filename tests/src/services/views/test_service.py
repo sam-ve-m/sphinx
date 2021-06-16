@@ -120,6 +120,42 @@ def test_link_feature():
     assert response.get("message_key") == "requests.updated"
 
 
+def test_link_feature_not_have_feature():
+    view_repository = StubRepository(database="", collection="")
+    feature_repository = StubRepository(database="", collection="")
+    view_repository.find_one = MagicMock(return_value={})
+    feature_repository.find_one = MagicMock(return_value={})
+    view_repository.update_one = MagicMock(return_value=True)
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
+        ViewService.link_feature(
+            payload=link_feature_payload, view_repository=view_repository,
+        )
+
+def test_link_feature_not_modified():
+    view_repository = StubRepository(database="", collection="")
+    feature_repository = StubRepository(database="", collection="")
+    view_repository.find_one = MagicMock(return_value={"features": list()})
+    feature_repository.find_one = MagicMock(return_value=None)
+    response = ViewService.link_feature(
+        payload=link_feature_payload, view_repository=view_repository
+    )
+    assert response.get("status_code") == status.HTTP_304_NOT_MODIFIED
+    assert response.get("message_key") == "requests.not_modified"
+
+
+def test_link_feature_not_modified_already_there():
+    view_repository = StubRepository(database="", collection="")
+    feature_repository = StubRepository(database="", collection="")
+    view_repository.find_one = MagicMock(return_value={"features": ['lele']})
+    feature_repository.find_one = MagicMock(return_value={})
+    view_repository.update_one = MagicMock(return_value=True)
+    response = ViewService.link_feature(
+        payload=link_feature_payload, view_repository=view_repository
+    )
+    assert response.get("status_code") == status.HTTP_304_NOT_MODIFIED
+    assert response.get("message_key") == "requests.not_modified"
+
+
 def test_get_view_register_not_exists():
     payload = {"view_id": "lala"}
     stub_repository = StubRepository(database="", collection="")

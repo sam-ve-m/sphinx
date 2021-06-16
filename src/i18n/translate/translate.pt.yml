@@ -4,11 +4,13 @@ pt:
     created: Registrado com sucesso.
     updated: Registro atualizado.
     deleted: Registro deletado.
+    not_modified: Nada para atualizar.
   common:
     invalid_params: Parametros invalidos.
     register_exists: Registro já existe.
     register_not_exists: Registro não existe.
     process_issue: Erro no processo.
+    unable_to_process: Impossivel processar.
   view:
     feature_not_exists: O serviços enviado não existe.
   user:

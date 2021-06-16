@@ -139,7 +139,7 @@ class UserService(IUser):
         new["scope"] = dict(old.get("scope"))
         new["scope"]["view_type"] = new_view
         if user_repository.update_one(old=old, new=new) is False:
-            raise InternalServerError("common.process_issue")
+            raise InternalServerError("common.unable_to_process")
         jwt = token_handler.generate_token(payload=new, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
@@ -264,7 +264,7 @@ class UserService(IUser):
         if (
             sent_to_persephone and user_repository.update_one(old=old, new=new)
         ) is False:
-            raise InternalServerError("common.process_issue")
+            raise InternalServerError("common.unable_to_process")
         jwt = token_handler.generate_token(payload=new, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
