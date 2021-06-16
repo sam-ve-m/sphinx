@@ -122,7 +122,7 @@ def test_save_valid_term_file(
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     assert (
         file_repository.save_term_file(
-            file_type=TermsFileType.TERM_REFUSAL, content="",
+            file_type=TermsFileType.TERM_REFUSAL, content=b"its a byte",
         )
         is None
     )
@@ -200,8 +200,9 @@ def test_get_term_version(
         new_file_repository_valid_mocked_validate_bucket_name_and_s3_with_content
     )
     file_repository.s3_client = S3Client
+    contents = file_repository.s3_client.list_objects()
     value = file_repository.get_current_term_version(file_type=TermsFileType.TERM_REFUSAL)
-    assert value == 3
+    assert value == len(contents.get('Contents'))
 
 
 def test_get_term_version_is_new_version(
@@ -211,8 +212,10 @@ def test_get_term_version_is_new_version(
         new_file_repository_valid_mocked_validate_bucket_name_and_s3_with_content
     )
     file_repository.s3_client = S3Client
-    value = file_repository.get_current_term_version(file_type=TermsFileType.TERM_REFUSAL, is_new_version=True)
-    assert value == 4
+    contents = file_repository.s3_client.list_objects()
+    value = file_repository.get_current_term_version(file_type=TermsFileType.TERM_REFUSAL)
+    new_v = value + 1
+    assert new_v > len(contents.get('Contents'))
 
 
 def test_get_terms_version_without_cache(

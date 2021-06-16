@@ -337,7 +337,7 @@ def test_sign_term_process_issue():
     stub_user_repository.find_one = MagicMock(return_value={"email": "lala"})
     stub_user_repository.update_one = MagicMock(return_value=False)
     stub_file_repository = StubRepository(database="", collection="")
-    stub_file_repository.get_term_version = MagicMock(return_value=1)
+    stub_file_repository.get_current_term_version = MagicMock(return_value=1)
     with pytest.raises(InternalServerError, match="^common.unable_to_process"):
         UserService.sign_term(
             payload={
@@ -354,7 +354,7 @@ def test_sign_term_process_issue_v2():
     stub_user_repository.find_one = MagicMock(return_value={"email": "lala"})
     stub_user_repository.update_one = MagicMock(return_value=False)
     stub_file_repository = StubRepository(database="", collection="")
-    stub_file_repository.get_term_version = MagicMock(return_value=1)
+    stub_file_repository.get_current_term_version = MagicMock(return_value=1)
     StubPersephoneClient.run = MagicMock(return_value=True)
     with pytest.raises(InternalServerError, match="^common.unable_to_process"):
         UserService.sign_term(
@@ -374,7 +374,7 @@ def test_sign_term():
     stub_user_repository.update_one = MagicMock(return_value=True)
 
     stub_file_repository = StubRepository(database="", collection="")
-    stub_file_repository.get_term_version = MagicMock(return_value=1)
+    stub_file_repository.get_current_term_version = MagicMock(return_value=1)
 
     StubPersephoneClient.run = MagicMock(return_value=True)
     stub_jwt_handler = StubJWTHandler()
