@@ -252,7 +252,7 @@ class UserService(IUser):
         UserService.fill_term_signed(
             payload=new,
             file_type=file_type.value,
-            version=file_repository.get_term_version(file_type=file_type),
+            version=file_repository.get_current_term_version(file_type=file_type),
         )
         sent_to_persephone = persephone_client.run(
             topic="thebes.sphinx_persephone.topic",

@@ -1,7 +1,7 @@
 # STANDARD LIBS
 import pytest
 from unittest.mock import MagicMock, patch
-from base64 import b64encode
+from base64 import b64encode, b64decode
 from enum import Enum
 
 # SPHINX
@@ -99,12 +99,22 @@ def test_resolve_path() -> None:
     assert path == "lionx.com.br/ma/marco@lionx.com.br/user_self/"
 
 
-def test_resolve_content_str():
-    str_value = b"1234"
-    base64_str = b64encode(str_value).decode()
+def test_resolve_content_byte():
+    byte_value = b"1234"
+    base64_str = b64encode(byte_value).decode()
     value = FileRepository.resolve_content(content=base64_str)
-    assert str_value == value
+    assert byte_value == value
 
+def test_resolve_content_str():
+    str_value = "1234"
+    value = FileRepository.resolve_content(content=str_value)
+    base64_bytes = str_value.encode("ascii")
+    assert b64decode(base64_bytes) == value
+
+def test_resolve_content_without_value():
+    str_value = None
+    with pytest.raises(InternalServerError, match="files.error"):
+        FileRepository.resolve_content(content=str_value)
 
 def test_save_valid_term_file(
     new_file_repository_valid_mocked_validate_bucket_name,
@@ -178,8 +188,9 @@ def test_get_term_version_file_not_exists(
     new_file_repository_valid_mocked_validate_bucket_name,
 ) -> None:
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
+    file_repository.s3_client.list_objects = MagicMock(return_value={})
     with pytest.raises(BadRequestError, match="^files.not_exists"):
-        file_repository.get_term_version(file_type=TermsFileType.TERM_REFUSAL)
+        file_repository.get_current_term_version(file_type=TermsFileType.TERM_REFUSAL)
 
 
 def test_get_term_version(
@@ -189,7 +200,7 @@ def test_get_term_version(
         new_file_repository_valid_mocked_validate_bucket_name_and_s3_with_content
     )
     file_repository.s3_client = S3Client
-    value = file_repository.get_term_version(file_type=TermsFileType.TERM_REFUSAL)
+    value = file_repository.get_current_term_version(file_type=TermsFileType.TERM_REFUSAL)
     assert value == 3
 
 
@@ -200,9 +211,7 @@ def test_get_term_version_is_new_version(
         new_file_repository_valid_mocked_validate_bucket_name_and_s3_with_content
     )
     file_repository.s3_client = S3Client
-    value = file_repository.get_term_version(
-        file_type=TermsFileType.TERM_REFUSAL, is_new_version=True
-    )
+    value = file_repository.get_current_term_version(file_type=TermsFileType.TERM_REFUSAL, is_new_version=True)
     assert value == 4
 
 
@@ -263,7 +272,7 @@ def test__get_last_saved_file_from_folder_file_error(
         file_repository._get_last_saved_file_from_folder(path=None)
 
 
-def test__get_last_saved_file_from_folder_sucesse(
+def test__get_last_saved_file_from_folder_success(
     new_file_repository_valid_mocked_validate_bucket_name,
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name

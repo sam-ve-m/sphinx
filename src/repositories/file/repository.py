@@ -66,8 +66,9 @@ class FileRepository(IFile):
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
         path = self.resolve_term_path(file_type=file_type)
-        version = self.get_term_version(file_type=file_type, is_new_version=True)
-        file_name = self.generate_term_file_name(name=file_type.value, version=version)
+        current_version = self.get_current_term_version(file_type=file_type)
+        new_version = current_version + 1
+        file_name = self.generate_term_file_name(name=file_type.value, version=new_version)
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if all([path, file_name, file_extension]) is False:
             raise InternalServerError("files.error")
@@ -104,7 +105,7 @@ class FileRepository(IFile):
             value = dict()
             for file_type in term_types:
                 value.update(
-                    {file_type.value: self.get_term_version(file_type=file_type)}
+                    {file_type.value: self.get_current_term_version(file_type=file_type)}
                 )
             cache.set(key=cache_key, value=value)
         return value
@@ -126,7 +127,7 @@ class FileRepository(IFile):
         return value
 
     def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
-        if type(path) != str:
+        if type(path) is not str:
             raise InternalServerError("files.error")
         objects = self.s3_client.list_objects(
             Bucket=self.bucket_name, Prefix=path, Delimiter="/"
@@ -141,7 +142,9 @@ class FileRepository(IFile):
 
     @staticmethod
     def resolve_content(content: Union[str, bytes]):
-        if type(content) == str:
+        if not content:
+            raise InternalServerError("files.error")
+        if type(content) is str:
             base64_bytes = content.encode("ascii")
             content = b64decode(base64_bytes)
         return content
@@ -170,17 +173,17 @@ class FileRepository(IFile):
     def resolve_term_path(file_type: TermsFileType) -> str:
         return f"{file_type.value}/"
 
-    def get_term_version(self, file_type: TermsFileType, is_new_version=False) -> int:
+    def get_current_term_version(self, file_type: TermsFileType) -> int:
         objects = self.s3_client.list_objects(
             Bucket=self.bucket_name,
             Prefix=FileRepository.resolve_term_path(file_type=file_type),
             Delimiter="/",
         )
         content = objects.get("Contents")
-        if type(content) == list:
-            version = len(content)
-            if is_new_version:
-                return version + 1
-            if version != 0:
-                return version
-        raise BadRequestError("files.not_exists")
+        if type(content) is not list:
+            raise BadRequestError("files.not_exists")
+
+        version = len(content)
+        if version != 0:
+            return version
+        return 1

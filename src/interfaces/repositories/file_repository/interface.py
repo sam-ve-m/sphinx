@@ -55,7 +55,7 @@ class IFile(ABC):
         pass
 
     @abstractmethod
-    def get_term_version(self, file_type: TermsFileType, is_new_version=False) -> int:
+    def get_current_term_version(self, file_type: TermsFileType) -> int:
         pass
 
     @abstractmethod
