@@ -184,7 +184,8 @@ class UserService(IUser):
         old = payload.get("thebes_answer")
         new = dict(old)
         new_scope = new.get("scope")
-        if payload.get("feature") not in new_scope.get("features"):
+        feature = payload.get("feature")
+        if feature not in new_scope.get("features"):
             new_scope.get("features").append(payload.get("feature"))
             new.update({"scope": new_scope})
             if user_repository.update_one(old=old, new=new) is False:

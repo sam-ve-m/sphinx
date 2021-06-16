@@ -244,7 +244,7 @@ def test_add_feature_already_exists():
 
 def test_add_feature_process_issue():
     copy = dict(user_data)
-    copy.update({"view_type": None, "features": []},)
+    copy.update({'scope': {"view_type": None, "features": []}},)
     payload = {
         "thebes_answer": copy,
         "feature": "real_time_data",
@@ -252,7 +252,7 @@ def test_add_feature_process_issue():
     stub_jwt_handler = StubJWTHandler()
     stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
     stub_repository = StubRepository(database="", collection="")
-    stub_repository.update_one = MagicMock(return_value=True)
+    stub_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.add_feature(
             payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
