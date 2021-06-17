@@ -35,6 +35,7 @@ class StubRequest:
         self.url = url
 
 
+
 def test_is_public_true_post():
     stub_url = StubURL
     stub_url.path = "/user"
@@ -69,7 +70,7 @@ def test_login_admin_post_is_public():
 
 def test_any_post_is_public():
     stub_url = StubURL
-    stub_url.path = "ANY_POST_METHOD"
+    stub_url.path = "/ANY_POST_METHOD"
     request = StubRequest(url=stub_url)
     route_public = is_public(request=request)
     assert route_public is False
@@ -139,7 +140,7 @@ def test_feature_need_be_admin_true():
     stub_url.path = "/feature"
     request = StubRequest(url=stub_url)
     is_admin_route = need_be_admin(request=request)
-    assert is_admin_route
+    assert is_admin_route is True
 
 
 def test_term_need_be_admin_true_post():
@@ -148,7 +149,7 @@ def test_term_need_be_admin_true_post():
     request = StubRequest(url=stub_url)
     request.method = "POST"
     is_admin_route = need_be_admin(request=request)
-    assert is_admin_route
+    assert is_admin_route is True
 
 
 def test_views_need_be_admin_true_post():
@@ -157,7 +158,7 @@ def test_views_need_be_admin_true_post():
     request = StubRequest(url=stub_url)
     request.method = "POST"
     is_admin_route = need_be_admin(request=request)
-    assert is_admin_route
+    assert is_admin_route is True
 
 
 def test_user_admin_need_be_admin_true_post():
@@ -166,7 +167,7 @@ def test_user_admin_need_be_admin_true_post():
     request = StubRequest(url=stub_url)
     request.method = "POST"
     is_admin_route = need_be_admin(request=request)
-    assert is_admin_route
+    assert is_admin_route is True
 
 
 def test_is_user_deleted_true():

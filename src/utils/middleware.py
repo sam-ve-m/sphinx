@@ -16,21 +16,24 @@ from src.utils.language_identifier import get_language_from_request
 
 def is_public(request: Request) -> bool:
     post_method = request.method == "POST"
-    get_method = request.method == "POST"
-    url_path = request.path
+    get_method = request.method == "GET"
+    url_path = request.url.path
     public_path_list = ["/user", "/user/forgot_password", "/login", "/login/admin",]
     term_path_list = ["/term",]
     if post_method and url_path in public_path_list or get_method and url_path in term_path_list :
         return True
+    return False
 
 def need_be_admin(request: Request) -> bool:
-    return (
-        request.url.path == "/user_admin"
-        or request.url.path.startswith("/views")
-        or request.url.path.startswith("/feature")
-        or (request.url.path == "/term" and request.method == "POST")
-    )
+    right_path = request.url.path == "/user_admin"
+    starts_with_views = request.url.path.startswith("/views")
+    starts_with_feature = request.url.path.startswith("/feature")
+    term_path = request.url.path == "/term"
+    post_method = request.method == "POST"
 
+    if right_path or starts_with_views or starts_with_feature or term_path and post_method:
+        return True
+    return False
 
 def is_user_deleted(user_data: dict) -> bool:
     return user_data.get("deleted")
