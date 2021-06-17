@@ -292,7 +292,7 @@ def test_delete_feature_not_exists():
         "feature": "test_feature_xxx",
     }
     stub_repository = StubRepository(database="", collection="")
-    stub_repository.update_one = MagicMock(return_value=False)
+    stub_repository.update_one = MagicMock(return_value=True)
     stub_jwt_handler = StubJWTHandler()
     stub_jwt_handler.generate_token = MagicMock(return_value=user_data)
     result = UserService.delete_feature(
@@ -311,14 +311,14 @@ def test_delete_feature_that_exists():
         return_value="asdkjash761.asd98y7139.123y7129h"
     )
     stub_repository = StubRepository(database="", collection="")
-    stub_repository.update_one = MagicMock(return_value=True)
+    stub_repository.update_one = MagicMock(return_value=False)
     result = UserService.delete_feature(
         payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
     )
     assert result.get("status_code") == status.HTTP_200_OK
 
 
-def test_delete_feature_that_not_exists():
+def test_delete_feature_that_not_exists_raises():
     payload = {
         "thebes_answer": user_data,
         "feature": "real_time_data",
