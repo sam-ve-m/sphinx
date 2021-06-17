@@ -65,6 +65,9 @@ class FileRepository(IFile):
     def save_term_file(
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
+
+        if content is None:
+            raise InternalServerError("files.content.empty")
         content = self.resolve_content(content)
         path = self.resolve_term_path(file_type=file_type)
         current_version = self.get_current_term_version(file_type=file_type)

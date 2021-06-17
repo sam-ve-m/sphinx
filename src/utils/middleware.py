@@ -15,8 +15,8 @@ from src.utils.language_identifier import get_language_from_request
 
 
 def is_public(request: Request) -> bool:
-    post_method = request.method == "POST"
-    get_method = request.method == "GET"
+    post_method = "POST" in request.method
+    get_method = "GET" in request.method
     url_path = request.url.path
     public_path_list = ["/user", "/user/forgot_password", "/login", "/login/admin", ]
     term_path_list = ["/term", ]
