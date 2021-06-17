@@ -60,7 +60,7 @@ def test_insert_many_true() -> None:
 
 def test_find_one_false_without_cache() -> None:
     stub_mongo_collection = StubMongoCollection()
-    stub_mongo_collection.find_one = MagicMock(side_effect=Exception())
+    stub_mongo_collection.find_one = MagicMock(side_effect={})
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
     stub_base_repository._get_from_cache = MagicMock(return_value=False)
     stub_cache = StubCache()
@@ -75,29 +75,28 @@ def test_find_one_false_without_cache() -> None:
 
 def test_find_one_true_without_cache() -> None:
     stub_mongo_collection = StubMongoCollection()
-    stub_mongo_collection.find_one = MagicMock(return_value=True)
+    stub_mongo_collection.find_one = MagicMock(return_value={"source":"collection"})
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
-    stub_base_repository._get_from_cache = MagicMock(return_value=False)
+    stub_base_repository._get_from_cache = MagicMock(return_value={"source":"redis"})
     stub_cache = StubCache()
-    assert stub_base_repository.find_one(
-        query={"test_insert_user_false": "test_insert_user_false"}, cache=stub_cache,
+    from_source = stub_base_repository.find_one(
+        query={"test_insert_user_false": "test_insert_user_false"}, ttl=0, cache=stub_cache,
     )
+    assert from_source == {"source": "collection"}
 
 
 def test_find_one_true_with_cache() -> None:
     stub_mongo_collection = StubMongoCollection()
-    stub_mongo_collection.find_one = MagicMock(return_value=True)
+    stub_mongo_collection.find_one = MagicMock(return_value={})
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
-    stub_base_repository._get_from_cache = MagicMock(return_value={})
+    stub_base_repository._get_from_cache = MagicMock(return_value={"source":"redis"})
     stub_cache = StubCache()
-    assert (
-        stub_base_repository.find_one(
+    from_source = stub_base_repository.find_one(
             query={"test_insert_user_false": "test_insert_user_false"},
-            ttl=1,
+            ttl=2,
             cache=stub_cache,
         )
-        == {}
-    )
+    assert from_source == {"source": "redis"}
 
 
 def test_find_more_than_equal_one_false() -> None:
