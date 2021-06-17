@@ -18,22 +18,31 @@ def is_public(request: Request) -> bool:
     post_method = request.method == "POST"
     get_method = request.method == "GET"
     url_path = request.url.path
-    public_path_list = ["/user", "/user/forgot_password", "/login", "/login/admin",]
-    term_path_list = ["/term",]
-    if post_method and url_path in public_path_list or get_method and url_path in term_path_list :
+    public_path_list = ["/user", "/user/forgot_password", "/login", "/login/admin", ]
+    term_path_list = ["/term", ]
+    if post_method and url_path in public_path_list or get_method and url_path in term_path_list:
         return True
     return False
+
 
 def need_be_admin(request: Request) -> bool:
-    right_path = request.url.path == "/user_admin"
+    need_admin = False
+    starts_with_user_admin = request.url.path.startswith("/user_admin")
     starts_with_views = request.url.path.startswith("/views")
     starts_with_feature = request.url.path.startswith("/feature")
-    term_path = request.url.path == "/term"
+    starts_with_term = request.url.path.startswith("/term")
     post_method = request.method == "POST"
 
-    if right_path or starts_with_views or starts_with_feature or term_path and post_method:
-        return True
-    return False
+    if starts_with_user_admin and post_method:
+        need_admin = True
+    elif starts_with_views and post_method:
+        need_admin = True
+    elif starts_with_feature and post_method:
+        need_admin = True
+    elif starts_with_term and post_method:
+        need_admin = True
+    return need_admin
+
 
 def is_user_deleted(user_data: dict) -> bool:
     return user_data.get("deleted")
@@ -42,11 +51,11 @@ def is_user_deleted(user_data: dict) -> bool:
 def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
     try:
         token_valid_after = user_data.get("token_valid_after")
-        token_created_at = datetime.strptime(
-            jwt_data.get("created_at"), "%Y-%m-%d %H:%M:%S.%f"
-        )
-        is_token_invalid = token_valid_after > token_created_at
+        user_created_at = jwt_data.get("created_at")
+        is_token_invalid = token_valid_after > user_created_at
         return is_token_invalid
+    except ValueError:
+        return False
     except Exception as e:
         logger = logging.getLogger(config("LOG_NAME"))
         logger.error(e, exc_info=True)
@@ -60,25 +69,26 @@ def invalidate_user(user_data: dict, jwt_data: dict) -> bool:
 
 
 def check_if_is_user_not_allowed_to_access_route(
-    request: Request, jwt_data: dict, user_repository: UserRepository = UserRepository()
+        request: Request, jwt_data: dict, user_repository: UserRepository = UserRepository()
 ) -> Optional[Response]:
     user_data = user_repository.find_one({"email": jwt_data["email"]}, ttl=60)
-    user_not_allowed = invalidate_user(user_data=user_data, jwt_data=jwt_data)
-    is_user_not_admin = (
-        user_data.get("is_admin") is None or user_data.get("is_admin") is False
-    )
+    token_is_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
     is_admin_route = need_be_admin(request=request)
-    is_not_admin_user_accessing_admin_route = is_admin_route and is_user_not_admin
+    is_admin = user_data.get("is_admin")
+    content = {"message": None}
+    locale = get_language_from_request(request=request)
+    message = i18n.get_translate("valid_credential", locale=locale, )
+    status_code = 200
 
-    if user_not_allowed or is_not_admin_user_accessing_admin_route:
-        return Response(
-            content=json.dumps(
-                {
-                    "message": i18n.get_translate(
-                        "invalid_token",
-                        locale=get_language_from_request(request=request),
-                    )
-                }
-            ),
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
+    if not token_is_valid:
+        status_code = status.HTTP_401_UNAUTHORIZED
+    elif is_admin_route:
+        if is_admin:
+            message = i18n.get_translate("valid_credential", locale=locale, )
+            status_code = status.HTTP_200_OK
+        else:
+            message = i18n.get_translate("invalid_credential", locale=locale, )
+            status_code = status.HTTP_304_NOT_MODIFIED
+
+    content.update({"message": message})
+    return Response(content=json.dumps(content), status_code=status_code)

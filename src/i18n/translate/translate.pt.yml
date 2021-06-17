@@ -51,6 +51,8 @@ pt:
     params:
       invalid: Nome e versao sao necessarios para criar o arquivo.
   invalid_token: Parece que seu acesso expirou, logue novamente.
+  invalid_credential: Usuario nao tem permissao para acessar esta routa ou acao.
+  valid_credential: Usuario possui permissao ou acesso para executar esta acao.
   not_allowed: Parece que você não tem eprmissão para isso.
   internal_error: Tivemos problema, por favor tente novamente.
   suitability:
