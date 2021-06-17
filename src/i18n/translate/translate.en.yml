@@ -25,8 +25,8 @@ en:
     files:
       term_not_signed: You did not sign this term yet.
     quiz:
-      ok: Quiz recieved.
-      trouble: Failed to get Quiz.
+      ok: Quiz recebido.
+      trouble: Falha ao obter Quiz.
   email:
     login: We sent an email to the registered account, to conclude login
     forgot_password: We sent an email to login and change your PIN

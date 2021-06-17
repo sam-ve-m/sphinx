@@ -15,12 +15,13 @@ from src.utils.language_identifier import get_language_from_request
 
 
 def is_public(request: Request) -> bool:
-    return (
-        request.method == "POST"
-        and request.url.path
-        in ["/user", "/user/forgot_password", "/login", "/login/admin",]
-    ) or (request.method == "GET" and request.url.path in ["/term",])
-
+    post_method = request.method == "POST"
+    get_method = request.method == "POST"
+    url_path = request.path
+    public_path_list = ["/user", "/user/forgot_password", "/login", "/login/admin",]
+    term_path_list = ["/term",]
+    if post_method and url_path in public_path_list or get_method and url_path in term_path_list :
+        return True
 
 def need_be_admin(request: Request) -> bool:
     return (

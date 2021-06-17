@@ -134,7 +134,7 @@ def test_save_term_file_with_invalid_user_path(
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     file_repository.resolve_term_path = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
-        file_repository.save_term_file(file_type=TermsFileType.TERM_REFUSAL, content="")
+        file_repository.save_term_file(file_type=TermsFileType.TERM_REFUSAL, content=b"is a byte")
 
 
 def test_save_term_file_with_invalid_file_extension(
@@ -143,7 +143,7 @@ def test_save_term_file_with_invalid_file_extension(
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     file_repository.get_file_extension_by_type = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
-        file_repository.save_term_file(file_type=TermsFileType.TERM_REFUSAL, content="")
+        file_repository.save_term_file(file_type=TermsFileType.TERM_REFUSAL, content=b"is a byte")
 
 
 def test_get_term_file_none(

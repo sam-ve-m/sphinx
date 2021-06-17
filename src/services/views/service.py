@@ -66,7 +66,7 @@ class ViewService(IView):
                 new.get("features").append(feature_id)
                 if view_repository.update_one(old=old, new=new) is False:
                     raise InternalServerError("common.process_issue")
-                return {"status_code": status.HTTP_200_OK, "message_key": "requests.updated"}
+            return {"status_code": status.HTTP_200_OK, "message_key": "requests.updated"}
         return {"status_code": status.HTTP_304_NOT_MODIFIED, "message_key": "requests.not_modified"}
 
     @staticmethod
