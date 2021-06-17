@@ -48,11 +48,8 @@ class BaseRepository(IRepository):
     ) -> Optional[dict]:
         try:
             if not ttl != 0:
-                value = self.collection.find_one(query)
-            else:
-                value = self._get_from_cache(query=query, cache=cache, ttl=ttl)
-
-            return value
+                return self.collection.find_one(query)
+            return self._get_from_cache(query=query, cache=cache, ttl=ttl)
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)

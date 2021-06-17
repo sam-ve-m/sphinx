@@ -316,6 +316,21 @@ def test_delete_feature_that_exists():
     )
     assert result.get("status_code") == status.HTTP_200_OK
 
+def test_delete_feature_that_not_exists():
+    payload = {
+        "thebes_answer": user_data,
+        "feature": "real_time_data",
+    }
+    stub_jwt_handler = StubJWTHandler()
+    stub_jwt_handler.generate_token = MagicMock(
+        return_value="asdkjash761.asd98y7139.123y7129h"
+    )
+    stub_repository = StubRepository(database="", collection="")
+    stub_repository.update_one = MagicMock(return_value=False)
+    with pytest.raises(InternalServerError, match="common.process_issue"):
+        UserService.delete_feature(
+            payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        )
 
 def test_save_user_self():
     stub_repository = StubRepository(database="", collection="")
