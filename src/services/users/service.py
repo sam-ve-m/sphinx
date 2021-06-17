@@ -292,7 +292,7 @@ class UserService(IUser):
                 .get(file_type.value)
                 .get("version")
             )
-        except:
+        except Exception:
             raise BadRequestError("user.files.term_not_signed")
         try:
             link = file_repository.get_term_file_by_version(
@@ -315,7 +315,7 @@ class UserService(IUser):
         user_identifier = payload.get("user_identifier")
         quiz = stone_age.send_user_identifier_data(user_identifier_data=user_identifier)
         if type(quiz) is not dict:
-            raise InternalServerError("common.process_issue")
+            raise InternalServerError("user.quiz.trouble")
         new = dict(old)
         UserService.update_user_identifier_data(
             payload=new, user_identifier=user_identifier

@@ -465,9 +465,9 @@ def test_user_identifier_data_register_not_exists():
 def test_user_identifier_data_process_issue_v1():
     stub_user_repository = StubRepository(database="", collection="")
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
-    stub_user_repository.update_one = MagicMock(return_value=False)
+    stub_user_repository.update_one = MagicMock(return_value=True)
     StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
-    with pytest.raises(InternalServerError, match="^common.process_issue"):
+    with pytest.raises(InternalServerError, match="^user.quiz.trouble"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,

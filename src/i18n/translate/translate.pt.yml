@@ -24,6 +24,9 @@ pt:
     creating_account: Iremos criar sua conta bancaria, espere o email.
     files:
       term_not_signed: Você ainda não assinou estes termos.
+    quiz:
+      ok: Quiz recebido.
+      trouble: Falha ao obter Quiz.
   email:
     login: Enviamos um email para a conta cadastrada, para concluir o login
     forgot_password: Enviamos um email para efetura login e mudança do PIN

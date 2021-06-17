@@ -1,174 +1,77 @@
-import pytest
-from unittest.mock import MagicMock
+# OUTSIDE LIBRARIES
 from fastapi import status
 
+# SPHINX
+from src.repositories.view.repository import ViewRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-from src.services.views.service import ViewService
-from tests.stub_classes.stub_base_repository import StubBaseRepository
+from src.utils.genarate_id import generate_id, generate_list
+from src.interfaces.services.view.interface import IView
 
 
-class StubRepository(StubBaseRepository):
-    pass
+class ViewService(IView):
+    @staticmethod
+    def create(payload: dict, view_repository=ViewRepository()) -> dict:
+        payload = generate_id("name", payload)
+        payload = generate_list("features", payload)
+        if view_repository.find_one(payload) is not None:
+            raise BadRequestError("common.register_exists")
+        if view_repository.insert(payload):
+            return {
+                "status_code": status.HTTP_201_CREATED,
+                "message_key": "requests.created",
+            }
+        else:
+            raise InternalServerError("common.process_issue")
 
+    @staticmethod
+    def update(payload: dict, view_repository=ViewRepository()) -> dict:
+        display_name = payload.get("model").get("display_name")
+        old = view_repository.find_one({"_id": payload.get("view_id")})
+        if old is None:
+            raise BadRequestError("common.register_not_exists")
+        new = dict(old)
+        new["display_name"] = display_name
+        if view_repository.update_one(old=old, new=new):
+            return {
+                "status_code": status.HTTP_200_OK,
+                "message_key": "requests.updated",
+            }
+        else:
+            raise InternalServerError("common.process_issue")
 
-def test_create_register_exists():
-    payload = {"name": "lala", "display_name": "Lala"}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={})
-    with pytest.raises(BadRequestError, match="^common.register_exists"):
-        ViewService.create(payload=payload, view_repository=stub_repository)
+    @staticmethod
+    def delete(payload: dict, view_repository=ViewRepository()) -> dict:
+        view_id = payload.get("view_id")
+        old = view_repository.find_one({"_id": view_id})
+        if old is None:
+            raise BadRequestError("common.register_not_exists")
+        if view_repository.delete_one({"_id": view_id}):
+            return {
+                "status_code": status.HTTP_200_OK,
+                "message_key": "requests.deleted",
+            }
+        else:
+            raise InternalServerError("common.process_issue")
 
+    @staticmethod
+    def link_feature(payload: dict, view_repository=ViewRepository()) -> dict:
+        feature_id = payload.get("feature_id")
+        old = view_repository.find_one({"_id": payload.get("view_id")})
+        if old:
+            features = old.get("features")
+            if features is None:
+                raise InternalServerError("common.process_issue")
+            if feature_id not in features:
+                new = dict(old)
+                new.get("features").append(feature_id)
+                if view_repository.update_one(old=old, new=new) is False:
+                    raise InternalServerError("common.process_issue")
+            return {"status_code": status.HTTP_200_OK, "message_key": "requests.updated"}
+        return {"status_code": status.HTTP_304_NOT_MODIFIED, "message_key": "requests.not_modified"}
 
-def test_create_process_issue():
-    payload = {"name": "lala", "display_name": "Lala"}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value=None)
-    stub_repository.insert = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="^common.process_issue"):
-        ViewService.create(payload=payload, view_repository=stub_repository)
-
-
-def test_created():
-    payload = {"name": "lala", "display_name": "Lala"}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value=None)
-    stub_repository.insert = MagicMock(return_value=True)
-    response = ViewService.create(payload=payload, view_repository=stub_repository)
-    assert response.get("status_code") == status.HTTP_201_CREATED
-    assert response.get("message_key") == "requests.created"
-
-
-def test_update_register_not_exists():
-    payload = {"view_id": "lala", "model": {"name": "lala", "display_name": "Lala"}}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
-        ViewService.update(payload=payload, view_repository=stub_repository)
-
-
-def test_update_process_issue():
-    payload = {"view_id": "lala", "model": {"name": "lala", "display_name": "Lala"}}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={})
-    stub_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="^common.process_issue"):
-        ViewService.update(payload=payload, view_repository=stub_repository)
-
-
-def test_updated():
-    payload = {"view_id": "lala", "model": {"name": "lala", "display_name": "Lala"}}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={})
-    stub_repository.update_one = MagicMock(return_value=True)
-    response = ViewService.update(payload=payload, view_repository=stub_repository)
-    assert response.get("status_code") == status.HTTP_200_OK
-    assert response.get("message_key") == "requests.updated"
-
-
-def test_delete_register_not_exists():
-    payload = {"view_id": "lala"}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
-        ViewService.delete(payload=payload, view_repository=stub_repository)
-
-
-def test_delete_process_issue():
-    payload = {"view_id": "lala"}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={})
-    stub_repository.delete_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="^common.process_issue"):
-        ViewService.delete(payload=payload, view_repository=stub_repository)
-
-
-def test_deleted():
-    payload = {"view_id": "lala"}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={})
-    stub_repository.delete_one = MagicMock(return_value=True)
-    response = ViewService.delete(payload=payload, view_repository=stub_repository)
-    assert response.get("status_code") == status.HTTP_200_OK
-    assert response.get("message_key") == "requests.deleted"
-
-
-link_feature_payload = {"view_id": "lala", "feature_id": "lele"}
-
-
-def test_link_feature_process_issue():
-    view_repository = StubRepository(database="", collection="")
-    feature_repository = StubRepository(database="", collection="")
-    view_repository.find_one = MagicMock(return_value={"features": list()})
-    feature_repository.find_one = MagicMock(return_value={})
-    view_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="^common.process_issue"):
-        ViewService.link_feature(
-            payload=link_feature_payload, view_repository=view_repository,
-        )
-
-
-def test_link_feature():
-    view_repository = StubRepository(database="", collection="")
-    feature_repository = StubRepository(database="", collection="")
-    view_repository.find_one = MagicMock(return_value={"features": list()})
-    feature_repository.find_one = MagicMock(return_value={})
-    view_repository.update_one = MagicMock(return_value=True)
-    response = ViewService.link_feature(
-        payload=link_feature_payload, view_repository=view_repository
-    )
-    assert response.get("status_code") == status.HTTP_200_OK
-    assert response.get("message_key") == "requests.updated"
-
-
-def test_link_feature_not_have_feature():
-    view_repository = StubRepository(database="", collection="")
-    feature_repository = StubRepository(database="", collection="")
-    view_repository.find_one = MagicMock(return_value={"view":"12313"})
-    feature_repository.find_one = MagicMock(return_value={})
-    view_repository.update_one = MagicMock(return_value=False)
-    with pytest.raises(InternalServerError, match="^common.process_issue"):
-        ViewService.link_feature(
-            payload=link_feature_payload, view_repository=view_repository,
-        )
-
-def test_link_feature_not_modified():
-    view_repository = StubRepository(database="", collection="")
-    feature_repository = StubRepository(database="", collection="")
-    view_repository.find_one = MagicMock(return_value={"features": ["lele"]})
-    feature_repository.find_one = MagicMock(return_value=None)
-    response = ViewService.link_feature(
-        payload=link_feature_payload, view_repository=view_repository
-    )
-    assert response.get("status_code") == status.HTTP_304_NOT_MODIFIED
-    assert response.get("message_key") == "requests.not_modified"
-
-
-def test_link_feature_not_modified_already_there():
-    view_repository = StubRepository(database="", collection="")
-    feature_repository = StubRepository(database="", collection="")
-    view_repository.find_one = MagicMock(return_value={"features": ['lele']})
-    feature_repository.find_one = MagicMock(return_value={})
-    view_repository.update_one = MagicMock(return_value=True)
-    response = ViewService.link_feature(
-        payload=link_feature_payload, view_repository=view_repository
-    )
-    assert response.get("status_code") == status.HTTP_304_NOT_MODIFIED
-    assert response.get("message_key") == "requests.not_modified"
-
-
-def test_get_view_register_not_exists():
-    payload = {"view_id": "lala"}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
-        ViewService.get_view(payload=payload, view_repository=stub_repository)
-
-
-def test_get_view():
-    payload = {"view_id": "lala"}
-    data = {"alala": "elele"}
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value=data)
-    response = ViewService.get_view(payload=payload, view_repository=stub_repository)
-    assert response.get("status_code") == status.HTTP_200_OK
-    assert response.get("payload") == data
+    @staticmethod
+    def get_view(payload: dict, view_repository=ViewRepository()) -> dict:
+        view = view_repository.find_one({"_id": payload.get("view_id")})
+        if view is None:
+            raise BadRequestError("common.register_not_exists")
+        return {"status_code": status.HTTP_200_OK, "payload": view}

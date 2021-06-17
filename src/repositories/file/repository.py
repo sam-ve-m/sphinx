@@ -65,7 +65,7 @@ class FileRepository(IFile):
     def save_term_file(
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
-        if not content:
+        if not content or type(content) not in [str, bytes]:
             raise InternalServerError("files.error")
         content = self.resolve_content(content)
         path = self.resolve_term_path(file_type=file_type)
@@ -73,7 +73,7 @@ class FileRepository(IFile):
         new_version = current_version + 1
         file_name = self.generate_term_file_name(name=file_type.value, version=new_version)
         file_extension = self.get_file_extension_by_type(file_type=file_type)
-        if all([path, file_name, file_extension]) is False:
+        if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
         self.s3_client.put_object(
             Body=content,
