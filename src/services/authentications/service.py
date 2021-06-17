@@ -41,9 +41,9 @@ class AuthenticationService(IAuthentication):
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
 
-            response["status_code"] = status.HTTP_200_OK
+            response.update({"status_code" : status.HTTP_200_OK})
         else:
-            response["status_code"] = status.HTTP_304_NOT_MODIFIED
+            response.update({"status_code" : status.HTTP_304_NOT_MODIFIED})
 
         jwt = token_handler.generate_token(payload=new, ttl=525600)
 
