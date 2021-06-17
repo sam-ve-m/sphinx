@@ -35,13 +35,11 @@ class FileRepository(IFile):
         region_name=config("REGION_NAME"),
     )
 
-    def __init__(self, bucket_name: str):
+    def __init__(self, bucket_name: str) -> None:
         self.bucket_name = bucket_name
 
     @staticmethod
     def validate_bucket_name(bucket_name: str = ""):
-        if bucket_name == "":
-            bucket_name = FileRepository.bucket_name
         response = FileRepository.s3_client.list_buckets()
         buckets = [bucket["Name"] for bucket in response["Buckets"]]
         if bucket_name not in buckets:
