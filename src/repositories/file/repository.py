@@ -162,6 +162,7 @@ class FileRepository(IFile):
 
     @staticmethod
     def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
+
         valid_files = list()
         for file_enum in [UserFileType, TermsFileType]:
             valid_files += [item.value for item in file_enum]

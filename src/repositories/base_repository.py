@@ -15,15 +15,16 @@ from src.interfaces.repositories.base_repository.interface import IRepository
 
 
 class BaseRepository(IRepository):
-    client: MongoClient = (
-        eval(config("PRODUCTION")) is True
-        and MongoClient(
+
+    production = eval(config("PRODUCTION"))
+    if production:
+        client: MongoClient = MongoClient(
             f"mongodb+srv://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
         )
-        or MongoClient(
+    else:
+        client: MongoClient = MongoClient(
             f"mongodb://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
         )
-    )
 
     def __init__(self, database: str, collection: str) -> None:
         self.base_identifier = f"{database}:{collection}"

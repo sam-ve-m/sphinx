@@ -296,3 +296,21 @@ def test__get_last_saved_file_from_folder_success(
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     assert file_repository._get_last_saved_file_from_folder(path="laalla") is None
+
+
+def test_get_file_extension_by_type_valid(
+    new_file_repository_valid_mocked_validate_bucket_name,
+) -> None:
+    file_repository = new_file_repository_valid_mocked_validate_bucket_name
+    result = file_repository.get_file_extension_by_type(file_type=UserFileType.SELF)
+    assert result == ".jpg"
+
+class FakeEnum(Enum):
+    FAKE = "fake"
+
+def test_get_file_extension_by_type_invalid(
+    new_file_repository_valid_mocked_validate_bucket_name,
+) -> None:
+    file_repository = new_file_repository_valid_mocked_validate_bucket_name
+    with pytest.raises(InternalServerError, match="^files.error"):
+        file_repository.get_file_extension_by_type(FakeEnum.FAKE)
