@@ -253,7 +253,7 @@ def test_add_feature_already_exists():
 
 def test_add_feature_process_issue():
     copy = dict(user_data)
-    copy.update({'scope': {"view_type": None, "features": []}},)
+    copy.update({'scope': {"view_type": None, "features": []}}, )
     payload = {
         "thebes_answer": copy,
         "feature": "real_time_data",
@@ -266,6 +266,7 @@ def test_add_feature_process_issue():
         UserService.add_feature(
             payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
         )
+
 
 def test_add_feature():
     payload = {
@@ -316,6 +317,7 @@ def test_delete_feature_that_exists():
     )
     assert result.get("status_code") == status.HTTP_200_OK
 
+
 def test_delete_feature_that_not_exists():
     payload = {
         "thebes_answer": user_data,
@@ -331,6 +333,7 @@ def test_delete_feature_that_not_exists():
         UserService.delete_feature(
             payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
         )
+
 
 def test_save_user_self():
     stub_repository = StubRepository(database="", collection="")
@@ -606,7 +609,7 @@ def test_fill_term_signed_empty_terms_on_payload():
 
 
 def test_fill_term_signed_filled_terms_on_payload():
-    payload = {"terms": {"aaa": {"version": 2, "date": None, "is_deprecated": False,}}}
+    payload = {"terms": {"aaa": {"version": 2, "date": None, "is_deprecated": False, }}}
     UserService.fill_term_signed(payload=payload, file_type="xxx", version=1)
     assert type(payload.get("terms")) == dict
     assert len(payload.get("terms")) == 2

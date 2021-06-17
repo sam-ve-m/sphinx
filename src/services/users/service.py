@@ -102,7 +102,7 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
         new = dict(old)
         new.update({"deleted": True})
-        if not user_repository.update_one(old=old, new=new):
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
@@ -119,7 +119,7 @@ class UserService(IUser):
         new = dict(old)
         new["pin"] = new_pin
         new = hash_field(key="pin", payload=new)
-        if not user_repository.update_one(old=old, new=new):
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
@@ -138,7 +138,7 @@ class UserService(IUser):
         new = dict(old)
         new["scope"] = dict(old.get("scope"))
         new["scope"]["view_type"] = new_view
-        if not user_repository.update_one(old=old, new=new):
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.unable_to_process")
         jwt = token_handler.generate_token(payload=new, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
@@ -170,7 +170,7 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
         new = dict(old)
         new.update({"token_valid_after": datetime.now()})
-        if not user_repository.update_one(old=old, new=new):
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
@@ -188,7 +188,7 @@ class UserService(IUser):
         if feature not in new_scope.get("features"):
             new_scope.get("features").append(payload.get("feature"))
             new.update({"scope": new_scope})
-            if not user_repository.update_one(old=old, new=new):
+            if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
             jwt = token_handler.generate_token(payload=new, ttl=525600)
             return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
@@ -209,9 +209,8 @@ class UserService(IUser):
         if payload.get("feature") in new_scope.get("features"):
             new_scope.get("features").remove(payload.get("feature"))
             new.update({"scope": new_scope})
-            if not user_repository.update_one(old=old, new=new):
+            if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
-
             response.update({"status_code" : status.HTTP_200_OK})
         else:
             response.update({"status_code" : status.HTTP_304_NOT_MODIFIED})
@@ -323,7 +322,7 @@ class UserService(IUser):
         UserService.update_user_identifier_data(
             payload=new, user_identifier=user_identifier
         )
-        if not user_repository.update_one(old=old, new=new):
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
@@ -374,7 +373,7 @@ class UserService(IUser):
         UserService.fill_account_data_on_user_document(
             payload=new, stone_age_user_data=stone_age_user_data
         )
-        if not user_repository.update_one(old=old, new=new):
+        if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
