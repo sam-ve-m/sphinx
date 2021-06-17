@@ -36,10 +36,12 @@ class FileRepository(IFile):
     )
 
     def __init__(self, bucket_name: str):
-        self.bucket_name = self.validate_bucket_name(bucket_name)
+        self.bucket_name = bucket_name
 
     @staticmethod
-    def validate_bucket_name(bucket_name: str):
+    def validate_bucket_name(bucket_name: str = ""):
+        if bucket_name is "":
+            bucket_name = FileRepository.bucket_name
         response = FileRepository.s3_client.list_buckets()
         buckets = [bucket["Name"] for bucket in response["Buckets"]]
         if bucket_name not in buckets:
@@ -66,8 +68,6 @@ class FileRepository(IFile):
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
 
-        if content is None:
-            raise InternalServerError("files.content.empty")
         content = self.resolve_content(content)
         path = self.resolve_term_path(file_type=file_type)
         current_version = self.get_current_term_version(file_type=file_type)

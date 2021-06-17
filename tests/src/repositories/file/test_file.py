@@ -47,7 +47,7 @@ def test_init_error() -> None:
     S3Client.list_buckets = MagicMock(return_value={"Buckets": [{"Name": ""}]})
     FileRepository.s3_client = S3Client
     with pytest.raises(InternalServerError, match="^files.bucket.invalid_name"):
-        FileRepository(bucket_name="XXX")
+        FileRepository.validate_bucket_name(bucket_name="XXX")
 
 
 def test_init() -> None:
@@ -56,6 +56,22 @@ def test_init() -> None:
     FileRepository.s3_client = S3Client
     file_repository = FileRepository(bucket_name=name)
     assert file_repository.bucket_name == name
+
+def test_bucket_name_valid() -> None:
+    name = "XXX"
+    S3Client.list_buckets = MagicMock(return_value={"Buckets": [{"Name": name}]})
+    FileRepository.s3_client = S3Client
+    file_repository = FileRepository(bucket_name=name)
+    bucket_name = file_repository.validate_bucket_name(bucket_name=name)
+    assert bucket_name == name
+
+def test_bucket_name_invalid() -> None:
+    name = "XXX"
+    S3Client.list_buckets = MagicMock(return_value={"Buckets": [{"Name": "mybucket"}]})
+    FileRepository.s3_client = S3Client
+    file_repository = FileRepository(bucket_name=name)
+    with pytest.raises(InternalServerError, match="files.bucket.invalid_name"):
+        file_repository.validate_bucket_name(bucket_name=name)
 
 
 def test_save_valid_user_file(
