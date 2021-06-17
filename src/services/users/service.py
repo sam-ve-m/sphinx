@@ -221,9 +221,8 @@ class UserService(IUser):
 
         jwt = token_handler.generate_token(payload=new, ttl=525600)
 
-
-
-
+        response["jwt"] = jwt
+        
         return response
 
     @staticmethod
