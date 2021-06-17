@@ -67,7 +67,6 @@ class FileRepository(IFile):
     ) -> None:
         if not content or type(content) not in [str, bytes]:
             raise InternalServerError("files.content.empty")
-
         content = self.resolve_content(content)
         path = self.resolve_term_path(file_type=file_type)
         current_version = self.get_current_term_version(file_type=file_type)
@@ -149,7 +148,7 @@ class FileRepository(IFile):
     def resolve_content(content: Union[str, bytes]):
         ''' str in this case is a base64 string '''
         if not content:
-            raise InternalServerError("files.content.epmty")
+            raise InternalServerError("files.content.empty")
         if type(content) is str:
             base64_bytes = content.encode("ascii")
             content = b64decode(base64_bytes)

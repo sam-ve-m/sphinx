@@ -113,7 +113,7 @@ def test_resolve_content_str():
 
 def test_resolve_content_without_value():
     str_value = None
-    with pytest.raises(InternalServerError, match="files.content.epmty"):
+    with pytest.raises(InternalServerError, match="files.content.empty"):
         FileRepository.resolve_content(content=str_value)
 
 def test_save_valid_term_file(
