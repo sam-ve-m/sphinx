@@ -315,7 +315,6 @@ def test_delete_feature_that_exists():
         payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
     )
     assert result.get("status_code") == status.HTTP_200_OK
-    assert type(result.get("payload").get("jwt")) == str
 
 
 def test_save_user_self():
