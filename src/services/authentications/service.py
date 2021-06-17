@@ -41,7 +41,7 @@ class AuthenticationService(IAuthentication):
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
 
-            response.update({"status_code" : status.HTTP_200_OK})
+            response.update({"status_code": status.HTTP_200_OK})
         else:
             response.update({"status_code" : status.HTTP_304_NOT_MODIFIED})
 
@@ -76,11 +76,13 @@ class AuthenticationService(IAuthentication):
                 "status_code": status.HTTP_200_OK,
                 "message_key": "user.need_pin",
             }
-        if pin and hash_field(payload=pin) == entity.get("pin"):
-            jwt = token_handler.generate_token(payload=entity, ttl=525600)
-            JwtController.insert_one(jwt, entity.get("email"))
-            return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-        raise UnauthorizedError("user.pin_error")
+        if hash_field(payload=pin) != entity.get("pin"):
+            raise UnauthorizedError("user.pin_error")
+        
+        jwt = token_handler.generate_token(payload=entity, ttl=525600)
+        JwtController.insert_one(jwt, entity.get("email"))
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+
 
     @staticmethod
     def send_authentication_email(
