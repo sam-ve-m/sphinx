@@ -288,13 +288,13 @@ def test_check_if_is_user_not_allowed_to_access_route_expect_none_because_user_i
     request = StubRequest(url=stub_url)
     request.method = "GET"
     user_data = {
-        "token_valid_after": datetime(year=2020, month=10, day=10),
+        "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d"),
         "deleted": False,
         "is_admin": True,
     }
     user_repository = StubRepository(database="", collection="")
     user_repository.find_one = MagicMock(return_value=user_data)
-    jwt_data = {"created_at": "2020-11-01", "email": "test@test.com"}
+    jwt_data = {"created_at": "2020-10-01", "email": "test@test.com"}
     is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
         request=request, jwt_data=jwt_data, user_repository=user_repository
     )

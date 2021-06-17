@@ -31,15 +31,14 @@ def need_be_admin(request: Request) -> bool:
     starts_with_views = request.url.path.startswith("/views")
     starts_with_feature = request.url.path.startswith("/feature")
     starts_with_term = request.url.path.startswith("/term")
-    post_method = request.method == "POST"
 
-    if starts_with_user_admin and post_method:
+    if starts_with_user_admin:
         need_admin = True
-    elif starts_with_views and post_method:
+    elif starts_with_views:
         need_admin = True
-    elif starts_with_feature and post_method:
+    elif starts_with_feature:
         need_admin = True
-    elif starts_with_term and post_method:
+    elif starts_with_term:
         need_admin = True
     return need_admin
 
@@ -88,7 +87,7 @@ def check_if_is_user_not_allowed_to_access_route(
             status_code = status.HTTP_200_OK
         else:
             message = i18n.get_translate("invalid_credential", locale=locale, )
-            status_code = status.HTTP_304_NOT_MODIFIED
+            status_code = status.HTTP_401_UNAUTHORIZED
 
     content.update({"message": message})
     return Response(content=json.dumps(content), status_code=status_code)
