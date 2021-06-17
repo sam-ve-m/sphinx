@@ -49,9 +49,9 @@ def is_user_deleted(user_data: dict) -> bool:
 
 def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
     try:
-        token_valid_after = user_data.get("token_valid_after")
-        user_created_at = jwt_data.get("created_at")
-        is_token_invalid = token_valid_after > user_created_at
+        user_created = user_data.get("token_valid_after")
+        jwt_created_at = jwt_data.get("created_at")
+        is_token_invalid = jwt_created_at > user_created
         return is_token_invalid
     except ValueError:
         return False
@@ -63,8 +63,10 @@ def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
 
 def invalidate_user(user_data: dict, jwt_data: dict) -> bool:
     is_deleted = is_user_deleted(user_data=user_data)
-    is_token_invalid = is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
-    return is_token_invalid or is_deleted
+    if is_deleted:
+        return False
+    return is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
+
 
 
 def check_if_is_user_not_allowed_to_access_route(
@@ -80,6 +82,7 @@ def check_if_is_user_not_allowed_to_access_route(
     status_code = 200
 
     if not token_is_valid:
+        message = i18n.get_translate("invalid_credential", locale=locale, )
         status_code = status.HTTP_401_UNAUTHORIZED
     elif is_admin_route:
         if is_admin:
