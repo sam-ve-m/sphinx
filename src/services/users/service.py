@@ -205,19 +205,26 @@ class UserService(IUser):
         old = payload.get("thebes_answer")
         new = dict(old)
         new_scope = new.get("scope")
+        response = {"status_code": None, "payload": {"jwt": None}}
         if payload.get("feature") in new_scope.get("features"):
             new_scope.get("features").remove(payload.get("feature"))
             new.update({"scope": new_scope})
-            if user_repository.update_one(old=old, new=new):
-                jwt = token_handler.generate_token(payload=new, ttl=525600)
-                return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-            else:
+            if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
+
+            response["status_code"] = status.HTTP_200_OK
+        else:
+            response = {
+                "status_code": status.HTTP_304_NOT_MODIFIED,
+                "payload": {"jwt": None},
+            }
+
         jwt = token_handler.generate_token(payload=new, ttl=525600)
-        return {
-            "status_code": status.HTTP_304_NOT_MODIFIED,
-            "payload": {"jwt": jwt},
-        }
+
+
+
+
+        return response
 
     @staticmethod
     def save_user_self(

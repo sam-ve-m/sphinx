@@ -65,7 +65,9 @@ class FileRepository(IFile):
     def save_term_file(
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
-        if not content or type(content) not in [str, bytes]:
+        if not content:
+            raise InternalServerError("files.error")
+        if type(content) not in [str, bytes]:
             raise InternalServerError("files.error")
         content = self.resolve_content(content)
         path = self.resolve_term_path(file_type=file_type)

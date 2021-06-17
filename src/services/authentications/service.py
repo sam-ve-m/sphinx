@@ -29,6 +29,7 @@ class AuthenticationService(IAuthentication):
             raise BadRequestError("common.register_not_exists")
         new = dict(old)
         is_active = old.get("is_active")
+        response = {"status_code": None, "payload": {"jwt": None}}
         if not is_active:
             new.update(
                 {
@@ -40,8 +41,15 @@ class AuthenticationService(IAuthentication):
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
 
+            response["status_code"] = status.HTTP_200_OK
+        else:
+            response["status_code"] = status.HTTP_304_NOT_MODIFIED
+
         jwt = token_handler.generate_token(payload=new, ttl=525600)
-        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+
+        response["jwt"] = jwt
+
+        return response
 
     @staticmethod
     def login(
