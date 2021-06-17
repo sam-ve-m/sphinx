@@ -40,7 +40,7 @@ class FileRepository(IFile):
 
     @staticmethod
     def validate_bucket_name(bucket_name: str = ""):
-        if bucket_name is "":
+        if bucket_name == "":
             bucket_name = FileRepository.bucket_name
         response = FileRepository.s3_client.list_buckets()
         buckets = [bucket["Name"] for bucket in response["Buckets"]]
