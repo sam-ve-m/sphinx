@@ -263,7 +263,7 @@ def test_check_if_is_user_not_allowed_to_access_route_user_not_admin():
     request = StubRequest(url=stub_url)
     request.method = "GET"
     user_data = {
-        "token_valid_after": datetime(year=2020, month=11, day=10).strftime("%Y-%m-%d"),
+        "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d"),
         "deleted": False,
         "is_admin": False,
     }
