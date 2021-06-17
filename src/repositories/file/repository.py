@@ -65,7 +65,8 @@ class FileRepository(IFile):
     def save_term_file(
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
-        if not content or type(content) not in [str, bytes]:
+
+        if not content:
             raise InternalServerError("files.content.empty")
         content = self.resolve_content(content)
         path = self.resolve_term_path(file_type=file_type)
@@ -147,8 +148,6 @@ class FileRepository(IFile):
     @staticmethod
     def resolve_content(content: Union[str, bytes]):
         ''' str in this case is a base64 string '''
-        if not content:
-            raise InternalServerError("files.content.empty")
         if type(content) is str:
             base64_bytes = content.encode("ascii")
             content = b64decode(base64_bytes)
