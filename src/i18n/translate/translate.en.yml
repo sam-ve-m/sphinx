@@ -44,6 +44,12 @@ en:
     uploaded: File uploaded.
     not_suported: This file is not suported.
     not_exists: This file not exists.
+    bucket:
+      invalid_name: Nome invalido.
+    content:
+      empty: Conteudo nao pode ser vazio.
+    params:
+      invalid: Nome e versao sao necessarios para criar o arquivo.
   invalid_token: Seems that your access has expired, try to login again.
   not_allowed: Seems that your can accesse this.
   internal_error: We have some issue, please try again.

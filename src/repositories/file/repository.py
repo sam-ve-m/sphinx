@@ -45,7 +45,7 @@ class FileRepository(IFile):
         if bucket_name not in buckets:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(f"The bucket {bucket_name} not exists", exc_info=True)
-            raise InternalServerError("files.error")
+            raise InternalServerError("files.bucket.invalid_name")
         return bucket_name
 
     def save_user_file(
@@ -54,7 +54,7 @@ class FileRepository(IFile):
         path = self.resolve_user_path(user_email=user_email, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
-        if all([path, file_name, file_extension]) is False:
+        if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
         self.s3_client.put_object(
             Body=self.resolve_content(content=content),
@@ -65,10 +65,9 @@ class FileRepository(IFile):
     def save_term_file(
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
-        if not content:
-            raise InternalServerError("files.error")
-        if type(content) not in [str, bytes]:
-            raise InternalServerError("files.error")
+        if not content or type(content) not in [str, bytes]:
+            raise InternalServerError("files.content.empty")
+
         content = self.resolve_content(content)
         path = self.resolve_term_path(file_type=file_type)
         current_version = self.get_current_term_version(file_type=file_type)
@@ -82,6 +81,7 @@ class FileRepository(IFile):
             Bucket=self.bucket_name,
             Key=f"{path}{file_name}{file_extension}",
         )
+        return
 
     def get_term_file(
         self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 3600
@@ -143,13 +143,13 @@ class FileRepository(IFile):
                 files_metadata, key=lambda item: item.get("LastModified"), reverse=True
             )
             return files_metadata[0].get("Key")
-        return None
+        return
 
     @staticmethod
     def resolve_content(content: Union[str, bytes]):
         ''' str in this case is a base64 string '''
         if not content:
-            raise InternalServerError("files.error")
+            raise InternalServerError("files.content.epmty")
         if type(content) is str:
             base64_bytes = content.encode("ascii")
             content = b64decode(base64_bytes)
@@ -172,7 +172,7 @@ class FileRepository(IFile):
     @staticmethod
     def generate_term_file_name(name: str, version: int):
         if version is None or name is None:
-            raise InternalServerError("files.error")
+            raise InternalServerError("files.params.invalid")
         return f"{name}_v{version}"
 
     @staticmethod

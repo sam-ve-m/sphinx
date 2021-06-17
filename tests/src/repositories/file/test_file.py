@@ -46,7 +46,7 @@ def new_file_repository_valid_mocked_validate_bucket_name_and_s3_with_content(
 def test_init_error() -> None:
     S3Client.list_buckets = MagicMock(return_value={"Buckets": [{"Name": ""}]})
     FileRepository.s3_client = S3Client
-    with pytest.raises(InternalServerError, match="^files.error"):
+    with pytest.raises(InternalServerError, match="^files.bucket.invalid_name"):
         FileRepository(bucket_name="XXX")
 
 
@@ -113,7 +113,7 @@ def test_resolve_content_str():
 
 def test_resolve_content_without_value():
     str_value = None
-    with pytest.raises(InternalServerError, match="files.error"):
+    with pytest.raises(InternalServerError, match="files.content.epmty"):
         FileRepository.resolve_content(content=str_value)
 
 def test_save_valid_term_file(
@@ -255,7 +255,7 @@ def test_generate_term_file_name_version_none(
     new_file_repository_valid_mocked_validate_bucket_name,
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    with pytest.raises(InternalServerError, match="^files.error"):
+    with pytest.raises(InternalServerError, match="^files.params.invalid"):
         file_repository.generate_term_file_name(name="lala", version=None)
 
 
@@ -263,7 +263,7 @@ def test_generate_term_file_name_name_none(
     new_file_repository_valid_mocked_validate_bucket_name,
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    with pytest.raises(InternalServerError, match="^files.error"):
+    with pytest.raises(InternalServerError, match="^files.params.invalid"):
         file_repository.generate_term_file_name(name=None, version=1)
 
 

@@ -44,6 +44,12 @@ pt:
     uploaded: Upload de arquivo feito com sucesso.
     not_suported: Arquivo não suportado.
     not_exists: Arquivo não existente.
+    bucket:
+      invalid_name: Nome invalido.
+    content:
+      empty: Conteudo nao pode ser vazio.
+    params:
+      invalid: Nome e versao sao necessarios para criar o arquivo.
   invalid_token: Parece que seu acesso expirou, logue novamente.
   not_allowed: Parece que você não tem eprmissão para isso.
   internal_error: Tivemos problema, por favor tente novamente.
