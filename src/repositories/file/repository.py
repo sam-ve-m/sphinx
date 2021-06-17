@@ -36,7 +36,7 @@ class FileRepository(IFile):
     )
 
     def __init__(self, bucket_name: str) -> None:
-        self.bucket_name = bucket_name
+        self.bucket_name = FileRepository.validate_bucket_name(bucket_name)
 
     @staticmethod
     def validate_bucket_name(bucket_name: str = ""):

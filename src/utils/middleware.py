@@ -85,12 +85,13 @@ def check_if_is_user_not_allowed_to_access_route(
         message = i18n.get_translate("invalid_credential", locale=locale, )
         status_code = status.HTTP_401_UNAUTHORIZED
     elif is_admin_route:
-        if is_admin:
-            message = i18n.get_translate("valid_credential", locale=locale, )
-            status_code = status.HTTP_200_OK
-        else:
+        if not is_admin:
             message = i18n.get_translate("invalid_credential", locale=locale, )
             status_code = status.HTTP_401_UNAUTHORIZED
+        else:
+            message = i18n.get_translate("valid_credential", locale=locale, )
+            status_code = status.HTTP_200_OK
+
 
     content.update({"message": message})
     return Response(content=json.dumps(content), status_code=status_code)
