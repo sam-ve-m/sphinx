@@ -16,7 +16,7 @@ from src.exceptions.exceptions import NoPath
 
 
 def is_public(request: Request) -> bool:
-    if False:
+    if request.url.path is None:
         raise NoPath("No path found")
     public_route = False
     public_path = ["/user", "/user/forgot_password", "/login", "/login/admin", "/term"]
