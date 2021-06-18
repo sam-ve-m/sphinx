@@ -5,7 +5,7 @@ from datetime import datetime
 # OUTSIDE LIBRARIES
 import pytest
 from fastapi import Response
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 # SPHINX
 from src.utils.middleware import (
@@ -17,6 +17,7 @@ from src.utils.middleware import (
     check_if_is_user_not_allowed_to_access_route,
 )
 from tests.stub_classes.stub_base_repository import StubBaseRepository
+from src.exceptions.exceptions import NoPath
 
 
 class StubURL:
@@ -118,6 +119,7 @@ def test_is_public_true_user(get_new_stubby_request_user):
     route_public = is_public(request=get_new_stubby_request_user)
     assert route_public is True
 
+
 def test_is_public_false(get_new_stubby_request_feature):
     route_public = is_public(request=get_new_stubby_request_feature)
     assert route_public is False
@@ -138,12 +140,14 @@ def test_login_admin_is_public(get_new_stubby_request_login_admin):
     assert route_public is True
 
 
+@patch('src.utils.middleware.need_be_admin', return_value=True)
 def test_none_url_path_is_public(get_new_stubby_request_none_path):
-    with pytest.raises(Exception, match="No path found"):
+    with pytest.raises(NoPath, match="No path found"):
         is_public(request=get_new_stubby_request_none_path)
 
-def test_none_url_path_is_public_raises(get_new_stubby_request_none_path):
-    with pytest.raises(Exception, match="No path found"):
+
+def test_none_url_path_admin_raises(get_new_stubby_request_none_path):
+    with pytest.raises(NoPath, match="No path found"):
         need_be_admin(request=get_new_stubby_request_none_path)
 
 

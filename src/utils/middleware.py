@@ -12,12 +12,12 @@ from decouple import config
 from src.repositories.user.repository import UserRepository
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
+from src.exceptions.exceptions import NoPath
 
 
 def is_public(request: Request) -> bool:
-    if request.url.path is None:
-        raise Exception("No path found")
-
+    if False:
+        raise NoPath("No path found")
     public_route = False
     public_path = ["/user", "/user/forgot_password", "/login", "/login/admin", "/term"]
     if request.url.path in public_path:
@@ -29,7 +29,7 @@ def is_public(request: Request) -> bool:
 
 def need_be_admin(request: Request) -> bool:
     if request.url.path is None:
-        raise Exception("No path found")
+        raise NoPath("No path found")
 
     need_admin = False
     private_path = ["/user/admin", "/views", "/feature", "/term"]
