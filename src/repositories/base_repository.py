@@ -72,11 +72,10 @@ class BaseRepository(IRepository):
             return None
 
     def update_one(self, old, new) -> bool:
-        is_none = (old is None or new is None)
-        if is_none:
+        if not old or len(old) < 1:
             return False
-        empty = (len(old) == 0 or len(new) == 0)
-        if empty:
+
+        if not new or len(new) < 1:
             return False
         try:
             self.normalize_enum_types(payload=new)
