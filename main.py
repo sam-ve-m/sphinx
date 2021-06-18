@@ -18,7 +18,7 @@ app = FastAPI()
 
 @app.middleware("http")
 async def process_thebes_answer(request: Request, call_next):
-    is_public = route_is_public(request=request.url.path)
+    is_public = route_is_public(url_request=request.url.path)
     if not is_public:
         jwt_data_or_error_response = JWTHandler.get_payload_from_request(
             request=request

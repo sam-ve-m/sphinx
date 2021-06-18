@@ -21,7 +21,7 @@ def route_is_public(url_request: str) -> bool:
         raise NoPath("No path found")
 
     public_route = False
-    public_paths = ["/user", "/user/forgot_password", "/login", "/login/admin", "/term"]
+    public_paths = ["/user", "/user/forgot_password", "/login", "/login/admin", "/term", "/docs", "/openapi.json"]
     if url_request in public_paths:
         public_route = True
     return public_route
