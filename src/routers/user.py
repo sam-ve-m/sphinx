@@ -162,20 +162,20 @@ def remove_features_to_user(feature: Feature, request: Request):
     return BaseController.run(UserController.delete_feature, dict(payload), request)
 
 
-# @router.post("/user/self", tags=["user"])
-# async def save_user_self(
-#     request: Request, file_or_base64: Union[UploadFile, str] = File(...)
-# ):
-#     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
-#     if isinstance(jwt_data_or_error_response, Response):
-#         return jwt_data_or_error_response
-#     if isinstance(file_or_base64, str) is False:
-#         file_or_base64 = await file_or_base64.read()
-#     payload = {
-#         "thebes_answer": jwt_data_or_error_response,
-#         "file_or_base64": file_or_base64,
-#     }
-#     return BaseController.run(UserController.save_user_self, payload, request)
+@router.post("/user/self", tags=["user"], include_in_schema=False)
+async def save_user_self(
+    request: Request, file_or_base64: Union[UploadFile, str] = File(...)
+):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    if isinstance(file_or_base64, str) is False:
+        file_or_base64 = await file_or_base64.read()
+    payload = {
+        "thebes_answer": jwt_data_or_error_response,
+        "file_or_base64": file_or_base64,
+    }
+    return BaseController.run(UserController.save_user_self, payload, request)
 
 
 @router.put("/user/sign_term", tags=["user"])
