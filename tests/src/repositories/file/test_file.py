@@ -173,18 +173,6 @@ def test_save_term_file_with_invalid_file_extension(
         file_repository.save_term_file(file_type=TermsFileType.TERM_REFUSAL, content=b"is a byte")
 
 
-def test_get_term_file_none(
-    new_file_repository_valid_mocked_validate_bucket_name,
-) -> None:
-    file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    StubCache.get = MagicMock(return_value=None)
-    StubCache.set = MagicMock(return_value=None)
-    value = file_repository.get_term_file(
-        file_type=TermsFileType.TERM_REFUSAL, cache=StubCache
-    )
-    assert value is not None
-
-
 def test_get_term_file_cache(
     new_file_repository_valid_mocked_validate_bucket_name,
 ) -> None:

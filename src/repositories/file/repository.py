@@ -89,8 +89,14 @@ class FileRepository(IFile):
         if cached_value:
             return cached_value
         path = self.resolve_term_path(file_type=file_type)
-        file_path = self._get_last_saved_file_from_folder(path=path)
-        if file_path:
+        try:
+            file_path = self._get_last_saved_file_from_folder(path=path)
+
+        except InternalServerError:
+            return
+        else:
+            if not file_path:
+                return
             value = self.s3_client.generate_presigned_url(
                 "get_object",
                 Params={"Bucket": self.bucket_name, "Key": file_path},
@@ -98,7 +104,6 @@ class FileRepository(IFile):
             )
             cache.set(key=cache_key, value=value, ttl=ttl)
             return value
-        return
 
     def get_terms_version(
         self, term_types=TermsFileType, cache=RepositoryRedis, ttl: int = 3600
