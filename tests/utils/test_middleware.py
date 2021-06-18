@@ -145,7 +145,7 @@ def test_none_url_path_is_public(get_new_stubby_request_none_path):
 
 def test_is_public_true(get_new_stubby_request_random_path):
     route_public = is_public(request=get_new_stubby_request_random_path)
-    assert route_public is False
+    assert route_public is True
 
 
 def test_need_be_admin_false(get_new_stubby_request_random_path):

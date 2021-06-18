@@ -136,12 +136,16 @@ class FileRepository(IFile):
             Bucket=self.bucket_name, Prefix=path, Delimiter="/"
         )
         files_metadata = objects.get("Contents")
-        if type(files_metadata) == list and len(files_metadata) > 0:
-            sorted(
-                files_metadata, key=lambda item: item.get("LastModified"), reverse=True
-            )
-            return files_metadata[0].get("Key")
-        return
+
+        if not type(files_metadata) == list:
+            return
+        if not len(files_metadata) > 0:
+            return
+
+        sorted(
+            files_metadata, key=lambda item: item.get("LastModified"), reverse=True
+        )
+        return files_metadata[0].get("Key")
 
     @staticmethod
     def resolve_content(content: Union[str, bytes]):

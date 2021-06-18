@@ -17,12 +17,16 @@ from src.utils.language_identifier import get_language_from_request
 def is_public(request: Request) -> bool:
     if not request.url.path:
         return False
-    public_route = False
-    public_path = ["/user", "/user/forgot_password", "/login", "/login/admin", "/term"]
-    if request.url.path in public_path:
-        public_route = True
-
-    return public_route
+    try:
+        public_route = False
+        public_path = ["/user", "/user/forgot_password", "/login", "/login/admin", "/term"]
+        if request.url.path in public_path:
+            public_route = True
+        elif not need_be_admin(request):
+            public_route = True
+        return public_route
+    except Exception:
+        return False
 
 
 def need_be_admin(request: Request) -> bool:
