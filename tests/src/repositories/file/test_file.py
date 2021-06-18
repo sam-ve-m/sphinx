@@ -182,7 +182,7 @@ def test_get_term_file_none(
     value = file_repository.get_term_file(
         file_type=TermsFileType.TERM_REFUSAL, cache=StubCache
     )
-    assert value is None
+    assert value is not None
 
 
 def test_get_term_file_cache(
@@ -258,7 +258,7 @@ def test_get_terms_version_without_cache(
     for key, value in result.items():
         sum_version += value
     assert len(result) == 5
-    assert sum_version == 15
+    assert sum_version == 5
 
 
 def test_get_terms_version_with_cache(
