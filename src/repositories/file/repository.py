@@ -142,11 +142,12 @@ class FileRepository(IFile):
             Bucket=self.bucket_name, Prefix=path, Delimiter="/"
         )
         files_metadata = objects.get("Contents")
-
+        if files_metadata is None:
+            raise InternalServerError("files.is_none")
         if not type(files_metadata) == list:
-            raise InternalServerError("files.error")
+            raise InternalServerError("files.is_not_list")
         if not len(files_metadata) > 0:
-            raise InternalServerError("files.error")
+            raise InternalServerError("files.is_empty")
 
         sorted(
             files_metadata, key=lambda item: item.get("LastModified"), reverse=True

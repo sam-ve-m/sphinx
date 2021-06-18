@@ -55,6 +55,19 @@ def new_file_repository_valid_mocked_validate_bucket_name_and_s3_without_content
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     return FileRepository(bucket_name=name)
 
+@pytest.fixture
+@patch.object(FileRepository, "validate_bucket_name", return_value="XXX")
+def new_file_repository_valid_mocked_validate_bucket_name_and_s3_content_none(
+    mock_method,
+):
+    name = "XXX"
+    S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
+    S3Client.list_objects = MagicMock(return_value={"Contents": None})
+    S3Client.generate_presigned_url = MagicMock(return_value="link")
+    FileRepository.s3_client = S3Client
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    return FileRepository(bucket_name=name)
+
 
 def test_init_error() -> None:
     S3Client.list_buckets = MagicMock(return_value={"Buckets": [{"Name": ""}]})
@@ -270,7 +283,7 @@ def test_generate_term_file_name_version_none(
     new_file_repository_valid_mocked_validate_bucket_name,
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    with pytest.raises(InternalServerError, match="^files.params.invalid"):
+    with pytest.raises(InternalServerError, match="files.params.invalid"):
         file_repository.generate_term_file_name(name="lala", version=None)
 
 
@@ -278,7 +291,7 @@ def test_generate_term_file_name_name_none(
     new_file_repository_valid_mocked_validate_bucket_name,
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    with pytest.raises(InternalServerError, match="^files.params.invalid"):
+    with pytest.raises(InternalServerError, match="files.params.invalid"):
         file_repository.generate_term_file_name(name=None, version=1)
 
 
@@ -286,7 +299,7 @@ def test__get_last_saved_file_from_folder_file_error(
     new_file_repository_valid_mocked_validate_bucket_name,
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    with pytest.raises(InternalServerError, match="^files.error"):
+    with pytest.raises(InternalServerError, match="files.error"):
         file_repository._get_last_saved_file_from_folder(path=None)
 
 
@@ -311,7 +324,7 @@ def test_get_file_extension_by_type_invalid(
     new_file_repository_valid_mocked_validate_bucket_name,
 ) -> None:
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    with pytest.raises(InternalServerError, match="^files.error"):
+    with pytest.raises(InternalServerError, match="files.error"):
         file_repository.get_file_extension_by_type(FakeEnum.FAKE)
 
 
@@ -321,5 +334,25 @@ def test_get_terms_version_without_content(
     file_repository = (
         new_file_repository_valid_mocked_validate_bucket_name_and_s3_without_content
     )
-    with pytest.raises(InternalServerError, match="files.error"):
+    with pytest.raises(InternalServerError, match="files.is_empty"):
+        file_repository._get_last_saved_file_from_folder(path="laalla") is None
+
+
+def test_get_terms_version_without_content(
+    new_file_repository_valid_mocked_validate_bucket_name_and_s3_content_int,
+) -> None:
+    file_repository = (
+        new_file_repository_valid_mocked_validate_bucket_name_and_s3_content_int
+    )
+    with pytest.raises(InternalServerError, match="files.is_not_list"):
+        file_repository._get_last_saved_file_from_folder(path="laalla") is None
+
+
+def test_get_terms_version_without_content(
+    new_file_repository_valid_mocked_validate_bucket_name_and_s3_content_none,
+) -> None:
+    file_repository = (
+        new_file_repository_valid_mocked_validate_bucket_name_and_s3_content_none
+    )
+    with pytest.raises(InternalServerError, match="files.is_none"):
         file_repository._get_last_saved_file_from_folder(path="laalla") is None
