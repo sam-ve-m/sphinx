@@ -98,6 +98,7 @@ class FileRepository(IFile):
             )
             cache.set(key=cache_key, value=value, ttl=ttl)
             return value
+        return
 
     def get_terms_version(
         self, term_types=TermsFileType, cache=RepositoryRedis, ttl: int = 3600
@@ -138,9 +139,9 @@ class FileRepository(IFile):
         files_metadata = objects.get("Contents")
 
         if not type(files_metadata) == list:
-            return
+            raise InternalServerError("files.error")
         if not len(files_metadata) > 0:
-            return
+            raise InternalServerError("files.error")
 
         sorted(
             files_metadata, key=lambda item: item.get("LastModified"), reverse=True

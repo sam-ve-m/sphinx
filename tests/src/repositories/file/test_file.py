@@ -22,7 +22,7 @@ class StubCache:
 def new_file_repository_valid_mocked_validate_bucket_name(mock_method):
     name = "XXX"
     S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
-    S3Client.list_objects = MagicMock(return_value={"Contents": list()})
+    S3Client.list_objects = MagicMock(return_value={"Contents": [{"LastModified": "ddd", "Key": "lila"}]})
     S3Client.generate_presigned_url = MagicMock(return_value="link")
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
@@ -36,7 +36,20 @@ def new_file_repository_valid_mocked_validate_bucket_name_and_s3_with_content(
 ):
     name = "XXX"
     S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
-    S3Client.list_objects = MagicMock(return_value={"Contents": [1, 2, 3]})
+    S3Client.list_objects = MagicMock(return_value={"Contents": [{"LastModified": "ddd", "Key": "lila"}]})
+    S3Client.generate_presigned_url = MagicMock(return_value="link")
+    FileRepository.s3_client = S3Client
+    FileRepository.validate_bucket_name = MagicMock(return_value=name)
+    return FileRepository(bucket_name=name)
+
+@pytest.fixture
+@patch.object(FileRepository, "validate_bucket_name", return_value="XXX")
+def new_file_repository_valid_mocked_validate_bucket_name_and_s3_without_content(
+    mock_method,
+):
+    name = "XXX"
+    S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
+    S3Client.list_objects = MagicMock(return_value={"Contents": []})
     S3Client.generate_presigned_url = MagicMock(return_value="link")
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
@@ -293,7 +306,7 @@ def test__get_last_saved_file_from_folder_success(
     new_file_repository_valid_mocked_validate_bucket_name,
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    assert file_repository._get_last_saved_file_from_folder(path="laalla") is None
+    assert file_repository._get_last_saved_file_from_folder(path="laalla") is not None
 
 
 def test_get_file_extension_by_type_valid(
@@ -312,3 +325,13 @@ def test_get_file_extension_by_type_invalid(
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     with pytest.raises(InternalServerError, match="^files.error"):
         file_repository.get_file_extension_by_type(FakeEnum.FAKE)
+
+
+def test_get_terms_version_without_content(
+    new_file_repository_valid_mocked_validate_bucket_name_and_s3_without_content,
+) -> None:
+    file_repository = (
+        new_file_repository_valid_mocked_validate_bucket_name_and_s3_without_content
+    )
+    with pytest.raises(InternalServerError, match="files.error"):
+        file_repository._get_last_saved_file_from_folder(path="laalla") is None
