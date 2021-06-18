@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 # SPHINX
 from src.utils.middleware import (
-    is_public,
+    route_is_public,
     need_be_admin,
     is_user_deleted,
     is_user_token_valid,
@@ -79,6 +79,19 @@ def get_new_stubby_request_none_path():
     stub_url.path = None
     return StubRequest(url=stub_url)
 
+@pytest.fixture
+def get_new_stubby_request_none_path_admin():
+    stub_url = StubURL
+    stub_url.path = None
+    return StubRequest(url=stub_url)
+
+
+@pytest.fixture
+def get_new_stubby_request_none_path_public():
+    stub_url = StubURL()
+    stub_url.path = None
+    return StubRequest(url=stub_url)
+
 
 @pytest.fixture
 def get_new_stubby_request_random_path():
@@ -115,69 +128,63 @@ def get_new_stubby_request_user_admin():
     return StubRequest(url=stub_url)
 
 
-def test_is_public_true_user(get_new_stubby_request_user):
-    route_public = is_public(request=get_new_stubby_request_user)
+def test_is_public_true_user():
+    route_public = route_is_public(url_request="/user")
     assert route_public is True
 
 
-def test_is_public_false(get_new_stubby_request_feature):
-    route_public = is_public(request=get_new_stubby_request_feature)
+def test_is_public_false():
+    route_public = route_is_public(url_request="/oppai")
     assert route_public is False
 
 
-def test_forgot_password_post_is_public(get_new_stubby_request_forgot_password):
-    route_public = is_public(request=get_new_stubby_request_forgot_password)
+def test_forgot_password_post_is_public():
+    route_public = route_is_public(url_request="/user/forgot_password")
     assert route_public is True
 
 
-def test_login_is_public(get_new_stubby_request_login):
-    route_public = is_public(request=get_new_stubby_request_login)
+def test_login_is_public():
+    route_public = route_is_public(url_request="/login")
     assert route_public is True
 
 
-def test_login_admin_is_public(get_new_stubby_request_login_admin):
-    route_public = is_public(request=get_new_stubby_request_login_admin)
+def test_login_admin_is_public():
+    route_public = route_is_public(url_request="/login/admin")
     assert route_public is True
 
 
-@patch('src.utils.middleware.need_be_admin', return_value=True)
-def test_none_url_path_is_public(get_new_stubby_request_none_path):
+def test_none_url_path_admin_raises():
     with pytest.raises(NoPath, match="No path found"):
-        is_public(request=get_new_stubby_request_none_path)
+        need_be_admin(url_request=None)
 
 
-def test_none_url_path_admin_raises(get_new_stubby_request_none_path):
+def test_none_url_path_is_public_raises():
     with pytest.raises(NoPath, match="No path found"):
-        need_be_admin(request=get_new_stubby_request_none_path)
+        route_is_public(url_request=None)
 
 
-def test_is_public_true(get_new_stubby_request_random_path):
-    route_public = is_public(request=get_new_stubby_request_random_path)
-    assert route_public is True
-
-
-def test_need_be_admin_false(get_new_stubby_request_random_path):
-    is_admin_route = need_be_admin(request=get_new_stubby_request_random_path)
+def test_need_be_admin_false():
+    is_admin_route = need_be_admin(url_request="/user")
     assert is_admin_route is False
 
 
-def test_feature_need_be_admin_true(get_new_stubby_request_feature):
-    is_admin_route = need_be_admin(request=get_new_stubby_request_feature)
+def test_feature_need_be_admin_true():
+    is_admin_route = need_be_admin(url_request="/feature")
     assert is_admin_route is True
 
 
-def test_term_need_be_admin_true(get_new_stubby_request_term):
-    is_admin_route = need_be_admin(request=get_new_stubby_request_term)
+def test_term_need_be_admin_true():
+    is_admin_route = need_be_admin(url_request="/term")
     assert is_admin_route is True
 
 
-def test_views_need_be_admin_true(get_new_stubby_request_views):
-    is_admin_route = need_be_admin(request=get_new_stubby_request_views)
+def test_views_need_be_admin_true():
+    is_admin_route = need_be_admin(url_request="/views")
     assert is_admin_route is True
 
 
-def test_user_admin_need_be_admin(get_new_stubby_request_user_admin):
-    is_admin_route = need_be_admin(request=get_new_stubby_request_user_admin)
+def test_user_admin_need_be_admin():
+    is_admin_route = need_be_admin(url_request="/user/admin")
     assert is_admin_route is True
 
 
