@@ -15,32 +15,22 @@ from src.utils.language_identifier import get_language_from_request
 
 
 def is_public(request: Request) -> bool:
-    public_route = True
-
     if not request.url.path:
-        return True
-    starts_with_user = request.url.path.startswith("/user")
-    starts_with_user_forgot_password = request.url.path.startswith("/user/forgot_password")
-    starts_with_login = request.url.path.startswith("/login")
-    starts_with_login_admin = request.url.path.startswith("/login/admin")
-    starts_with_term = request.url.path.startswith("/term")
-
-    if not starts_with_user or not starts_with_user_forgot_password or not starts_with_login or not starts_with_login_admin or not starts_with_term:
-        public_route = False
-    if not need_be_admin(request):
+        return False
+    public_route = False
+    public_path = ["/user", "/user/forgot_password", "/login", "/login/admin", "/term"]
+    if request.url.path in public_path:
         public_route = True
 
     return public_route
 
 
 def need_be_admin(request: Request) -> bool:
+    if not request.url.path:
+        return False
     need_admin = False
-    starts_with_user_admin = request.url.path.startswith("/user/admin")
-    starts_with_views = request.url.path.startswith("/views")
-    starts_with_feature = request.url.path.startswith("/feature")
-    starts_with_term = request.url.path.startswith("/term")
-
-    if starts_with_user_admin or starts_with_views or starts_with_feature or starts_with_term:
+    private_path = ["/user/admin", "/views", "/feature", "/term"]
+    if request.url.path in private_path:
         need_admin = True
 
     return need_admin

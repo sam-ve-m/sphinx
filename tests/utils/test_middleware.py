@@ -114,9 +114,13 @@ def get_new_stubby_request_user_admin():
     return StubRequest(url=stub_url)
 
 
-def test_is_public_true(get_new_stubby_request_user):
+def test_is_public_true_user(get_new_stubby_request_user):
     route_public = is_public(request=get_new_stubby_request_user)
     assert route_public is True
+
+def test_is_public_false(get_new_stubby_request_feature):
+    route_public = is_public(request=get_new_stubby_request_feature)
+    assert route_public is False
 
 
 def test_forgot_password_post_is_public(get_new_stubby_request_forgot_password):
@@ -136,12 +140,12 @@ def test_login_admin_is_public(get_new_stubby_request_login_admin):
 
 def test_none_url_path_is_public(get_new_stubby_request_none_path):
     route_public = is_public(request=get_new_stubby_request_none_path)
-    assert route_public is True
+    assert route_public is False
 
 
 def test_is_public_true(get_new_stubby_request_random_path):
     route_public = is_public(request=get_new_stubby_request_random_path)
-    assert route_public is True
+    assert route_public is False
 
 
 def test_need_be_admin_false(get_new_stubby_request_random_path):
