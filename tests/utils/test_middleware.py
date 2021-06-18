@@ -35,137 +35,137 @@ class StubRequest:
         self.url = url
 
 
-def test_is_public_true_post():
+class StubRepository(StubBaseRepository):
+    pass
+
+
+@pytest.fixture
+def get_new_stubby_repository():
+    return StubRepository(database="", collection="")
+
+
+@pytest.fixture
+def get_new_stubby_request_user():
     stub_url = StubURL
     stub_url.path = "/user"
-    request = StubRequest(url=stub_url)
-    route_public = is_public(request=request)
-    assert route_public
+    return StubRequest(url=stub_url)
 
 
-def test_forgot_password_post_is_public():
+@pytest.fixture
+def get_new_stubby_request_forgot_password():
     stub_url = StubURL
     stub_url.path = "/user/forgot_password"
-    request = StubRequest(url=stub_url)
-    route_public = is_public(request=request)
-    assert route_public
+    return StubRequest(url=stub_url)
 
 
-def test_login_post_is_public():
+@pytest.fixture
+def get_new_stubby_request_login():
     stub_url = StubURL
     stub_url.path = "/login"
-    request = StubRequest(url=stub_url)
-    route_public = is_public(request=request)
-    assert route_public
+    return StubRequest(url=stub_url)
 
 
-def test_login_admin_post_is_public():
+@pytest.fixture
+def get_new_stubby_request_login_admin():
     stub_url = StubURL
     stub_url.path = "/login/admin"
-    request = StubRequest(url=stub_url)
-    route_public = is_public(request=request)
-    assert route_public
+    return StubRequest(url=stub_url)
 
 
-def test_any_post_is_public():
+@pytest.fixture
+def get_new_stubby_request_none_path():
     stub_url = StubURL
-    stub_url.path = "/ANY_POST_METHOD"
-    request = StubRequest(url=stub_url)
-    route_public = is_public(request=request)
-    assert route_public is False
+    stub_url.path = None
+    return StubRequest(url=stub_url)
 
 
-def test_any_get_is_public():
-    stub_url = StubURL
-    stub_url.path = "ANY_GET_METHOD"
-    request = StubRequest(url=stub_url)
-    request.method = "GET"
-    route_public = is_public(request=request)
-    assert route_public is False
-
-
-def test_none_url_path_is_public():
-    stub_url = StubURL
-    request = StubRequest(url=stub_url)
-    request.method = "GET"
-    route_public = is_public(request=request)
-    assert route_public is False
-
-
-def test_is_public_true_get():
-    stub_url = StubURL
-    stub_url.path = "/term"
-    request = StubRequest(url=stub_url)
-    request.method = "GET"
-    route_public = is_public(request=request)
-    assert route_public
-
-
-def test_is_public_false_post():
-    stub_url = StubURL
-    request = StubRequest(url=stub_url)
-    route_public = is_public(request=request)
-    assert route_public is False
-
-
-def test_is_public_false_get():
-    stub_url = StubURL
-    stub_url.path = "/xxx"
-    request = StubRequest(url=stub_url)
-    request.method = "GET"
-    route_public = is_public(request=request)
-    assert route_public is False
-
-
-def test_need_be_admin_false():
+@pytest.fixture
+def get_new_stubby_request_random_path():
     stub_url = StubURL
     stub_url.path = "/xx"
-    request = StubRequest(url=stub_url)
-    is_admin_route = need_be_admin(request=request)
-    assert is_admin_route is False
+    return StubRequest(url=stub_url)
 
 
-def test_need_be_admin_false_post():
-    stub_url = StubURL
-    stub_url.path = "/xxx"
-    request = StubRequest(url=stub_url)
-    request.method = "POST"
-    is_admin_route = need_be_admin(request=request)
-    assert is_admin_route is False
-
-
-def test_feature_need_be_admin_true():
+@pytest.fixture
+def get_new_stubby_request_feature():
     stub_url = StubURL
     stub_url.path = "/feature"
-    request = StubRequest(url=stub_url)
-    is_admin_route = need_be_admin(request=request)
-    assert is_admin_route is True
+    return StubRequest(url=stub_url)
 
 
-def test_term_need_be_admin_true_post():
+@pytest.fixture
+def get_new_stubby_request_term():
     stub_url = StubURL
     stub_url.path = "/term"
-    request = StubRequest(url=stub_url)
-    request.method = "POST"
-    is_admin_route = need_be_admin(request=request)
-    assert is_admin_route is True
+    return StubRequest(url=stub_url)
 
 
-def test_views_need_be_admin_true_post():
+@pytest.fixture
+def get_new_stubby_request_views():
     stub_url = StubURL
     stub_url.path = "/views"
-    request = StubRequest(url=stub_url)
-    request.method = "POST"
-    is_admin_route = need_be_admin(request=request)
+    return StubRequest(url=stub_url)
+
+
+@pytest.fixture
+def get_new_stubby_request_user_admin():
+    stub_url = StubURL
+    stub_url.path = "/user/admin"
+    return StubRequest(url=stub_url)
+
+
+def test_is_public_true(get_new_stubby_request_user):
+    route_public = is_public(request=get_new_stubby_request_user)
+    assert route_public is True
+
+
+def test_forgot_password_post_is_public(get_new_stubby_request_forgot_password):
+    route_public = is_public(request=get_new_stubby_request_forgot_password)
+    assert route_public is True
+
+
+def test_login_is_public(get_new_stubby_request_login):
+    route_public = is_public(request=get_new_stubby_request_login)
+    assert route_public is True
+
+
+def test_login_admin_is_public(get_new_stubby_request_login_admin):
+    route_public = is_public(request=get_new_stubby_request_login_admin)
+    assert route_public is True
+
+
+def test_none_url_path_is_public(get_new_stubby_request_none_path):
+    route_public = is_public(request=get_new_stubby_request_none_path)
+    assert route_public is True
+
+
+def test_is_public_true(get_new_stubby_request_random_path):
+    route_public = is_public(request=get_new_stubby_request_random_path)
+    assert route_public is True
+
+
+def test_need_be_admin_false(get_new_stubby_request_random_path):
+    is_admin_route = need_be_admin(request=get_new_stubby_request_random_path)
+    assert is_admin_route is False
+
+
+def test_feature_need_be_admin_true(get_new_stubby_request_feature):
+    is_admin_route = need_be_admin(request=get_new_stubby_request_feature)
     assert is_admin_route is True
 
 
-def test_user_admin_need_be_admin_true_post():
-    stub_url = StubURL
-    stub_url.path = "/user_admin"
-    request = StubRequest(url=stub_url)
-    request.method = "POST"
-    is_admin_route = need_be_admin(request=request)
+def test_term_need_be_admin_true(get_new_stubby_request_term):
+    is_admin_route = need_be_admin(request=get_new_stubby_request_term)
+    assert is_admin_route is True
+
+
+def test_views_need_be_admin_true(get_new_stubby_request_views):
+    is_admin_route = need_be_admin(request=get_new_stubby_request_views)
+    assert is_admin_route is True
+
+
+def test_user_admin_need_be_admin(get_new_stubby_request_user_admin):
+    is_admin_route = need_be_admin(request=get_new_stubby_request_user_admin)
     assert is_admin_route is True
 
 
@@ -233,22 +233,15 @@ def test_invalidate_user_false():
     assert is_invalidate_user is False
 
 
-class StubRepository(StubBaseRepository):
-    pass
-
-
-
-def test_check_if_user_is_allowed_to_access_route_user_is_admin():
-    stub_url = StubURL
-    stub_url.path = "/not_admin_route"
-    request = StubRequest(url=stub_url)
-    request.method = "GET"
+def test_check_if_user_is_allowed_to_access_route_user_is_admin(get_new_stubby_request_random_path,
+                                                                get_new_stubby_repository):
+    request = get_new_stubby_request_random_path
     user_data = {
         "token_valid_after": "2020-06-01",
         "deleted": False,
         "is_admin": True,
     }
-    user_repository = StubRepository(database="", collection="")
+    user_repository = get_new_stubby_repository
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-07-01", "email": "test@test.com"}
     is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
@@ -257,17 +250,15 @@ def test_check_if_user_is_allowed_to_access_route_user_is_admin():
     assert is_user_not_allowed_value.status_code == 200
 
 
-def test_check_if_is_user_not_allowed_to_access_route_user_not_admin():
-    stub_url = StubURL
-    stub_url.path = "/views"
-    request = StubRequest(url=stub_url)
-    request.method = "GET"
+def test_check_if_is_user_not_allowed_to_access_route_user_not_admin(get_new_stubby_request_views,
+                                                                     get_new_stubby_repository):
+    request = get_new_stubby_request_views
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d"),
         "deleted": False,
         "is_admin": False,
     }
-    user_repository = StubRepository(database="", collection="")
+    user_repository = get_new_stubby_repository
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01", "email": "test@test.com"}
     is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
@@ -276,17 +267,15 @@ def test_check_if_is_user_not_allowed_to_access_route_user_not_admin():
     assert is_user_not_allowed_value.status_code == 401
 
 
-def test_check_if_is_user_not_allowed_to_access_route_user_not_admin_and_user_is_deleted():
-    stub_url = StubURL
-    stub_url.path = "/views"
-    request = StubRequest(url=stub_url)
-    request.method = "GET"
+def test_check_if_is_user_not_allowed_to_access_route_user_not_admin_and_user_is_deleted(get_new_stubby_request_views,
+                                                                                         get_new_stubby_repository):
+    request = get_new_stubby_request_views
     user_data = {
         "token_valid_after": datetime(year=2020, month=11, day=10).strftime("%Y-%m-%d"),
         "deleted": True,
         "is_admin": False,
     }
-    user_repository = StubRepository(database="", collection="")
+    user_repository = get_new_stubby_repository
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01", "email": "test@test.com"}
     is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
@@ -295,17 +284,15 @@ def test_check_if_is_user_not_allowed_to_access_route_user_not_admin_and_user_is
     assert is_user_not_allowed_value.status_code == 401
 
 
-def test_check_if_is_user_not_allowed_to_access_route_user_is_admin_and_user_is_deleted():
-    stub_url = StubURL
-    stub_url.path = "/views"
-    request = StubRequest(url=stub_url)
-    request.method = "GET"
+def test_check_if_is_user_not_allowed_to_access_route_user_is_admin_and_user_is_deleted(get_new_stubby_request_views,
+                                                                                        get_new_stubby_repository):
+    request = get_new_stubby_request_views
     user_data = {
         "token_valid_after": datetime(year=2020, month=11, day=10).strftime("%Y-%m-%d"),
         "deleted": True,
         "is_admin": True,
     }
-    user_repository = StubRepository(database="", collection="")
+    user_repository = get_new_stubby_repository
     user_repository.find_one = MagicMock(return_value=user_data)
     jwt_data = {"created_at": "2020-11-01", "email": "test@test.com"}
     is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(

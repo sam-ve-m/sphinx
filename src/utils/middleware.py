@@ -15,31 +15,34 @@ from src.utils.language_identifier import get_language_from_request
 
 
 def is_public(request: Request) -> bool:
-    post_method = "POST" in request.method
-    get_method = "GET" in request.method
-    url_path = request.url.path
-    public_path_list = ["/user", "/user/forgot_password", "/login", "/login/admin", ]
-    term_path_list = ["/term", ]
-    if post_method and url_path in public_path_list or get_method and url_path in term_path_list:
+    public_route = True
+
+    if not request.url.path:
         return True
-    return False
+    starts_with_user = request.url.path.startswith("/user")
+    starts_with_user_forgot_password = request.url.path.startswith("/user/forgot_password")
+    starts_with_login = request.url.path.startswith("/login")
+    starts_with_login_admin = request.url.path.startswith("/login/admin")
+    starts_with_term = request.url.path.startswith("/term")
+
+    if not starts_with_user or not starts_with_user_forgot_password or not starts_with_login or not starts_with_login_admin or not starts_with_term:
+        public_route = False
+    if not need_be_admin(request):
+        public_route = True
+
+    return public_route
 
 
 def need_be_admin(request: Request) -> bool:
     need_admin = False
-    starts_with_user_admin = request.url.path.startswith("/user_admin")
+    starts_with_user_admin = request.url.path.startswith("/user/admin")
     starts_with_views = request.url.path.startswith("/views")
     starts_with_feature = request.url.path.startswith("/feature")
     starts_with_term = request.url.path.startswith("/term")
 
-    if starts_with_user_admin:
+    if starts_with_user_admin or starts_with_views or starts_with_feature or starts_with_term:
         need_admin = True
-    elif starts_with_views:
-        need_admin = True
-    elif starts_with_feature:
-        need_admin = True
-    elif starts_with_term:
-        need_admin = True
+
     return need_admin
 
 
@@ -84,7 +87,7 @@ def check_if_is_user_not_allowed_to_access_route(
     if not token_is_valid:
         message = i18n.get_translate("invalid_credential", locale=locale, )
         status_code = status.HTTP_401_UNAUTHORIZED
-    elif is_admin_route:
+    elif True:
         if not is_admin:
             message = i18n.get_translate("invalid_credential", locale=locale, )
             status_code = status.HTTP_401_UNAUTHORIZED
