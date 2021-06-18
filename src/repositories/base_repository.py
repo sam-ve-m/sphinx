@@ -47,9 +47,14 @@ class BaseRepository(IRepository):
         self, query: dict, ttl: int = 0, cache=RepositoryRedis
     ) -> Optional[dict]:
         try:
-            if not ttl != 0:
-                return self.collection.find_one(query)
-            return self._get_from_cache(query=query, cache=cache, ttl=ttl)
+            if cache_data := self._get_from_cache(query=query, cache=cache):
+                return cache_data
+
+            if data := self.collection.find_one(query):
+                self._save_cache(query=query, cache=cache, ttl=ttl, data=data)
+                return data
+
+            return
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
@@ -102,17 +107,20 @@ class BaseRepository(IRepository):
             elif type(payload[key]) == dict:
                 self.normalize_enum_types(payload=payload[key])
 
-    def _get_from_cache(self, query: dict, ttl: int, cache=RepositoryRedis):
+    def _get_from_cache(self, query: dict, cache=RepositoryRedis):
         if query is None:
             return
 
         query_hash = hash_field(payload=query)
         cache_value = cache.get(key=f"{self.base_identifier}:{query_hash}")
-        if cache_value is None:
-            cache_value = self.collection.find_one(query)
-            cache.set(
-                key=f"{self.base_identifier}:{query_hash}",
-                value=cache_value,
-                ttl=ttl,
+        if cache := cache_value:
+            return cache
+        return
+
+    def _save_cache(self, data: dict, query: dict, cache=RepositoryRedis, ttl: int = 0):
+        query_hash = hash_field(payload=query)
+        cache.set(
+            key=f"{self.base_identifier}:{query_hash}",
+            value=data,
+            ttl=ttl,
             )
-        return cache_value
