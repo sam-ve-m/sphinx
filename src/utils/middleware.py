@@ -15,23 +15,22 @@ from src.utils.language_identifier import get_language_from_request
 
 
 def is_public(request: Request) -> bool:
-    if not request.url.path:
-        return False
-    try:
-        public_route = False
-        public_path = ["/user", "/user/forgot_password", "/login", "/login/admin", "/term"]
-        if request.url.path in public_path:
-            public_route = True
-        elif not need_be_admin(request):
-            public_route = True
-        return public_route
-    except Exception:
-        return False
+    if request.url.path is None:
+        raise Exception("No path found")
+
+    public_route = False
+    public_path = ["/user", "/user/forgot_password", "/login", "/login/admin", "/term"]
+    if request.url.path in public_path:
+        public_route = True
+    elif not need_be_admin(request):
+        public_route = True
+    return public_route
 
 
 def need_be_admin(request: Request) -> bool:
-    if not request.url.path:
-        return False
+    if request.url.path is None:
+        raise Exception("No path found")
+
     need_admin = False
     private_path = ["/user/admin", "/views", "/feature", "/term"]
     if request.url.path in private_path:
@@ -60,9 +59,9 @@ def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
 
 def invalidate_user(user_data: dict, jwt_data: dict) -> bool:
     is_deleted = is_user_deleted(user_data=user_data)
-    if is_deleted:
-        return False
-    return is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
+    if not is_deleted:
+        return is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
+    return False
 
 
 

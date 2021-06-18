@@ -139,8 +139,12 @@ def test_login_admin_is_public(get_new_stubby_request_login_admin):
 
 
 def test_none_url_path_is_public(get_new_stubby_request_none_path):
-    route_public = is_public(request=get_new_stubby_request_none_path)
-    assert route_public is False
+    with pytest.raises(Exception, match="No path found"):
+        is_public(request=get_new_stubby_request_none_path)
+
+def test_none_url_path_is_public_raises(get_new_stubby_request_none_path):
+    with pytest.raises(Exception, match="No path found"):
+        need_be_admin(request=get_new_stubby_request_none_path)
 
 
 def test_is_public_true(get_new_stubby_request_random_path):
