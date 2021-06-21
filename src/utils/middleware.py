@@ -16,7 +16,6 @@ from src.exceptions.exceptions import NoPath
 
 
 def route_is_public(url_request: str) -> bool:
-
     if url_request is None:
         raise NoPath("No path found")
 
@@ -47,8 +46,8 @@ def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
     try:
         user_created = user_data.get("token_valid_after")
         jwt_created_at = jwt_data.get("created_at")
-        is_token_invalid = jwt_created_at > user_created
-        return is_token_invalid
+        is_token_valid = jwt_created_at > user_created
+        return is_token_valid
     except ValueError:
         return False
     except Exception as e:
@@ -79,14 +78,13 @@ def check_if_is_user_not_allowed_to_access_route(
     if not token_is_valid:
         message = i18n.get_translate("invalid_credential", locale=locale, )
         status_code = status.HTTP_401_UNAUTHORIZED
-    elif True:
+    elif is_admin_route:
         if not is_admin:
             message = i18n.get_translate("invalid_credential", locale=locale, )
             status_code = status.HTTP_401_UNAUTHORIZED
         else:
             message = i18n.get_translate("valid_credential", locale=locale, )
             status_code = status.HTTP_200_OK
-
 
     content.update({"message": message})
     return Response(content=json.dumps(content), status_code=status_code)

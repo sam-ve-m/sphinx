@@ -79,6 +79,7 @@ def get_new_stubby_request_none_path():
     stub_url.path = None
     return StubRequest(url=stub_url)
 
+
 @pytest.fixture
 def get_new_stubby_request_none_path_admin():
     stub_url = StubURL
@@ -232,16 +233,6 @@ def test_is_user_token_valid_true():
     assert token_valid
 
 
-def test_invalidate_user_true():
-    user_data = {
-        "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d"),
-        "deleted": True,
-    }
-    jwt_data = {"created_at": "2020-01-01"}
-    is_invalidate_user = invalidate_user(user_data=user_data, jwt_data=jwt_data)
-    assert is_invalidate_user is False
-
-
 def test_invalidate_user_false():
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10),
@@ -252,17 +243,27 @@ def test_invalidate_user_false():
     assert is_invalidate_user is False
 
 
+def test_invalidate_user_is_deleted():
+    user_data = {
+        "token_valid_after": datetime(year=2020, month=11, day=10),
+        "deleted": True,
+    }
+    jwt_data = {"created_at": "2020-11-01"}
+    is_user_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
+    assert is_user_valid is False
+
+
 def test_check_if_user_is_allowed_to_access_route_user_is_admin(get_new_stubby_request_random_path,
                                                                 get_new_stubby_repository):
     request = get_new_stubby_request_random_path
     user_data = {
-        "token_valid_after": "2020-06-01",
+        "token_valid_after": "2020-07-01",
         "deleted": False,
         "is_admin": True,
     }
     user_repository = get_new_stubby_repository
     user_repository.find_one = MagicMock(return_value=user_data)
-    jwt_data = {"created_at": "2020-07-01", "email": "test@test.com"}
+    jwt_data = {"created_at": "2020-07-02", "email": "test@test.com"}
     is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
         request=request, jwt_data=jwt_data, user_repository=user_repository
     )
