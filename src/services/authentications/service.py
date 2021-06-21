@@ -58,7 +58,8 @@ class AuthenticationService(IAuthentication):
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
-        if entity.get("use_magic_link") is True:
+        use_magic_link = entity.get("use_magic_link")
+        if use_magic_link is True:
             AuthenticationService.send_authentication_email(
                 email=entity.get("email"),
                 payload=entity,
@@ -69,19 +70,19 @@ class AuthenticationService(IAuthentication):
                 "status_code": status.HTTP_200_OK,
                 "message_key": "email.login",
             }
+        else:
+            pin = payload.get("pin")
+            if pin is None:
+                return {
+                    "status_code": status.HTTP_200_OK,
+                    "message_key": "user.need_pin",
+                }
+            if hash_field(payload=pin) != entity.get("pin"):
+                raise UnauthorizedError("user.pin_error")
 
-        pin = payload.get("pin")
-        if pin is None:
-            return {
-                "status_code": status.HTTP_200_OK,
-                "message_key": "user.need_pin",
-            }
-        if hash_field(payload=pin) != entity.get("pin"):
-            raise UnauthorizedError("user.pin_error")
-
-        jwt = token_handler.generate_token(payload=entity, ttl=525600)
-        JwtController.insert_one(jwt, entity.get("email"))
-        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+            jwt = token_handler.generate_token(payload=entity, ttl=525600)
+            JwtController.insert_one(jwt, entity.get("email"))
+            return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
 
     @staticmethod
