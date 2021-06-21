@@ -47,10 +47,11 @@ class BaseRepository(IRepository):
         self, query: dict, ttl: int = 0, cache=RepositoryRedis
     ) -> Optional[dict]:
         try:
-            if cache_data := self._get_from_cache(query=query, cache=cache):
+            if ttl > 0:
+                cache_data = self._get_from_cache(query=query, cache=cache)
                 return cache_data
-
-            if data := self.collection.find_one(query):
+            else:
+                data = self.collection.find_one(query)
                 self._save_cache(query=query, cache=cache, ttl=ttl, data=data)
                 return data
 

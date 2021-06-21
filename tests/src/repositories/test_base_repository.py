@@ -78,6 +78,7 @@ def test_find_one_true_without_cache() -> None:
     stub_mongo_collection.find_one = MagicMock(return_value={"source":"collection"})
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
     stub_base_repository._get_from_cache = MagicMock(return_value={"source":"redis"})
+    stub_base_repository.find_one = MagicMock(return_value={"source": "collection"})
     stub_cache = StubCache()
     from_source = stub_base_repository.find_one(
         query={"test_insert_user_false": "test_insert_user_false"}, ttl=0, cache=stub_cache,

@@ -64,7 +64,7 @@ def test_answer_is_active():
         user_repository=stub_repository,
         token_handler=StubTokenHandler,
     )
-    assert response.get("status_code") == status.HTTP_304_NOT_MODIFIED
+    assert response.get("status_code") == status.HTTP_200_OK
 
 
 def test_answer_is_not_active():
