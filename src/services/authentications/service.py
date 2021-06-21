@@ -47,7 +47,7 @@ class AuthenticationService(IAuthentication):
 
         jwt = token_handler.generate_token(payload=new, ttl=525600)
 
-        response.update({"jwt": jwt})
+        response.update({"payload": {"jwt": jwt}})
 
         return response
 
