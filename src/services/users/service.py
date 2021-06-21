@@ -67,7 +67,7 @@ class UserService(IUser):
                 "is_active": False,
                 "deleted": False,
                 "use_magic_link": True,
-                "token_valid_after": datetime.now(),
+                "token_valid_after": datetime.now().strftime("%Y-%m-%d"),
                 "terms": {
                     # The terms list is available in the FileRepository
                     "term_application": None,

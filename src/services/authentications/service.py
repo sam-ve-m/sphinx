@@ -43,7 +43,7 @@ class AuthenticationService(IAuthentication):
 
             response.update({"status_code": status.HTTP_200_OK})
         else:
-            response.update({"status_code" : status.HTTP_304_NOT_MODIFIED})
+            response.update({"status_code": status.HTTP_304_NOT_MODIFIED})
 
         jwt = token_handler.generate_token(payload=new, ttl=525600)
 
