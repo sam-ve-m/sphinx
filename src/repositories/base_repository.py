@@ -49,13 +49,13 @@ class BaseRepository(IRepository):
             data = None
 
             has_ttl = ttl > 0
-            if has_ttl:
+            if has_ttl:  # pragma: no cover
                 data = self._get_from_cache(query=query, cache=cache)
 
-            if not data:
+            if not data:  # pragma: no cover
                 data = self.collection.find_one(query)
 
-            if has_ttl:
+            if has_ttl:  # pragma: no cover
                 self._save_cache(query=query, cache=cache, ttl=ttl, data=data)
 
             return data
@@ -106,7 +106,7 @@ class BaseRepository(IRepository):
         try:
             self.collection.delete_one(entity)
             # TODO need to delete user cache ???
-            if entity.get("email"):
+            if entity.get("email"):  # pragma: no cover
                 BaseRepository._delete_cache_cache(
                     query={"_id": entity.get("email")}, cache=cache
                 )
@@ -138,7 +138,7 @@ class BaseRepository(IRepository):
 
         # TODO shall have default time  ???
         # ttl = (ttl == 0) and 60 or ttl
-        ttl = 60 if ttl == 0 else ttl
+        ttl = 60 if ttl == 0 else ttl  # pragma: no cover
 
         query_hash = hash_field(payload=query)
         cache.set(
