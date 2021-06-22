@@ -49,7 +49,10 @@ class FileRepository(IFile):
         return bucket_name
 
     def save_user_file(
-        self, file_type: UserFileType, content: Union[str, bytes], user_email: str,
+        self,
+        file_type: UserFileType,
+        content: Union[str, bytes],
+        user_email: str,
     ) -> None:
         path = self.resolve_user_path(user_email=user_email, file_type=file_type)
         file_name = file_type.value
@@ -70,7 +73,9 @@ class FileRepository(IFile):
         path = self.resolve_term_path(file_type=file_type)
         current_version = self.get_current_term_version(file_type=file_type)
         new_version = current_version + 1
-        file_name = self.generate_term_file_name(name=file_type.value, version=new_version)
+        file_name = self.generate_term_file_name(
+            name=file_type.value, version=new_version
+        )
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
@@ -114,7 +119,11 @@ class FileRepository(IFile):
             value = dict()
             for file_type in term_types:
                 value.update(
-                    {file_type.value: self.get_current_term_version(file_type=file_type)}
+                    {
+                        file_type.value: self.get_current_term_version(
+                            file_type=file_type
+                        )
+                    }
                 )
             cache.set(key=cache_key, value=value)
         return value
@@ -149,14 +158,12 @@ class FileRepository(IFile):
         if not len(files_metadata) > 0:
             raise InternalServerError("files.is_empty")
 
-        sorted(
-            files_metadata, key=lambda item: item.get("LastModified"), reverse=True
-        )
+        sorted(files_metadata, key=lambda item: item.get("LastModified"), reverse=True)
         return files_metadata[0].get("Key")
 
     @staticmethod
     def resolve_content(content: Union[str, bytes]):
-        ''' str in this case is a base64 string '''
+        """str in this case is a base64 string"""
         if content is None:
             raise InternalServerError("files.content.empty")
         if type(content) is str:
@@ -201,4 +208,3 @@ class FileRepository(IFile):
 
         version = len(content)
         return version
-

@@ -48,16 +48,28 @@ def test_insert_suitability_with_valid_value():
 def test_get_questions_with_best_answer_with_fake_suitability():
     builder = SuitabilityAnswersProfileBuilder()
     builder.suitability = fake_suitability
-    questions_with_best_answers = builder._SuitabilityAnswersProfileBuilder__get_questions_with_best_answer()
-    assert questions_with_best_answers[0]["answer"] == fake_suitability['questions'][0]['answers'][1]['value_text']
-    assert questions_with_best_answers[1]["answer"] == fake_suitability['questions'][1]['answers'][1]['value_text']
+    questions_with_best_answers = (
+        builder._SuitabilityAnswersProfileBuilder__get_questions_with_best_answer()
+    )
+    assert (
+        questions_with_best_answers[0]["answer"]
+        == fake_suitability["questions"][0]["answers"][1]["value_text"]
+    )
+    assert (
+        questions_with_best_answers[1]["answer"]
+        == fake_suitability["questions"][1]["answers"][1]["value_text"]
+    )
 
 
 def test_calc_suitability_score_profile():
     builder = SuitabilityAnswersProfileBuilder()
     builder.suitability = fake_suitability
-    questions_with_best_answers = builder._SuitabilityAnswersProfileBuilder__get_questions_with_best_answer()
-    score = builder._SuitabilityAnswersProfileBuilder__calc_suitability_score_profile(questions_with_best_answers)
+    questions_with_best_answers = (
+        builder._SuitabilityAnswersProfileBuilder__get_questions_with_best_answer()
+    )
+    score = builder._SuitabilityAnswersProfileBuilder__calc_suitability_score_profile(
+        questions_with_best_answers
+    )
     assert score == 1.0
     assert type(score) is float
 
@@ -71,4 +83,9 @@ def test_profile_without_suitability():
 def test_profile_dictionary_keys_with_suitability():
     builder = SuitabilityAnswersProfileBuilder()
     builder.suitability = fake_suitability
-    assert "score" and "suitability_version" and "suitability_submission_date" and "answers" in builder.profile.keys()
+    assert (
+        "score"
+        and "suitability_version"
+        and "suitability_submission_date"
+        and "answers" in builder.profile.keys()
+    )

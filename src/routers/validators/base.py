@@ -2,10 +2,13 @@
 from __future__ import annotations
 from typing import Optional
 from datetime import datetime
+import logging
 
 # OUTSIDE LIBRARIES
 from fastapi import Form
-from pydantic import BaseModel, constr, validate_email, validator, UUID1
+from validate_email import validate_email
+from pydantic import BaseModel, constr, validator, UUID1
+from decouple import config
 
 # SPHIX
 from src.repositories.view.repository import ViewRepository
@@ -18,17 +21,17 @@ from src.routers.validators.enum_template import MaritalStatusEnum
 class Email(BaseModel):
     email: constr(min_length=4, max_length=255)
     # TODO: DNS lib not found
-    # @validator('email', always=True, allow_reuse=True)
-    # def validate_email(cls, value):
-    #     try:
-    #         is_valid = validate_email(value)
-    #         if is_valid:
-    #             return True
-    #     except Exception as e:
-    #         logger = logging.getLogger(config("LOG_NAME"))
-    #         logger.error(e, exc_info=True)
-    #
-    #     return False
+    @validator("email", always=True, allow_reuse=True)
+    def validate_email(cls, value):
+        try:
+            is_valid = validate_email(value)
+            if is_valid:
+                return value
+            raise ValueError("The given email is invalid")
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
+        raise ValueError("The given email is invalid")
 
 
 class View(BaseModel):

@@ -15,9 +15,8 @@ from src.interfaces.repositories.base_repository.interface import IRepository
 
 
 class BaseRepository(IRepository):
-
     client: MongoClient = MongoClient(
-            f"{config('MONGO_CONNECTION')}://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
+        f"{config('MONGO_CONNECTION')}://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
     )
 
     def __init__(self, database: str, collection: str) -> None:
@@ -64,7 +63,7 @@ class BaseRepository(IRepository):
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            return None
+            return
 
     def find_more_than_equal_one(self, query: dict) -> Optional[Cursor]:
         try:
@@ -80,9 +79,9 @@ class BaseRepository(IRepository):
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            return None
+            return
 
-    def update_one(self, old, new) -> bool:
+    def update_one(self, old, new, ttl=60, cache=RepositoryRedis) -> bool:
         if not old or len(old) == 0:
             return False
 
@@ -91,19 +90,26 @@ class BaseRepository(IRepository):
         try:
             self.normalize_enum_types(payload=new)
             self.collection.update_one(old, {"$set": new})
-            #TODO need to generate a new cache ???
-            #{"_id": new.get("_id")}
+            # TODO update cache when update user
+            if new.get("email"):
+                self._save_cache(
+                    query={"_id": new.get("email")}, cache=cache, ttl=ttl, data=new
+                )
+
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
             return False
 
-    def delete_one(self, entity) -> bool:
+    def delete_one(self, entity, ttl=0, cache=RepositoryRedis) -> bool:
         try:
             self.collection.delete_one(entity)
             # TODO need to delete user cache ???
-            #{"_id": entity.get("_id")}
+            if entity.get("email"):
+                BaseRepository._delete_cache_cache(
+                    query={"_id": entity.get("email")}, cache=cache
+                )
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
@@ -116,7 +122,6 @@ class BaseRepository(IRepository):
                 payload[key] = payload[key].value
             elif type(payload[key]) == dict:
                 self.normalize_enum_types(payload=payload[key])
-
 
     def _get_from_cache(self, query: dict, cache=RepositoryRedis):
         if query is None:
@@ -132,7 +137,7 @@ class BaseRepository(IRepository):
     def _save_cache(self, data: dict, query: dict, cache=RepositoryRedis, ttl: int = 0):
 
         # TODO shall have default time  ???
-        #ttl = (ttl == 0) and 60 or ttl
+        # ttl = (ttl == 0) and 60 or ttl
         ttl = 60 if ttl == 0 else ttl
 
         query_hash = hash_field(payload=query)
@@ -140,4 +145,9 @@ class BaseRepository(IRepository):
             key=f"{self.base_identifier}:{query_hash}",
             value=data,
             ttl=ttl,
-            )
+        )
+
+    @staticmethod
+    def _delete_cache(query: dict, cache=RepositoryRedis):
+        query_hash = hash_field(payload=query)
+        cache.delete(query_hash)

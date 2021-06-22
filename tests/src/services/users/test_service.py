@@ -37,6 +37,7 @@ payload = {"name": "lala", "email": "Lala", "pin": 1234}
 def get_new_stubby_repository():
     return StubRepository(database="", collection="")
 
+
 @pytest.fixture
 def get_user_data():
     return {
@@ -48,6 +49,7 @@ def get_user_data():
         "use_magic_link": False,
         "token_valid_after": {"$date": "2021-05-29T20:00:52.571Z"},
     }
+
 
 def test_create_register_exists(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
@@ -241,7 +243,7 @@ def test_logout_all(get_new_stubby_repository):
     assert response.get("message_key") == "user.all_logged_out"
 
 
-def test_add_feature_already_exists(get_user_data,get_new_stubby_repository):
+def test_add_feature_already_exists(get_user_data, get_new_stubby_repository):
     payload = {
         "thebes_answer": get_user_data,
         "feature": "real_time_data",
@@ -256,9 +258,11 @@ def test_add_feature_already_exists(get_user_data,get_new_stubby_repository):
     assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
 
 
-def test_add_feature_process_issue(get_user_data,get_new_stubby_repository):
+def test_add_feature_process_issue(get_user_data, get_new_stubby_repository):
     copy = dict(get_user_data)
-    copy.update({'scope': {"view_type": None, "features": []}}, )
+    copy.update(
+        {"scope": {"view_type": None, "features": []}},
+    )
     payload = {
         "thebes_answer": copy,
         "feature": "real_time_data",
@@ -269,11 +273,13 @@ def test_add_feature_process_issue(get_user_data,get_new_stubby_repository):
     stub_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.add_feature(
-            payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+            payload=payload,
+            user_repository=stub_repository,
+            token_handler=stub_jwt_handler,
         )
 
 
-def test_add_feature(get_user_data,get_new_stubby_repository):
+def test_add_feature(get_user_data, get_new_stubby_repository):
     payload = {
         "thebes_answer": get_user_data,
         "feature": "test_feature",
@@ -291,7 +297,9 @@ def test_add_feature(get_user_data,get_new_stubby_repository):
     assert type(result.get("payload").get("jwt")) == str
 
 
-def test_delete_feature_that_not_exists_raises(get_user_data,get_new_stubby_repository):
+def test_delete_feature_that_not_exists_raises(
+    get_user_data, get_new_stubby_repository
+):
     payload = {
         "thebes_answer": get_user_data,
         "feature": "real_time_data",
@@ -304,11 +312,13 @@ def test_delete_feature_that_not_exists_raises(get_user_data,get_new_stubby_repo
     stub_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
         UserService.delete_feature(
-            payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+            payload=payload,
+            user_repository=stub_repository,
+            token_handler=stub_jwt_handler,
         )
 
 
-def test_delete_feature_not_exists(get_user_data,get_new_stubby_repository):
+def test_delete_feature_not_exists(get_user_data, get_new_stubby_repository):
     payload = {
         "thebes_answer": get_user_data,
         "feature": "test_feature_xxx",
@@ -323,7 +333,7 @@ def test_delete_feature_not_exists(get_user_data,get_new_stubby_repository):
     assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
 
 
-def test_delete_feature_that_exists(get_user_data,get_new_stubby_repository):
+def test_delete_feature_that_exists(get_user_data, get_new_stubby_repository):
     payload = {
         "thebes_answer": get_user_data,
         "feature": "real_time_data",
@@ -340,7 +350,7 @@ def test_delete_feature_that_exists(get_user_data,get_new_stubby_repository):
     assert result.get("status_code") == status.HTTP_200_OK
 
 
-def test_save_user_self(get_user_data,get_new_stubby_repository):
+def test_save_user_self(get_user_data, get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
     stub_repository.save_user_file = MagicMock(return_value=None)
     response = UserService.save_user_self(
@@ -351,7 +361,7 @@ def test_save_user_self(get_user_data,get_new_stubby_repository):
     assert response.get("message_key") == "files.uploaded"
 
 
-def test_sign_term_register_not_exists(get_user_data,get_new_stubby_repository):
+def test_sign_term_register_not_exists(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value=None)
     stub_file_repository = StubRepository(database="", collection="")
@@ -363,7 +373,7 @@ def test_sign_term_register_not_exists(get_user_data,get_new_stubby_repository):
         )
 
 
-def test_sign_term_process_issue(get_user_data,get_new_stubby_repository):
+def test_sign_term_process_issue(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value={"email": "lala"})
     stub_user_repository.update_one = MagicMock(return_value=False)
@@ -380,7 +390,7 @@ def test_sign_term_process_issue(get_user_data,get_new_stubby_repository):
         )
 
 
-def test_sign_term_process_issue_v2(get_user_data,get_new_stubby_repository):
+def test_sign_term_process_issue_v2(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value={"email": "lala"})
     stub_user_repository.update_one = MagicMock(return_value=False)
@@ -399,7 +409,7 @@ def test_sign_term_process_issue_v2(get_user_data,get_new_stubby_repository):
         )
 
 
-def test_sign_term(get_user_data,get_new_stubby_repository):
+def test_sign_term(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value={"email": "lala"})
     stub_user_repository.update_one = MagicMock(return_value=True)
@@ -423,7 +433,7 @@ def test_sign_term(get_user_data,get_new_stubby_repository):
     assert response.get("status_code") == status.HTTP_200_OK
 
 
-def test_get_signed_term_not_signed(get_user_data,get_new_stubby_repository):
+def test_get_signed_term_not_signed(get_user_data, get_new_stubby_repository):
     payload = {"file_type": TermsFileType.TERM_REFUSAL}
     stub_user_repository = get_new_stubby_repository
     with pytest.raises(BadRequestError, match="^user.files.term_not_signed"):
@@ -432,7 +442,7 @@ def test_get_signed_term_not_signed(get_user_data,get_new_stubby_repository):
         )
 
 
-def test_get_signed_term_not_signed(get_user_data,get_new_stubby_repository):
+def test_get_signed_term_not_signed(get_user_data, get_new_stubby_repository):
     payload = {
         "file_type": TermsFileType.TERM_REFUSAL,
         "thebes_answer": {"terms": {"term_refusal": {"version": 1}}},
@@ -446,7 +456,7 @@ def test_get_signed_term_not_signed(get_user_data,get_new_stubby_repository):
     assert type(response.get("payload").get("link")) == str
 
 
-def test_get_signed_term_error(get_user_data,get_new_stubby_repository):
+def test_get_signed_term_error(get_user_data, get_new_stubby_repository):
     payload = {
         "file_type": TermsFileType.TERM_REFUSAL,
         "thebes_answer": {"terms": {"term_refusal": {"version": 1}}},
@@ -471,7 +481,9 @@ class StubStoneAge:
     pass
 
 
-def test_user_identifier_data_register_not_exists(get_user_data,get_new_stubby_repository):
+def test_user_identifier_data_register_not_exists(
+    get_user_data, get_new_stubby_repository
+):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value=None)
     StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
@@ -483,7 +495,9 @@ def test_user_identifier_data_register_not_exists(get_user_data,get_new_stubby_r
         )
 
 
-def test_user_identifier_data_process_issue_v1(get_user_data,get_new_stubby_repository):
+def test_user_identifier_data_process_issue_v1(
+    get_user_data, get_new_stubby_repository
+):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     stub_user_repository.update_one = MagicMock(return_value=True)
@@ -496,7 +510,9 @@ def test_user_identifier_data_process_issue_v1(get_user_data,get_new_stubby_repo
         )
 
 
-def test_user_identifier_data_process_issue_v2(get_user_data,get_new_stubby_repository):
+def test_user_identifier_data_process_issue_v2(
+    get_user_data, get_new_stubby_repository
+):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     stub_user_repository.update_one = MagicMock(return_value=False)
@@ -509,7 +525,7 @@ def test_user_identifier_data_process_issue_v2(get_user_data,get_new_stubby_repo
         )
 
 
-def test_user_identifier_data(get_user_data,get_new_stubby_repository):
+def test_user_identifier_data(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     StubStoneAge.send_user_identifier_data = MagicMock(return_value={"a": 123})
@@ -527,7 +543,9 @@ class StubPersephoneClient:
     pass
 
 
-def test_user_quiz_responses_register_not_exists(get_user_data,get_new_stubby_repository):
+def test_user_quiz_responses_register_not_exists(
+    get_user_data, get_new_stubby_repository
+):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value=None)
     StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
@@ -544,7 +562,7 @@ def test_user_quiz_responses_register_not_exists(get_user_data,get_new_stubby_re
     "src.services.users.service.get_user_account_template_with_data",
     MagicMock(return_value={}),
 )
-def test_user_quiz_responses_process_issue_v1(get_user_data,get_new_stubby_repository):
+def test_user_quiz_responses_process_issue_v1(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
     StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
@@ -562,7 +580,7 @@ def test_user_quiz_responses_process_issue_v1(get_user_data,get_new_stubby_repos
     "src.services.users.service.get_user_account_template_with_data",
     MagicMock(return_value={}),
 )
-def test_user_quiz_responses_process_issue_v2(get_user_data,get_new_stubby_repository):
+def test_user_quiz_responses_process_issue_v2(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(
         return_value={"user_account_data": {"data": "lalal"}}
@@ -583,7 +601,7 @@ def test_user_quiz_responses_process_issue_v2(get_user_data,get_new_stubby_repos
     "src.services.users.service.get_user_account_template_with_data",
     MagicMock(return_value={}),
 )
-def test_user_quiz_responses(get_user_data,get_new_stubby_repository):
+def test_user_quiz_responses(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
     stub_user_repository.find_one = MagicMock(
         return_value={"user_account_data": {"data": "lalal"}}
@@ -613,7 +631,15 @@ def test_fill_term_signed_empty_terms_on_payload():
 
 
 def test_fill_term_signed_filled_terms_on_payload():
-    payload = {"terms": {"aaa": {"version": 2, "date": None, "is_deprecated": False, }}}
+    payload = {
+        "terms": {
+            "aaa": {
+                "version": 2,
+                "date": None,
+                "is_deprecated": False,
+            }
+        }
+    }
     UserService.fill_term_signed(payload=payload, file_type="xxx", version=1)
     assert type(payload.get("terms")) == dict
     assert len(payload.get("terms")) == 2
@@ -625,13 +651,13 @@ def test_fill_account_data_on_user_document_without_provided_by_bureaux_field():
     UserService.fill_account_data_on_user_document(
         payload=payload, stone_age_user_data=stone_age_user_data
     )
-    assert payload.get('provided_by_bureaux').get('name') == "Nome completo"
+    assert payload.get("provided_by_bureaux").get("name") == "Nome completo"
 
 
 def test_fill_account_data_on_user_document_with_provided_by_bureaux_field():
-    payload = {'provided_by_bureaux': {'year': 2012}}
+    payload = {"provided_by_bureaux": {"year": 2012}}
     stone_age_user_data = {"name": {"source": "test", "value": "Nome completo"}}
     UserService.fill_account_data_on_user_document(
         payload=payload, stone_age_user_data=stone_age_user_data
     )
-    assert payload.get('provided_by_bureaux').get('year') == 2012
+    assert payload.get("provided_by_bureaux").get("year") == 2012

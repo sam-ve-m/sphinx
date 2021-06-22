@@ -180,7 +180,8 @@ async def save_user_self(
 
 @router.put("/user/sign_term", tags=["user"])
 async def sign_term(
-    request: Request, file_type: TermFile,
+    request: Request,
+    file_type: TermFile,
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -192,7 +193,8 @@ async def sign_term(
 
 @router.get("/user/signed_term", tags=["user"])
 async def get_assigned_term(
-    request: Request, file_type: TermFile = Depends(TermFile),
+    request: Request,
+    file_type: TermFile = Depends(TermFile),
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):

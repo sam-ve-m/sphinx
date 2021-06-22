@@ -29,17 +29,27 @@ class AuthenticationService(IAuthentication):
             raise BadRequestError("common.register_not_exists")
         new = dict(old)
         is_active = old.get("is_active")
+        has_pin = old.get("pin")
         response = {"status_code": None, "payload": {"jwt": None}}
         response.update({"status_code": status.HTTP_200_OK})
 
         if not is_active:
-            new.update(
-                {
-                    "is_active": True,
-                    "use_magic_link": True,
-                    "scope": {"view_type": "default", "features": ["default"]},
-                }
-            )
+            if not has_pin:
+                new.update(
+                    {
+                        "is_active": True,
+                        "use_magic_link": True,
+                        "scope": {"view_type": "default", "features": ["default"]},
+                    }
+                )
+            else:
+                new.update(
+                    {
+                        "is_active": True,
+                        "use_magic_link": False,
+                        "scope": {"view_type": "default", "features": ["default"]},
+                    }
+                )
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
 
@@ -81,7 +91,6 @@ class AuthenticationService(IAuthentication):
             jwt = token_handler.generate_token(payload=entity, ttl=525600)
             JwtController.insert_one(jwt, entity.get("email"))
             return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-
 
     @staticmethod
     def send_authentication_email(

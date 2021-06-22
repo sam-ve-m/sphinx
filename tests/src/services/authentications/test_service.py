@@ -151,6 +151,7 @@ def test_login_with_pin():
 
     assert response.get("status_code") == status.HTTP_200_OK
 
+
 def test_forgot_password_not_register_exists():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)

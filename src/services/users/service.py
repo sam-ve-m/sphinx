@@ -34,7 +34,9 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         payload = generate_id("email", payload, must_remove=False)
-        payload = hash_field(key="pin", payload=payload)
+        has_pin = payload.get("pin")
+        if has_pin:
+            payload = hash_field(key="pin", payload=payload)
         if user_repository.find_one({"_id": payload.get("_id")}) is not None:
             raise BadRequestError("common.register_exists")
         UserService.add_user_control_metadata(payload=payload)
@@ -211,9 +213,9 @@ class UserService(IUser):
             new.update({"scope": new_scope})
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
-            response.update({"status_code" : status.HTTP_200_OK})
+            response.update({"status_code": status.HTTP_200_OK})
         else:
-            response.update({"status_code" : status.HTTP_304_NOT_MODIFIED})
+            response.update({"status_code": status.HTTP_304_NOT_MODIFIED})
 
         jwt = token_handler.generate_token(payload=new, ttl=525600)
 
@@ -308,7 +310,9 @@ class UserService(IUser):
 
     @staticmethod
     def user_identifier_data(
-        payload: dict, user_repository=UserRepository(), stone_age=StoneAge,
+        payload: dict,
+        user_repository=UserRepository(),
+        stone_age=StoneAge,
     ) -> dict:
         thebes_answer = payload.get("thebes_answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
@@ -394,7 +398,8 @@ class UserService(IUser):
 
     @staticmethod
     def table_callback(
-        payload: dict, persephone_client=PersephoneService.get_client(),
+        payload: dict,
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         payload.update(
             {

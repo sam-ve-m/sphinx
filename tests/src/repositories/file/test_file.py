@@ -22,7 +22,9 @@ class StubCache:
 def new_file_repository_valid_mocked_validate_bucket_name(mock_method):
     name = "XXX"
     S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
-    S3Client.list_objects = MagicMock(return_value={"Contents": [{"LastModified": "ddd", "Key": "lila"}]})
+    S3Client.list_objects = MagicMock(
+        return_value={"Contents": [{"LastModified": "ddd", "Key": "lila"}]}
+    )
     S3Client.generate_presigned_url = MagicMock(return_value="link")
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
@@ -36,11 +38,14 @@ def new_file_repository_valid_mocked_validate_bucket_name_and_s3_with_content(
 ):
     name = "XXX"
     S3Client.put_object = MagicMock(return_value={"Buckets": [{"Name": name}]})
-    S3Client.list_objects = MagicMock(return_value={"Contents": [{"LastModified": "ddd", "Key": "lila"}]})
+    S3Client.list_objects = MagicMock(
+        return_value={"Contents": [{"LastModified": "ddd", "Key": "lila"}]}
+    )
     S3Client.generate_presigned_url = MagicMock(return_value="link")
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     return FileRepository(bucket_name=name)
+
 
 @pytest.fixture
 @patch.object(FileRepository, "validate_bucket_name", return_value="XXX")
@@ -54,6 +59,7 @@ def new_file_repository_valid_mocked_validate_bucket_name_and_s3_without_content
     FileRepository.s3_client = S3Client
     FileRepository.validate_bucket_name = MagicMock(return_value=name)
     return FileRepository(bucket_name=name)
+
 
 @pytest.fixture
 @patch.object(FileRepository, "validate_bucket_name", return_value="XXX")
@@ -83,12 +89,14 @@ def test_init() -> None:
     file_repository = FileRepository(bucket_name=name)
     assert file_repository.bucket_name == name
 
+
 def test_bucket_name_valid() -> None:
     name = "XXX"
     S3Client.list_buckets = MagicMock(return_value={"Buckets": [{"Name": name}]})
     FileRepository.s3_client = S3Client
     file_repository = FileRepository(bucket_name=name)
     assert file_repository.bucket_name == name
+
 
 def test_bucket_name_invalid() -> None:
     name = "XXX"
@@ -145,16 +153,19 @@ def test_resolve_content_byte():
     value = FileRepository.resolve_content(content=base64_str)
     assert byte_value == value
 
+
 def test_resolve_content_str():
     str_value = "1234"
     value = FileRepository.resolve_content(content=str_value)
     base64_bytes = str_value.encode("ascii")
     assert b64decode(base64_bytes) == value
 
+
 def test_resolve_content_without_value():
     str_value = None
     with pytest.raises(InternalServerError, match="files.content.empty"):
         FileRepository.resolve_content(content=str_value)
+
 
 def test_save_valid_term_file(
     new_file_repository_valid_mocked_validate_bucket_name,
@@ -162,7 +173,8 @@ def test_save_valid_term_file(
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     assert (
         file_repository.save_term_file(
-            file_type=TermsFileType.TERM_REFUSAL, content=b"its a byte",
+            file_type=TermsFileType.TERM_REFUSAL,
+            content=b"its a byte",
         )
         is None
     )
@@ -174,7 +186,9 @@ def test_save_term_file_with_invalid_user_path(
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     file_repository.resolve_term_path = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
-        file_repository.save_term_file(file_type=TermsFileType.TERM_REFUSAL, content=b"is a byte")
+        file_repository.save_term_file(
+            file_type=TermsFileType.TERM_REFUSAL, content=b"is a byte"
+        )
 
 
 def test_save_term_file_with_invalid_file_extension(
@@ -183,7 +197,9 @@ def test_save_term_file_with_invalid_file_extension(
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     file_repository.get_file_extension_by_type = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
-        file_repository.save_term_file(file_type=TermsFileType.TERM_REFUSAL, content=b"is a byte")
+        file_repository.save_term_file(
+            file_type=TermsFileType.TERM_REFUSAL, content=b"is a byte"
+        )
 
 
 def test_get_term_file_cache(
@@ -229,8 +245,10 @@ def test_get_term_version(
     )
     file_repository.s3_client = S3Client
     contents = file_repository.s3_client.list_objects()
-    value = file_repository.get_current_term_version(file_type=TermsFileType.TERM_REFUSAL)
-    assert value == len(contents.get('Contents'))
+    value = file_repository.get_current_term_version(
+        file_type=TermsFileType.TERM_REFUSAL
+    )
+    assert value == len(contents.get("Contents"))
 
 
 def test_get_term_version_is_new_version(
@@ -241,9 +259,11 @@ def test_get_term_version_is_new_version(
     )
     file_repository.s3_client = S3Client
     contents = file_repository.s3_client.list_objects()
-    value = file_repository.get_current_term_version(file_type=TermsFileType.TERM_REFUSAL)
+    value = file_repository.get_current_term_version(
+        file_type=TermsFileType.TERM_REFUSAL
+    )
     new_v = value + 1
-    assert new_v > len(contents.get('Contents'))
+    assert new_v > len(contents.get("Contents"))
 
 
 def test_get_terms_version_without_cache(
@@ -317,8 +337,10 @@ def test_get_file_extension_by_type_valid(
     result = file_repository.get_file_extension_by_type(file_type=UserFileType.SELF)
     assert result == ".jpg"
 
+
 class FakeEnum(Enum):
     FAKE = "fake"
+
 
 def test_get_file_extension_by_type_invalid(
     new_file_repository_valid_mocked_validate_bucket_name,

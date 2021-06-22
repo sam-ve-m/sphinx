@@ -253,8 +253,9 @@ def test_invalidate_user_is_deleted():
     assert is_user_valid is False
 
 
-def test_check_if_user_is_allowed_to_access_route_user_is_admin(get_new_stubby_request_random_path,
-                                                                get_new_stubby_repository):
+def test_check_if_user_is_allowed_to_access_route_user_is_admin(
+    get_new_stubby_request_random_path, get_new_stubby_repository
+):
     request = get_new_stubby_request_random_path
     user_data = {
         "token_valid_after": "2020-07-01",
@@ -270,8 +271,9 @@ def test_check_if_user_is_allowed_to_access_route_user_is_admin(get_new_stubby_r
     assert is_user_not_allowed_value.status_code == 200
 
 
-def test_check_if_is_user_not_allowed_to_access_route_user_not_admin(get_new_stubby_request_views,
-                                                                     get_new_stubby_repository):
+def test_check_if_is_user_not_allowed_to_access_route_user_not_admin(
+    get_new_stubby_request_views, get_new_stubby_repository
+):
     request = get_new_stubby_request_views
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d"),
@@ -287,8 +289,9 @@ def test_check_if_is_user_not_allowed_to_access_route_user_not_admin(get_new_stu
     assert is_user_not_allowed_value.status_code == 401
 
 
-def test_check_if_is_user_not_allowed_to_access_route_user_not_admin_and_user_is_deleted(get_new_stubby_request_views,
-                                                                                         get_new_stubby_repository):
+def test_check_if_is_user_not_allowed_to_access_route_user_not_admin_and_user_is_deleted(
+    get_new_stubby_request_views, get_new_stubby_repository
+):
     request = get_new_stubby_request_views
     user_data = {
         "token_valid_after": datetime(year=2020, month=11, day=10).strftime("%Y-%m-%d"),
@@ -304,8 +307,9 @@ def test_check_if_is_user_not_allowed_to_access_route_user_not_admin_and_user_is
     assert is_user_not_allowed_value.status_code == 401
 
 
-def test_check_if_is_user_not_allowed_to_access_route_user_is_admin_and_user_is_deleted(get_new_stubby_request_views,
-                                                                                        get_new_stubby_repository):
+def test_check_if_is_user_not_allowed_to_access_route_user_is_admin_and_user_is_deleted(
+    get_new_stubby_request_views, get_new_stubby_repository
+):
     request = get_new_stubby_request_views
     user_data = {
         "token_valid_after": datetime(year=2020, month=11, day=10).strftime("%Y-%m-%d"),

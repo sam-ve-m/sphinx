@@ -10,7 +10,10 @@ from src.routers.pendencies import router as pendencies_router
 from src.routers.term import router as term_router
 from src.routers.suitability import router as suitability_router
 from src.routers.view import router as view_router
-from src.utils.middleware import route_is_public, check_if_is_user_not_allowed_to_access_route
+from src.utils.middleware import (
+    route_is_public,
+    check_if_is_user_not_allowed_to_access_route,
+)
 from src.utils.jwt_utils import JWTHandler
 
 app = FastAPI()

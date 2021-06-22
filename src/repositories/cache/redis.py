@@ -31,6 +31,11 @@ class RepositoryRedis(IRedis):
             redis.set(name=key, value=pickle.dumps(value))
 
     @staticmethod
+    def delete(key: str, redis=redis):
+        redis.delete(key)
+        return
+
+    @staticmethod
     def get(key: str, redis=redis) -> Optional[dict]:
         if type(key) != str:
             raise InternalServerError("cache.error.key")

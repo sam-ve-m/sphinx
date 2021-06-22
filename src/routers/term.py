@@ -19,7 +19,9 @@ async def save_term(
         file_or_base64 = await file_or_base64.read()
     payload = file_type.dict()
     payload.update(
-        {"file_or_base64": file_or_base64,}
+        {
+            "file_or_base64": file_or_base64,
+        }
     )
     return BaseController.run(TermsController.save_term, payload, request)
 

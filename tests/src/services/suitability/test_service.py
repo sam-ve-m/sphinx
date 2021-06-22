@@ -14,14 +14,17 @@ class StubRepository(StubBaseRepository):
 
 
 class StubbyService:
-
     def create_quiz(self, **kwargs):
-        return {"message_key": "suitability.create_quiz", "status_code": status.HTTP_201_CREATED}
+        return {
+            "message_key": "suitability.create_quiz",
+            "status_code": status.HTTP_201_CREATED,
+        }
+
 
 class StubbyServiceRaises:
-
     def create_quiz(self, **kwargs):
-        raise InternalServerError('common.process_issue')
+        raise InternalServerError("common.process_issue")
+
 
 basic_payload = {
     "suitability": {
@@ -52,7 +55,10 @@ class MySuitabilityStubRepository(StubBaseRepository):
         pass
 
 
-@patch('src.services.suitability.service.SuitabilityService', return_value=StubbyServiceRaises())
+@patch(
+    "src.services.suitability.service.SuitabilityService",
+    return_value=StubbyServiceRaises(),
+)
 def test_insert_error_in_suitability_db(mocked_class):
     stubby_repository = StubRepository(database="", collection="")
     stubby_repository.insert = MagicMock(return_value=False)
@@ -63,7 +69,10 @@ def test_insert_error_in_suitability_db(mocked_class):
             suitability_answers_repository=stubby_repository,
         )
 
-@patch('src.services.suitability.service.SuitabilityService', return_value=StubbyService())
+
+@patch(
+    "src.services.suitability.service.SuitabilityService", return_value=StubbyService()
+)
 def test_insert_in_suitability_db(mocked_class):
     stubby_repository = StubRepository(database="", collection="")
     stubby_repository.insert = MagicMock(return_value=True)
@@ -361,8 +370,10 @@ def test_get_last_suitability_answers_metadata():
         return_value=[{"suitability_version": 2, "score": 1.0, "answers": True}]
     )
 
-    response = SuitabilityService._SuitabilityService__get_last_suitability_answers_metadata(
-        suitability_answers_repository=stubby_repository,
+    response = (
+        SuitabilityService._SuitabilityService__get_last_suitability_answers_metadata(
+            suitability_answers_repository=stubby_repository,
+        )
     )
 
     assert (True, 1.0, 2) == response

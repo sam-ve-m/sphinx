@@ -75,13 +75,15 @@ def test_find_one_false_without_cache() -> None:
 
 def test_find_one_true_without_cache() -> None:
     stub_mongo_collection = StubMongoCollection()
-    stub_mongo_collection.find_one = MagicMock(return_value={"source":"collection"})
+    stub_mongo_collection.find_one = MagicMock(return_value={"source": "collection"})
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
-    stub_base_repository._get_from_cache = MagicMock(return_value={"source":"redis"})
+    stub_base_repository._get_from_cache = MagicMock(return_value={"source": "redis"})
     stub_base_repository.find_one = MagicMock(return_value={"source": "collection"})
     stub_cache = StubCache()
     from_source = stub_base_repository.find_one(
-        query={"test_insert_user_false": "test_insert_user_false"}, ttl=0, cache=stub_cache,
+        query={"test_insert_user_false": "test_insert_user_false"},
+        ttl=0,
+        cache=stub_cache,
     )
     assert type(from_source) == dict
 
@@ -90,14 +92,14 @@ def test_find_one_true_with_cache() -> None:
     stub_mongo_collection = StubMongoCollection()
     stub_mongo_collection.find_one = MagicMock(return_value={})
     stub_base_repository = StubBaseRepository(collection=stub_mongo_collection)
-    stub_base_repository._get_from_cache = MagicMock(return_value={"source":"redis"})
+    stub_base_repository._get_from_cache = MagicMock(return_value={"source": "redis"})
     stub_cache = StubCache()
     from_source = stub_base_repository.find_one(
-            query={"test_insert_user_false": "test_insert_user_false"},
-            ttl=2,
-            cache=stub_cache,
-        )
-    assert from_source == None
+        query={"test_insert_user_false": "test_insert_user_false"},
+        ttl=2,
+        cache=stub_cache,
+    )
+    assert from_source is None
 
 
 def test_find_more_than_equal_one_false() -> None:
@@ -242,10 +244,13 @@ def test__get_from_cache_not_cached() -> None:
     stub_cache = StubCache()
     stub_cache.get = MagicMock(return_value=None)
     stub_cache.set = MagicMock(return_value=None)
-    assert stub_base_repository._get_from_cache(
-        query={"test_insert_user_false": "test_insert_user_false"},
-        cache=stub_cache,
-    ) is None
+    assert (
+        stub_base_repository._get_from_cache(
+            query={"test_insert_user_false": "test_insert_user_false"},
+            cache=stub_cache,
+        )
+        is None
+    )
 
 
 def test__get_from_cache_query_is_none() -> None:
@@ -257,10 +262,13 @@ def test__get_from_cache_query_is_none() -> None:
     stub_cache = StubCache()
     stub_cache.get = MagicMock(return_value=None)
     stub_cache.set = MagicMock(return_value=None)
-    assert stub_base_repository._get_from_cache(
-        query=None,
-        cache=stub_cache,
-    ) is None
+    assert (
+        stub_base_repository._get_from_cache(
+            query=None,
+            cache=stub_cache,
+        )
+        is None
+    )
 
 
 def test__get_from_cache_cached() -> None:
@@ -272,7 +280,10 @@ def test__get_from_cache_cached() -> None:
     stub_cache = StubCache()
     stub_cache.get = MagicMock(return_value={"test__get_from_cache_cached": 1})
     stub_cache.set = MagicMock(return_value=None)
-    assert stub_base_repository._get_from_cache(
-        query={"test_insert_user_false": "test_insert_user_false"},
-        cache=stub_cache,
-    ) == {"test__get_from_cache_cached": 1}
+    assert (
+        stub_base_repository._get_from_cache(
+            query={"test_insert_user_false": "test_insert_user_false"},
+            cache=stub_cache,
+        )
+        == {"test__get_from_cache_cached": 1}
+    )
