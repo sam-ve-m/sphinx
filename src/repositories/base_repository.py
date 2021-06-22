@@ -47,15 +47,20 @@ class BaseRepository(IRepository):
         self, query: dict, ttl: int = 0, cache=RepositoryRedis
     ) -> Optional[dict]:
         try:
-            if ttl > 0:
-                cache_data = self._get_from_cache(query=query, cache=cache)
-                return cache_data
-            else:
-                data = self.collection.find_one(query)
-                self._save_cache(query=query, cache=cache, ttl=ttl, data=data)
-                return data
+            data = None
 
-            return
+            has_ttl = ttl > 0
+            if has_ttl:
+                data = self._get_from_cache(query=query, cache=cache)
+
+            if not data:
+                data = self.collection.find_one(query)
+
+            if has_ttl:
+                self._save_cache(query=query, cache=cache, ttl=ttl, data=data)
+
+            return data
+
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
@@ -86,6 +91,8 @@ class BaseRepository(IRepository):
         try:
             self.normalize_enum_types(payload=new)
             self.collection.update_one(old, {"$set": new})
+            #TODO need to generate a new cache ???
+            #{"_id": new.get("_id")}
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
@@ -95,6 +102,8 @@ class BaseRepository(IRepository):
     def delete_one(self, entity) -> bool:
         try:
             self.collection.delete_one(entity)
+            # TODO need to delete user cache ???
+            #{"_id": entity.get("_id")}
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
@@ -108,17 +117,24 @@ class BaseRepository(IRepository):
             elif type(payload[key]) == dict:
                 self.normalize_enum_types(payload=payload[key])
 
+
     def _get_from_cache(self, query: dict, cache=RepositoryRedis):
         if query is None:
             return
 
         query_hash = hash_field(payload=query)
         cache_value = cache.get(key=f"{self.base_identifier}:{query_hash}")
-        if cache := cache_value:
-            return cache
+        if cache_value:
+            return cache_value
+
         return
 
     def _save_cache(self, data: dict, query: dict, cache=RepositoryRedis, ttl: int = 0):
+
+        # TODO shall have default time  ???
+        #ttl = (ttl == 0) and 60 or ttl
+        ttl = 60 if ttl == 0 else ttl
+
         query_hash = hash_field(payload=query)
         cache.set(
             key=f"{self.base_identifier}:{query_hash}",

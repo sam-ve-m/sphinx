@@ -30,6 +30,8 @@ class AuthenticationService(IAuthentication):
         new = dict(old)
         is_active = old.get("is_active")
         response = {"status_code": None, "payload": {"jwt": None}}
+        response.update({"status_code": status.HTTP_200_OK})
+
         if not is_active:
             new.update(
                 {
@@ -40,8 +42,6 @@ class AuthenticationService(IAuthentication):
             )
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
-
-        response.update({"status_code": status.HTTP_200_OK})
 
         jwt = token_handler.generate_token(payload=new, ttl=525600)
 

@@ -97,7 +97,7 @@ def test_find_one_true_with_cache() -> None:
             ttl=2,
             cache=stub_cache,
         )
-    assert type(from_source) == dict
+    assert from_source == None
 
 
 def test_find_more_than_equal_one_false() -> None:
