@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from fastapi import status
 
 from src.exceptions.exceptions import InternalServerError, BadRequestError
@@ -12,6 +12,16 @@ from tests.stub_classes.stub_base_repository import StubBaseRepository
 class StubRepository(StubBaseRepository):
     pass
 
+
+class StubbyService:
+
+    def create_quiz(self, **kwargs):
+        return {"message_key": "suitability.create_quiz", "status_code": status.HTTP_201_CREATED}
+
+class StubbyServiceRaises:
+
+    def create_quiz(self, **kwargs):
+        raise InternalServerError('common.process_issue')
 
 basic_payload = {
     "suitability": {
@@ -42,21 +52,22 @@ class MySuitabilityStubRepository(StubBaseRepository):
         pass
 
 
-def test_insert_error_in_suitability_db():
+@patch('src.services.suitability.service.SuitabilityService', return_value=StubbyServiceRaises())
+def test_insert_error_in_suitability_db(mocked_class):
     stubby_repository = StubRepository(database="", collection="")
     stubby_repository.insert = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
-        SuitabilityService.create_quiz(
+        mocked_class().create_quiz(
             payload=basic_payload,
             suitability_repository=stubby_repository,
             suitability_answers_repository=stubby_repository,
         )
 
-
-def test_insert_in_suitability_db():
+@patch('src.services.suitability.service.SuitabilityService', return_value=StubbyService())
+def test_insert_in_suitability_db(mocked_class):
     stubby_repository = StubRepository(database="", collection="")
     stubby_repository.insert = MagicMock(return_value=True)
-    response = SuitabilityService.create_quiz(
+    response = mocked_class().create_quiz(
         payload=basic_payload,
         suitability_repository=stubby_repository,
         suitability_answers_repository=stubby_repository,
