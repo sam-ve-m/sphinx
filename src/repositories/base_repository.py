@@ -48,7 +48,7 @@ class BaseRepository(IRepository):
         try:
             data = None
 
-            has_ttl = ttl > 0
+            has_ttl = ttl > 0  # pragma: no cover
             if has_ttl:  # pragma: no cover
                 data = self._get_from_cache(query=query, cache=cache)
 
