@@ -1,6 +1,6 @@
 # NATIVE LIBRARIES
 import logging
-from typing import Optional
+from typing import Union
 import json
 
 # OUTSIDE LIBRARIES
@@ -52,9 +52,13 @@ def is_user_deleted(user_data: dict) -> bool:
     return user_data.get("deleted")
 
 
+def is_user_active(user_data: dict) -> bool:
+    return user_data.get("is_active")
+
+
 def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
     try:
-        user_created = user_data.get("token_valid_after")
+        user_created = str(user_data.get("token_valid_after"))
         jwt_created_at = jwt_data.get("created_at")
         is_token_valid = jwt_created_at > user_created
         return is_token_valid
@@ -68,14 +72,15 @@ def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
 
 def invalidate_user(user_data: dict, jwt_data: dict) -> bool:
     is_deleted = is_user_deleted(user_data=user_data)
-    if not is_deleted:
+    is_active = is_user_active(user_data=user_data)
+    if not is_deleted and is_active:
         return is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
     return False
 
 
 def check_if_is_user_not_allowed_to_access_route(
     request: Request, jwt_data: dict, user_repository: UserRepository = UserRepository()
-) -> Optional[Response]:
+) -> Union[Response, bool]:
     user_data = user_repository.find_one({"email": jwt_data["email"]}, ttl=60)
     token_is_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
     is_admin_route = need_be_admin(url_request=request.url.path)
@@ -87,13 +92,14 @@ def check_if_is_user_not_allowed_to_access_route(
         locale=locale,
     )
     status_code = 200
-
+    return_response = False
     if not token_is_valid:
         message = i18n.get_translate(
             "invalid_credential",
             locale=locale,
         )
         status_code = status.HTTP_401_UNAUTHORIZED
+        return_response = True
     elif is_admin_route:
         if not is_admin:
             message = i18n.get_translate(
@@ -101,12 +107,8 @@ def check_if_is_user_not_allowed_to_access_route(
                 locale=locale,
             )
             status_code = status.HTTP_401_UNAUTHORIZED
-        else:
-            message = i18n.get_translate(
-                "valid_credential",
-                locale=locale,
-            )
-            status_code = status.HTTP_200_OK
-
-    content.update({"message": message})
-    return Response(content=json.dumps(content), status_code=status_code)
+            return_response = True
+    if return_response:
+        content.update({"message": message})
+        return Response(content=json.dumps(content), status_code=status_code)
+    return True

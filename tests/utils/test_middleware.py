@@ -268,7 +268,7 @@ def test_check_if_user_is_allowed_to_access_route_user_is_admin(
     is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
         request=request, jwt_data=jwt_data, user_repository=user_repository
     )
-    assert is_user_not_allowed_value.status_code == 200
+    assert is_user_not_allowed_value
 
 
 def test_check_if_is_user_not_allowed_to_access_route_user_not_admin(
