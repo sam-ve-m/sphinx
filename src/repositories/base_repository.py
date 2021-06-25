@@ -107,7 +107,7 @@ class BaseRepository(IRepository):
             self.collection.delete_one(entity)
             # TODO need to delete user cache ???
             if entity.get("email"):  # pragma: no cover
-                BaseRepository._delete_cache_cache(
+                BaseRepository._delete_cache(
                     query={"_id": entity.get("email")}, cache=cache
                 )
             return True
