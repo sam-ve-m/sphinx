@@ -15,25 +15,37 @@ from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import NoPath
 
 
-def route_is_public(url_request: str) -> bool:
+def route_is_public(url_request: str, method: str = None) -> bool:
     if url_request is None:
         raise NoPath("No path found")
 
     public_route = False
-    public_paths = [
-        "/user",
-        "/user/forgot_password",
-        "/login",
-        "/login/admin",
+    public_paths_get = [
         "/term",
         "/docs",
         "/openapi.json",
         "/thebes_gate",
         "/thebes_hall",
+
     ]
-    if url_request in public_paths:
-        public_route = True
+
+    public_paths_post = [
+        "/user",
+        "/user/forgot_password",
+        "/login",
+        "/login/admin",
+
+    ]
+    if method == "POST":
+        if url_request in public_paths_post:
+            public_route = True
+
+    else:
+        if url_request in public_paths_get:
+            public_route = True
+
     return public_route
+
 
 
 def need_be_admin(url_request: str) -> bool:
@@ -81,7 +93,7 @@ def invalidate_user(user_data: dict, jwt_data: dict) -> bool:
 def check_if_is_user_not_allowed_to_access_route(
     request: Request, jwt_data: dict, user_repository: UserRepository = UserRepository()
 ) -> Union[Response, bool]:
-    user_data = user_repository.find_one({"email": jwt_data["email"]}, ttl=60)
+    user_data = user_repository.find_one({"_id": jwt_data["email"]}, ttl=60)
     token_is_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
     is_admin_route = need_be_admin(url_request=request.url.path)
     is_admin = user_data.get("is_admin")
