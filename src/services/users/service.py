@@ -7,6 +7,7 @@ from fastapi import status
 from decouple import config
 
 # SPHINX
+from src.controllers.jwts.controller import JwtController
 from src.interfaces.services.user.interface import IUser
 from src.repositories.user.repository import UserRepository
 from src.repositories.file.repository import FileRepository
@@ -98,7 +99,7 @@ class UserService(IUser):
         pass
 
     @staticmethod
-    def delete(payload: dict, user_repository=UserRepository()) -> dict:
+    def delete(payload: dict, user_repository=UserRepository(), token_handler=JWTHandler) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
@@ -106,10 +107,10 @@ class UserService(IUser):
         new.update({"deleted": True})
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
-        return {
-            "status_code": status.HTTP_200_OK,
-            "message_key": "requests.updated",
-        }
+
+        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        JwtController.insert_one(jwt, new.get("email"))
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
     def change_password(payload: dict, user_repository=UserRepository()) -> dict:
