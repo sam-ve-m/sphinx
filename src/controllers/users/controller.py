@@ -19,10 +19,6 @@ class UserController:
         return UserService.delete(payload=payload)
 
     @staticmethod
-    def create_admin(payload: dict):
-        return UserService.create_admin(payload=payload)
-
-    @staticmethod
     def change_password(payload: dict):
         return UserService.change_password(payload=payload)
 
