@@ -8,22 +8,29 @@ from decouple import config
 
 # SPHINX
 from src.controllers.jwts.controller import JwtController
+
 from src.interfaces.services.user.interface import IUser
+
+from src.services.authentications.service import AuthenticationService
+from src.services.persephone.service import PersephoneService
+
 from src.repositories.user.repository import UserRepository
 from src.repositories.file.repository import FileRepository
 from src.repositories.file.enum.user_file import UserFileType
-from src.services.authentications.service import AuthenticationService
-from src.exceptions.exceptions import BadRequestError, InternalServerError
+
+from src.domain.persephone_queue import PersephoneQueue
+
 from src.utils.genarate_id import generate_id, hash_field
 from src.utils.jwt_utils import JWTHandler
 from src.utils.stone_age import StoneAge
-from src.services.persephone.service import PersephoneService
 from src.utils.persephone_templates import (
     get_prospect_user_template_with_data,
     get_user_signed_term_template_with_data,
     get_table_response_template_with_data,
     get_user_account_template_with_data,
 )
+
+from src.exceptions.exceptions import BadRequestError, InternalServerError
 
 
 class UserService(IUser):
@@ -43,13 +50,15 @@ class UserService(IUser):
         UserService.add_user_control_metadata(payload=payload)
 
         sent_to_persephone = persephone_client.run(
-            topic="thebes.sphinx_persephone.topic",
-            partition=0,
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
             payload=get_prospect_user_template_with_data(payload=payload),
             schema_key="prospect_user_schema",
         )
 
-        if (sent_to_persephone and user_repository.insert(payload)) is False:
+        was_user_inserted = user_repository.insert(payload)
+
+        if (sent_to_persephone and was_user_inserted) is False:
             raise InternalServerError("common.process_issue")
         authentication_service.send_authentication_email(
             email=payload.get("email"),
@@ -99,7 +108,9 @@ class UserService(IUser):
         pass
 
     @staticmethod
-    def delete(payload: dict, user_repository=UserRepository(), token_handler=JWTHandler) -> dict:
+    def delete(
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+    ) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
@@ -260,8 +271,8 @@ class UserService(IUser):
             version=file_repository.get_current_term_version(file_type=file_type),
         )
         sent_to_persephone = persephone_client.run(
-            topic="thebes.sphinx_persephone.topic",
-            partition=1,
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.TERM_QUEUE.value,
             payload=get_user_signed_term_template_with_data(
                 payload=new, file_type=file_type.value
             ),
@@ -348,36 +359,44 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def fill_user_data(
+    def change_user_to_client(
         payload: dict,
         user_repository=UserRepository(),
         stone_age=StoneAge,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
+
         thebes_answer = payload.get("thebes_answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if type(old) is not dict:
             raise BadRequestError("common.register_not_exists")
+
         stone_age_user_data = stone_age.send_user_quiz_responses(
             quiz=payload.get("quiz")
         )
+
+        persephone_dtvm_user = get_user_account_template_with_data(
+            payload={
+                "stone_age_user_data": stone_age_user_data,
+                "user_data": dict(old),
+            }
+        )
+
         sent_to_persephone = persephone_client.run(
-            topic="thebes.sphinx_persephone.topic",
-            partition=3,
-            payload=get_user_account_template_with_data(
-                payload={
-                    "stone_age_user_data": stone_age_user_data,
-                    "user_data": dict(old),
-                }
-            ),
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.DTVM_USER_QUEUE.value,
+            payload=persephone_dtvm_user,
             schema_key="dtvm_user_schema",
         )
+
         if not sent_to_persephone:
             raise InternalServerError("common.process_issue")
+
         new = dict(old)
         UserService.fill_account_data_on_user_document(
             payload=new, stone_age_user_data=stone_age_user_data
         )
+
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {
@@ -411,8 +430,8 @@ class UserService(IUser):
             }
         )
         table_result = persephone_client.run(
-            topic="thebes.sphinx_persephone.topic",
-            partition=5,
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
             payload=get_table_response_template_with_data(payload=payload),
             schema_key="table_schema",
         )

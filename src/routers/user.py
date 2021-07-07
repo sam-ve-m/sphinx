@@ -72,8 +72,8 @@ def update_user_identifier_data(user_identifier: UserIdentifierData, request: Re
     return BaseController.run(UserController.user_identifier_data, payload, request)
 
 
-@router.put("/user/fill_user_data", tags=["user"])
-def update_fill_user_data(quiz_response: QuizResponses, request: Request):
+@router.put("/user/change_user_to_client", tags=["user"])
+def update_change_user_to_client(quiz_response: QuizResponses, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
@@ -81,7 +81,7 @@ def update_fill_user_data(quiz_response: QuizResponses, request: Request):
         "thebes_answer": jwt_data_or_error_response,
         "quiz": quiz_response.dict(),
     }
-    return BaseController.run(UserController.fill_user_data, payload, request)
+    return BaseController.run(UserController.change_user_to_client, payload, request)
 
 
 @router.put("/user/table_callback", tags=["user"])

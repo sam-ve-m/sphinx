@@ -26,7 +26,6 @@ def route_is_public(url_request: str, method: str = None) -> bool:
         "/openapi.json",
         "/thebes_gate",
         "/thebes_hall",
-
     ]
 
     public_paths_post = [
@@ -34,7 +33,6 @@ def route_is_public(url_request: str, method: str = None) -> bool:
         "/user/forgot_password",
         "/login",
         "/login/admin",
-
     ]
     if method == "POST":
         if url_request in public_paths_post:
@@ -45,7 +43,6 @@ def route_is_public(url_request: str, method: str = None) -> bool:
             public_route = True
 
     return public_route
-
 
 
 def need_be_admin(url_request: str) -> bool:
