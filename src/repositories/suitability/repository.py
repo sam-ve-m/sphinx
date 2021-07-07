@@ -2,10 +2,10 @@
 from decouple import config
 
 # SPHINX
-from src.repositories.base_repository import BaseRepository
+from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
 
 
-class SuitabilityRepository(BaseRepository):
+class SuitabilityRepository(MongoDBInfrastructure):
     def __init__(self):
         super().__init__(
             database=config("MONGODB_DATABASE_NAME"),
@@ -13,7 +13,7 @@ class SuitabilityRepository(BaseRepository):
         )
 
 
-class SuitabilityUserProfileRepository(BaseRepository):
+class SuitabilityUserProfileRepository(MongoDBInfrastructure):
     def __init__(self):
         super().__init__(
             database=config("MONGODB_DATABASE_NAME"),
@@ -21,7 +21,7 @@ class SuitabilityUserProfileRepository(BaseRepository):
         )
 
 
-class SuitabilityAnswersRepository(BaseRepository):
+class SuitabilityAnswersRepository(MongoDBInfrastructure):
     def __init__(self):
         super().__init__(
             database=config("MONGODB_DATABASE_NAME"),
