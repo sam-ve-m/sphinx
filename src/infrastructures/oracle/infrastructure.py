@@ -1,3 +1,6 @@
+# OUTSIDE LIBRARIES
+import os
+
 # STANDARD LIBS
 from contextlib import contextmanager
 import logging
@@ -9,16 +12,19 @@ from decouple import config
 # SPHINX
 from src.interfaces.repositories.oracle.interface import IOracle
 
-
 class OracleInfrastructure(IOracle):
 
     pool = cx_Oracle.SessionPool(
-        config("ORACLE_USER"),
-        config("ORACLE_PASSWORD"),
-        config("ORACLE_DATABASE_NAME"),
-        min=100,
+        user=config("ORACLE_USER"),
+        password=config("ORACLE_PASSWORD"),
+        min=5,
         max=100,
-        increment=0,
+        increment=1,
+        dsn=cx_Oracle.makedsn(
+            config("ORACLE_BASE_DSN"),
+            config("ORACLE_PORT"),
+            service_name=config("ORACLE_SERVICE")
+        ),
         encoding=config("ORACLE_ENCODING"),
     )
 
