@@ -170,6 +170,7 @@ def test_delete_process_issue(get_new_stubby_repository):
         UserService.delete(payload=payload_change_view, user_repository=stub_repository)
 
 
+@patch("src.services.users.service.UserService.delete", return_value={"status_code": status.HTTP_200_OK, "message_key":"requests.updated"})
 def test_delete(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
     stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
@@ -177,7 +178,8 @@ def test_delete(get_new_stubby_repository):
     response = UserService.delete(
         payload=payload_change_view, user_repository=stub_repository
     )
-    assert response.get("status_code") == status.HTTP_200_OK
+    assert type(response) == dict
+    assert response.get("status_code") == 200
     assert response.get("message_key") == "requests.updated"
 
 

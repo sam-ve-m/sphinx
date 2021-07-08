@@ -1,6 +1,7 @@
 import os
 import platform
 from decouple import Config, RepositoryEnv
+
 config = None
 SYSTEM = platform.system()
 
@@ -18,6 +19,4 @@ elif SYSTEM == "Windows":
 else:
     raise Exception("Unsupported system")
 
-__all__ = [
-    "config"
-]
+__all__ = ["config"]

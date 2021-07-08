@@ -33,7 +33,7 @@ async def create_quiz_suitability(suitability: Suitability, request: Request):
         return jwt_data_or_error_response
 
     payload = {
-        x-thebes-answer: jwt_data_or_error_response,
+        x - thebes - answer: jwt_data_or_error_response,
         "suitability": suitability.dict(),
     }
 

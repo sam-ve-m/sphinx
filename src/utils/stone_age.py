@@ -10,112 +10,121 @@ from src.exceptions.exceptions import InternalServerError
 
 class StoneAge:
     @staticmethod
-    def send_user_identifier_data(
-        user_identifier_data: dict
-    ) -> Optional[list]:
+    def send_user_identifier_data(user_identifier_data: dict) -> Optional[list]:
         """this functions will send the user_identifier_data and will return a quiz"""
 
         # TODO: Get cpf from user identifier data
-        response = StoneAge.run_sync_stone_age_app_entry_point(entry_point="mock", body={'cpf': 123})
-        response["output"].update({
-            "quiz": [
-                {
-                    "questionId": "b9e0546e-252c-4380-8ce0-df532a5e6c77",
-                    "question": "Qual desse números é seu?",
-                    "options": [
-                        {
-                            "value": "+5511952896753",
-                            "optionId": "b9e1541e-252c-4380-8ce0-df532a5e6c77",
-                        },
-                        {
-                            "value": "+5511952006753",
-                            "optionId": "b9e1546e-252c-4480-8ce0-df532a5e6c77",
-                        },
-                        {
-                            "value": "+5511933896753",
-                            "optionId": "b9e1546e-252c-4380-8ce0-df532a5y6c77",
-                        },
-                    ],
-                },
-                {
-                    "questionId": "b9e0546e-252c-4380-8ce0-df532a5e6c78",
-                    "question": "Qual desses endereções é o seu?",
-                    "options": [
-                        {
-                            "value": "R.jagunça 999, Cabrobro",
-                            "optionId": "b9e1541e-252c-4380-8ce0-df532a5e6c77",
-                        },
-                        {
-                            "value": "R. jabuti aqueroso 43, Cabuti",
-                            "optionId": "b9e1546e-252c-4480-8ce0-df532a5e6c77",
-                        },
-                        {
-                            "value": "R. antoni carlos 123, São Pedro",
-                            "optionId": "b9e1546e-252c-4380-8ce0-df532a5y6c77",
-                        },
-                    ],
-                },
-            ]
-        })
+        response = StoneAge.run_sync_stone_age_app_entry_point(
+            entry_point="mock", body={"cpf": 123}
+        )
+        response["output"].update(
+            {
+                "quiz": [
+                    {
+                        "questionId": "b9e0546e-252c-4380-8ce0-df532a5e6c77",
+                        "question": "Qual desse números é seu?",
+                        "options": [
+                            {
+                                "value": "+5511952896753",
+                                "optionId": "b9e1541e-252c-4380-8ce0-df532a5e6c77",
+                            },
+                            {
+                                "value": "+5511952006753",
+                                "optionId": "b9e1546e-252c-4480-8ce0-df532a5e6c77",
+                            },
+                            {
+                                "value": "+5511933896753",
+                                "optionId": "b9e1546e-252c-4380-8ce0-df532a5y6c77",
+                            },
+                        ],
+                    },
+                    {
+                        "questionId": "b9e0546e-252c-4380-8ce0-df532a5e6c78",
+                        "question": "Qual desses endereções é o seu?",
+                        "options": [
+                            {
+                                "value": "R.jagunça 999, Cabrobro",
+                                "optionId": "b9e1541e-252c-4380-8ce0-df532a5e6c77",
+                            },
+                            {
+                                "value": "R. jabuti aqueroso 43, Cabuti",
+                                "optionId": "b9e1546e-252c-4480-8ce0-df532a5e6c77",
+                            },
+                            {
+                                "value": "R. antoni carlos 123, São Pedro",
+                                "optionId": "b9e1546e-252c-4380-8ce0-df532a5y6c77",
+                            },
+                        ],
+                    },
+                ]
+            }
+        )
 
         return response
 
     @staticmethod
     def send_user_quiz_responses(quiz: dict) -> Optional[dict]:
         # TODO: Change body to quiz
-        response = StoneAge.run_sync_stone_age_app_entry_point(entry_point="mock", body={'cpf': 123})
-        response["output"].update({
-            "payload": {
-                "gender": {"value": "string", "source": "string"},
-                "birthDate": {"value": 5465465456456456, "source": "string"},
-                "naturalness": {"value": "string", "source": "string"},
-                "nationality": {"value": "string", "source": "string"},
-                "mother_name": {"value": "string", "source": "string"},
-                "identifier_document": {
-                    "type": {"value": "string", "source": "string"},
-                    "document_data": {
-                        "number": {"value": "string", "source": "string"},
-                        "date": {"value": 5456456, "source": "string"},
+        response = StoneAge.run_sync_stone_age_app_entry_point(
+            entry_point="mock", body={"cpf": 123}
+        )
+        response["output"].update(
+            {
+                "payload": {
+                    "gender": {"value": "string", "source": "string"},
+                    "birthDate": {"value": 5465465456456456, "source": "string"},
+                    "naturalness": {"value": "string", "source": "string"},
+                    "nationality": {"value": "string", "source": "string"},
+                    "mother_name": {"value": "string", "source": "string"},
+                    "identifier_document": {
+                        "type": {"value": "string", "source": "string"},
+                        "document_data": {
+                            "number": {"value": "string", "source": "string"},
+                            "date": {"value": 5456456, "source": "string"},
+                            "state": {"value": "string", "source": "string"},
+                            "issuer": {"value": "string", "source": "string"},
+                        },
+                    },
+                    "address": {
+                        "street_name": {"value": "string", "source": "string"},
+                        "number": {"value": 5464564, "source": "string"},
                         "state": {"value": "string", "source": "string"},
-                        "issuer": {"value": "string", "source": "string"},
+                        "city": {"value": "string", "source": "string"},
+                        "zipCode": {"value": "string", "source": "string"},
+                        "phone_number": {"value": "string", "source": "string"},
                     },
-                },
-                "address": {
-                    "street_name": {"value": "string", "source": "string"},
-                    "number": {"value": 5464564, "source": "string"},
-                    "state": {"value": "string", "source": "string"},
-                    "city": {"value": "string", "source": "string"},
-                    "zipCode": {"value": "string", "source": "string"},
-                    "phone_number": {"value": "string", "source": "string"},
-                },
-                "occupation": {
-                    "status": {"value": "Assalariado", "source": "string"},
-                    "company": {
-                        "name": {"value": "string", "source": "string"},
-                        "cpnj": {"value": 46564564564656544, "source": "string"},
+                    "occupation": {
+                        "status": {"value": "Assalariado", "source": "string"},
+                        "company": {
+                            "name": {"value": "string", "source": "string"},
+                            "cpnj": {"value": 46564564564656544, "source": "string"},
+                        },
                     },
-                },
-                "assets": {
-                    "patrimony": {"value": 5446456.44, "source": "string"},
-                    "income": {"value": 5446456.44, "source": "string"},
-                },
-                "education": {
-                    "level": {"value": "Médio incompleto", "source": "string"},
-                    "course": {"value": "string", "source": "string"},
-                },
-                "documents_photos": {
-                    "identifier_document": {"value": "string", "source": "string"},
-                    "address_document": {"value": "string", "source": "string"},
-                },
-                "politically_exposed_person": {
-                    "is_politically_exposed_person": {
-                        "value": False,
+                    "assets": {
+                        "patrimony": {"value": 5446456.44, "source": "string"},
+                        "income": {"value": 5446456.44, "source": "string"},
+                    },
+                    "education": {
+                        "level": {"value": "Médio incompleto", "source": "string"},
+                        "course": {"value": "string", "source": "string"},
+                    },
+                    "documents_photos": {
+                        "identifier_document": {"value": "string", "source": "string"},
+                        "address_document": {"value": "string", "source": "string"},
+                    },
+                    "politically_exposed_person": {
+                        "is_politically_exposed_person": {
+                            "value": False,
+                            "source": "string",
+                        }
+                    },
+                    "date_of_acquisition": {
+                        "value": 5465465456456456,
                         "source": "string",
-                    }
-                },
-                "date_of_acquisition": {"value": 5465465456456456, "source": "string"},
+                    },
+                }
             }
-        })
+        )
         return response
 
     @staticmethod

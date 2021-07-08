@@ -4,7 +4,7 @@ import logging
 # PERSEPHONE
 from persephone_client.main import Persephone
 
-#SPHINX
+# SPHINX
 from src.utils.env_config import config
 
 

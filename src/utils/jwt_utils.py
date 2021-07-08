@@ -20,7 +20,7 @@ from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 
 
 class JWTHandler:
-
+    # TODO change this method to use heimdall to validate the given jwt and this to generate the jwt only
     instance = JWT()
 
     @staticmethod
