@@ -4,7 +4,6 @@ import logging
 
 # OUTSIDE LIBRARIES
 from fastapi import status
-from decouple import config
 
 # SPHINX
 from src.controllers.jwts.controller import JwtController
@@ -31,6 +30,8 @@ from src.utils.persephone_templates import (
 )
 
 from src.exceptions.exceptions import BadRequestError, InternalServerError
+
+from src.utils.env_config import config
 
 
 class UserService(IUser):
@@ -125,7 +126,7 @@ class UserService(IUser):
 
     @staticmethod
     def change_password(payload: dict, user_repository=UserRepository()) -> dict:
-        thebes_answer = payload.get("thebes_answer")
+        thebes_answer = payload.get("x-thebes-answer")
         new_pin = payload.get("new_pin")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if old is None:
@@ -144,7 +145,7 @@ class UserService(IUser):
     def change_view(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
-        thebes_answer = payload.get("thebes_answer")
+        thebes_answer = payload.get("x-thebes-answer")
         new_view = payload.get("new_view")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if old is None:
@@ -195,7 +196,7 @@ class UserService(IUser):
     def add_feature(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
-        old = payload.get("thebes_answer")
+        old = payload.get("x-thebes-answer")
         new = dict(old)
         new_scope = new.get("scope")
         feature = payload.get("feature")
@@ -216,7 +217,7 @@ class UserService(IUser):
     def delete_feature(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
-        old = payload.get("thebes_answer")
+        old = payload.get("x-thebes-answer")
         new = dict(old)
         new_scope = new.get("scope")
         response = {"status_code": None, "payload": {"jwt": None}}
@@ -240,7 +241,7 @@ class UserService(IUser):
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
     ) -> dict:
-        thebes_answer = payload.get("thebes_answer")
+        thebes_answer = payload.get("x-thebes-answer")
         file_repository.save_user_file(
             file_type=UserFileType.SELF,
             content=payload.get("file_or_base64"),
@@ -259,7 +260,7 @@ class UserService(IUser):
         token_handler=JWTHandler,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        thebes_answer = payload.get("thebes_answer")
+        thebes_answer = payload.get("x-thebes-answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if type(old) is not dict:
             raise BadRequestError("common.register_not_exists")
@@ -303,7 +304,7 @@ class UserService(IUser):
         file_type = payload.get("file_type")
         try:
             version = (
-                payload.get("thebes_answer")
+                payload.get("x-thebes-answer")
                 .get("terms")
                 .get(file_type.value)
                 .get("version")
@@ -326,7 +327,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         stone_age=StoneAge,
     ) -> dict:
-        thebes_answer = payload.get("thebes_answer")
+        thebes_answer = payload.get("x-thebes-answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
@@ -366,7 +367,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
 
-        thebes_answer = payload.get("thebes_answer")
+        thebes_answer = payload.get("x-thebes-answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if type(old) is not dict:
             raise BadRequestError("common.register_not_exists")

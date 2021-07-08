@@ -8,7 +8,7 @@ import logging
 from fastapi import Form
 from validate_email import validate_email
 from pydantic import BaseModel, constr, validator, UUID1
-from decouple import config
+from src.utils.env_config import config
 
 # SPHIX
 from src.repositories.view.repository import ViewRepository

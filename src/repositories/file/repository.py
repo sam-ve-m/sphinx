@@ -6,7 +6,7 @@ from enum import Enum
 
 # OUTSIDE LIBRARIES
 import boto3
-from decouple import config
+from src.utils.env_config import config
 
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError

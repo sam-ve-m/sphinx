@@ -66,7 +66,7 @@ def update_user_identifier_data(user_identifier: UserIdentifierData, request: Re
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
-        "thebes_answer": jwt_data_or_error_response,
+        "x-thebes-answer": jwt_data_or_error_response,
         "user_identifier": user_identifier.dict(),
     }
     return BaseController.run(UserController.user_identifier_data, payload, request)
@@ -78,7 +78,7 @@ def update_change_user_to_client(quiz_response: QuizResponses, request: Request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
-        "thebes_answer": jwt_data_or_error_response,
+        "x-thebes-answer": jwt_data_or_error_response,
         "quiz": quiz_response.dict(),
     }
     return BaseController.run(UserController.change_user_to_client, payload, request)
@@ -90,7 +90,7 @@ def user_table_callback(request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
-    payload = {"thebes_answer": jwt_data_or_error_response}
+    payload = {"x-thebes-answer": jwt_data_or_error_response}
     return BaseController.run(UserController.table_callback, payload, request)
 
 
@@ -110,7 +110,7 @@ def change_user_password(pin: PIN, request: Request):
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
-        "thebes_answer": jwt_data_or_error_response,
+        "x-thebes-answer": jwt_data_or_error_response,
         "new_pin": pin.dict().get("pin"),
     }
     return BaseController.run(UserController.change_password, payload, request)
@@ -132,7 +132,7 @@ def change_user_view(view: View, request: Request):
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
-        "thebes_answer": jwt_data_or_error_response,
+        "x-thebes-answer": jwt_data_or_error_response,
         "new_view": view.dict().get("views"),
     }
     return BaseController.run(UserController.change_view, payload, request)
@@ -144,7 +144,7 @@ def add_features_to_user(feature: Feature, request: Request):
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
-        "thebes_answer": jwt_data_or_error_response,
+        "x-thebes-answer": jwt_data_or_error_response,
         "feature": feature.dict().get("feature"),
     }
     return BaseController.run(UserController.add_feature, dict(payload), request)
@@ -156,7 +156,7 @@ def remove_features_to_user(feature: Feature, request: Request):
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
-        "thebes_answer": jwt_data_or_error_response,
+        "x-thebes-answer": jwt_data_or_error_response,
         "feature": feature.dict().get("feature"),
     }
     return BaseController.run(UserController.delete_feature, dict(payload), request)
@@ -172,7 +172,7 @@ async def save_user_self(
     if isinstance(file_or_base64, str) is False:
         file_or_base64 = await file_or_base64.read()
     payload = {
-        "thebes_answer": jwt_data_or_error_response,
+        "x-thebes-answer": jwt_data_or_error_response,
         "file_or_base64": file_or_base64,
     }
     return BaseController.run(UserController.save_user_self, payload, request)
@@ -187,7 +187,7 @@ async def sign_term(
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = file_type.dict()
-    payload.update({"thebes_answer": jwt_data_or_error_response})
+    payload.update({"x-thebes-answer": jwt_data_or_error_response})
     return BaseController.run(UserController.sign_term, payload, request)
 
 
@@ -200,5 +200,5 @@ async def get_assigned_term(
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = file_type.dict()
-    payload.update({"thebes_answer": jwt_data_or_error_response})
+    payload.update({"x-thebes-answer": jwt_data_or_error_response})
     return BaseController.run(UserController.get_signed_term, payload, request)

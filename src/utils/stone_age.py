@@ -1,5 +1,5 @@
 # OUTSIDE LIBRARIES
-from decouple import config
+from src.utils.env_config import config
 import requests
 import logging
 from typing import Optional

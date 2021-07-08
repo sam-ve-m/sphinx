@@ -5,7 +5,7 @@ import json
 
 # OUTSIDE LIBRARIES
 from fastapi import Response, status, Request
-from decouple import config
+from src.utils.env_config import config
 
 # SPHINX
 from src.exceptions.exceptions import (
