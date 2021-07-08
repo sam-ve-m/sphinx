@@ -14,7 +14,7 @@ from src.utils.genarate_id import hash_field
 from src.interfaces.repositories.base_repository.interface import IRepository
 
 
-class BaseRepository(IRepository):
+class MongoDBInfrastructure(IRepository):
     client: MongoClient = MongoClient(
         f"{config('MONGO_CONNECTION')}://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
     )
@@ -107,7 +107,7 @@ class BaseRepository(IRepository):
             self.collection.delete_one(entity)
             # TODO need to delete user cache ???
             if entity.get("email"):  # pragma: no cover
-                BaseRepository._delete_cache(
+                MongoDBInfrastructure._delete_cache(
                     query={"_id": entity.get("email")}, cache=cache
                 )
             return True

@@ -99,7 +99,9 @@ class UserService(IUser):
         pass
 
     @staticmethod
-    def delete(payload: dict, user_repository=UserRepository(), token_handler=JWTHandler) -> dict:
+    def delete(
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+    ) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")

@@ -66,7 +66,7 @@ class AuthenticationService(IAuthentication):
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
-        if entity.get('deleted'):
+        if entity.get("deleted"):
             raise UnauthorizedError("invalid_credential")
         if entity.get("use_magic_link") is True:
             AuthenticationService.send_authentication_email(
