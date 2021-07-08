@@ -11,6 +11,7 @@ from src.controllers.jwts.controller import JwtController
 from src.interfaces.services.user.interface import IUser
 from src.repositories.user.repository import UserRepository
 from src.repositories.file.repository import FileRepository
+from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.file.enum.user_file import UserFileType
 from src.services.authentications.service import AuthenticationService
 from src.exceptions.exceptions import BadRequestError, InternalServerError
@@ -400,10 +401,14 @@ class UserService(IUser):
         payload["provided_by_bureaux"]["concluded_at"] = datetime.now()
 
     @staticmethod
-    def table_callback(
+    def bureau_callback(
         payload: dict,
+        client_register_repository=ClientRegisterRepository(),
+        user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
+        # TODO: normalize bureau data using client_register_repository and save it in Sinacor
+        # TODO: update user data
         payload.update(
             {
                 "uuid": "lallals-2197na-askdabskdjbaskd",

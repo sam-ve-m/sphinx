@@ -1,3 +1,4 @@
+# SPHINX
 from src.services.users.service import UserService
 
 
@@ -63,5 +64,5 @@ class UserController:
         return UserService.fill_user_data(payload=payload)
 
     @staticmethod
-    def table_callback(payload: dict):
-        return UserService.table_callback(payload=payload)
+    def bureau_callback(payload: dict):
+        return UserService.bureau_callback(payload=payload)

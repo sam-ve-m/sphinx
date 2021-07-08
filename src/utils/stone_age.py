@@ -4,7 +4,6 @@ import requests
 import logging
 from typing import Optional
 
-
 class StoneAge:
     @staticmethod
     def send_user_identifier_data(

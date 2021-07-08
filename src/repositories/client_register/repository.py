@@ -27,7 +27,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return len(result) == 0
 
     def register_validated_users(self):
-        # Validate this values
+        # TODO: Validate this values
         values = ['CD_EMPRESA', 'CD_USUARIO', 'TP_OCORRENCIA', 'CD_CLIENTE_PADRAO']
         self.execute(name='PROC_IMPCLIH_V2', values=values)
 
@@ -149,6 +149,8 @@ class ClientRegisterRepository(OracleInfrastructure):
             value=""
         )
         return builder
+
+    # TODO: all is_* must be implemented when the bureau return the data
 
     @staticmethod
     def is_employed_and_not_married_person(base_value: dict) -> ClientRegisterBuilder:

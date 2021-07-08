@@ -14,6 +14,8 @@ from decouple import config
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
 from src.repositories.file.enum.term_file import TermsFileType
+from src.repositories.sinacor_types.enum.decision import Decisions
+from src.repositories.sinacor_types.enum.status import OutputStatus
 from src.utils.brazil_register_number_validator import is_cpf_valid
 from src.routers.validators.enum_template import MaritalStatusEnum
 
@@ -137,3 +139,45 @@ class IsUsPerson(BaseModel):
 
 class UsTin(BaseModel):
     us_tin: Optional[bool]
+
+# Bureau validators
+
+
+class Uuid(BaseModel):
+    uuid: str
+
+
+class AppName(BaseModel):
+    appName: str
+
+
+class Successful(BaseModel):
+    successful: bool
+
+
+class Error(BaseModel):
+    error: str
+
+
+class Decision(BaseModel):
+    decision: Decisions
+
+
+class Status(BaseModel):
+    status: OutputStatus
+
+
+class Output(Decision, Status):
+    pass
+
+
+class ClientType(BaseModel):
+    client_type: str
+
+
+class Country(BaseModel):
+    country: str
+
+
+class State(BaseModel):
+    state: str
