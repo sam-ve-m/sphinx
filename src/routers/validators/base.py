@@ -114,6 +114,16 @@ class Cpf(BaseModel):
         raise ValueError("invalid cpf")
 
 
+class CelPhone(BaseModel):
+    cel_phone: str
+
+    @validator("cel_phone", always=True, allow_reuse=True)
+    def validate_cpf(cls, e):
+        if is_cel_phone_valid(cel_phone=e):
+            return e
+        raise ValueError("invalid cpf")
+
+
 class MaritalStatus(BaseModel):
     marital_status: MaritalStatusEnum
 

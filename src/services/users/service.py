@@ -73,33 +73,6 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def add_user_control_metadata(payload: dict):
-        payload.update(
-            {
-                "scope": {"view_type": None, "features": []},
-                "is_active": False,
-                "deleted": False,
-                "use_magic_link": True,
-                "token_valid_after": datetime.utcnow(),
-                "terms": {
-                    # The terms list is available in the FileRepository
-                    "term_application": None,
-                    "term_open_account": None,
-                    "term_retail_liquid_provider": None,
-                    "term_refusal": None,
-                    "term_non_compliance": None,
-                },
-                "can_be_managed_by_third_party_operator": False,
-                "is_managed_by_third_party_operator": False,
-                "third_party_operator": {
-                    "is_third_party_operator": False,
-                    "details": {},
-                    "third_party_operator_email": "string",
-                },
-            }
-        )
-
-    @staticmethod
     def create_admin(payload: dict) -> dict:
         payload.update({"is_admin": True})
         UserService.create(payload=payload)
@@ -287,6 +260,33 @@ class UserService(IUser):
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
+    def add_user_control_metadata(payload: dict):
+        payload.update(
+            {
+                "scope": {"view_type": None, "features": []},
+                "is_active": False,
+                "deleted": False,
+                "use_magic_link": True,
+                "token_valid_after": datetime.utcnow(),
+                "terms": {
+                    # The terms list is available in the FileRepository
+                    "term_application": None,
+                    "term_open_account": None,
+                    "term_retail_liquid_provider": None,
+                    "term_refusal": None,
+                    "term_non_compliance": None,
+                },
+                "can_be_managed_by_third_party_operator": False,
+                "is_managed_by_third_party_operator": False,
+                "third_party_operator": {
+                    "is_third_party_operator": False,
+                    "details": {},
+                    "third_party_operator_email": "string",
+                },
+            }
+        )
+
+    @staticmethod
     def fill_term_signed(payload: dict, file_type: str, version: int):
         if payload.get("terms") is None:
             payload["terms"] = dict()
@@ -325,39 +325,75 @@ class UserService(IUser):
     def user_identifier_data(
         payload: dict,
         user_repository=UserRepository(),
-        stone_age=StoneAge,
     ) -> dict:
-        thebes_answer = payload.get("x-thebes-answer")
-        old = user_repository.find_one({"_id": thebes_answer.get("email")})
-        if old is None:
+        thebes_answer = payload.get("thebes_answer")
+        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if current_user is None:
             raise BadRequestError("common.register_not_exists")
-        user_identifier = payload.get("user_identifier")
-        quiz = stone_age.send_user_identifier_data(user_identifier_data=user_identifier)
-        if type(quiz) is not dict:
-            raise InternalServerError("user.quiz.trouble")
-        new = dict(old)
-        UserService.update_user_identifier_data(
-            payload=new, user_identifier=user_identifier
+        user_identifier_data = payload.get("user_identifier")
+
+        current_user_with_identifier_data = dict(current_user)
+        UserService.add_user_identifier_data_on_current_user(
+            payload=current_user_with_identifier_data, user_identifier_data=user_identifier_data
         )
-        if user_repository.update_one(old=old, new=new) is False:
+        if user_repository.update_one(old=current_user, new=current_user_with_identifier_data) is False:
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {"quiz": quiz},
         }
 
     @staticmethod
-    def update_user_identifier_data(payload: dict, user_identifier: dict):
-        payload["cpf"] = user_identifier.get("cpf")
-        payload["is_us_person"] = user_identifier.get("is_us_person")
-        payload["us_tin"] = user_identifier.get("us_tin")
-        payload["is_cvm_qualified_investor"] = user_identifier.get(
+    def add_user_identifier_data_on_current_user(payload: dict, user_identifier_data: dict):
+        payload["cpf"] = user_identifier_data.get("cpf")
+        payload["cel_phone"] = user_identifier_data.get("cel_phone")
+
+    @staticmethod
+    def user_complementary_data(
+        payload: dict,
+        user_repository=UserRepository(),
+    ) -> dict:
+        thebes_answer = payload.get("thebes_answer")
+        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if current_user is None:
+            raise BadRequestError("common.register_not_exists")
+        user_complementary_data = payload.get("user_complementary")
+
+        current_user_with_complementary_data = dict(current_user)
+        UserService.add_user_complementary_data_on_current_user(
+            payload=current_user_with_complementary_data, user_complementary_data=user_complementary_data
+        )
+
+        if user_repository.update_one(old=current_user, new=current_user_with_complementary_data) is False:
+            raise InternalServerError("common.process_issue")
+        return {
+            "status_code": status.HTTP_200_OK,
+        }
+
+    @staticmethod
+    def add_user_complementary_data_on_current_user(payload: dict, user_complementary_data):
+        payload["is_us_person"] = user_complementary_data.get("is_us_person")
+        payload["us_tin"] = user_complementary_data.get("us_tin")
+        payload["is_cvm_qualified_investor"] = user_complementary_data.get(
             "is_cvm_qualified_investor"
         )
         payload["marital"] = {
-            "status": user_identifier.get("marital_status"),
-            "spouse": user_identifier.get("spouse"),
+            "status": user_complementary_data.get("marital_status"),
+            "spouse": user_complementary_data.get("spouse"),
         }
+
+    @staticmethod
+    def user_quiz(payload: dict, stone_age=StoneAge, user_repository=UserRepository()) -> dict:
+        thebes_answer = payload.get("thebes_answer")
+        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+
+        return dict()
+
+    @staticmethod
+    def quiz_responses(payload: dict, stone_age=StoneAge, user_repository=UserRepository()) -> dict:
+        thebes_answer = payload.get("thebes_answer")
+        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+
+        return dict()
 
     @staticmethod
     def change_user_to_client(
