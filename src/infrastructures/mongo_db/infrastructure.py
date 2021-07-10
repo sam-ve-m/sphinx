@@ -142,9 +142,7 @@ class MongoDBInfrastructure(IRepository):
 
         query_hash = hash_field(payload=query)
         cache.set(
-            key=f"{self.base_identifier}:{query_hash}",
-            value=data,
-            ttl=ttl,
+            key=f"{self.base_identifier}:{query_hash}", value=data, ttl=ttl,
         )
 
     @staticmethod

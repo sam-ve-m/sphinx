@@ -3,10 +3,9 @@ from src.services.sinacor_types.service import SinaCorTypes
 
 
 class ClientRegisterEnumsController:
-
     @staticmethod
     def get_type_of_income_tax(payload: dict):
-        return SinaCorTypes.get_type_of_income_tax(payload=payload)
+        return SinaCorTypes.get_type_of_income_tax()
 
     @staticmethod
     def get_client_type(payload: dict):

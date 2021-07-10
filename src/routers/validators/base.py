@@ -140,6 +140,7 @@ class IsUsPerson(BaseModel):
 class UsTin(BaseModel):
     us_tin: Optional[bool]
 
+
 # Bureau validators
 
 

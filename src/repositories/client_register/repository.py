@@ -7,14 +7,13 @@ from src.repositories.client_register.builder import ClientRegisterBuilder
 
 
 class ClientRegisterRepository(OracleInfrastructure):
-
     def cleanup_temp_tables(self):
         client_temp = """TRUNCATE TABLE TSCIMPCLIH;"""
         error_temp = """TRUNCATE TABLE TSCERROH;"""
         self.query(sql=client_temp + error_temp)
 
     def run_data_validator_in_register_user_tmp_table(self):
-        result = self.execute(name='PROC_CLIECOH_V2', values='S')
+        result = self.execute(name="PROC_CLIECOH_V2", values="S")
 
     def validate_errors_on_temp_tables(self):
         sql = """
@@ -28,8 +27,8 @@ class ClientRegisterRepository(OracleInfrastructure):
 
     def register_validated_users(self):
         # TODO: Validate this values
-        values = ['CD_EMPRESA', 'CD_USUARIO', 'TP_OCORRENCIA', 'CD_CLIENTE_PADRAO']
-        self.execute(name='PROC_IMPCLIH_V2', values=values)
+        values = ["CD_EMPRESA", "CD_USUARIO", "TP_OCORRENCIA", "CD_CLIENTE_PADRAO"]
+        self.execute(name="PROC_IMPCLIH_V2", values=values)
 
     def is_not_employed_or_business_and_not_married_person(
         self, base_value: dict
@@ -395,7 +394,9 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def is_not_employed_or_business_and_married_person(base_value: dict) -> ClientRegisterBuilder:
+    def is_not_employed_or_business_and_married_person(
+        base_value: dict,
+    ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         builder.add_tp_registro(values="").add_dt_criacao(values="").add_dt_atualiz(
             values=""
@@ -776,7 +777,9 @@ class ClientRegisterRepository(OracleInfrastructure):
         )
         return builder
 
-    def register_user_data_in_register_users_temp_table(self, builder: Type[ClientRegisterBuilder]):
+    def register_user_data_in_register_users_temp_table(
+        self, builder: Type[ClientRegisterBuilder]
+    ):
         client_register = builder.build()
         fields = client_register.keys()
         sql = f"""

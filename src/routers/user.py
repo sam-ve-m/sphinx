@@ -25,7 +25,7 @@ from src.routers.validators.base import (
     AppName,
     Successful,
     Error,
-    Output
+    Output,
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -50,13 +50,7 @@ class QuizResponses(BaseModel):
     responses: List[QuizQuestionOption]
 
 
-class BureauCallback(
-    Uuid,
-    AppName,
-    Successful,
-    Error,
-    Output
-):
+class BureauCallback(Uuid, AppName, Successful, Error, Output):
     pass
 
 
@@ -105,7 +99,10 @@ def user_bureau_callback(bureau_callback: BureauCallback, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
-    payload = {"thebes_answer": jwt_data_or_error_response, "bureau_callback": bureau_callback.dict()}
+    payload = {
+        "thebes_answer": jwt_data_or_error_response,
+        "bureau_callback": bureau_callback.dict(),
+    }
     return BaseController.run(UserController.bureau_callback, payload, request)
 
 
@@ -195,8 +192,7 @@ async def save_user_self(
 
 @router.put("/user/sign_term", tags=["user"])
 async def sign_term(
-    request: Request,
-    file_type: TermFile,
+    request: Request, file_type: TermFile,
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -208,8 +204,7 @@ async def sign_term(
 
 @router.get("/user/signed_term", tags=["user"])
 async def get_assigned_term(
-    request: Request,
-    file_type: TermFile = Depends(TermFile),
+    request: Request, file_type: TermFile = Depends(TermFile),
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):

@@ -314,9 +314,7 @@ class UserService(IUser):
 
     @staticmethod
     def user_identifier_data(
-        payload: dict,
-        user_repository=UserRepository(),
-        stone_age=StoneAge,
+        payload: dict, user_repository=UserRepository(), stone_age=StoneAge,
     ) -> dict:
         thebes_answer = payload.get("thebes_answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})

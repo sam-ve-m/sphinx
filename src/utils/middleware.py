@@ -15,6 +15,34 @@ from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import NoPath
 
 
+def route_is_third_part_access(url_request: str, method: str = None) -> bool:
+    if url_request is None:
+        raise NoPath("No path found")
+    third_part_access_path = [
+        "/client_register_enums/type_of_income_tax",
+        "/client_register_enums/client_type",
+        "/client_register_enums/investor_type",
+        "/client_register_enums/activity_type",
+        "/client_register_enums/type_ability_person",
+        "/client_register_enums/customer_qualification_type",
+        "/client_register_enums/cosif_tax_classification",
+        "/client_register_enums/marital_status",
+        "/client_register_enums/nationality",
+        "/client_register_enums/document_issuing_body",
+        "/client_register_enums/document_type",
+        "/client_register_enums/county",
+        "/client_register_enums/state",
+        "/client_register_enums/country",
+        "/client_register_enums/marriage_regime",
+        "/client_register_enums/customer_origin",
+        "/client_register_enums/customer_status",
+        "/client_register_enums/bmf_customer_type",
+        "/client_register_enums/economic_activity",
+        "/client_register_enums/account_type",
+    ]
+    return url_request in third_part_access_path
+
+
 def route_is_public(url_request: str, method: str = None) -> bool:
     if url_request is None:
         raise NoPath("No path found")
@@ -96,25 +124,16 @@ def check_if_is_user_not_allowed_to_access_route(
     is_admin = user_data.get("is_admin")
     content = {"message": None}
     locale = get_language_from_request(request=request)
-    message = i18n.get_translate(
-        "valid_credential",
-        locale=locale,
-    )
+    message = i18n.get_translate("valid_credential", locale=locale,)
     status_code = 200
     return_response = False
     if not token_is_valid:
-        message = i18n.get_translate(
-            "invalid_credential",
-            locale=locale,
-        )
+        message = i18n.get_translate("invalid_credential", locale=locale,)
         status_code = status.HTTP_401_UNAUTHORIZED
         return_response = True
     elif is_admin_route:
         if not is_admin:
-            message = i18n.get_translate(
-                "invalid_credential",
-                locale=locale,
-            )
+            message = i18n.get_translate("invalid_credential", locale=locale,)
             status_code = status.HTTP_401_UNAUTHORIZED
             return_response = True
     if return_response:

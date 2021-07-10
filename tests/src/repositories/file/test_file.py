@@ -173,8 +173,7 @@ def test_save_valid_term_file(
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     assert (
         file_repository.save_term_file(
-            file_type=TermsFileType.TERM_REFUSAL,
-            content=b"its a byte",
+            file_type=TermsFileType.TERM_REFUSAL, content=b"its a byte",
         )
         is None
     )
