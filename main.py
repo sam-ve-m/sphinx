@@ -27,19 +27,29 @@ async def process_thebes_answer(request: Request, call_next):
         url_request=request.url.path, method=request.method
     )
     if is_third_part_access:
-        return await call_next(request)
+        return await resolve_third_part_request(request=request, call_next=call_next)
     is_public = route_is_public(url_request=request.url.path, method=request.method)
     if not is_public:
-        jwt_data_or_error_response = JWTHandler.get_payload_from_request(
-            request=request
-        )
-        if type(jwt_data_or_error_response) == Response:
-            return jwt_data_or_error_response
-        response = check_if_is_user_not_allowed_to_access_route(
-            request=request, jwt_data=jwt_data_or_error_response
-        )
-        if type(response) == Response:
-            return response
+        return await resolve_not_public_request(request=request, call_next=call_next)
+
+
+@staticmethod
+async def resolve_third_part_request(request: Request, call_next):
+    return await call_next(request)
+
+
+@staticmethod
+async def resolve_not_public_request(request: Request, call_next):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(
+        request=request
+    )
+    if type(jwt_data_or_error_response) == Response:
+        return jwt_data_or_error_response
+    response = check_if_is_user_not_allowed_to_access_route(
+        request=request, jwt_data=jwt_data_or_error_response
+    )
+    if type(response) == Response:
+        return response
     return await call_next(request)
 
 
