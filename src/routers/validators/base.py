@@ -115,13 +115,7 @@ class Cpf(BaseModel):
 
 
 class CelPhone(BaseModel):
-    cel_phone: str
-
-    @validator("cel_phone", always=True, allow_reuse=True)
-    def validate_cpf(cls, e):
-        if is_cel_phone_valid(cel_phone=e):
-            return e
-        raise ValueError("invalid cpf")
+    cel_phone: constr(min_length=11, max_length=11)
 
 
 class MaritalStatus(BaseModel):
@@ -146,4 +140,4 @@ class IsUsPerson(BaseModel):
 
 
 class UsTin(BaseModel):
-    us_tin: Optional[bool]
+    us_tin: Optional[int]

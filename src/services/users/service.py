@@ -326,7 +326,7 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
     ) -> dict:
-        thebes_answer = payload.get("thebes_answer")
+        thebes_answer = payload.get("x-thebes-answer")
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
@@ -352,7 +352,7 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
     ) -> dict:
-        thebes_answer = payload.get("thebes_answer")
+        thebes_answer = payload.get("x-thebes-answer")
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
@@ -383,17 +383,31 @@ class UserService(IUser):
 
     @staticmethod
     def user_quiz(payload: dict, stone_age=StoneAge, user_repository=UserRepository()) -> dict:
-        thebes_answer = payload.get("thebes_answer")
+        thebes_answer = payload.get("x-thebes-answer")
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        current_user_marital = current_user.get("marital")
 
-        return dict()
+        user_identifier_data = {
+            "cpf": current_user.get("cpf"),
+            "cel_phone": current_user.get("cel_phone"),
+            "marital_status": current_user_marital.get("marital_status"),
+            "is_us_person": current_user.get("is_us_person"),
+        }
 
-    @staticmethod
-    def quiz_responses(payload: dict, stone_age=StoneAge, user_repository=UserRepository()) -> dict:
-        thebes_answer = payload.get("thebes_answer")
-        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        current_user_is_us_person = current_user.get("is_us_person")
 
-        return dict()
+        if current_user_is_us_person:
+            user_identifier_data["us_tin"] = current_user.get("us_tin")
+
+        spouse = current_user_marital.get("spouse")
+
+        if spouse is not None:
+            user_identifier_data["spouse"] = spouse
+
+        response = stone_age.get_user_quiz(user_identifier_data)
+        quiz = response.get("output")
+
+        return {"status_code": status.HTTP_200_OK, "payload": quiz}
 
     @staticmethod
     def change_user_to_client(
