@@ -28,7 +28,10 @@ from src.routers.validators.base import (
     CountrySource,
     CitySource,
     ZipCodeSource,
-    PhoneNumberSource
+    PhoneNumberSource,
+    ActivitySource,
+    CnpjSource,
+    CompanyNameSource
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
@@ -58,6 +61,16 @@ class Address(BaseModel):
     phone_number: PhoneNumberSource
 
 
+class Company(BaseModel):
+    cpnj: CnpjSource
+    name: CompanyNameSource
+
+
+class Occupation(BaseModel):
+    activity: ActivitySource
+    company: Optional[Company]
+
+
 class Output(Decision, Status):
     gender: GenderSource
     birth_date: BirthDateSource
@@ -66,6 +79,7 @@ class Output(Decision, Status):
     mother_name: MotherNameSource
     identifier_document: IdentifierDocument
     address: Address
+    occupation: Occupation
 
 
 class BureauCallback(Uuid, AppName, Successful, Error):

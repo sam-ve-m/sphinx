@@ -277,3 +277,12 @@ class SinaCorTypesRepository(OracleInfrastructure):
         """
         value = self.query_with_cache(sql=sql)
         return len(value) == 1 and value[0][0] == 1
+
+    def validate_activity(self, value: str):
+        sql = f"""
+            SELECT 1
+            FROM TSCATIV
+            WHERE CD_ATIV = '{value}'
+        """
+        value = self.query_with_cache(sql=sql)
+        return len(value) == 1 and value[0][0] == 1

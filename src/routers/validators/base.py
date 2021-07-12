@@ -236,7 +236,7 @@ class DocumentTypeSource(Source):
 
 
 class CpfOrCnpjSource(Source):
-    value: int
+    value: str
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
@@ -307,4 +307,29 @@ class ZipCodeSource(Source):
 
 
 class PhoneNumberSource(Source):
+    value: str
+
+
+class ActivitySource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_activity(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class CnpjSource(Source):
+    value: str
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        if is_cnpj_valid(cnpj=e):
+            return e
+        raise ValueError("invalid cpf")
+
+
+class CompanyNameSource(Source):
     value: str
