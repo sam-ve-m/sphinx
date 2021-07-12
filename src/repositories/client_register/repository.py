@@ -12,8 +12,8 @@ class ClientRegisterRepository(OracleInfrastructure):
         error_temp = """TRUNCATE TABLE TSCERROH;"""
         self.query(sql=client_temp + error_temp)
 
-    def run_data_validator_in_register_user_tmp_table(self):
-        result = self.execute(name="PROC_CLIECOH_V2", values="S")
+    def run_data_validator_in_register_user_tmp_table(self, user_cpf: int):
+        result = self.execute(name="PROC_CLIECOH_V2_LIONX", values=[user_cpf])
 
     def validate_errors_on_temp_tables(self):
         sql = """

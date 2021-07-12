@@ -13,7 +13,9 @@ def get_prospect_user_template_with_data(payload: dict) -> dict:
 def get_user_signed_term_template_with_data(payload: dict, file_type: str) -> dict:
     version = payload.get("terms").get(file_type).get("version")
     return {
-        "metadata": {"user_email": payload.get("email"),},
+        "metadata": {
+            "user_email": payload.get("email"),
+        },
         "term_type": file_type,
         "term_version": f"v{version}",
         "user_accept": True,
@@ -32,7 +34,9 @@ def get_table_response_template_with_data(payload: dict) -> dict:
 
 def get_user_suitability_template_with_data(payload: dict) -> dict:
     return {
-        "metadata": {"user_email": payload.get("email"),},
+        "metadata": {
+            "user_email": payload.get("email"),
+        },
         "form": _normalize_form_helper(payload.get("answers")),
         "version": payload.get("suitability_version"),
         "score": payload.get("score"),
@@ -54,7 +58,9 @@ def get_user_account_template_with_data(payload: dict) -> dict:
     user_data = payload.get("user_data")
     marital = user_data.get("marital")
     return {
-        "metadata": {"user_email": user_data.get("email"),},
+        "metadata": {
+            "user_email": user_data.get("email"),
+        },
         "user_registry_data": {
             "provided_by_user": {
                 "name": user_data.get("name"),

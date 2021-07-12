@@ -182,7 +182,8 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __insert_new_answers_suitability(
-        suitability_answers_repository: MongoDBInfrastructure, answers: dict,
+        suitability_answers_repository: MongoDBInfrastructure,
+        answers: dict,
     ) -> Optional[Exception]:
         if type(answers) is not dict:
             raise InternalServerError("common.invalid_params")
@@ -241,7 +242,14 @@ class SuitabilityService(ISuitability):
         if type(old) is not dict:
             raise BadRequestError("common.register_not_exists")
 
-        if not all([user_email, score, suitability_version, submission_date,]):
+        if not all(
+            [
+                user_email,
+                score,
+                suitability_version,
+                submission_date,
+            ]
+        ):
             raise InternalServerError("common.process_issue")
 
         new = dict(old)
@@ -273,7 +281,13 @@ class SuitabilityService(ISuitability):
         submission_date: datetime,
     ) -> Optional[Exception]:
         if not all(
-            [answers, suitability_version, user_email, user_score, submission_date,]
+            [
+                answers,
+                suitability_version,
+                user_email,
+                user_score,
+                submission_date,
+            ]
         ):
             raise InternalServerError("common.process_issue")
 

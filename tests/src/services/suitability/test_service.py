@@ -370,8 +370,10 @@ def test_get_last_suitability_answers_metadata():
         return_value=[{"suitability_version": 2, "score": 1.0, "answers": True}]
     )
 
-    response = SuitabilityService._SuitabilityService__get_last_suitability_answers_metadata(
-        suitability_answers_repository=stubby_repository,
+    response = (
+        SuitabilityService._SuitabilityService__get_last_suitability_answers_metadata(
+            suitability_answers_repository=stubby_repository,
+        )
     )
 
     assert (True, 1.0, 2) == response

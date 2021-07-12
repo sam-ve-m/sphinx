@@ -11,13 +11,17 @@ from pydantic import BaseModel, constr, validator, UUID1
 from decouple import config
 
 # SPHIX
+from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.sinacor_types.enum.decision import Decisions
 from src.repositories.sinacor_types.enum.status import OutputStatus
 from src.utils.brazil_register_number_validator import is_cpf_valid
+from src.utils.brazil_register_number_validator import is_cnpj_valid
 from src.routers.validators.enum_template import MaritalStatusEnum
+from src.repositories.sinacor_types.enum.person_gender import PersonGender
+from src.repositories.sinacor_types.enum.document_type import DocumentTypes
 
 
 class Email(BaseModel):
@@ -25,6 +29,7 @@ class Email(BaseModel):
     # TODO: DNS lib not found
     @validator("email", always=True, allow_reuse=True)
     def validate_email(cls, value):
+        return value
         try:
             is_valid = validate_email(value)
             if is_valid:
@@ -157,7 +162,7 @@ class Successful(BaseModel):
 
 
 class Error(BaseModel):
-    error: str
+    error: Optional[str]
 
 
 class Decision(BaseModel):
@@ -166,10 +171,6 @@ class Decision(BaseModel):
 
 class Status(BaseModel):
     status: OutputStatus
-
-
-class Output(Decision, Status):
-    pass
 
 
 class ClientType(BaseModel):
@@ -182,3 +183,128 @@ class Country(BaseModel):
 
 class State(BaseModel):
     state: str
+
+
+class Source(BaseModel):
+    source: str
+
+
+class GenderSource(Source):
+    value: PersonGender
+
+
+class BirthDateSource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        try:
+            date = datetime.fromtimestamp(e)
+            return date
+        except:
+            raise ValueError("Wrong timestamp supplied")
+
+
+class NationalitySource(Source):
+    value: constr(min_length=3, max_length=3)
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_country(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class NaturalnessSource(Source):
+    value: constr(min_length=2, max_length=2)
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_state(value=e):
+            return e
+        raise ValueError("naturalness not exists")
+
+
+class MotherNameSource(Source):
+    value: str
+
+
+class DocumentTypeSource(Source):
+    value: DocumentTypes
+
+
+class CpfOrCnpjSource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        if is_cpf_valid(cpf=e) or is_cnpj_valid(cnpj=e):
+            return e
+        raise ValueError("invalid cpf")
+
+
+class DateSource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        try:
+            date = datetime.fromtimestamp(e)
+            return date
+        except:
+            raise ValueError("Wrong timestamp supplied")
+
+
+class StateSource(Source):
+    value: constr(min_length=2, max_length=2)
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_state(value=e):
+            return e
+        raise ValueError("state not exists")
+
+
+class IssuerSource(Source):
+    value: str
+
+
+class StreetNameSource(Source):
+    value: str
+
+
+class AddressNumberSource(Source):
+    value: str
+
+
+class CountrySource(Source):
+    value: constr(min_length=3, max_length=3)
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_country(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class CitySource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_city(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class ZipCodeSource(Source):
+    value: str
+
+
+class PhoneNumberSource(Source):
+    value: str

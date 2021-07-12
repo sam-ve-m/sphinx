@@ -4,7 +4,6 @@ from fastapi import APIRouter, Request, Depends
 # SPHINX
 from src.controllers.base_controller import BaseController
 from src.routers.validators.base import ClientType, Country, State
-from src.utils.jwt_utils import JWTHandler
 from src.controllers.cliente_register_enums.controller import (
     ClientRegisterEnumsController,
 )
@@ -112,7 +111,7 @@ def get_document_type(request: Request):
 
 
 @router.get("/client_register_enums/county", tags=["client_register_enums"])
-def get_county(request: Request, country_state: CountryState=Depends(CountryState)):
+def get_county(request: Request, country_state: CountryState = Depends(CountryState)):
     payload = dict()
     payload.update(country_state.dict())
     return BaseController.run(
@@ -121,7 +120,7 @@ def get_county(request: Request, country_state: CountryState=Depends(CountryStat
 
 
 @router.get("/client_register_enums/state", tags=["client_register_enums"])
-def get_state(request: Request, country: Country=Depends(Country)):
+def get_state(request: Request, country: Country = Depends(Country)):
     payload = dict()
     payload.update(country.dict())
     return BaseController.run(
@@ -171,6 +170,13 @@ def get_bmf_customer_type(client_type: ClientType, request: Request):
 def get_economic_activity(request: Request):
     return BaseController.run(
         ClientRegisterEnumsController.get_economic_activity, payload={}, request=request
+    )
+
+
+@router.get("/client_register_enums/account_type", tags=["client_register_enums"])
+def get_account_type(request: Request):
+    return BaseController.run(
+        ClientRegisterEnumsController.get_account_type, payload={}, request=request
     )
 
 

@@ -13,7 +13,7 @@ from decouple import config
 # SPHINX
 from src.interfaces.repositories.oracle.interface import IOracle
 
-cx_Oracle.init_oracle_client(lib_dir=config("ORACLE_LD_LIBRARY_PATH"))
+cx_Oracle.init_oracle_client(lib_dir=config("LD_LIBRARY_PATH"))
 
 
 class OracleInfrastructure(IOracle):

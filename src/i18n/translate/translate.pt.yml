@@ -70,3 +70,6 @@ pt:
   cache:
     error:
       key: Chave invalida enviada para classe ce cache
+  bureau:
+    error:
+      fail: Erro na resposta da StoneAge

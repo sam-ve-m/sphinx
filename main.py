@@ -11,6 +11,7 @@ from src.routers.term import router as term_router
 from src.routers.suitability import router as suitability_router
 from src.routers.view import router as view_router
 from src.routers.client_register_enums import router as client_register_enums_router
+from src.routers.bureau_callbacks import router as bureau_callbacks_router
 from src.utils.middleware import (
     route_is_third_part_access,
     route_is_public,
@@ -33,16 +34,12 @@ async def process_thebes_answer(request: Request, call_next):
         return await resolve_not_public_request(request=request, call_next=call_next)
 
 
-@staticmethod
 async def resolve_third_part_request(request: Request, call_next):
     return await call_next(request)
 
 
-@staticmethod
 async def resolve_not_public_request(request: Request, call_next):
-    jwt_data_or_error_response = JWTHandler.get_payload_from_request(
-        request=request
-    )
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if type(jwt_data_or_error_response) == Response:
         return jwt_data_or_error_response
     response = check_if_is_user_not_allowed_to_access_route(
@@ -62,6 +59,7 @@ app.include_router(pendencies_router)
 app.include_router(suitability_router)
 app.include_router(term_router)
 app.include_router(client_register_enums_router)
+app.include_router(bureau_callbacks_router)
 
 
 if __name__ == "__main__":

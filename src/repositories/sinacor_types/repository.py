@@ -1,9 +1,10 @@
 # STANDARD LIBS
 from typing import Type, List
+from hashlib import sha1
 
 # SPHINX
 from src.infrastructures.oracle.infrastructure import OracleInfrastructure
-from src.repositories.client_register.builder import ClientRegisterBuilder
+from src.repositories.cache.redis import RepositoryRedis
 
 
 class SinaCorTypesRepository(OracleInfrastructure):
@@ -237,3 +238,42 @@ class SinaCorTypesRepository(OracleInfrastructure):
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
+
+    def query_with_cache(self, sql: str, cache=RepositoryRedis) -> list:
+        _sha1 = sha1()
+        _sha1.update(str(sql).encode())
+        partial_key = _sha1.hexdigest()
+        key = f'sinacor_types:{partial_key}'
+        value = cache.get(key=key)
+        if not value:
+            partial_value = self.query(sql=sql)
+            value = {'value': partial_value}
+            cache.set(key=key, value=value, ttl=86400)
+        return value.get('value')
+
+    def validate_country(self, value: str):
+        sql = f"""
+            SELECT 1
+            FROM TSCPAIS
+            WHERE SG_PAIS = '{value}'
+        """
+        value = self.query_with_cache(sql=sql)
+        return len(value) == 1 and value[0][0] == 1
+
+    def validate_state(self, value: str):
+        sql = f"""
+            SELECT 1
+            FROM TSCESTADO
+            WHERE SG_ESTADO = '{value}'
+        """
+        value = self.query_with_cache(sql=sql)
+        return len(value) == 1 and value[0][0] == 1
+
+    def validate_city(self, value: str):
+        sql = f"""
+            SELECT 1
+            FROM TSCDXMUNICIPIO
+            WHERE COD_MUNI = '{value}'
+        """
+        value = self.query_with_cache(sql=sql)
+        return len(value) == 1 and value[0][0] == 1

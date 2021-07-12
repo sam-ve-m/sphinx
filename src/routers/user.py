@@ -21,11 +21,6 @@ from src.routers.validators.base import (
     IsUsPerson,
     UsTin,
     IsCvmQualifiedInvestor,
-    Uuid,
-    AppName,
-    Successful,
-    Error,
-    Output,
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -48,10 +43,6 @@ class UserIdentifierData(Cpf, MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedIn
 
 class QuizResponses(BaseModel):
     responses: List[QuizQuestionOption]
-
-
-class BureauCallback(Uuid, AppName, Successful, Error, Output):
-    pass
 
 
 @router.post("/user", tags=["user"])
@@ -91,19 +82,6 @@ def update_fill_user_data(quiz_response: QuizResponses, request: Request):
         "quiz": quiz_response.dict(),
     }
     return BaseController.run(UserController.fill_user_data, payload, request)
-
-
-@router.put("/user/bureau_callback", tags=["user"])
-def user_bureau_callback(bureau_callback: BureauCallback, request: Request):
-    # TODO: Callback da STONEAGE MAKE BASEMODEL
-    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
-    if isinstance(jwt_data_or_error_response, Response):
-        return jwt_data_or_error_response
-    payload = {
-        "thebes_answer": jwt_data_or_error_response,
-        "bureau_callback": bureau_callback.dict(),
-    }
-    return BaseController.run(UserController.bureau_callback, payload, request)
 
 
 @router.delete("/user", tags=["user"])
@@ -192,7 +170,8 @@ async def save_user_self(
 
 @router.put("/user/sign_term", tags=["user"])
 async def sign_term(
-    request: Request, file_type: TermFile,
+    request: Request,
+    file_type: TermFile,
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -204,7 +183,8 @@ async def sign_term(
 
 @router.get("/user/signed_term", tags=["user"])
 async def get_assigned_term(
-    request: Request, file_type: TermFile = Depends(TermFile),
+    request: Request,
+    file_type: TermFile = Depends(TermFile),
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):

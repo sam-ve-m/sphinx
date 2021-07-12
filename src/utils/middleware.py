@@ -39,6 +39,7 @@ def route_is_third_part_access(url_request: str, method: str = None) -> bool:
         "/client_register_enums/bmf_customer_type",
         "/client_register_enums/economic_activity",
         "/client_register_enums/account_type",
+        "/bureau_callback",
     ]
     return url_request in third_part_access_path
 
@@ -124,16 +125,25 @@ def check_if_is_user_not_allowed_to_access_route(
     is_admin = user_data.get("is_admin")
     content = {"message": None}
     locale = get_language_from_request(request=request)
-    message = i18n.get_translate("valid_credential", locale=locale,)
+    message = i18n.get_translate(
+        "valid_credential",
+        locale=locale,
+    )
     status_code = 200
     return_response = False
     if not token_is_valid:
-        message = i18n.get_translate("invalid_credential", locale=locale,)
+        message = i18n.get_translate(
+            "invalid_credential",
+            locale=locale,
+        )
         status_code = status.HTTP_401_UNAUTHORIZED
         return_response = True
     elif is_admin_route:
         if not is_admin:
-            message = i18n.get_translate("invalid_credential", locale=locale,)
+            message = i18n.get_translate(
+                "invalid_credential",
+                locale=locale,
+            )
             status_code = status.HTTP_401_UNAUTHORIZED
             return_response = True
     if return_response:
