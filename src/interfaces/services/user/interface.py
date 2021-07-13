@@ -2,10 +2,12 @@
 from abc import ABC, abstractmethod
 
 # SPHINX
-from src.repositories.user.repository import UserRepository
 from src.services.authentications.service import AuthenticationService
-from src.utils.jwt_utils import JWTHandler
+from src.repositories.user.repository import UserRepository
 from src.repositories.file.repository import FileRepository
+from src.utils.jwt_utils import JWTHandler
+from src.utils.stone_age import StoneAge
+
 from persephone_client.main import Persephone
 
 
@@ -53,6 +55,16 @@ class IUser(ABC):
     @abstractmethod
     def change_view(
         payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+    ) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def change_user_to_client(
+        payload: dict,
+        user_repository: UserRepository,
+        stone_age: StoneAge,
+        persephone_client: Persephone,
     ) -> dict:
         pass
 

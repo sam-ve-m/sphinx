@@ -33,7 +33,7 @@ async def create_quiz_suitability(suitability: Suitability, request: Request):
         return jwt_data_or_error_response
 
     payload = {
-        "thebes_answer": jwt_data_or_error_response,
+        x - thebes - answer: jwt_data_or_error_response,
         "suitability": suitability.dict(),
     }
 
@@ -46,7 +46,7 @@ async def crate_user_profile_suitability(request: Request):
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 
-    payload = {"thebes_answer": jwt_data_or_error_response}
+    payload = {"x-thebes-answer": jwt_data_or_error_response}
 
     return BaseController.run(SuitabilityController.create_profile, payload, request)
 
@@ -57,6 +57,6 @@ async def get_user_profile_suitability(request: Request):
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 
-    payload = {"thebes_answer": jwt_data_or_error_response}
+    payload = {"x-thebes-answer": jwt_data_or_error_response}
 
     return BaseController.run(SuitabilityController.get_user_profile, payload, request)

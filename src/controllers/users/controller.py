@@ -59,8 +59,8 @@ class UserController:
         return UserService.user_identifier_data(payload=payload)
 
     @staticmethod
-    def fill_user_data(payload: dict):
-        return UserService.fill_user_data(payload=payload)
+    def change_user_to_client(payload: dict):
+        return UserService.change_user_to_client(payload=payload)
 
     @staticmethod
     def table_callback(payload: dict):

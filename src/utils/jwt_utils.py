@@ -3,7 +3,7 @@ import os.path
 from typing import Union, Optional
 from datetime import datetime, timezone, timedelta
 import logging
-from decouple import config
+from src.utils.env_config import config
 import json
 from pathlib import Path
 
@@ -20,7 +20,7 @@ from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 
 
 class JWTHandler:
-
+    # TODO change this method to use heimdall to validate the given jwt and this to generate the jwt only
     instance = JWT()
 
     @staticmethod
@@ -106,7 +106,7 @@ class JWTHandler:
     def get_payload_from_request(request: Request) -> Union[dict, Response]:
         thebes_answer = None
         for header_tuple in request.headers.raw:
-            if b"thebes_answer" in header_tuple:
+            if b"x-thebes-answer" in header_tuple:
                 thebes_answer = header_tuple[1].decode()
                 break
         try:

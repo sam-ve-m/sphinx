@@ -1,5 +1,5 @@
 # OUTSIDE LIBRARIES
-from decouple import config
+from src.utils.env_config import config
 
 # SPHINX
 from src.interfaces.services.builders.thebes_hall.validators.interface import IValidator

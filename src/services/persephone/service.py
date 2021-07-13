@@ -1,9 +1,11 @@
 # OUTSIDE LIBRARIES
-from decouple import config
 import logging
 
 # PERSEPHONE
 from persephone_client.main import Persephone
+
+# SPHINX
+from src.utils.env_config import config
 
 
 class PersephoneService:

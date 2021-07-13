@@ -1,6 +1,6 @@
 # OUTSIDE LIBRARIES
 from fastapi import status
-from decouple import config
+from src.utils.env_config import config
 
 # SPHINX
 from src.utils.email import HtmlModifier
