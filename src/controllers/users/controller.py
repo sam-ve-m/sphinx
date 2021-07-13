@@ -59,9 +59,21 @@ class UserController:
         return UserService.user_identifier_data(payload=payload)
 
     @staticmethod
+    def user_complementary_data(payload: dict):
+        return UserService.user_complementary_data(payload=payload)
+
+    @staticmethod
+    def user_quiz(payload: dict):
+        return UserService.user_quiz(payload=payload)
+
+    @staticmethod
     def change_user_to_client(payload: dict):
         return UserService.change_user_to_client(payload=payload)
 
     @staticmethod
     def table_callback(payload: dict):
         return UserService.table_callback(payload=payload)
+
+    @staticmethod
+    def get_on_boarding_user_current_step(payload: dict):
+        return UserService.get_on_boarding_user_current_step(payload=payload)

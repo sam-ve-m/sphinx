@@ -91,6 +91,7 @@ class JWTHandler:
             "user_account_data_months_past": user_account_data_months_past,
             "exp": payload.get("exp"),
             "created_at": payload.get("created_at"),
+            "on_boarding_steps": {},
         }
         return new_payload
 
