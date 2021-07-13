@@ -423,10 +423,15 @@ class UserService(IUser):
             user_identifier_data["spouse"] = spouse
 
         response = stone_age.get_user_quiz(user_identifier_data)
-        # TODO: SAVE UUID on user COLECTION and STATUS PERSEPHONE AND COLECTION
-        quiz = response.get("output")
 
-        return {"status_code": status.HTTP_200_OK, "payload": quiz}
+        output = response.get("output")
+        stone_age_decision = output.get("decision")
+
+        if stone_age_decision is not None:
+            current_user_updated = current_user.update({'stone_age_decision': stone_age_decision})
+            user_repository.update_one(old=current_user, new=current_user_updated)
+
+        return {"status_code": status.HTTP_200_OK, "payload": output}
 
     @staticmethod
     def change_user_to_client(
@@ -437,21 +442,18 @@ class UserService(IUser):
     ) -> dict:
 
         thebes_answer = payload.get("x-thebes-answer")
-        old = user_repository.find_one({"_id": thebes_answer.get("email")})
-        if type(old) is not dict:
+        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if type(current_user) is not dict:
             raise BadRequestError("common.register_not_exists")
 
-        stone_age_user_data = stone_age.send_user_quiz_responses(
+        stone_age_response = stone_age.send_user_quiz_responses(
             quiz=payload.get("quiz")
         )
 
-        new = dict(old)
-        UserService.fill_account_data_on_user_document(
-            payload=new, stone_age_user_data=stone_age_user_data
-        )
+        stone_age_contract_uuid = stone_age_response.get('uuid')
+        current_user_updated = current_user.update({'stone_age_contract_uuid': stone_age_contract_uuid})
+        user_repository.update_one(old=current_user, new=current_user_updated)
 
-        if user_repository.update_one(old=old, new=new) is False:
-            raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "user.creating_account",
