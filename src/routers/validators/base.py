@@ -333,3 +333,35 @@ class CnpjSource(Source):
 
 class CompanyNameSource(Source):
     value: str
+
+
+class PatrimonySource(Source):
+    value: float
+
+
+class IncomeSource(Source):
+    value: float
+
+
+class EducationLevelSource(Source):
+    value: str
+
+
+class EducationCourseSource(Source):
+    value: str
+
+
+class IsPoliticallyExposedPerson(Source):
+    value: bool
+
+
+class DateOfAcquisition(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        try:
+            date = datetime.fromtimestamp(e)
+            return date
+        except:
+            raise ValueError("Wrong timestamp supplied")

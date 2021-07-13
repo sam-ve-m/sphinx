@@ -31,7 +31,13 @@ from src.routers.validators.base import (
     PhoneNumberSource,
     ActivitySource,
     CnpjSource,
-    CompanyNameSource
+    CompanyNameSource,
+    PatrimonySource,
+    IncomeSource,
+    EducationLevelSource,
+    EducationCourseSource,
+    IsPoliticallyExposedPerson,
+    DateOfAcquisition
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
@@ -71,6 +77,20 @@ class Occupation(BaseModel):
     company: Optional[Company]
 
 
+class Assets(BaseModel):
+    patrimony: PatrimonySource
+    income: IncomeSource
+
+
+class Education(BaseModel):
+    level: EducationLevelSource
+    course: Optional[EducationCourseSource]
+
+
+class PoliticallyExposedPerson(BaseModel):
+    is_politically_exposed_person: IsPoliticallyExposedPerson
+
+
 class Output(Decision, Status):
     gender: GenderSource
     birth_date: BirthDateSource
@@ -80,6 +100,10 @@ class Output(Decision, Status):
     identifier_document: IdentifierDocument
     address: Address
     occupation: Occupation
+    assets: Assets
+    education: Education
+    politically_exposed_person: PoliticallyExposedPerson
+    date_of_acquisition: DateOfAcquisition
 
 
 class BureauCallback(Uuid, AppName, Successful, Error):

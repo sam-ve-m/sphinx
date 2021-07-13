@@ -1,7 +1,11 @@
+# STANDARD LIBS
 from abc import ABC, abstractmethod
 from typing import Optional
+
+# OUTSIDE LIBRARIES
 from pymongo.cursor import Cursor
 
+# SPHINX
 from src.repositories.cache.redis import RepositoryRedis
 
 

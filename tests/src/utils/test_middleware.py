@@ -4,8 +4,7 @@ from datetime import datetime
 
 # OUTSIDE LIBRARIES
 import pytest
-from fastapi import Response
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 # SPHINX
 from src.utils.middleware import (

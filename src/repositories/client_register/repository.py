@@ -30,6 +30,8 @@ class ClientRegisterRepository(OracleInfrastructure):
         values = ["CD_EMPRESA", "CD_USUARIO", "TP_OCORRENCIA", "CD_CLIENTE_PADRAO"]
         self.execute(name="PROC_IMPCLIH_V2", values=values)
 
+
+
     def is_not_employed_or_business_and_not_married_person(
         self, base_value: dict
     ) -> ClientRegisterBuilder:

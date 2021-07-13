@@ -12,6 +12,7 @@ from pymongo import MongoClient
 from src.repositories.cache.redis import RepositoryRedis
 from src.utils.genarate_id import hash_field
 from src.interfaces.repositories.base_repository.interface import IRepository
+from src.utils.base_model_normalizer import normalize_enum_types
 
 
 class MongoDBInfrastructure(IRepository):
@@ -88,7 +89,7 @@ class MongoDBInfrastructure(IRepository):
         if not new or len(new) == 0:
             return False
         try:
-            self.normalize_enum_types(payload=new)
+            normalize_enum_types(payload=new)
             self.collection.update_one(old, {"$set": new})
             # TODO update cache when update user
             if new.get("email"):
@@ -115,13 +116,6 @@ class MongoDBInfrastructure(IRepository):
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
             return False
-
-    def normalize_enum_types(self, payload: dict):
-        for key in payload:
-            if isinstance(payload[key], Enum):
-                payload[key] = payload[key].value
-            elif type(payload[key]) == dict:
-                self.normalize_enum_types(payload=payload[key])
 
     def _get_from_cache(self, query: dict, cache=RepositoryRedis):
         if query is None:

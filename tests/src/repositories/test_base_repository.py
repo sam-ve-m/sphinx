@@ -215,26 +215,6 @@ def test_delete_one_true() -> None:
     assert stub_base_repository.delete_one(entity={})
 
 
-class T(Enum):
-    TEST = "test"
-
-
-def test_normalize_enum_types():
-    payload = {"a": T.TEST}
-    stub_mongo_collection = StubMongoCollection()
-    base_repository = StubMongoDBInfrastructure(collection=stub_mongo_collection)
-    base_repository.normalize_enum_types(payload=payload)
-    assert payload == {"a": "test"}
-
-
-def test_normalize_enum_types_deep():
-    payload = {"a": {"b": T.TEST}}
-    stub_mongo_collection = StubMongoCollection()
-    base_repository = StubMongoDBInfrastructure(collection=stub_mongo_collection)
-    base_repository.normalize_enum_types(payload=payload)
-    assert payload == {"a": {"b": "test"}}
-
-
 def test__get_from_cache_not_cached() -> None:
     stub_mongo_collection = StubMongoCollection()
     stub_mongo_collection.find_one = MagicMock(return_value=True)
