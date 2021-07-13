@@ -22,11 +22,11 @@ from src.utils.brazil_register_number_validator import is_cnpj_valid
 from src.routers.validators.enum_template import MaritalStatusEnum
 from src.repositories.sinacor_types.enum.person_gender import PersonGender
 from src.repositories.sinacor_types.enum.document_type import DocumentTypes
+from src.repositories.sinacor_types.enum.connected_person import ConnectedPerson
 
 
 class Email(BaseModel):
     email: constr(min_length=4, max_length=255)
-    # TODO: DNS lib not found
     @validator("email", always=True, allow_reuse=True)
     def validate_email(cls, value):
         return value
@@ -369,3 +369,18 @@ class DateOfAcquisition(Source):
             return date
         except:
             raise ValueError("Wrong timestamp supplied")
+
+
+class IncomeTaxTypeSource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_income_tax_type(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class ConnectedPersonSource(Source):
+    value: ConnectedPerson

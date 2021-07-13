@@ -37,7 +37,10 @@ from src.routers.validators.base import (
     EducationLevelSource,
     EducationCourseSource,
     IsPoliticallyExposedPerson,
-    DateOfAcquisition
+    DateOfAcquisition,
+    Email,
+    IncomeTaxTypeSource,
+    ConnectedPersonSource
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
@@ -80,6 +83,7 @@ class Occupation(BaseModel):
 class Assets(BaseModel):
     patrimony: PatrimonySource
     income: IncomeSource
+    income_tax_type: IncomeTaxTypeSource
 
 
 class Education(BaseModel):
@@ -91,7 +95,7 @@ class PoliticallyExposedPerson(BaseModel):
     is_politically_exposed_person: IsPoliticallyExposedPerson
 
 
-class Output(Decision, Status):
+class Output(Decision, Status, Email):
     gender: GenderSource
     birth_date: BirthDateSource
     nationality: NationalitySource
@@ -104,6 +108,7 @@ class Output(Decision, Status):
     education: Education
     politically_exposed_person: PoliticallyExposedPerson
     date_of_acquisition: DateOfAcquisition
+    connected_person: ConnectedPersonSource
 
 
 class BureauCallback(Uuid, AppName, Successful, Error):

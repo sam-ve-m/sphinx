@@ -36,19 +36,19 @@ class OnBoardingStepBuilder:
         return self
 
     def user_complementary_step(self, current_user):
-        user_cpf = current_user.get("cpf")
-        user_cel_phone = current_user.get("cel_phone")
-        if user_cpf is not None and user_cel_phone is not None:
+        marital = current_user.get("marital")
+        is_us_person = current_user.get("is_us_person")
+
+        if marital is not None and (is_us_person is False or is_us_person is not None):
             self.__on_boarding_steps["user_complementary_step"] = True
             self.__on_boarding_steps["current_on_boarding_step"] = "user_quiz_step"
 
         return self
 
     def user_quiz_step(self, current_user):
-        marital = current_user.get("marital")
-        is_us_person = current_user.get("is_us_person")
+        has_stone_age_contract_uuid = current_user.get("is_dtvm_user_client")
 
-        if marital is not None and (is_us_person is False or is_us_person is not None):
+        if has_stone_age_contract_uuid is not None:
             self.__on_boarding_steps["user_quiz_step"] = True
             self.__on_boarding_steps["current_on_boarding_step"] = "finished"
             self.__on_boarding_steps["finished"] = True

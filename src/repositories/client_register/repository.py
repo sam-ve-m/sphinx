@@ -4,9 +4,11 @@ from typing import Type
 # SPHINX
 from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 from src.repositories.client_register.builder import ClientRegisterBuilder
+from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 
 
 class ClientRegisterRepository(OracleInfrastructure):
+
     def cleanup_temp_tables(self):
         client_temp = """TRUNCATE TABLE TSCIMPCLIH;"""
         error_temp = """TRUNCATE TABLE TSCERROH;"""
@@ -30,10 +32,29 @@ class ClientRegisterRepository(OracleInfrastructure):
         values = ["CD_EMPRESA", "CD_USUARIO", "TP_OCORRENCIA", "CD_CLIENTE_PADRAO"]
         self.execute(name="PROC_IMPCLIH_V2", values=values)
 
+    def get_builder(self, data: dict, sinacor_types_repository=SinaCorTypesRepository()):
+        activity = data['occupation']['activity']
+        is_married = data['marital']['status'] == 'married'
+        is_business_person = sinacor_types_repository.is_business_person(value=activity)
+        is_not_employed_or_business_person = sinacor_types_repository.is_others(value=activity)
+
+        if is_married:
+            if is_not_employed_or_business_person:
+                self.is_not_employed_or_business_and_married_person(data=data)
+            elif is_business_person:
+                self.is_business_and_married_person(data=data)
+            else:
+                self.is_employed_and_married_person(data=data)
+        elif is_not_employed_or_business_person:
+            self.is_not_employed_or_business_and_not_married_person(data=data)
+        elif is_business_person:
+            self.is_business_and_not_married_person(data=data)
+        else:
+            self.is_employed_and_not_married_person(data=data)
 
 
     def is_not_employed_or_business_and_not_married_person(
-        self, base_value: dict
+        self, data: dict
     ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         builder.add_tp_registro(value="").add_dt_criacao(value="").add_dt_atualiz(
@@ -151,10 +172,8 @@ class ClientRegisterRepository(OracleInfrastructure):
         )
         return builder
 
-    # TODO: all is_* must be implemented when the bureau return the data
-
     @staticmethod
-    def is_employed_and_not_married_person(base_value: dict) -> ClientRegisterBuilder:
+    def is_employed_and_not_married_person(data: dict) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         builder.add_tp_registro(value="").add_dt_criacao(value="").add_dt_atualiz(
             value=""
@@ -276,7 +295,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def is_business_and_not_married_person(base_value: dict) -> ClientRegisterBuilder:
+    def is_business_and_not_married_person(data: dict) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         builder.add_tp_registro(value="").add_dt_criacao(value="").add_dt_atualiz(
             value=""
@@ -397,7 +416,7 @@ class ClientRegisterRepository(OracleInfrastructure):
 
     @staticmethod
     def is_not_employed_or_business_and_married_person(
-        base_value: dict,
+        data: dict,
     ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         builder.add_tp_registro(values="").add_dt_criacao(values="").add_dt_atualiz(
@@ -524,7 +543,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def is_employed_and_married_person(base_value: dict) -> ClientRegisterBuilder:
+    def is_employed_and_married_person(data: dict) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         builder.add_tp_registro(values="").add_dt_criacao(values="").add_dt_atualiz(
             values=""
@@ -654,16 +673,18 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def is_business_and_married_person(base_value: dict) -> ClientRegisterBuilder:
+    def is_business_and_married_person(data: dict) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
-        builder.add_tp_registro(values="").add_dt_criacao(values="").add_dt_atualiz(
-            values=""
-        ).add_cd_cpfcgc(values="").add_dt_nasc_fund(values="").add_cd_con_dep(
-            values=""
-        ).add_in_irsdiv(
-            values=""
+        builder.add_tp_registro().add_dt_criacao(
+            data=data
+        ).add_dt_atualiz().add_cd_cpfcgc(
+            data=data
+        ).add_dt_nasc_fund(
+            data=data
+        ).add_cd_con_dep().add_in_irsdiv(
+            data=data
         ).add_in_pess_vinc(
-            values=""
+            data=data
         ).add_nm_cliente(
             values=""
         ).add_tp_cliente(

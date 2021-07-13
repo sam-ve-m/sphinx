@@ -79,7 +79,7 @@ def need_be_admin(url_request: str) -> bool:
         raise NoPath("No path found")
 
     need_admin = False
-    private_paths = ["/user/admin", "/views", "/feature", "/term"]
+    private_paths = ["/user/admin", "/views", "/feature", "/term", "/suitability/quiz"]
     if url_request in private_paths:
         need_admin = True
 

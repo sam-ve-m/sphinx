@@ -62,12 +62,12 @@ class FileRepository(IFile):
         self.s3_client.put_object(
             Bucket=self.bucket_name,
             Body=self.resolve_content(content=content),
-            Key=f"{path}/{file_name}{file_extension}",
+            Key=f"{path}{file_name}{file_extension}",
         )
 
     def get_user_file(self, file_type: UserFileType, user_email: str):
         exists_self = False
-        prefix = self.resolve_user_file_path(user_email=user_email)
+        prefix = self.resolve_user_path(user_email=user_email, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if not prefix or not file_name or not file_extension:
@@ -86,11 +86,6 @@ class FileRepository(IFile):
             exists_self = True
 
         return exists_self
-
-    @staticmethod
-    def resolve_user_file_path(user_email: str) -> str:
-        name, domain = user_email.split("@")
-        return f"{domain}/{name[:2]}/{user_email}/"
 
     def save_term_file(
         self, file_type: TermsFileType, content: Union[str, bytes]

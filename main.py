@@ -1,6 +1,6 @@
 # OUTSIDE LIBRARIES
 import uvicorn
-from fastapi import FastAPI, Request, status, Response
+from fastapi import FastAPI, Request, Response
 
 # SPHINX
 from src.routers.user import router as user_router
@@ -32,6 +32,7 @@ async def process_thebes_answer(request: Request, call_next):
     is_public = route_is_public(url_request=request.url.path, method=request.method)
     if not is_public:
         return await resolve_not_public_request(request=request, call_next=call_next)
+    return await call_next(request)
 
 
 async def resolve_third_part_request(request: Request, call_next):
@@ -67,7 +68,7 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=8000,
-        # access_log=True,
-        # log_config="./log.ini",
-        # log_level="info",
+        access_log=True,
+        log_config="./log.ini",
+        log_level="info",
     )

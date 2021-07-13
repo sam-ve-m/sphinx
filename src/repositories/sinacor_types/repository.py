@@ -286,3 +286,33 @@ class SinaCorTypesRepository(OracleInfrastructure):
         """
         value = self.query_with_cache(sql=sql)
         return len(value) == 1 and value[0][0] == 1
+
+
+    def validate_income_tax_type(self, value: str):
+        sql = f"""
+            SELECT 1
+            FROM TSCTIPIR
+            WHERE TP_IMP_RENDA = '{value}'
+        """
+        value = self.query_with_cache(sql=sql)
+        return len(value) == 1 and value[0][0] == 1
+
+    def is_others(self, value: str):
+        sql = f"""
+            SELECT 1
+            FROM TSCATIV
+            WHERE DS_ATIV = 'OUTROS'
+            AND CD_ATIV = {value}
+        """
+        value = self.query_with_cache(sql=sql)
+        return len(value) == 1 and value[0][0] == 1
+
+    def is_business_person(self, value: str):
+        sql = f"""
+            SELECT 1
+            FROM TSCATIV
+            WHERE DS_ATIV = 'EMPRESARIO'
+            AND CD_ATIV = {value}
+        """
+        value = self.query_with_cache(sql=sql)
+        return len(value) == 1 and value[0][0] == 1
