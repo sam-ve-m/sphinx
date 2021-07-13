@@ -423,6 +423,7 @@ class UserService(IUser):
             user_identifier_data["spouse"] = spouse
 
         response = stone_age.get_user_quiz(user_identifier_data)
+        # TODO: SAVE UUID on user COLECTION and STATUS PERSEPHONE AND COLECTION
         quiz = response.get("output")
 
         return {"status_code": status.HTTP_200_OK, "payload": quiz}
@@ -443,23 +444,6 @@ class UserService(IUser):
         stone_age_user_data = stone_age.send_user_quiz_responses(
             quiz=payload.get("quiz")
         )
-
-        persephone_dtvm_user = get_user_account_template_with_data(
-            payload={
-                "stone_age_user_data": stone_age_user_data,
-                "user_data": dict(old),
-            }
-        )
-
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
-            partition=PersephoneQueue.DTVM_USER_QUEUE.value,
-            payload=persephone_dtvm_user,
-            schema_key="dtvm_user_schema",
-        )
-
-        if not sent_to_persephone:
-            raise InternalServerError("common.process_issue")
 
         new = dict(old)
         UserService.fill_account_data_on_user_document(

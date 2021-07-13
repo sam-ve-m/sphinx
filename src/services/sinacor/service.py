@@ -38,11 +38,11 @@ class SinacorService:
 
         user = user_repository.find_one({"cpf": output["identifier_document"]["document_data"]["number"]})
 
-        client_register_repository.
+        # client_register_repository.s
 
-        return {
-            "status_code": status.HTTP_200_OK,
-            "message_key": "ok",
-        }
+        # return {
+        #     "status_code": status.HTTP_200_OK,
+        #     "message_key": "ok",
+        # }
 
         normalized_data = StoneAge.get_only_values_from_user_data(user_data=output)
