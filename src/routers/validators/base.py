@@ -8,7 +8,7 @@ import logging
 from fastapi import Form
 from validate_email import validate_email
 from pydantic import BaseModel, constr, validator, UUID1
-from decouple import config
+from src.utils.env_config import config
 
 # SPHIX
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
@@ -121,6 +121,10 @@ class Cpf(BaseModel):
         raise ValueError("invalid cpf")
 
 
+class CelPhone(BaseModel):
+    cel_phone: constr(min_length=11, max_length=11)
+
+
 class MaritalStatus(BaseModel):
     marital_status: MaritalStatusEnum
 
@@ -143,7 +147,7 @@ class IsUsPerson(BaseModel):
 
 
 class UsTin(BaseModel):
-    us_tin: Optional[bool]
+    us_tin: Optional[int]
 
 
 # Bureau validators

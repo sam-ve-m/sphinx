@@ -3,7 +3,7 @@ import pickle
 from typing import Optional
 
 # OUTSIDE LIBRARIES
-from decouple import config
+from src.utils.env_config import config
 from redis import Redis
 
 # SPHINX

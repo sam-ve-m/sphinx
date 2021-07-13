@@ -6,7 +6,7 @@ import json
 # OUTSIDE LIBRARIES
 from fastapi import Request, Response, status
 from datetime import datetime
-from decouple import config
+from src.utils.env_config import config
 
 # SPHINX
 from src.repositories.user.repository import UserRepository

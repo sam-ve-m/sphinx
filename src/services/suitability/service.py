@@ -63,7 +63,7 @@ class SuitabilityService(ISuitability):
         suitability_user_profile_repository=SuitabilityUserProfileRepository(),
         persephone_client=PersephoneService.get_client(),
     ) -> Union[dict, Exception]:
-        thebes_answer: dict = payload.get("thebes_answer")
+        thebes_answer: dict = payload.get("x-thebes-answer")
         user_email: str = thebes_answer.get("email")
         suitability_submission_date = datetime.utcnow()
         (
@@ -119,7 +119,7 @@ class SuitabilityService(ISuitability):
         payload: dict,
         suitability_user_profile_repository=SuitabilityUserProfileRepository(),
     ) -> Union[dict, Exception]:
-        thebes_answer: dict = payload.get("thebes_answer")
+        thebes_answer: dict = payload.get("x-thebes-answer")
         user_email: str = thebes_answer.get("email")
         user_profile = SuitabilityService.__get_last_user_profile(
             suitability_user_profile_repository=suitability_user_profile_repository,

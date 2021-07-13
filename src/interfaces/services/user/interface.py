@@ -1,12 +1,16 @@
 # STANDARD LIBS
 from abc import ABC, abstractmethod
+from persephone_client.main import Persephone
 
 # SPHINX
-from src.repositories.user.repository import UserRepository
 from src.services.authentications.service import AuthenticationService
-from src.utils.jwt_utils import JWTHandler
+from src.services.persephone.service import PersephoneService
+
+from src.repositories.user.repository import UserRepository
 from src.repositories.file.repository import FileRepository
-from persephone_client.main import Persephone
+
+from src.utils.jwt_utils import JWTHandler
+from src.utils.stone_age import StoneAge
 
 
 class IUser(ABC):
@@ -42,17 +46,17 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def forgot_password(
-        payload: dict,
-        user_repository: UserRepository,
-        authentication_service: AuthenticationService,
+    def change_view(
+        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def change_view(
-        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+    def forgot_password(
+        payload: dict,
+        user_repository: UserRepository,
+        authentication_service: AuthenticationService,
     ) -> dict:
         pass
 
@@ -87,5 +91,46 @@ class IUser(ABC):
         user_repository: UserRepository,
         token_handler: JWTHandler,
         file_repository: FileRepository,
+    ) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def user_identifier_data(
+        payload: dict,
+        user_repository=UserRepository(),
+    ) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def user_complementary_data(
+        payload: dict,
+        user_repository=UserRepository(),
+    ) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def change_user_to_client(
+        payload: dict,
+        user_repository=UserRepository(),
+        stone_age=StoneAge,
+        persephone_client=PersephoneService.get_client(),
+    ) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def user_quiz(
+        payload: dict, stone_age=StoneAge, user_repository=UserRepository()
+    ) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def table_callback(
+        payload: dict,
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         pass

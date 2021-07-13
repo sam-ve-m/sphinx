@@ -129,27 +129,27 @@ def get_new_stubby_request_user_admin():
 
 
 def test_is_public_true_user():
-    route_public = route_is_public(url_request="/user")
+    route_public = route_is_public(url_request="/user", method="POST")
     assert route_public is True
 
 
 def test_is_public_false():
-    route_public = route_is_public(url_request="/oppai")
+    route_public = route_is_public(url_request="/oppai", method="GET")
     assert route_public is False
 
 
 def test_forgot_password_post_is_public():
-    route_public = route_is_public(url_request="/user/forgot_password")
+    route_public = route_is_public(url_request="/user/forgot_password", method="POST")
     assert route_public is True
 
 
 def test_login_is_public():
-    route_public = route_is_public(url_request="/login")
+    route_public = route_is_public(url_request="/login", method="POST")
     assert route_public is True
 
 
 def test_login_admin_is_public():
-    route_public = route_is_public(url_request="/login/admin")
+    route_public = route_is_public(url_request="/login/admin", method="POST")
     assert route_public is True
 
 
