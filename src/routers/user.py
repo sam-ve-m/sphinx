@@ -78,7 +78,9 @@ def update_user_identifier_data(user_identifier: UserIdentifierData, request: Re
 
 
 @router.put("/user/complementary_data", tags=["user"])
-def update_user_complementary_data(user_identifier: UserComplementaryData, request: Request):
+def update_user_complementary_data(
+    user_identifier: UserComplementaryData, request: Request
+):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
@@ -231,3 +233,19 @@ async def get_assigned_term(
     payload = file_type.dict()
     payload.update({"x-thebes-answer": jwt_data_or_error_response})
     return BaseController.run(UserController.get_signed_term, payload, request)
+
+
+@router.get("/user/on_boarding_user_current_step", tags=["user"])
+async def get_on_boarding_user_current_step(
+    request: Request,
+):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+    }
+    return BaseController.run(
+        UserController.get_on_boarding_user_current_step, payload, request
+    )

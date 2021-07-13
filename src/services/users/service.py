@@ -12,10 +12,12 @@ from src.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
 from src.services.persephone.service import PersephoneService
+from src.services.builders.user.on_boarding_steps_builder import OnBoardingStepBuilder
 
-from src.repositories.user.repository import UserRepository
-from src.repositories.file.repository import FileRepository
+from src.repositories.suitability.repository import SuitabilityUserProfileRepository
 from src.repositories.file.enum.user_file import UserFileType
+from src.repositories.file.repository import FileRepository
+from src.repositories.user.repository import UserRepository
 
 from src.domain.persephone_queue import PersephoneQueue
 
@@ -28,10 +30,9 @@ from src.utils.persephone_templates import (
     get_table_response_template_with_data,
     get_user_account_template_with_data,
 )
+from src.utils.env_config import config
 
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-
-from src.utils.env_config import config
 
 
 class UserService(IUser):
@@ -334,16 +335,24 @@ class UserService(IUser):
 
         current_user_with_identifier_data = dict(current_user)
         UserService.add_user_identifier_data_on_current_user(
-            payload=current_user_with_identifier_data, user_identifier_data=user_identifier_data
+            payload=current_user_with_identifier_data,
+            user_identifier_data=user_identifier_data,
         )
-        if user_repository.update_one(old=current_user, new=current_user_with_identifier_data) is False:
+        if (
+            user_repository.update_one(
+                old=current_user, new=current_user_with_identifier_data
+            )
+            is False
+        ):
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
         }
 
     @staticmethod
-    def add_user_identifier_data_on_current_user(payload: dict, user_identifier_data: dict):
+    def add_user_identifier_data_on_current_user(
+        payload: dict, user_identifier_data: dict
+    ):
         payload["cpf"] = user_identifier_data.get("cpf")
         payload["cel_phone"] = user_identifier_data.get("cel_phone")
 
@@ -360,17 +369,25 @@ class UserService(IUser):
 
         current_user_with_complementary_data = dict(current_user)
         UserService.add_user_complementary_data_on_current_user(
-            payload=current_user_with_complementary_data, user_complementary_data=user_complementary_data
+            payload=current_user_with_complementary_data,
+            user_complementary_data=user_complementary_data,
         )
 
-        if user_repository.update_one(old=current_user, new=current_user_with_complementary_data) is False:
+        if (
+            user_repository.update_one(
+                old=current_user, new=current_user_with_complementary_data
+            )
+            is False
+        ):
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
         }
 
     @staticmethod
-    def add_user_complementary_data_on_current_user(payload: dict, user_complementary_data):
+    def add_user_complementary_data_on_current_user(
+        payload: dict, user_complementary_data
+    ):
         payload["is_us_person"] = user_complementary_data.get("is_us_person")
         payload["us_tin"] = user_complementary_data.get("us_tin")
         payload["is_cvm_qualified_investor"] = user_complementary_data.get(
@@ -382,7 +399,9 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def user_quiz(payload: dict, stone_age=StoneAge, user_repository=UserRepository()) -> dict:
+    def user_quiz(
+        payload: dict, stone_age=StoneAge, user_repository=UserRepository()
+    ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         current_user_marital = current_user.get("marital")
@@ -492,3 +511,34 @@ class UserService(IUser):
             "status_code": status.HTTP_200_OK,
             "message_key": "ok",
         }
+
+    @staticmethod
+    def get_on_boarding_user_current_step(
+        payload: dict,
+        user_repository=UserRepository(),
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
+        on_boarding_step_builder=OnBoardingStepBuilder(),
+    ) -> dict:
+        thebes_answer = payload.get("x-thebes-answer")
+        jwt_user_email = thebes_answer.get("email")
+
+        user_file_exists = file_repository.get_user_file(file_type=UserFileType.SELF, user_email=jwt_user_email)
+
+        current_user = user_repository.find_one({"_id": jwt_user_email})
+        if current_user is None:
+            raise BadRequestError("common.register_not_exists")
+
+        user_suitability_profile = current_user.get("suitability")
+
+        on_boarding_steps = (
+            on_boarding_step_builder.user_suitability_step(
+                user_suitability_profile=user_suitability_profile
+            )
+            .user_identifier_step(current_user=current_user)
+            .user_self_step(user_file_exists=user_file_exists)
+            .user_complementary_step(current_user=current_user)
+            .user_quiz_step(current_user=current_user)
+            .build()
+        )
+
+        return {"status_code": status.HTTP_200_OK, "payload": on_boarding_steps}

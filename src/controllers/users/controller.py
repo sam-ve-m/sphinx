@@ -73,3 +73,7 @@ class UserController:
     @staticmethod
     def table_callback(payload: dict):
         return UserService.table_callback(payload=payload)
+
+    @staticmethod
+    def get_on_boarding_user_current_step(payload: dict):
+        return UserService.get_on_boarding_user_current_step(payload=payload)
