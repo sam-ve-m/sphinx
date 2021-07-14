@@ -66,6 +66,7 @@ class UserController:
     @staticmethod
     def user_quiz(payload: dict):
         return UserService.user_quiz(payload=payload)
+
     @staticmethod
     def change_user_to_client(payload: dict):
         return UserService.change_user_to_client(payload=payload)

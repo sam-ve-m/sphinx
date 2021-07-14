@@ -40,7 +40,14 @@ from src.routers.validators.base import (
     DateOfAcquisition,
     Email,
     IncomeTaxTypeSource,
-    ConnectedPersonSource
+    ConnectedPersonSource,
+    ClientTypeSource,
+    PersonTypeSource,
+    InvestorTypeTypeSource,
+    CosifTaxClassificationSource,
+    MaritalRegimeSource,
+    NeighborhoodSource,
+    AssetsDateSource,
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
@@ -63,6 +70,7 @@ class IdentifierDocument(BaseModel):
 class Address(BaseModel):
     street_name: StreetNameSource
     number: AddressNumberSource
+    neighborhood: NeighborhoodSource
     country: CountrySource
     state: StateSource
     city: CitySource
@@ -84,6 +92,7 @@ class Assets(BaseModel):
     patrimony: PatrimonySource
     income: IncomeSource
     income_tax_type: IncomeTaxTypeSource
+    date: AssetsDateSource
 
 
 class Education(BaseModel):
@@ -95,11 +104,17 @@ class PoliticallyExposedPerson(BaseModel):
     is_politically_exposed_person: IsPoliticallyExposedPerson
 
 
+class Marital(BaseModel):
+    marital_regime: MaritalRegimeSource
+    spouse_birth_date: BirthDateSource
+
+
 class Output(Decision, Status, Email):
     gender: GenderSource
     birth_date: BirthDateSource
     nationality: NationalitySource
     naturalness: NaturalnessSource
+    city: CitySource
     mother_name: MotherNameSource
     identifier_document: IdentifierDocument
     address: Address
@@ -109,6 +124,11 @@ class Output(Decision, Status, Email):
     politically_exposed_person: PoliticallyExposedPerson
     date_of_acquisition: DateOfAcquisition
     connected_person: ConnectedPersonSource
+    person_type: PersonTypeSource
+    client_type: ClientTypeSource
+    investor_type: InvestorTypeTypeSource
+    cosif_tax_classification: CosifTaxClassificationSource
+    marital_update: Optional[Marital]
 
 
 class BureauCallback(Uuid, AppName, Successful, Error):

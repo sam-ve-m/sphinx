@@ -31,7 +31,9 @@ class OnBoardingStepBuilder:
     def user_self_step(self, user_file_exists: bool):
         if user_file_exists:
             self.__on_boarding_steps["user_self_step"] = user_file_exists
-            self.__on_boarding_steps["current_on_boarding_step"] = "user_complementary_step"
+            self.__on_boarding_steps[
+                "current_on_boarding_step"
+            ] = "user_complementary_step"
 
         return self
 

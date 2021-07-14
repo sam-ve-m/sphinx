@@ -243,76 +243,120 @@ class SinaCorTypesRepository(OracleInfrastructure):
         _sha1 = sha1()
         _sha1.update(str(sql).encode())
         partial_key = _sha1.hexdigest()
-        key = f'sinacor_types:{partial_key}'
+        key = f"sinacor_types:{partial_key}"
         value = cache.get(key=key)
         if not value:
             partial_value = self.query(sql=sql)
-            value = {'value': partial_value}
+            value = {"value": partial_value}
             cache.set(key=key, value=value, ttl=86400)
-        return value.get('value')
+        return value.get("value")
 
-    def validate_country(self, value: str):
+    def base_validator(self, sql: str) -> bool:
+        value = self.query_with_cache(sql=sql)
+        return len(value) == 1 and value[0][0] == 1
+
+    def validate_country(self, value: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCPAIS
             WHERE SG_PAIS = '{value}'
         """
-        value = self.query_with_cache(sql=sql)
-        return len(value) == 1 and value[0][0] == 1
+        return self.base_validator(sql=sql)
 
-    def validate_state(self, value: str):
+    def validate_state(self, value: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCESTADO
             WHERE SG_ESTADO = '{value}'
         """
-        value = self.query_with_cache(sql=sql)
-        return len(value) == 1 and value[0][0] == 1
+        return self.base_validator(sql=sql)
 
-    def validate_city(self, value: str):
+    def validate_city(self, value: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCDXMUNICIPIO
             WHERE COD_MUNI = '{value}'
         """
-        value = self.query_with_cache(sql=sql)
-        return len(value) == 1 and value[0][0] == 1
+        return self.base_validator(sql=sql)
 
-    def validate_activity(self, value: str):
+    def validate_activity(self, value: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCATIV
             WHERE CD_ATIV = '{value}'
         """
-        value = self.query_with_cache(sql=sql)
-        return len(value) == 1 and value[0][0] == 1
+        return self.base_validator(sql=sql)
 
-
-    def validate_income_tax_type(self, value: str):
+    def validate_income_tax_type(self, value: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCTIPIR
             WHERE TP_IMP_RENDA = '{value}'
         """
-        value = self.query_with_cache(sql=sql)
-        return len(value) == 1 and value[0][0] == 1
+        return self.base_validator(sql=sql)
 
-    def is_others(self, value: str):
+    def is_others(self, value: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCATIV
             WHERE DS_ATIV = 'OUTROS'
             AND CD_ATIV = {value}
         """
-        value = self.query_with_cache(sql=sql)
-        return len(value) == 1 and value[0][0] == 1
+        return self.base_validator(sql=sql)
 
-    def is_business_person(self, value: str):
+    def is_business_person(self, value: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCATIV
             WHERE DS_ATIV = 'EMPRESARIO'
             AND CD_ATIV = {value}
         """
-        value = self.query_with_cache(sql=sql)
-        return len(value) == 1 and value[0][0] == 1
+        return self.base_validator(sql=sql)
+
+    def validate_client_type(self, value: str) -> bool:
+        sql = f"""
+            SELECT 1
+            FROM TSCTIPCLI
+            WHERE TP_CLIENTE = {value}
+        """
+        return self.base_validator(sql=sql)
+
+    def validate_investor_type(self, value: str) -> bool:
+        sql = f"""
+            SELECT 1
+            FROM TSCTPINVESTIDOR
+            WHERE TP_INVESTIDOR = {value}
+        """
+        return self.base_validator(sql=sql)
+
+    def validate_cosif_tax_classification(self, value: str) -> bool:
+        sql = f"""
+            SELECT 1
+            FROM TSCCOSIF
+            WHERE CD_COSIF = {value}
+        """
+        return self.base_validator(sql=sql)
+
+    def validate_document_type(self, value: str) -> bool:
+        sql = f"""
+            SELECT 1
+            FROM TSCTIPDOC
+            WHERE CD_TIPO_DOC = {value}
+        """
+        return self.base_validator(sql=sql)
+
+    def validate_county(self, value: str) -> bool:
+        sql = f"""
+            SELECT 1
+            FROM TSCDXMUNICIPIO
+            WHERE NUM_SEQ_MUNI = {value}
+        """
+        return self.base_validator(sql=sql)
+
+    def validate_marital_regime(self, value: str) -> bool:
+        sql = f"""
+            SELECT 1
+            FROM TSCREGCAS
+            WHERE TP_REGCAS = {value}
+        """
+        return self.base_validator(sql=sql)

@@ -23,13 +23,14 @@ from src.routers.validators.enum_template import MaritalStatusEnum
 from src.repositories.sinacor_types.enum.person_gender import PersonGender
 from src.repositories.sinacor_types.enum.document_type import DocumentTypes
 from src.repositories.sinacor_types.enum.connected_person import ConnectedPerson
+from src.repositories.sinacor_types.enum.person_type import PersonType
 
 
 class Email(BaseModel):
     email: constr(min_length=4, max_length=255)
+
     @validator("email", always=True, allow_reuse=True)
     def validate_email(cls, value):
-        return value
         try:
             is_valid = validate_email(value)
             if is_valid:
@@ -384,3 +385,78 @@ class IncomeTaxTypeSource(Source):
 
 class ConnectedPersonSource(Source):
     value: ConnectedPerson
+
+
+class ClientTypeSource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_client_type(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class PersonTypeSource(Source):
+    value: PersonType
+
+
+class InvestorTypeTypeSource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_investor_type(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class CosifTaxClassificationSource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_cosif_tax_classification(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class CountySource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_county(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class MaritalRegimeSource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_marital_regime(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class NeighborhoodSource(Source):
+    value: str
+
+
+class AssetsDateSource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        try:
+            date = datetime.fromtimestamp(e)
+            return date
+        except:
+            raise ValueError("Wrong timestamp supplied")

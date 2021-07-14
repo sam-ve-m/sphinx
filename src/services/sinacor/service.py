@@ -35,10 +35,12 @@ class SinacorService:
 
         output = payload.get("output")
         old = user_repository.find_one({"_id": output["email"]})
-        new = SinacorService.merge_data_and_get_completed_user_data(output=output, user_database_document=old)
+        new = SinacorService.merge_data_and_get_completed_user_data(
+            output=output, user_database_document=old
+        )
 
-        #TODO: cleanup TSCIMPCLIH, TSCERROH
-        builder = client_register_repository.get_builder(data=new)
+        # TODO: cleanup TSCIMPCLIH, TSCERROH
+        builder = client_register_repository.get_builder(user_data=new)
         # TODO: register_user_data_in_register_users_temp_table
         # TODO: EXECUTE VALDIATOR
         # TODO: EXECUTE CREATE
@@ -51,14 +53,16 @@ class SinacorService:
         normalized_data = StoneAge.get_only_values_from_user_data(user_data=output)
 
     @staticmethod
-    def merge_data_and_get_completed_user_data(output: dict, user_database_document: dict) -> dict:
+    def merge_data_and_get_completed_user_data(
+        output: dict, user_database_document: dict
+    ) -> dict:
         new = deepcopy(user_database_document)
         output_normalized = StoneAge.get_only_values_from_user_data(user_data=output)
         normalize_enum_types(output_normalized)
-        new.update({'stone_age_decision': output_normalized['decision']})
-        del output_normalized['decision']
-        del output_normalized['status']
-        del output_normalized['email']
-        del output_normalized['date_of_acquisition']
+        new.update({"stone_age_decision": output_normalized["decision"]})
+        del output_normalized["decision"]
+        del output_normalized["status"]
+        del output_normalized["email"]
+        del output_normalized["date_of_acquisition"]
         new.update(output_normalized)
         return new
