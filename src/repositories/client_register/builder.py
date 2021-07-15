@@ -69,7 +69,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_dt_atualiz(self):
-        self._fields_added.update({"DT_ATUALIZ": str(datetime.now())})
+        self._fields_added.update({"DT_ATUALIZ": datetime.now()})
         return self
 
     def add_cd_cpfcgc(self, user_data: dict):
@@ -123,7 +123,9 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cosif_ci(self, user_data: dict):
-        self._fields_added.update({"CD_COSIF_CI": user_data["cosif_tax_classification"]})
+        self._fields_added.update(
+            {"CD_COSIF_CI": user_data["cosif_tax_classification"]}
+        )
         return self
 
     def add_cd_est_civil(self, user_data: dict):
@@ -138,7 +140,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_nacion(self, user_data: dict):
-        self._fields_added.update({"CD_NACION": user_data["nationality"]})
+        self._fields_added.update({"CD_NACION": user_data["birthplace"]["nationality"]})
         return self
 
     def add_cd_tipo_doc(self, user_data: dict):
@@ -150,7 +152,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_doc_ident(self, user_data: dict):
-        self._fields_added.update({"CD_TIPO_DOC": user_data["cpf"]})
+        self._fields_added.update({"CD_DOC_IDENT": user_data["cpf"]})
         return self
 
     def add_id_sexo(self, user_data: dict):
@@ -164,7 +166,9 @@ class ClientRegisterBuilder:
         return self
 
     def add_nm_conjuge(self, user_data: dict):
-        self._fields_added.update({"NM_CONJUGE": user_data["marital"]["spouse"]["name"]})
+        self._fields_added.update(
+            {"NM_CONJUGE": user_data["marital"]["spouse"]["name"]}
+        )
         return self
 
     def add_nm_e_mail(self, user_data: dict):
@@ -172,7 +176,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_nm_loc_nasc(self, user_data: dict):
-        self._fields_added.update({"NM_LOC_NASC": user_data["city"]})
+        self._fields_added.update({"NM_LOC_NASC": user_data["birthplace"]["city"]})
         return self
 
     def add_nm_mae(self, user_data: dict):
@@ -180,11 +184,11 @@ class ClientRegisterBuilder:
         return self
 
     def add_sg_estado_nasc(self, user_data: dict):
-        self._fields_added.update({"SG_ESTADO_NASC": user_data["naturalness"]})
+        self._fields_added.update({"SG_ESTADO_NASC": user_data["birthplace"]["state"]})
         return self
 
     def add_sg_pais(self, user_data: dict):
-        self._fields_added.update({"SG_PAIS": user_data["nationality"]})
+        self._fields_added.update({"SG_PAIS": user_data["birthplace"]["country"]})
         return self
 
     def add_tp_regcas(self, user_data: dict):
@@ -194,17 +198,18 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cep(self, user_data: dict):
-        self._fields_added.update({"CD_CEP": user_data["address"]["zip_code"]})
+        self._fields_added.update({"CD_CEP": int(user_data["address"]["zip_code"])})
         return self
 
     def add_cd_ddd_celular1(self, user_data: dict):
         # TODO: celphone format validate
-        self._fields_added.update({"CD_DDD_CELULAR1": user_data["cel_phone"][:2]})
+        self._fields_added.update({"CD_DDD_CELULAR1": int(user_data["cel_phone"][:2])})
         return self
 
     def add_cd_ddd_tel(self, user_data: dict):
-        # TODO: celphone format validate
-        self._fields_added.update({"CD_DDD_TEL": user_data["address"]["phone_number"][:2]})
+        self._fields_added.update(
+            {"CD_DDD_TEL": int(user_data["address"]["phone_number"][:2])}
+        )
         return self
 
     def add_in_ende(self):
@@ -216,7 +221,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_nr_celular1(self, user_data: dict):
-        self._fields_added.update({"NR_CELULAR1": user_data["cel_phone"]})
+        self._fields_added.update({"NR_CELULAR1": user_data["cel_phone"][2:]})
         return self
 
     def add_nm_cidade(self, user_data: dict):
@@ -224,7 +229,9 @@ class ClientRegisterBuilder:
         return self
 
     def add_nm_logradouro(self, user_data: dict):
-        self._fields_added.update({"NM_LOGRADOURO": user_data["address"]["street_name"]})
+        self._fields_added.update(
+            {"NM_LOGRADOURO": user_data["address"]["street_name"]}
+        )
         return self
 
     def add_nr_predio(self, user_data: dict):
@@ -232,7 +239,9 @@ class ClientRegisterBuilder:
         return self
 
     def add_nr_telefone(self, user_data: dict):
-        self._fields_added.update({"NR_TELEFONE": user_data["address"]["phone_number"]})
+        self._fields_added.update(
+            {"NR_TELEFONE": int(user_data["address"]["phone_number"][2:])}
+        )
         return self
 
     def add_sg_estado(self, user_data: dict):
@@ -352,15 +361,19 @@ class ClientRegisterBuilder:
         return self
 
     def add_cod_cidade_nasc(self, user_data: dict):
-        self._fields_added.update({"COD_CIDADE_NASC": user_data["city"]})
+        self._fields_added.update(
+            {"COD_CIDADE_NASC": user_data["birthplace"]["id_city"]}
+        )
         return self
 
     def add_sigl_pais_resid(self, user_data: dict):
-        self._fields_added.update({"SIGL_PAIS_RESID": user_data["nationality"]})
+        self._fields_added.update({"SIGL_PAIS_RESID": user_data["address"]["country"]})
         return self
 
     def add_num_seq_muni_end1(self, user_data: dict):
-        self._fields_added.update({"NUM_SEQ_MUNI_END1": user_data["address"]["city"]})
+        self._fields_added.update(
+            {"NUM_SEQ_MUNI_END1": user_data["address"]["id_city"]}
+        )
         return self
 
     def add_num_tipo_con(self, value=None):
@@ -391,7 +404,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_data_ult_atlz(self):
-        self._fields_added.update({"DATA_ULT_ATLZ": str(datetime.now())})
+        self._fields_added.update({"DATA_ULT_ATLZ": datetime.now()})
         return self
 
     def add_num_trab_empr(self, user_data: dict):
@@ -417,7 +430,9 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cpf_conjuge(self, user_data: dict):
-        self._fields_added.update({"CD_CPF_CONJUGE": user_data["marital"]["spouse"]["cpf"]})
+        self._fields_added.update(
+            {"CD_CPF_CONJUGE": user_data["marital"]["spouse"]["cpf"]}
+        )
         return self
 
     def add_dt_nasc_conjuge(self, user_data: dict):

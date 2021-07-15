@@ -15,8 +15,8 @@ from src.routers.validators.base import (
     Status,
     GenderSource,
     BirthDateSource,
-    NationalitySource,
-    NaturalnessSource,
+    CountrySource,
+    StateSource,
     MotherNameSource,
     DocumentTypeSource,
     CpfOrCnpjSource,
@@ -27,6 +27,7 @@ from src.routers.validators.base import (
     AddressNumberSource,
     CountrySource,
     CitySource,
+    IdCitySource,
     ZipCodeSource,
     PhoneNumberSource,
     ActivitySource,
@@ -48,6 +49,7 @@ from src.routers.validators.base import (
     MaritalRegimeSource,
     NeighborhoodSource,
     AssetsDateSource,
+    NationalitySource,
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
@@ -68,12 +70,14 @@ class IdentifierDocument(BaseModel):
 
 
 class Address(BaseModel):
+    country: CountrySource
     street_name: StreetNameSource
     number: AddressNumberSource
     neighborhood: NeighborhoodSource
     country: CountrySource
     state: StateSource
     city: CitySource
+    id_city: IdCitySource
     zip_code: ZipCodeSource
     phone_number: PhoneNumberSource
 
@@ -109,12 +113,18 @@ class Marital(BaseModel):
     spouse_birth_date: BirthDateSource
 
 
+class Birthplace(BaseModel):
+    nationality: NationalitySource
+    country: CountrySource
+    state: StateSource
+    city: CitySource
+    id_city: IdCitySource
+
+
 class Output(Decision, Status, Email):
     gender: GenderSource
     birth_date: BirthDateSource
-    nationality: NationalitySource
-    naturalness: NaturalnessSource
-    city: CitySource
+    birthplace: Birthplace
     mother_name: MotherNameSource
     identifier_document: IdentifierDocument
     address: Address

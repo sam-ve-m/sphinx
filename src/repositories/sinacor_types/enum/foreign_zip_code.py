@@ -2,4 +2,4 @@ from enum import Enum
 
 
 class ForeignZipCode(Enum):
-    DEFAULT = 0
+    DEFAULT = "0"

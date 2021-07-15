@@ -21,7 +21,7 @@ class OracleInfrastructure(IOracle):
     pool = cx_Oracle.SessionPool(
         user=config("ORACLE_USER"),
         password=config("ORACLE_PASSWORD"),
-        min=1,
+        min=2,
         max=100,
         increment=1,
         dsn=cx_Oracle.makedsn(
@@ -32,25 +32,30 @@ class OracleInfrastructure(IOracle):
         encoding=config("ORACLE_ENCODING"),
     )
 
-    @staticmethod
     @contextmanager
-    def get_connection():
-        connection = OracleInfrastructure.pool.acquire()
+    def get_connection(self):
+        connection = self.pool.acquire()
         try:
             yield connection
         except (cx_Oracle.Error, Exception) as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
         finally:
-            OracleInfrastructure.pool.release(connection)
+            self.pool.release(connection)
 
     def query(self, sql: str) -> list:
-        with OracleInfrastructure.get_connection() as connection:
+        with self.get_connection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute(sql)
                 rows = cursor.fetchall()
                 rows = self._normalize_encode(rows=rows)
                 return rows
+
+    def delete(self, sql: str, values: dict) -> list:
+        with self.get_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, values)
+                connection.commit()
 
     @staticmethod
     def _normalize_encode(rows: List[tuple]) -> List[tuple]:
@@ -64,15 +69,14 @@ class OracleInfrastructure(IOracle):
             new_rows.append(tuple(new_row))
         return new_rows
 
-    def insert(self, sql: str, values: list) -> None:
-        with OracleInfrastructure.get_connection() as connection:
+    def insert(self, sql: str, values: dict) -> None:
+        with self.get_connection() as connection:
             with connection.cursor() as cursor:
                 cursor.execute(sql, values)
                 connection.commit()
 
-    def execute(self, name, values) -> int:
-        with OracleInfrastructure.get_connection() as connection:
+    def execute(self, sql, values) -> int:
+        with self.get_connection() as connection:
             with connection.cursor() as cursor:
-                order_count = cursor.var(int)
-                cursor.callproc(name, values)
-                return order_count.getvalue()
+                cursor.execute(sql, values)
+                connection.commit()

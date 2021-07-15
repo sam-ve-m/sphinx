@@ -210,7 +210,7 @@ class BirthDateSource(Source):
             raise ValueError("Wrong timestamp supplied")
 
 
-class NationalitySource(Source):
+class CountrySource(Source):
     value: constr(min_length=3, max_length=3)
 
     @validator("value", always=True, allow_reuse=True)
@@ -221,7 +221,7 @@ class NationalitySource(Source):
         raise ValueError("nationality not exists")
 
 
-class NaturalnessSource(Source):
+class StateSource(Source):
     value: constr(min_length=2, max_length=2)
 
     @validator("value", always=True, allow_reuse=True)
@@ -296,13 +296,35 @@ class CountrySource(Source):
         raise ValueError("nationality not exists")
 
 
-class CitySource(Source):
+class NationalitySource(Source):
     value: int
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
         sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_nationality(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class CitySource(Source):
+    value: str
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_city(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class IdCitySource(Source):
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_city_id(value=e):
             return e
         raise ValueError("nationality not exists")
 

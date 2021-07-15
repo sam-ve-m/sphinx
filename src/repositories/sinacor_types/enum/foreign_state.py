@@ -2,4 +2,4 @@ from enum import Enum
 
 
 class ForeignState(Enum):
-    DEFAULT = 0
+    DEFAULT = "0"

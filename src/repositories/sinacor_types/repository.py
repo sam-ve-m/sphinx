@@ -263,6 +263,14 @@ class SinaCorTypesRepository(OracleInfrastructure):
         """
         return self.base_validator(sql=sql)
 
+    def validate_nationality(self, value: str) -> bool:
+        sql = f"""
+            SELECT 1
+            FROM TSCNACION
+            WHERE CD_NACION = {value}
+        """
+        return self.base_validator(sql=sql)
+
     def validate_state(self, value: str) -> bool:
         sql = f"""
             SELECT 1
@@ -271,12 +279,20 @@ class SinaCorTypesRepository(OracleInfrastructure):
         """
         return self.base_validator(sql=sql)
 
-    def validate_city(self, value: str) -> bool:
+    def validate_city_id(self, value: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCDXMUNICIPIO
             WHERE COD_MUNI = '{value}'
         """
+        return self.base_validator(sql=sql)
+
+    def validate_city(self, value: str) -> bool:
+        sql = f"""
+              SELECT 1
+              FROM TSCDXMUNICIPIO
+              WHERE NOME_MUNI = '{value}'
+          """
         return self.base_validator(sql=sql)
 
     def validate_activity(self, value: str) -> bool:

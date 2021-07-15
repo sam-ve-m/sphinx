@@ -8,32 +8,44 @@ from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 
 
 class ClientRegisterRepository(OracleInfrastructure):
-    def cleanup_temp_tables(self):
-        client_temp = """TRUNCATE TABLE TSCIMPCLIH;"""
-        error_temp = """TRUNCATE TABLE TSCERROH;"""
-        self.query(sql=client_temp + error_temp)
+    def register_validated_users(self, user_cpf: str):
+        # TODO: Validate this values
+        values = [1, "CD_USUARIO", "I", 0, user_cpf]
+        self.execute(name="PROC_IMPCLIH_V2", values=values)
 
-    def run_data_validator_in_register_user_tmp_table(self, user_cpf: int):
-        result = self.execute(name="PROC_CLIECOH_V2_LIONX", values=[user_cpf])
+    def cleanup_temp_tables(self, user_cpf: str):
+        client_temp = "DELETE FROM TSCIMPCLIH WHERE CD_CPFCGC = :cpf"
+        self.delete(sql=client_temp, values={"cpf": user_cpf})
+        error_temp = "DELETE FROM TSCERROH WHERE CD_CPFCGC = :cpf"
+        self.delete(sql=error_temp, values={"cpf": user_cpf})
 
-    def validate_errors_on_temp_tables(self):
-        sql = """
-            SELECT count(*) 
-            FROM TSCERROH E
-            JOIN TSCIMCPLI I on E.CD_CPFCGC = I.CD_CPFCGC
-            WHERE I.TP_REGISTRO = 'P';
+    def validate_user_data_erros(self, user_cpf: int) -> bool:
+        self._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
+        return self._validate_errors_on_temp_tables(user_cpf=user_cpf)
+
+    def _validate_errors_on_temp_tables(self, user_cpf: int) -> bool:
+        sql = f"""
+            SELECT 1 
+            FROM TSCERROH
+            WHERE CD_CPFCGC = {user_cpf}
         """
         result = self.query(sql=sql)
-        return len(result) == 0
+        return len(result) >= 0
 
-    def register_validated_users(self):
-        # TODO: Validate this values
-        values = ["CD_EMPRESA", "CD_USUARIO", "TP_OCORRENCIA", "CD_CLIENTE_PADRAO"]
-        self.execute(name="PROC_IMPCLIH_V2", values=values)
+    def _run_data_validator_in_register_user_tmp_table(self, user_cpf: int) -> int:
+        self.execute(sql="call PROC_CLIECOH_V2_LIONX.EXECCONH(:s, :cpf)", values={'s': "S", 'cpf': str(user_cpf)})
+
+    def register_user_data_in_register_users_temp_table(
+        self, builder: Type[ClientRegisterBuilder]
+    ):
+        client_register = builder.build()
+        fields = client_register.keys()
+        sql = f"""INSERT INTO TSCIMPCLIH({','.join(fields)}) VALUES(:{',:'.join(fields)})"""
+        self.insert(sql=sql, values=client_register)
 
     def get_builder(
         self, user_data: dict, sinacor_types_repository=SinaCorTypesRepository()
-    ):
+    ) -> Type[ClientRegisterBuilder]:
         activity = user_data["occupation"]["activity"]
         is_married = user_data["marital"]["status"] == "married"
         is_business_person = sinacor_types_repository.is_business_person(value=activity)
@@ -41,23 +53,50 @@ class ClientRegisterRepository(OracleInfrastructure):
             value=activity
         )
 
-        callback_key = (is_married, is_not_employed_or_business_person, is_business_person)
+        callback_key = (
+            is_married,
+            is_not_employed_or_business_person,
+            is_business_person,
+        )
 
         callbacks = {
-            (True, True, False): ClientRegisterRepository.is_not_employed_or_business_and_married_person,
-            (True, False, True): ClientRegisterRepository.is_business_and_married_person,
-            (True, False, False): ClientRegisterRepository.is_employed_and_married_person,
-            (False, True, False): ClientRegisterRepository.is_not_employed_or_business_and_not_married_person,
-            (False, False, True): ClientRegisterRepository.is_business_and_not_married_person,
-            (False, False, False): ClientRegisterRepository.is_employed_and_not_married_person,
+            (
+                True,
+                True,
+                False,
+            ): ClientRegisterRepository._is_not_employed_or_business_and_married_person,
+            (
+                True,
+                False,
+                True,
+            ): ClientRegisterRepository._is_business_and_married_person,
+            (
+                True,
+                False,
+                False,
+            ): ClientRegisterRepository._is_employed_and_married_person,
+            (
+                False,
+                True,
+                False,
+            ): ClientRegisterRepository._is_not_employed_or_business_and_not_married_person,
+            (
+                False,
+                False,
+                True,
+            ): ClientRegisterRepository._is_business_and_not_married_person,
+            (
+                False,
+                False,
+                False,
+            ): ClientRegisterRepository._is_employed_and_not_married_person,
         }
         if callback := callbacks.get(callback_key):
-            builder = callback(user_data=user_data)
-
+            return callback(user_data=user_data)
 
     @staticmethod
-    def is_not_employed_or_business_and_not_married_person(
-        user_data: dict
+    def _is_not_employed_or_business_and_not_married_person(
+        user_data: dict,
     ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
@@ -96,6 +135,8 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_nr_telefone(user_data=user_data)
             .add_sg_estado(user_data=user_data)
             .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
             .add_dv_cliente()
             .add_in_cart_prop()
@@ -125,7 +166,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def is_employed_and_not_married_person(user_data: dict) -> ClientRegisterBuilder:
+    def _is_employed_and_not_married_person(user_data: dict) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
             builder.add_tp_registro()
@@ -163,6 +204,8 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_nr_telefone(user_data=user_data)
             .add_sg_estado(user_data=user_data)
             .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
             .add_dv_cliente()
             .add_in_cart_prop()
@@ -194,7 +237,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def is_business_and_not_married_person(user_data: dict) -> ClientRegisterBuilder:
+    def _is_business_and_not_married_person(user_data: dict) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
             builder.add_tp_registro()
@@ -232,6 +275,8 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_nr_telefone(user_data=user_data)
             .add_sg_estado(user_data=user_data)
             .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
             .add_dv_cliente()
             .add_in_cart_prop()
@@ -262,7 +307,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def is_not_employed_or_business_and_married_person(
+    def _is_not_employed_or_business_and_married_person(
         user_data: dict,
     ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
@@ -304,6 +349,8 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_nr_telefone(user_data=user_data)
             .add_sg_estado(user_data=user_data)
             .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
             .add_dv_cliente()
             .add_in_cart_prop()
@@ -335,7 +382,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def is_employed_and_married_person(user_data: dict) -> ClientRegisterBuilder:
+    def _is_employed_and_married_person(user_data: dict) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
             builder.add_tp_registro()
@@ -375,6 +422,8 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_nr_telefone(user_data=user_data)
             .add_sg_estado(user_data=user_data)
             .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
             .add_dv_cliente()
             .add_in_cart_prop()
@@ -408,7 +457,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def is_business_and_married_person(user_data: dict) -> ClientRegisterBuilder:
+    def _is_business_and_married_person(user_data: dict) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
             builder.add_tp_registro()
@@ -448,6 +497,8 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_nr_telefone(user_data=user_data)
             .add_sg_estado(user_data=user_data)
             .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
             .add_dv_cliente()
             .add_in_cart_prop()
@@ -477,14 +528,3 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_dt_nasc_conjuge(user_data=user_data)
         )
         return builder
-
-    def register_user_data_in_register_users_temp_table(
-        self, builder: Type[ClientRegisterBuilder]
-    ):
-        client_register = builder.build()
-        fields = client_register.keys()
-        sql = f"""
-            INSERT INTO TSCIMPCLIH({','.join(fields)}) 
-            VALUES(:{',:'.join(fields)});
-        """
-        self.insert(sql=sql, values=client_register.get_values())
