@@ -10,7 +10,7 @@ from src.exceptions.exceptions import InternalServerError
 
 class StoneAge:
     @staticmethod
-    def send_user_identifier_data(user_identifier_data: dict) -> Optional[list]:
+    def get_user_quiz(user_identifier_data: dict) -> dict:
         """this functions will send the user_identifier_data and will return a quiz"""
 
         # TODO: Get cpf from user identifier data

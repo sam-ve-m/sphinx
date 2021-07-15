@@ -114,6 +114,10 @@ class Cpf(BaseModel):
         raise ValueError("invalid cpf")
 
 
+class CelPhone(BaseModel):
+    cel_phone: constr(min_length=11, max_length=11)
+
+
 class MaritalStatus(BaseModel):
     marital_status: MaritalStatusEnum
 
@@ -136,4 +140,4 @@ class IsUsPerson(BaseModel):
 
 
 class UsTin(BaseModel):
-    us_tin: Optional[bool]
+    us_tin: Optional[int]

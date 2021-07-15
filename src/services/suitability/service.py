@@ -7,7 +7,7 @@ from fastapi import status
 
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError
-from src.repositories.base_repository import BaseRepository
+from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
 from src.repositories.suitability.repository import (
     SuitabilityRepository,
     SuitabilityUserProfileRepository,
@@ -24,8 +24,8 @@ class SuitabilityService(ISuitability):
     @staticmethod
     def create_quiz(
         payload: dict,
-        suitability_repository: BaseRepository = SuitabilityRepository(),
-        suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository(),
+        suitability_repository: MongoDBInfrastructure = SuitabilityRepository(),
+        suitability_answers_repository: MongoDBInfrastructure = SuitabilityAnswersRepository(),
         suitability_answers_profile_builder=SuitabilityAnswersProfileBuilder(),
     ) -> Union[dict, Exception]:
 
@@ -166,7 +166,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __insert_new_suitability(
-        suitability_repository: BaseRepository, suitability: dict
+        suitability_repository: MongoDBInfrastructure, suitability: dict
     ) -> Optional[Exception]:
         if type(suitability) is not dict:
             raise InternalServerError("common.invalid_params")
@@ -182,7 +182,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __insert_new_answers_suitability(
-        suitability_answers_repository: BaseRepository,
+        suitability_answers_repository: MongoDBInfrastructure,
         answers: dict,
     ) -> Optional[Exception]:
         if type(answers) is not dict:
@@ -199,7 +199,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __get_last_suitability_answers_metadata(
-        suitability_answers_repository: BaseRepository = SuitabilityAnswersRepository(),
+        suitability_answers_repository: MongoDBInfrastructure = SuitabilityAnswersRepository(),
     ) -> Union[Tuple[List[dict], int, int], Exception]:
         try:
             _answers = list(
@@ -228,7 +228,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __update_suitability_score_and_submission_date_in_user_db(
-        user_repository: BaseRepository,
+        user_repository: MongoDBInfrastructure,
         user_email: str,
         score: int,
         suitability_version: int,
@@ -273,7 +273,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __insert_suitability_answers_in_user_profile_db(
-        suitability_user_profile_repository: BaseRepository,
+        suitability_user_profile_repository: MongoDBInfrastructure,
         answers: List[dict],
         suitability_version: int,
         user_email: str,
@@ -309,7 +309,7 @@ class SuitabilityService(ISuitability):
 
     @staticmethod
     def __get_last_user_profile(
-        suitability_user_profile_repository: BaseRepository, email: str
+        suitability_user_profile_repository: MongoDBInfrastructure, email: str
     ) -> Union[dict, Exception]:
         if not email:
             raise InternalServerError("common.process_issue")

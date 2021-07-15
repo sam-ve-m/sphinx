@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 
 # SPHINX
-from src.repositories.base_repository import BaseRepository
+from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
 from src.repositories.suitability.repository import SuitabilityRepository
 
 
@@ -18,15 +18,15 @@ class ISuitability(ABC):
     @abstractmethod
     def create_profile(
         payload: dict,
-        user_repository: BaseRepository,
-        suitability_repository: BaseRepository,
-        suitability_user_profile_repository: BaseRepository,
+        user_repository: MongoDBInfrastructure,
+        suitability_repository: MongoDBInfrastructure,
+        suitability_user_profile_repository: MongoDBInfrastructure,
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def get_user_profile(
-        payload: dict, suitability_user_profile_repository: BaseRepository
+        payload: dict, suitability_user_profile_repository: MongoDBInfrastructure
     ) -> dict:
         pass

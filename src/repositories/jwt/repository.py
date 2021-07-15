@@ -2,10 +2,10 @@
 from src.utils.env_config import config
 
 # SPHINX
-from src.repositories.base_repository import BaseRepository
+from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
 
 
-class JwtRepository(BaseRepository):
+class JwtRepository(MongoDBInfrastructure):
     def __init__(self):
         super().__init__(
             database=config("MONGODB_DATABASE_NAME"),

@@ -170,7 +170,10 @@ def test_delete_process_issue(get_new_stubby_repository):
         UserService.delete(payload=payload_change_view, user_repository=stub_repository)
 
 
-@patch("src.services.users.service.UserService.delete", return_value={"status_code": status.HTTP_200_OK, "message_key":"requests.updated"})
+@patch(
+    "src.services.users.service.UserService.delete",
+    return_value={"status_code": status.HTTP_200_OK, "message_key": "requests.updated"},
+)
 def test_delete(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
     stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
@@ -493,23 +496,21 @@ def test_user_identifier_data_register_not_exists(
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
-            stone_age=StubStoneAge,
         )
 
 
-def test_user_identifier_data_process_issue_v1(
-    get_user_data, get_new_stubby_repository
-):
-    stub_user_repository = get_new_stubby_repository
-    stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
-    stub_user_repository.update_one = MagicMock(return_value=True)
-    StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
-    with pytest.raises(InternalServerError, match="^user.quiz.trouble"):
-        UserService.user_identifier_data(
-            payload=payload_user_identifier_data,
-            user_repository=stub_user_repository,
-            stone_age=StubStoneAge,
-        )
+# def test_user_identifier_data_process_issue_v1(
+#     get_user_data, get_new_stubby_repository
+# ):
+#     stub_user_repository = get_new_stubby_repository
+#     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
+#     stub_user_repository.update_one = MagicMock(return_value=True)
+#     StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
+#     with pytest.raises(InternalServerError, match="^user.quiz.trouble"):
+#         UserService.user_identifier_data(
+#             payload=payload_user_identifier_data,
+#             user_repository=stub_user_repository,
+#         )
 
 
 def test_user_identifier_data_process_issue_v2(
@@ -523,7 +524,6 @@ def test_user_identifier_data_process_issue_v2(
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
-            stone_age=StubStoneAge,
         )
 
 
@@ -535,10 +535,8 @@ def test_user_identifier_data(get_user_data, get_new_stubby_repository):
     response = UserService.user_identifier_data(
         payload=payload_user_identifier_data,
         user_repository=stub_user_repository,
-        stone_age=StubStoneAge,
     )
     assert response.get("status_code") == status.HTTP_200_OK
-    assert type(response.get("payload").get("quiz")) == dict
 
 
 class StubPersephoneClient:

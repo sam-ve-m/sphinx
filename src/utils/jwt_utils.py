@@ -81,6 +81,7 @@ class JWTHandler:
         user_account_data_months_past = None
         if user_account_data:
             user_account_data_months_past = user_account_data.get("months_past")
+
         new_payload = {
             "name": payload.get("name"),
             "email": payload.get("email"),
@@ -92,6 +93,11 @@ class JWTHandler:
             "exp": payload.get("exp"),
             "created_at": payload.get("created_at"),
         }
+        stone_age_decision = payload.get("stone_age_decision")
+
+        if stone_age_decision:
+            new_payload.update({"stone_age_decision": stone_age_decision})
+
         return new_payload
 
     @staticmethod

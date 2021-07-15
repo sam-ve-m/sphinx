@@ -15,6 +15,7 @@ from src.routers.validators.base import (
     Feature,
     TermFile,
     Cpf,
+    CelPhone,
     MaritalStatus,
     Nationality,
     QuizQuestionOption,
@@ -37,7 +38,11 @@ class Spouse(Name, Cpf, Nationality):
     pass
 
 
-class UserIdentifierData(Cpf, MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedInvestor):
+class UserIdentifierData(Cpf, CelPhone):
+    pass
+
+
+class UserComplementaryData(MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedInvestor):
     spouse: Optional[Spouse]
 
 
@@ -70,6 +75,32 @@ def update_user_identifier_data(user_identifier: UserIdentifierData, request: Re
         "user_identifier": user_identifier.dict(),
     }
     return BaseController.run(UserController.user_identifier_data, payload, request)
+
+
+@router.put("/user/complementary_data", tags=["user"])
+def update_user_complementary_data(
+    user_identifier: UserComplementaryData, request: Request
+):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+        "user_complementary": user_identifier.dict(),
+    }
+    return BaseController.run(UserController.user_complementary_data, payload, request)
+
+
+@router.get("/user/quiz", tags=["user"])
+def user_quiz(request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+    }
+    return BaseController.run(UserController.user_quiz, payload, request)
 
 
 @router.put("/user/change_user_to_client", tags=["user"])
@@ -202,3 +233,19 @@ async def get_assigned_term(
     payload = file_type.dict()
     payload.update({"x-thebes-answer": jwt_data_or_error_response})
     return BaseController.run(UserController.get_signed_term, payload, request)
+
+
+@router.get("/user/on_boarding_user_current_step", tags=["user"])
+async def get_on_boarding_user_current_step(
+    request: Request,
+):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+    }
+    return BaseController.run(
+        UserController.get_on_boarding_user_current_step, payload, request
+    )
