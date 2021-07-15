@@ -6,7 +6,7 @@ def get_prospect_user_template_with_data(payload: dict) -> dict:
     return {
         "user_email": payload.get("email"),
         "name": payload.get("name"),
-        "create_user_time_stamp": int(datetime.utcnow().timestamp()),
+        "create_user_timestamp": int(datetime.utcnow().timestamp()),
     }
 
 
@@ -19,7 +19,7 @@ def get_user_signed_term_template_with_data(payload: dict, file_type: str) -> di
         "term_type": file_type,
         "term_version": f"v{version}",
         "user_accept": True,
-        "term_answer_time_stamp": int(datetime.utcnow().timestamp()),
+        "term_answer_timestamp": int(datetime.utcnow().timestamp()),
     }
 
 
@@ -41,7 +41,7 @@ def get_user_suitability_template_with_data(payload: dict) -> dict:
         "version": payload.get("suitability_version"),
         "score": payload.get("score"),
         "profile": "Agressivo",
-        "create_suitability_time_stamp": payload.get("suitability_submission_date"),
+        "create_suitability_timestamp": payload.get("suitability_submission_date"),
     }
 
 
@@ -95,6 +95,6 @@ def get_user_account_template_with_data(payload: dict) -> dict:
             },
             "provided_by_bureaux": payload.get("stone_age_user_data"),
         },
-        "create_user_time_stamp": int(datetime.utcnow().timestamp()),
-        "create_digital_signature_time_stamp": int(datetime.utcnow().timestamp()),
+        "create_user_timestamp": int(datetime.utcnow().timestamp()),
+        "create_digital_signature_timestamp": int(datetime.utcnow().timestamp()),
     }
