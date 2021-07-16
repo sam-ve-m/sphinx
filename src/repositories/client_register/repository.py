@@ -5,6 +5,7 @@ from typing import Type, Optional
 from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 from src.repositories.client_register.builder import ClientRegisterBuilder
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.routers.validators.enum_template import MaritalStatusEnum
 
 
 class ClientRegisterRepository(OracleInfrastructure):
@@ -84,7 +85,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         sinacor_types_repository=SinaCorTypesRepository(),
     ) -> Type[ClientRegisterBuilder]:
         activity = user_data["occupation"]["activity"]
-        is_married = user_data["marital"]["status"] == "married"
+        is_married = user_data["marital"]["status"] in  [MaritalStatusEnum.MARRIED.value, MaritalStatusEnum.STABLE_UNION.value]
         is_business_person = sinacor_types_repository.is_business_person(value=activity)
         is_not_employed_or_business_person = sinacor_types_repository.is_others(
             value=activity

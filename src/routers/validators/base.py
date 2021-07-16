@@ -77,6 +77,10 @@ class Name(BaseModel):
     name: constr(min_length=1, max_length=50)
 
 
+class NickName(BaseModel):
+    nick_name: constr(min_length=1, max_length=50)
+
+
 class DisplayName(BaseModel):
     display_name: constr(min_length=1, max_length=50)
 
@@ -251,6 +255,16 @@ class CpfOrCnpjSource(Source):
         raise ValueError("invalid cpf")
 
 
+class CpfSource(Source):
+    value: str
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        if is_cpf_valid(cpf=e):
+            return e
+        raise ValueError("invalid cpf")
+
+
 class DateSource(Source):
     value: int
 
@@ -356,7 +370,7 @@ class CnpjSource(Source):
     def validate_value(cls, e):
         if is_cnpj_valid(cnpj=e):
             return e
-        raise ValueError("invalid cpf")
+        raise ValueError("invalid cnpj")
 
 
 class CompanyNameSource(Source):
@@ -483,3 +497,92 @@ class AssetsDateSource(Source):
             return date
         except:
             raise ValueError("Wrong timestamp supplied")
+
+
+class EmailSource(Source):
+    value: str
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, value):
+        return value
+        try:
+            is_valid = validate_email(value)
+            if is_valid:
+                return value
+            raise ValueError("The given email is invalid")
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
+        raise ValueError("The given email is invalid")
+
+
+class NameSource(Source):
+    value: str
+
+
+class SelfLinkSource(Source):
+    value: str
+
+
+class IsUsPersonSource(Source):
+    value: bool
+
+
+class UsTinSource(Source):
+    value: int
+
+
+class IrsSharingSource(Source):
+    value: bool
+
+
+class FatherNameSource(Source):
+    value: str
+
+
+class MidiaPersonSource(Source):
+    value: bool
+
+
+class PersonRelatedToMarketInfluencerSource(Source):
+    value: bool
+
+
+class CourtOrdersSource(Source):
+    value: bool
+
+
+class LawsuitsSource(Source):
+    value: bool
+
+
+class FundAdminRegistrationSource(Source):
+    value: bool
+
+
+class FundAdminRegistrationSource(Source):
+    value: bool
+
+
+class InvestmentFundAdministratorsRegistrationSource(Source):
+    value: bool
+
+
+class RegisterAuditorsSecuritiesCommissionSource(Source):
+    value: bool
+
+
+class RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource(Source):
+    value: bool
+
+
+class ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource(Source):
+    value: bool
+
+
+class RegistrationOfForeignInvestorsSecuritiesCommissionSource(Source):
+    value: bool
+
+
+class RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource(Source):
+    value: bool

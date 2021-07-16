@@ -21,6 +21,7 @@ from src.routers.validators.base import (
     QuizQuestionOption,
     IsUsPerson,
     UsTin,
+    NickName,
     IsCvmQualifiedInvestor,
 )
 from src.utils.jwt_utils import JWTHandler
@@ -30,7 +31,7 @@ from src.controllers.users.controller import UserController
 router = APIRouter()
 
 
-class UserSimple(Email, Name, OptionalPIN):
+class UserSimple(Email, NickName, OptionalPIN):
     pass
 
 

@@ -83,7 +83,7 @@ class JWTHandler:
             user_account_data_months_past = user_account_data.get("months_past")
 
         new_payload = {
-            "name": payload.get("name"),
+            "nick_name": payload.get("nick_name"),
             "email": payload.get("email"),
             "scope": payload.get("scope"),
             "is_active": payload.get("is_active"),

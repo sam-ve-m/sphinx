@@ -15,8 +15,6 @@ from src.routers.validators.base import (
     Status,
     GenderSource,
     BirthDateSource,
-    CountrySource,
-    StateSource,
     MotherNameSource,
     DocumentTypeSource,
     CpfOrCnpjSource,
@@ -39,7 +37,6 @@ from src.routers.validators.base import (
     EducationCourseSource,
     IsPoliticallyExposedPerson,
     DateOfAcquisition,
-    Email,
     IncomeTaxTypeSource,
     ConnectedPersonSource,
     ClientTypeSource,
@@ -50,6 +47,25 @@ from src.routers.validators.base import (
     NeighborhoodSource,
     AssetsDateSource,
     NationalitySource,
+    EmailSource,
+    NameSource,
+    CpfSource,
+    MidiaPersonSource,
+    PersonRelatedToMarketInfluencerSource,
+    CourtOrdersSource,
+    LawsuitsSource,
+    FundAdminRegistrationSource,
+    InvestmentFundAdministratorsRegistrationSource,
+    RegisterAuditorsSecuritiesCommissionSource,
+    RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource,
+    ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource,
+    RegistrationOfForeignInvestorsSecuritiesCommissionSource,
+    RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource,
+    SelfLinkSource,
+    IsUsPersonSource,
+    UsTinSource,
+    IrsSharingSource,
+    FatherNameSource
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
@@ -121,8 +137,10 @@ class Birthplace(BaseModel):
     id_city: IdCitySource
 
 
-class Output(Decision, Status, Email):
+class Output(Decision, Status):
     gender: GenderSource
+    email: EmailSource
+    name: NameSource
     birth_date: BirthDateSource
     birthplace: Birthplace
     mother_name: MotherNameSource
@@ -139,6 +157,23 @@ class Output(Decision, Status, Email):
     investor_type: InvestorTypeTypeSource
     cosif_tax_classification: CosifTaxClassificationSource
     marital_update: Optional[Marital]
+    cpf: CpfSource
+    self_link: SelfLinkSource
+    is_us_person: IsUsPersonSource
+    us_tin: UsTinSource
+    irs_sharing: IrsSharingSource
+    father_name: FatherNameSource
+    midia_person: MidiaPersonSource
+    person_related_to_market_influencer: PersonRelatedToMarketInfluencerSource
+    court_orders: CourtOrdersSource
+    lawsuits: LawsuitsSource
+    fund_admin_registration: FundAdminRegistrationSource
+    investment_fund_administrators_registration: InvestmentFundAdministratorsRegistrationSource
+    register_auditors_securities_commission: RegisterAuditorsSecuritiesCommissionSource
+    registration_of_other_market_participants_securities_commission: RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource
+    foreign_investors_register_of_annex_iv_not_reregistered: ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource
+    registration_of_foreign_investors_securities_commission: RegistrationOfForeignInvestorsSecuritiesCommissionSource
+    registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
 
 
 class BureauCallback(Uuid, AppName, Successful, Error):

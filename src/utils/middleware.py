@@ -6,9 +6,9 @@ import json
 # OUTSIDE LIBRARIES
 from fastapi import Request, Response, status
 from datetime import datetime
-from src.utils.env_config import config
 
 # SPHINX
+from src.utils.env_config import config
 from src.repositories.user.repository import UserRepository
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
@@ -149,4 +149,22 @@ def check_if_is_user_not_allowed_to_access_route(
     if return_response:
         content.update({"message": message})
         return Response(content=json.dumps(content), status_code=status_code)
+    return True
+
+
+def check_if_third_party_user_is_not_allowed_to_access_route(
+    request: Request
+):
+    thebes_answer = None
+    for header_tuple in request.headers.raw:
+        if b"x-thebes-answer" in header_tuple:
+            thebes_answer = header_tuple[1].decode()
+            break
+    if thebes_answer != config('THIRD_PARTY_TOKEN'):
+        locale = get_language_from_request(request=request)
+        message = i18n.get_translate(
+            "invalid_credential",
+            locale=locale,
+        )
+        return Response(content=json.dumps(message), status_code=status.HTTP_401_UNAUTHORIZED)
     return True
