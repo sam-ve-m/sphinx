@@ -1,3 +1,4 @@
+# SPHINX
 from src.services.users.service import UserService
 
 
@@ -69,10 +70,6 @@ class UserController:
     @staticmethod
     def change_user_to_client(payload: dict):
         return UserService.change_user_to_client(payload=payload)
-
-    @staticmethod
-    def table_callback(payload: dict):
-        return UserService.table_callback(payload=payload)
 
     @staticmethod
     def get_on_boarding_user_current_step(payload: dict):

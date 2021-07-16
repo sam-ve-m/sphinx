@@ -1,6 +1,7 @@
 # STANDARD LIBS
 from datetime import datetime
 import logging
+from copy import deepcopy
 
 # OUTSIDE LIBRARIES
 from fastapi import status
@@ -14,7 +15,6 @@ from src.services.authentications.service import AuthenticationService
 from src.services.persephone.service import PersephoneService
 from src.services.builders.user.on_boarding_steps_builder import OnBoardingStepBuilder
 
-from src.repositories.suitability.repository import SuitabilityUserProfileRepository
 from src.repositories.file.enum.user_file import UserFileType
 from src.repositories.file.repository import FileRepository
 from src.repositories.user.repository import UserRepository
@@ -27,8 +27,6 @@ from src.utils.stone_age import StoneAge
 from src.utils.persephone_templates import (
     get_prospect_user_template_with_data,
     get_user_signed_term_template_with_data,
-    get_table_response_template_with_data,
-    get_user_account_template_with_data,
 )
 from src.utils.env_config import config
 
@@ -49,6 +47,7 @@ class UserService(IUser):
             payload = hash_field(key="pin", payload=payload)
         if user_repository.find_one({"_id": payload.get("_id")}) is not None:
             raise BadRequestError("common.register_exists")
+        payload.update({"created_at": datetime.now()})
         UserService.add_user_control_metadata(payload=payload)
 
         sent_to_persephone = persephone_client.run(
@@ -347,6 +346,7 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
         }
 
     @staticmethod
@@ -382,6 +382,7 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
         }
 
     @staticmethod
@@ -427,10 +428,15 @@ class UserService(IUser):
 
         output = response.get("output")
         stone_age_decision = output.get("decision")
+        stone_age_contract_uuid = response.get("uuid")
+        current_user_updated = deepcopy(current_user)
+        current_user_updated.update(
+            {"stone_age_contract_uuid": stone_age_contract_uuid}
+        )
 
         if stone_age_decision is not None:
-            current_user_updated = current_user.update({'stone_age_decision': stone_age_decision})
-            user_repository.update_one(old=current_user, new=current_user_updated)
+            current_user_updated.update({"stone_age_decision": stone_age_decision})
+        user_repository.update_one(old=current_user, new=current_user_updated)
 
         return {"status_code": status.HTTP_200_OK, "payload": output}
 
@@ -447,17 +453,21 @@ class UserService(IUser):
         if type(current_user) is not dict:
             raise BadRequestError("common.register_not_exists")
 
-        stone_age_response = stone_age.send_user_quiz_responses(
-            quiz=payload.get("quiz")
-        )
-
-        stone_age_contract_uuid = stone_age_response.get('uuid')
-        current_user_updated = current_user.update({'stone_age_contract_uuid': stone_age_contract_uuid})
-        user_repository.update_one(old=current_user, new=current_user_updated)
-
+        is_dtvm_user_client = current_user.get("is_dtvm_user_client")
+        if is_dtvm_user_client is None or is_dtvm_user_client is False:
+            stone_age_response = stone_age.send_user_quiz_responses(
+                quiz=payload.get("quiz")
+            )
+            current_user_updated = deepcopy(current_user)
+            current_user_updated.update({"is_dtvm_user_client": True})
+            user_repository.update_one(old=current_user, new=current_user_updated)
+            return {
+                "status_code": status.HTTP_200_OK,
+                "message_key": "user.creating_account",
+            }
         return {
             "status_code": status.HTTP_200_OK,
-            "message_key": "user.creating_account",
+            "message_key": "requests.not_modified",
         }
 
     @staticmethod
@@ -473,32 +483,6 @@ class UserService(IUser):
         payload["provided_by_bureaux"]["concluded_at"] = datetime.now()
 
     @staticmethod
-    def table_callback(
-        payload: dict,
-        persephone_client=PersephoneService.get_client(),
-    ) -> dict:
-        payload.update(
-            {
-                "uuid": "lallals-2197na-askdabskdjbaskd",
-                "cpf": 43056808820,
-                "email": "msa@lionx.com.br",
-                "status": "aproved",
-            }
-        )
-        table_result = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
-            partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
-            payload=get_table_response_template_with_data(payload=payload),
-            schema_key="table_schema",
-        )
-        if table_result is False:
-            raise InternalServerError("common.process_issue")
-        return {
-            "status_code": status.HTTP_200_OK,
-            "message_key": "ok",
-        }
-
-    @staticmethod
     def get_on_boarding_user_current_step(
         payload: dict,
         user_repository=UserRepository(),
@@ -508,7 +492,9 @@ class UserService(IUser):
         thebes_answer = payload.get("x-thebes-answer")
         jwt_user_email = thebes_answer.get("email")
 
-        user_file_exists = file_repository.get_user_file(file_type=UserFileType.SELF, user_email=jwt_user_email)
+        user_file_exists = file_repository.get_user_file(
+            file_type=UserFileType.SELF, user_email=jwt_user_email
+        )
 
         current_user = user_repository.find_one({"_id": jwt_user_email})
         if current_user is None:
@@ -528,3 +514,4 @@ class UserService(IUser):
         )
 
         return {"status_code": status.HTTP_200_OK, "payload": on_boarding_steps}
+

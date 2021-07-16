@@ -70,3 +70,6 @@ en:
   cache:
     error:
       key: Invalid key sent to cache class
+  bureau:
+    error:
+      fail: Error on StoneAge response

@@ -1,784 +1,624 @@
 # STANDARD LIBS
-from typing import Type
+from typing import Type, Optional
 
 # SPHINX
 from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 from src.repositories.client_register.builder import ClientRegisterBuilder
+from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.routers.validators.enum_template import MaritalStatusEnum
 
 
 class ClientRegisterRepository(OracleInfrastructure):
+    def register_validated_users(self, user_cpf: str):
+        values = {
+            "cd_empresa": '1',
+            "cd_usuario": '1',
+            "tp_ocorrencia": "I",
+            "cd_cliente_padrao": '1',
+            "cpf": str(user_cpf),
+        }
+        self.execute(
+            sql="call PROC_IMPCLIH_V2_LIONX.EXECIMPH(:cd_empresa, :cd_usuario, :tp_ocorrencia, :cd_cliente_padrao, :cpf)",
+            values=values,
+        )
 
-    def cleanup_temp_tables(self):
-        client_temp = """TRUNCATE TABLE TSCIMPCLIH;"""
-        error_temp = """TRUNCATE TABLE TSCERROH;"""
-        self.query(sql=client_temp + error_temp)
+    def cleanup_temp_tables(self, user_cpf: str):
+        client_temp = "DELETE FROM TSCIMPCLIH WHERE CD_CPFCGC = :cpf"
+        self.execute(sql=client_temp, values={"cpf": str(user_cpf)})
+        error_temp = "DELETE FROM TSCERROH WHERE CD_CPFCGC = :cpf"
+        self.execute(sql=error_temp, values={"cpf": str(user_cpf)})
 
-    def run_data_validator_in_register_user_tmp_table(self):
-        result = self.execute(name='PROC_CLIECOH_V2', values='S')
+    def validate_user_data_erros(self, user_cpf: int) -> bool:
+        self._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
+        return self._validate_errors_on_temp_tables(user_cpf=user_cpf)
 
-    def validate_errors_on_temp_tables(self):
-        sql = """
-            SELECT count(*) 
-            FROM TSCERROH E
-            JOIN TSCIMCPLI I on E.CD_CPFCGC = I.CD_CPFCGC
-            WHERE I.TP_REGISTRO = 'P';
+    def _validate_errors_on_temp_tables(self, user_cpf: int) -> bool:
+        sql = f"""
+            SELECT 1 
+            FROM TSCERROH
+            WHERE CD_CPFCGC = {user_cpf}
         """
         result = self.query(sql=sql)
-        return len(result) == 0
+        return len(result) > 0
 
-    def register_validated_users(self):
-        # Validate this values
-        values = ['CD_EMPRESA', 'CD_USUARIO', 'TP_OCORRENCIA', 'CD_CLIENTE_PADRAO']
-        self.execute(name='PROC_IMPCLIH_V2', values=values)
-
-    def is_not_employed_or_business_and_not_married_person(
-        self, base_value: dict
-    ) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
-        builder.add_tp_registro(value="").add_dt_criacao(value="").add_dt_atualiz(
-            value=""
-        ).add_cd_cpfcgc(value="").add_dt_nasc_fund(value="").add_cd_con_dep(
-            value=""
-        ).add_in_irsdiv(
-            value=""
-        ).add_in_pess_vinc(
-            value=""
-        ).add_nm_cliente(
-            value=""
-        ).add_tp_cliente(
-            value=""
-        ).add_tp_pessoa(
-            value=""
-        ).add_tp_investidor(
-            value=""
-        ).add_in_situac_cliger(
-            value=""
-        ).add_cd_ativ(
-            value=""
-        ).add_cd_cosif(
-            value=""
-        ).add_cd_cosif_ci(
-            value=""
-        ).add_cd_est_civil(
-            value=""
-        ).add_cd_nacion(
-            value=""
-        ).add_cd_tipo_doc(
-            value=""
-        ).add_id_sexo(
-            value=""
-        ).add_nm_e_mail(
-            value=""
-        ).add_nm_loc_nasc(
-            value=""
-        ).add_nm_mae(
-            value=""
-        ).add_sg_estado_nasc(
-            value=""
-        ).add_sg_pais(
-            value=""
-        ).add_cd_cep(
-            value=""
-        ).add_cd_ddd_tel(
-            value=""
-        ).add_in_ende(
-            value=""
-        ).add_nm_bairro(
-            value=""
-        ).add_nm_cidade(
-            value=""
-        ).add_nm_logradouro(
-            value=""
-        ).add_nr_predio(
-            value=""
-        ).add_nr_telefone(
-            value=""
-        ).add_sg_estado(
-            value=""
-        ).add_sg_pais_ende1(
-            value=""
-        ).add_cd_origem(
-            value=""
-        ).add_dv_cliente(
-            value=""
-        ).add_in_cart_prop(
-            value=""
-        ).add_in_situac(
-            value=""
-        ).add_tp_cliente_bol(
-            value=""
-        ).add_tp_investidor_bol(
-            value=""
-        ).add_ind_pcta(
-            value=""
-        ).add_ind_end_vinc_con(
-            value=""
-        ).add_ind_end_crsp(
-            value=""
-        ).add_ind_env_email_bvmf(
-            value=""
-        ).add_tp_cliente_bmf(
-            value=""
-        ).add_ind_oprc_td(
-            value=""
-        ).add_ind_oprc_agnt_td(
-            value=""
-        ).add_cod_cidade_nasc(
-            value=""
-        ).add_sigl_pais_resid(
-            value=""
-        ).add_num_seq_muni_end1(
-            value=""
-        ).add_cod_tipo_colt(
-            value=""
-        ).add_cod_cep_estr1(
-            value=""
-        ).add_uf_estr1(
-            value=""
-        ).add_num_class_risc_cmtt(
-            value=""
-        ).add_desc_risc_cmtt(
-            value=""
-        ).add_data_ult_atlz(
-            value=""
-        ).add_num_us_person(
-            value=""
-        ).add_val_cfin(
-            value=""
-        ).add_data_cfin(
-            value=""
+    def _run_data_validator_in_register_user_tmp_table(self, user_cpf: int) -> int:
+        self.execute(
+            sql="call PROC_CLIECOH_V2_LIONX.EXECCONH(:s, :cpf)",
+            values={"s": "S", "cpf": str(user_cpf)},
         )
-        return builder
 
-    @staticmethod
-    def is_employed_and_not_married_person(base_value: dict) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
-        builder.add_tp_registro(value="").add_dt_criacao(value="").add_dt_atualiz(
-            value=""
-        ).add_cd_cpfcgc(value="").add_dt_nasc_fund(value="").add_cd_con_dep(
-            value=""
-        ).add_in_irsdiv(
-            value=""
-        ).add_in_pess_vinc(
-            value=""
-        ).add_nm_cliente(
-            value=""
-        ).add_tp_cliente(
-            value=""
-        ).add_tp_pessoa(
-            value=""
-        ).add_tp_investidor(
-            value=""
-        ).add_in_situac_cliger(
-            value=""
-        ).add_cd_ativ(
-            value=""
-        ).add_cd_cosif(
-            value=""
-        ).add_cd_cosif_ci(
-            value=""
-        ).add_cd_est_civil(
-            value=""
-        ).add_cd_nacion(
-            value=""
-        ).add_cd_tipo_doc(
-            value=""
-        ).add_id_sexo(
-            value=""
-        ).add_nm_e_mail(
-            value=""
-        ).add_nm_loc_nasc(
-            value=""
-        ).add_nm_mae(
-            value=""
-        ).add_sg_estado_nasc(
-            value=""
-        ).add_sg_pais(
-            value=""
-        ).add_cd_cep(
-            value=""
-        ).add_cd_ddd_tel(
-            value=""
-        ).add_in_ende(
-            value=""
-        ).add_nm_bairro(
-            value=""
-        ).add_nm_cidade(
-            value=""
-        ).add_nm_logradouro(
-            value=""
-        ).add_nr_predio(
-            value=""
-        ).add_nr_telefone(
-            value=""
-        ).add_sg_estado(
-            value=""
-        ).add_sg_pais_ende1(
-            value=""
-        ).add_cd_origem(
-            value=""
-        ).add_dv_cliente(
-            value=""
-        ).add_in_cart_prop(
-            value=""
-        ).add_in_situac(
-            value=""
-        ).add_tp_cliente_bol(
-            value=""
-        ).add_tp_investidor_bol(
-            value=""
-        ).add_ind_pcta(
-            value=""
-        ).add_ind_end_vinc_con(
-            value=""
-        ).add_ind_end_crsp(
-            value=""
-        ).add_ind_env_email_bvmf(
-            value=""
-        ).add_tp_cliente_bmf(
-            value=""
-        ).add_ind_oprc_td(
-            value=""
-        ).add_ind_oprc_agnt_td(
-            value=""
-        ).add_cod_cidade_nasc(
-            value=""
-        ).add_sigl_pais_resid(
-            value=""
-        ).add_num_seq_muni_end1(
-            value=""
-        ).add_cod_tipo_colt(
-            value=""
-        ).add_cod_cep_estr1(
-            value=""
-        ).add_uf_estr1(
-            value=""
-        ).add_num_class_risc_cmtt(
-            value=""
-        ).add_desc_risc_cmtt(
-            value=""
-        ).add_data_ult_atlz(
-            value=""
-        ).add_num_trab_empr(
-            value=""
-        ).add_num_us_person(
-            value=""
-        ).add_val_cfin(
-            value=""
-        ).add_data_cfin(
-            value=""
-        ).add_cd_cnpj_empresa(
-            value=""
-        )
-        return builder
-
-    @staticmethod
-    def is_business_and_not_married_person(base_value: dict) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
-        builder.add_tp_registro(value="").add_dt_criacao(value="").add_dt_atualiz(
-            value=""
-        ).add_cd_cpfcgc(value="").add_dt_nasc_fund(value="").add_cd_con_dep(
-            value=""
-        ).add_in_irsdiv(
-            value=""
-        ).add_in_pess_vinc(
-            value=""
-        ).add_nm_cliente(
-            value=""
-        ).add_tp_cliente(
-            value=""
-        ).add_tp_pessoa(
-            value=""
-        ).add_tp_investidor(
-            value=""
-        ).add_in_situac_cliger(
-            value=""
-        ).add_cd_ativ(
-            value=""
-        ).add_cd_cosif(
-            value=""
-        ).add_cd_cosif_ci(
-            value=""
-        ).add_cd_est_civil(
-            value=""
-        ).add_cd_nacion(
-            value=""
-        ).add_cd_tipo_doc(
-            value=""
-        ).add_id_sexo(
-            value=""
-        ).add_nm_e_mail(
-            value=""
-        ).add_nm_loc_nasc(
-            value=""
-        ).add_nm_mae(
-            value=""
-        ).add_sg_estado_nasc(
-            value=""
-        ).add_sg_pais(
-            value=""
-        ).add_cd_cep(
-            value=""
-        ).add_cd_ddd_tel(
-            value=""
-        ).add_in_ende(
-            value=""
-        ).add_nm_bairro(
-            value=""
-        ).add_nm_cidade(
-            value=""
-        ).add_nm_logradouro(
-            value=""
-        ).add_nr_predio(
-            value=""
-        ).add_nr_telefone(
-            value=""
-        ).add_sg_estado(
-            value=""
-        ).add_sg_pais_ende1(
-            value=""
-        ).add_cd_origem(
-            value=""
-        ).add_dv_cliente(
-            value=""
-        ).add_in_cart_prop(
-            value=""
-        ).add_in_situac(
-            value=""
-        ).add_tp_cliente_bol(
-            value=""
-        ).add_tp_investidor_bol(
-            value=""
-        ).add_ind_pcta(
-            value=""
-        ).add_ind_end_vinc_con(
-            value=""
-        ).add_ind_end_crsp(
-            value=""
-        ).add_ind_env_email_bvmf(
-            value=""
-        ).add_tp_cliente_bmf(
-            value=""
-        ).add_ind_oprc_td(
-            value=""
-        ).add_ind_oprc_agnt_td(
-            value=""
-        ).add_cod_cidade_nasc(
-            value=""
-        ).add_sigl_pais_resid(
-            value=""
-        ).add_num_seq_muni_end1(
-            value=""
-        ).add_cod_tipo_colt(
-            value=""
-        ).add_cod_cep_estr1(
-            value=""
-        ).add_uf_estr1(
-            value=""
-        ).add_num_class_risc_cmtt(
-            value=""
-        ).add_desc_risc_cmtt(
-            value=""
-        ).add_data_ult_atlz(
-            value=""
-        ).add_num_us_person(
-            value=""
-        ).add_val_cfin(
-            value=""
-        ).add_data_cfin(
-            value=""
-        ).add_cd_cnpj_empresa(
-            value=""
-        )
-        return builder
-
-    @staticmethod
-    def is_not_employed_or_business_and_married_person(base_value: dict) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
-        builder.add_tp_registro(values="").add_dt_criacao(values="").add_dt_atualiz(
-            values=""
-        ).add_cd_cpfcgc(values="").add_dt_nasc_fund(values="").add_cd_con_dep(
-            values=""
-        ).add_in_irsdiv(
-            values=""
-        ).add_in_pess_vinc(
-            values=""
-        ).add_nm_cliente(
-            values=""
-        ).add_tp_cliente(
-            values=""
-        ).add_tp_pessoa(
-            values=""
-        ).add_tp_investidor(
-            values=""
-        ).add_in_situac_cliger(
-            values=""
-        ).add_cd_ativ(
-            values=""
-        ).add_cd_cosif(
-            values=""
-        ).add_cd_cosif_ci(
-            values=""
-        ).add_cd_est_civil(
-            values=""
-        ).add_cd_nacion(
-            values=""
-        ).add_cd_tipo_doc(
-            values=""
-        ).add_id_sexo(
-            values=""
-        ).add_nm_conjuge(
-            values=""
-        ).add_nm_e_mail(
-            values=""
-        ).add_nm_loc_nasc(
-            values=""
-        ).add_nm_mae(
-            values=""
-        ).add_sg_estado_nasc(
-            values=""
-        ).add_sg_pais(
-            values=""
-        ).add_tp_regcas(
-            values=""
-        ).add_cd_cep(
-            values=""
-        ).add_cd_ddd_tel(
-            values=""
-        ).add_in_ende(
-            values=""
-        ).add_nm_bairro(
-            values=""
-        ).add_nm_cidade(
-            values=""
-        ).add_nm_logradouro(
-            values=""
-        ).add_nr_predio(
-            values=""
-        ).add_nr_telefone(
-            values=""
-        ).add_sg_estado(
-            values=""
-        ).add_sg_pais_ende1(
-            values=""
-        ).add_cd_origem(
-            values=""
-        ).add_dv_cliente(
-            values=""
-        ).add_in_cart_prop(
-            values=""
-        ).add_in_situac(
-            values=""
-        ).add_tp_cliente_bol(
-            values=""
-        ).add_tp_investidor_bol(
-            values=""
-        ).add_ind_pcta(
-            values=""
-        ).add_ind_end_vinc_con(
-            values=""
-        ).add_ind_end_crsp(
-            values=""
-        ).add_ind_env_email_bvmf(
-            values=""
-        ).add_tp_cliente_bmf(
-            values=""
-        ).add_ind_oprc_td(
-            values=""
-        ).add_ind_oprc_agnt_td(
-            values=""
-        ).add_cod_cidade_nasc(
-            values=""
-        ).add_sigl_pais_resid(
-            values=""
-        ).add_num_seq_muni_end1(
-            values=""
-        ).add_cod_tipo_colt(
-            values=""
-        ).add_cod_cep_estr1(
-            values=""
-        ).add_uf_estr1(
-            values=""
-        ).add_num_class_risc_cmtt(
-            values=""
-        ).add_desc_risc_cmtt(
-            values=""
-        ).add_data_ult_atlz(
-            values=""
-        ).add_num_us_person(
-            values=""
-        ).add_val_cfin(
-            values=""
-        ).add_data_cfin(
-            values=""
-        ).add_cd_cpf_conjuge(
-            values=""
-        ).add_dt_nasc_conjuge(
-            values=""
-        )
-        return builder
-
-    @staticmethod
-    def is_employed_and_married_person(base_value: dict) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
-        builder.add_tp_registro(values="").add_dt_criacao(values="").add_dt_atualiz(
-            values=""
-        ).add_cd_cpfcgc(values="").add_dt_nasc_fund(values="").add_cd_con_dep(
-            values=""
-        ).add_in_irsdiv(
-            values=""
-        ).add_in_pess_vinc(
-            values=""
-        ).add_nm_cliente(
-            values=""
-        ).add_tp_cliente(
-            values=""
-        ).add_tp_pessoa(
-            values=""
-        ).add_tp_investidor(
-            values=""
-        ).add_in_situac_cliger(
-            values=""
-        ).add_cd_ativ(
-            values=""
-        ).add_cd_cosif(
-            values=""
-        ).add_cd_cosif_ci(
-            values=""
-        ).add_cd_est_civil(
-            values=""
-        ).add_cd_nacion(
-            values=""
-        ).add_cd_tipo_doc(
-            values=""
-        ).add_id_sexo(
-            values=""
-        ).add_nm_conjuge(
-            values=""
-        ).add_nm_e_mail(
-            values=""
-        ).add_nm_loc_nasc(
-            values=""
-        ).add_nm_mae(
-            values=""
-        ).add_sg_estado_nasc(
-            values=""
-        ).add_sg_pais(
-            values=""
-        ).add_tp_regcas(
-            values=""
-        ).add_cd_cep(
-            values=""
-        ).add_cd_ddd_tel(
-            values=""
-        ).add_in_ende(
-            values=""
-        ).add_nm_bairro(
-            values=""
-        ).add_nm_cidade(
-            values=""
-        ).add_nm_logradouro(
-            values=""
-        ).add_nr_predio(
-            values=""
-        ).add_nr_telefone(
-            values=""
-        ).add_sg_estado(
-            values=""
-        ).add_sg_pais_ende1(
-            values=""
-        ).add_cd_origem(
-            values=""
-        ).add_dv_cliente(
-            values=""
-        ).add_in_cart_prop(
-            values=""
-        ).add_in_situac(
-            values=""
-        ).add_tp_cliente_bol(
-            values=""
-        ).add_tp_investidor_bol(
-            values=""
-        ).add_ind_pcta(
-            values=""
-        ).add_ind_end_vinc_con(
-            values=""
-        ).add_ind_end_crsp(
-            values=""
-        ).add_ind_env_email_bvmf(
-            values=""
-        ).add_tp_cliente_bmf(
-            values=""
-        ).add_ind_oprc_td(
-            values=""
-        ).add_ind_oprc_agnt_td(
-            values=""
-        ).add_cod_cidade_nasc(
-            values=""
-        ).add_sigl_pais_resid(
-            values=""
-        ).add_num_seq_muni_end1(
-            values=""
-        ).add_cod_tipo_colt(
-            values=""
-        ).add_cod_cep_estr1(
-            values=""
-        ).add_uf_estr1(
-            values=""
-        ).add_num_class_risc_cmtt(
-            values=""
-        ).add_desc_risc_cmtt(
-            values=""
-        ).add_data_ult_atlz(
-            values=""
-        ).add_num_trab_empr(
-            values=""
-        ).add_num_us_person(
-            values=""
-        ).add_val_cfin(
-            values=""
-        ).add_data_cfin(
-            values=""
-        ).add_cd_cpf_conjuge(
-            values=""
-        ).add_dt_nasc_conjuge(
-            values=""
-        ).add_cd_cnpj_empresa(
-            values=""
-        )
-        return builder
-
-    @staticmethod
-    def is_business_and_married_person(base_value: dict) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
-        builder.add_tp_registro(values="").add_dt_criacao(values="").add_dt_atualiz(
-            values=""
-        ).add_cd_cpfcgc(values="").add_dt_nasc_fund(values="").add_cd_con_dep(
-            values=""
-        ).add_in_irsdiv(
-            values=""
-        ).add_in_pess_vinc(
-            values=""
-        ).add_nm_cliente(
-            values=""
-        ).add_tp_cliente(
-            values=""
-        ).add_tp_pessoa(
-            values=""
-        ).add_tp_investidor(
-            values=""
-        ).add_in_situac_cliger(
-            values=""
-        ).add_cd_ativ(
-            values=""
-        ).add_cd_cosif(
-            values=""
-        ).add_cd_cosif_ci(
-            values=""
-        ).add_cd_est_civil(
-            values=""
-        ).add_cd_nacion(
-            values=""
-        ).add_cd_tipo_doc(
-            values=""
-        ).add_id_sexo(
-            values=""
-        ).add_nm_conjuge(
-            values=""
-        ).add_nm_e_mail(
-            values=""
-        ).add_nm_loc_nasc(
-            values=""
-        ).add_nm_mae(
-            values=""
-        ).add_sg_estado_nasc(
-            values=""
-        ).add_sg_pais(
-            values=""
-        ).add_tp_regcas(
-            values=""
-        ).add_cd_cep(
-            values=""
-        ).add_cd_ddd_tel(
-            values=""
-        ).add_in_ende(
-            values=""
-        ).add_nm_bairro(
-            values=""
-        ).add_nm_cidade(
-            values=""
-        ).add_nm_logradouro(
-            values=""
-        ).add_nr_predio(
-            values=""
-        ).add_nr_telefone(
-            values=""
-        ).add_sg_estado(
-            values=""
-        ).add_sg_pais_ende1(
-            values=""
-        ).add_cd_origem(
-            values=""
-        ).add_dv_cliente(
-            values=""
-        ).add_in_cart_prop(
-            values=""
-        ).add_in_situac(
-            values=""
-        ).add_tp_cliente_bol(
-            values=""
-        ).add_tp_investidor_bol(
-            values=""
-        ).add_ind_pcta(
-            values=""
-        ).add_ind_end_vinc_con(
-            values=""
-        ).add_ind_end_crsp(
-            values=""
-        ).add_ind_env_email_bvmf(
-            values=""
-        ).add_tp_cliente_bmf(
-            values=""
-        ).add_ind_oprc_td(
-            values=""
-        ).add_ind_oprc_agnt_td(
-            values=""
-        ).add_cod_cidade_nasc(
-            values=""
-        ).add_sigl_pais_resid(
-            values=""
-        ).add_num_seq_muni_end1(
-            values=""
-        ).add_cod_tipo_colt(
-            values=""
-        ).add_cod_cep_estr1(
-            values=""
-        ).add_uf_estr1(
-            values=""
-        ).add_num_class_risc_cmtt(
-            values=""
-        ).add_desc_risc_cmtt(
-            values=""
-        ).add_data_ult_atlz(
-            values=""
-        ).add_num_us_person(
-            values=""
-        ).add_val_cfin(
-            values=""
-        ).add_data_cfin(
-            values=""
-        ).add_cd_cpf_conjuge(
-            values=""
-        ).add_dt_nasc_conjuge(
-            values=""
-        )
-        return builder
-
-    def register_user_data_in_register_users_temp_table(self, builder: Type[ClientRegisterBuilder]):
+    def register_user_data_in_register_users_temp_table(
+        self, builder: Type[ClientRegisterBuilder]
+    ):
         client_register = builder.build()
         fields = client_register.keys()
-        sql = f"""
-            INSERT INTO TSCIMPCLIH({','.join(fields)}) 
-            VALUES(:{',:'.join(fields)});
-        """
-        self.insert(sql=sql, values=client_register.get_values())
+        sql = f"INSERT INTO TSCIMPCLIH({','.join(fields)}) VALUES(:{',:'.join(fields)})"
+        self.execute(sql=sql, values=client_register)
+
+    def get_user_control_data_if_user_already_exists(self, user_cpf: int):
+        verify_user_data_sql = f"SELECT 1 FROM TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
+        verify_user_bovespa_account = (
+            f"SELECT 1 FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+        )
+        verify_user_bmf_account = (
+            f"SELECT 1 FROM TSCCLIBMF WHERE CD_CPFCGC = {user_cpf}"
+        )
+        verify_user_account = f"SELECT 1 FROM TSCCLICOMP WHERE CD_CPFCGC = {user_cpf}"
+        verify_user_treasury = f"SELECT 1 FROM TSCCLITSD WHERE CD_CPFCGC = {user_cpf}"
+        all_validation_query = [
+            verify_user_data_sql,
+            verify_user_bovespa_account,
+            verify_user_bmf_account,
+            verify_user_account,
+            verify_user_treasury,
+        ]
+        result = self.query(sql=" union ".join(all_validation_query))
+        if len(result) > 0:
+            result = self.query(sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}")
+            return result[0]
+        return None
+
+    def get_builder(
+        self,
+        user_data: dict,
+        sinacor_user_control_data: Optional[tuple],
+        sinacor_types_repository=SinaCorTypesRepository(),
+    ) -> Type[ClientRegisterBuilder]:
+        activity = user_data["occupation"]["activity"]
+        is_married = user_data["marital"]["status"] in  [MaritalStatusEnum.MARRIED.value, MaritalStatusEnum.STABLE_UNION.value]
+        is_business_person = sinacor_types_repository.is_business_person(value=activity)
+        is_not_employed_or_business_person = sinacor_types_repository.is_others(
+            value=activity
+        )
+
+        callback_key = (
+            is_married,
+            is_not_employed_or_business_person,
+            is_business_person,
+        )
+
+        callbacks = {
+            (
+                True,
+                True,
+                False,
+            ): ClientRegisterRepository._is_not_employed_or_business_and_married_person,
+            (
+                True,
+                False,
+                True,
+            ): ClientRegisterRepository._is_business_and_married_person,
+            (
+                True,
+                False,
+                False,
+            ): ClientRegisterRepository._is_employed_and_married_person,
+            (
+                False,
+                True,
+                False,
+            ): ClientRegisterRepository._is_not_employed_or_business_and_not_married_person,
+            (
+                False,
+                False,
+                True,
+            ): ClientRegisterRepository._is_business_and_not_married_person,
+            (
+                False,
+                False,
+                False,
+            ): ClientRegisterRepository._is_employed_and_not_married_person,
+        }
+        if callback := callbacks.get(callback_key):
+            return callback(user_data=user_data, sinacor_user_control_data=sinacor_user_control_data)
+
+    @staticmethod
+    def _is_not_employed_or_business_and_not_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
+        builder = ClientRegisterBuilder()
+        (
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
+            .add_dt_criacao(user_data=user_data)
+            .add_dt_atualiz()
+            .add_cd_cpfcgc(user_data=user_data)
+            .add_dt_nasc_fund(user_data=user_data)
+            .add_cd_con_dep()
+            .add_in_irsdiv(user_data=user_data)
+            .add_in_pess_vinc(user_data=user_data)
+            .add_nm_cliente(user_data=user_data)
+            .add_tp_cliente(user_data=user_data)
+            .add_tp_pessoa(user_data=user_data)
+            .add_tp_investidor(user_data=user_data)
+            .add_in_situac_cliger()
+            .add_cd_ativ(user_data=user_data)
+            .add_cd_cosif(user_data=user_data)
+            .add_cd_cosif_ci(user_data=user_data)
+            .add_cd_est_civil(user_data=user_data)
+            .add_cd_nacion(user_data=user_data)
+            .add_cd_tipo_doc(user_data=user_data)
+            .add_id_sexo(user_data=user_data)
+            .add_nm_e_mail(user_data=user_data)
+            .add_nm_loc_nasc(user_data=user_data)
+            .add_nm_mae(user_data=user_data)
+            .add_sg_estado_nasc(user_data=user_data)
+            .add_sg_pais(user_data=user_data)
+            .add_cd_cep(user_data=user_data)
+            .add_cd_ddd_tel(user_data=user_data)
+            .add_in_ende()
+            .add_nm_bairro(user_data=user_data)
+            .add_nm_cidade(user_data=user_data)
+            .add_nm_logradouro(user_data=user_data)
+            .add_nr_predio(user_data=user_data)
+            .add_nr_telefone(user_data=user_data)
+            .add_sg_estado(user_data=user_data)
+            .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
+            .add_cd_origem()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_cart_prop()
+            .add_in_situac()
+            .add_tp_cliente_bol()
+            .add_tp_investidor_bol()
+            .add_ind_pcta()
+            .add_ind_end_vinc_con()
+            .add_ind_end_crsp()
+            .add_ind_env_email_bvmf()
+            .add_tp_cliente_bmf()
+            .add_ind_oprc_td()
+            .add_ind_oprc_agnt_td()
+            .add_cod_cidade_nasc(user_data=user_data)
+            .add_sigl_pais_resid(user_data=user_data)
+            .add_num_seq_muni_end1(user_data=user_data)
+            .add_cod_tipo_colt()
+            .add_cod_cep_estr1()
+            .add_uf_estr1()
+            .add_num_class_risc_cmtt()
+            .add_desc_risc_cmtt()
+            .add_num_us_person()
+            .add_val_cfin()
+            .add_data_cfin()
+        )
+        return builder
+
+    @staticmethod
+    def _is_employed_and_not_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
+        builder = ClientRegisterBuilder()
+        (
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
+            .add_dt_criacao(user_data=user_data)
+            .add_dt_atualiz()
+            .add_cd_cpfcgc(user_data=user_data)
+            .add_dt_nasc_fund(user_data=user_data)
+            .add_cd_con_dep()
+            .add_in_irsdiv(user_data=user_data)
+            .add_in_pess_vinc(user_data=user_data)
+            .add_nm_cliente(user_data=user_data)
+            .add_tp_cliente(user_data=user_data)
+            .add_tp_pessoa(user_data=user_data)
+            .add_tp_investidor(user_data=user_data)
+            .add_in_situac_cliger()
+            .add_cd_ativ(user_data=user_data)
+            .add_cd_cosif(user_data=user_data)
+            .add_cd_cosif_ci(user_data=user_data)
+            .add_cd_est_civil(user_data=user_data)
+            .add_cd_nacion(user_data=user_data)
+            .add_cd_tipo_doc(user_data=user_data)
+            .add_id_sexo(user_data=user_data)
+            .add_nm_e_mail(user_data=user_data)
+            .add_nm_loc_nasc(user_data=user_data)
+            .add_nm_mae(user_data=user_data)
+            .add_sg_estado_nasc(user_data=user_data)
+            .add_sg_pais(user_data=user_data)
+            .add_cd_cep(user_data=user_data)
+            .add_cd_ddd_tel(user_data=user_data)
+            .add_in_ende()
+            .add_nm_bairro(user_data=user_data)
+            .add_nm_cidade(user_data=user_data)
+            .add_nm_logradouro(user_data=user_data)
+            .add_nr_predio(user_data=user_data)
+            .add_nr_telefone(user_data=user_data)
+            .add_sg_estado(user_data=user_data)
+            .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
+            .add_cd_origem()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_cart_prop()
+            .add_in_situac()
+            .add_tp_cliente_bol()
+            .add_tp_investidor_bol()
+            .add_ind_pcta()
+            .add_ind_end_vinc_con()
+            .add_ind_end_crsp()
+            .add_ind_env_email_bvmf()
+            .add_tp_cliente_bmf()
+            .add_ind_oprc_td()
+            .add_ind_oprc_agnt_td()
+            .add_cod_cidade_nasc(user_data=user_data)
+            .add_sigl_pais_resid(user_data=user_data)
+            .add_num_seq_muni_end1(user_data=user_data)
+            .add_cod_tipo_colt()
+            .add_cod_cep_estr1()
+            .add_uf_estr1()
+            .add_num_class_risc_cmtt()
+            .add_desc_risc_cmtt()
+            .add_num_trab_empr(user_data=user_data)
+            .add_num_us_person(user_data=user_data)
+            .add_val_cfin(user_data=user_data)
+            .add_data_cfin(user_data=user_data)
+            .add_cd_cnpj_empresa(user_data=user_data)
+        )
+        return builder
+
+    @staticmethod
+    def _is_business_and_not_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
+        builder = ClientRegisterBuilder()
+        (
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
+            .add_dt_criacao(user_data=user_data)
+            .add_dt_atualiz()
+            .add_cd_cpfcgc(user_data=user_data)
+            .add_dt_nasc_fund(user_data=user_data)
+            .add_cd_con_dep()
+            .add_in_irsdiv(user_data=user_data)
+            .add_in_pess_vinc(user_data=user_data)
+            .add_nm_cliente(user_data=user_data)
+            .add_tp_cliente(user_data=user_data)
+            .add_tp_pessoa(user_data=user_data)
+            .add_tp_investidor(user_data=user_data)
+            .add_in_situac_cliger()
+            .add_cd_ativ(user_data=user_data)
+            .add_cd_cosif(user_data=user_data)
+            .add_cd_cosif_ci(user_data=user_data)
+            .add_cd_est_civil(user_data=user_data)
+            .add_cd_nacion(user_data=user_data)
+            .add_cd_tipo_doc(user_data=user_data)
+            .add_id_sexo(user_data=user_data)
+            .add_nm_e_mail(user_data=user_data)
+            .add_nm_loc_nasc(user_data=user_data)
+            .add_nm_mae(user_data=user_data)
+            .add_sg_estado_nasc(user_data=user_data)
+            .add_sg_pais(user_data=user_data)
+            .add_cd_cep(user_data=user_data)
+            .add_cd_ddd_tel(user_data=user_data)
+            .add_in_ende()
+            .add_nm_bairro(user_data=user_data)
+            .add_nm_cidade(user_data=user_data)
+            .add_nm_logradouro(user_data=user_data)
+            .add_nr_predio(user_data=user_data)
+            .add_nr_telefone(user_data=user_data)
+            .add_sg_estado(user_data=user_data)
+            .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
+            .add_cd_origem()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_cart_prop()
+            .add_in_situac()
+            .add_tp_cliente_bol()
+            .add_tp_investidor_bol()
+            .add_ind_pcta()
+            .add_ind_end_vinc_con()
+            .add_ind_end_crsp()
+            .add_ind_env_email_bvmf()
+            .add_tp_cliente_bmf()
+            .add_ind_oprc_td()
+            .add_ind_oprc_agnt_td()
+            .add_cod_cidade_nasc(user_data=user_data)
+            .add_sigl_pais_resid(user_data=user_data)
+            .add_num_seq_muni_end1(user_data=user_data)
+            .add_cod_tipo_colt()
+            .add_cod_cep_estr1()
+            .add_uf_estr1()
+            .add_num_class_risc_cmtt()
+            .add_desc_risc_cmtt()
+            .add_num_us_person(user_data=user_data)
+            .add_val_cfin(user_data=user_data)
+            .add_data_cfin(user_data=user_data)
+            .add_cd_cnpj_empresa(user_data=user_data)
+        )
+        return builder
+
+    @staticmethod
+    def _is_not_employed_or_business_and_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
+        builder = ClientRegisterBuilder()
+        (
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
+            .add_dt_criacao(user_data=user_data)
+            .add_dt_atualiz()
+            .add_cd_cpfcgc(user_data=user_data)
+            .add_dt_nasc_fund(user_data=user_data)
+            .add_cd_con_dep()
+            .add_in_irsdiv(user_data=user_data)
+            .add_in_pess_vinc(user_data=user_data)
+            .add_nm_cliente(user_data=user_data)
+            .add_tp_cliente(user_data=user_data)
+            .add_tp_pessoa(user_data=user_data)
+            .add_tp_investidor(user_data=user_data)
+            .add_in_situac_cliger()
+            .add_cd_ativ(user_data=user_data)
+            .add_cd_cosif(user_data=user_data)
+            .add_cd_cosif_ci(user_data=user_data)
+            .add_cd_est_civil(user_data=user_data)
+            .add_cd_nacion(user_data=user_data)
+            .add_cd_tipo_doc(user_data=user_data)
+            .add_id_sexo(user_data=user_data)
+            .add_nm_conjuge(user_data=user_data)
+            .add_nm_e_mail(user_data=user_data)
+            .add_nm_loc_nasc(user_data=user_data)
+            .add_nm_mae(user_data=user_data)
+            .add_sg_estado_nasc(user_data=user_data)
+            .add_sg_pais(user_data=user_data)
+            .add_tp_regcas(user_data=user_data)
+            .add_cd_cep(user_data=user_data)
+            .add_cd_ddd_tel(user_data=user_data)
+            .add_in_ende()
+            .add_nm_bairro(user_data=user_data)
+            .add_nm_cidade(user_data=user_data)
+            .add_nm_logradouro(user_data=user_data)
+            .add_nr_predio(user_data=user_data)
+            .add_nr_telefone(user_data=user_data)
+            .add_sg_estado(user_data=user_data)
+            .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
+            .add_cd_origem()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_cart_prop()
+            .add_in_situac()
+            .add_tp_cliente_bol()
+            .add_tp_investidor_bol()
+            .add_ind_pcta()
+            .add_ind_end_vinc_con()
+            .add_ind_end_crsp()
+            .add_ind_env_email_bvmf()
+            .add_tp_cliente_bmf()
+            .add_ind_oprc_td()
+            .add_ind_oprc_agnt_td()
+            .add_cod_cidade_nasc(user_data=user_data)
+            .add_sigl_pais_resid(user_data=user_data)
+            .add_num_seq_muni_end1(user_data=user_data)
+            .add_cod_tipo_colt()
+            .add_cod_cep_estr1()
+            .add_uf_estr1()
+            .add_num_class_risc_cmtt()
+            .add_desc_risc_cmtt()
+            .add_num_us_person(user_data=user_data)
+            .add_val_cfin(user_data=user_data)
+            .add_data_cfin(user_data=user_data)
+            .add_cd_cpf_conjuge(user_data=user_data)
+            .add_dt_nasc_conjuge(user_data=user_data)
+        )
+        return builder
+
+    @staticmethod
+    def _is_employed_and_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
+        builder = ClientRegisterBuilder()
+        (
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
+            .add_dt_criacao(user_data=user_data)
+            .add_dt_atualiz()
+            .add_cd_cpfcgc(user_data=user_data)
+            .add_dt_nasc_fund(user_data=user_data)
+            .add_cd_con_dep()
+            .add_in_irsdiv(user_data=user_data)
+            .add_in_pess_vinc(user_data=user_data)
+            .add_nm_cliente(user_data=user_data)
+            .add_tp_cliente(user_data=user_data)
+            .add_tp_pessoa(user_data=user_data)
+            .add_tp_investidor(user_data=user_data)
+            .add_in_situac_cliger()
+            .add_cd_ativ(user_data=user_data)
+            .add_cd_cosif(user_data=user_data)
+            .add_cd_cosif_ci(user_data=user_data)
+            .add_cd_est_civil(user_data=user_data)
+            .add_cd_nacion(user_data=user_data)
+            .add_cd_tipo_doc(user_data=user_data)
+            .add_id_sexo(user_data=user_data)
+            .add_nm_conjuge(user_data=user_data)
+            .add_nm_e_mail(user_data=user_data)
+            .add_nm_loc_nasc(user_data=user_data)
+            .add_nm_mae(user_data=user_data)
+            .add_sg_estado_nasc(user_data=user_data)
+            .add_sg_pais(user_data=user_data)
+            .add_tp_regcas(user_data=user_data)
+            .add_cd_cep(user_data=user_data)
+            .add_cd_ddd_tel(user_data=user_data)
+            .add_in_ende()
+            .add_nm_bairro(user_data=user_data)
+            .add_nm_cidade(user_data=user_data)
+            .add_nm_logradouro(user_data=user_data)
+            .add_nr_predio(user_data=user_data)
+            .add_nr_telefone(user_data=user_data)
+            .add_sg_estado(user_data=user_data)
+            .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
+            .add_cd_origem()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_cart_prop()
+            .add_in_situac()
+            .add_tp_cliente_bol()
+            .add_tp_investidor_bol()
+            .add_ind_pcta()
+            .add_ind_end_vinc_con()
+            .add_ind_end_crsp()
+            .add_ind_env_email_bvmf()
+            .add_tp_cliente_bmf()
+            .add_ind_oprc_td()
+            .add_ind_oprc_agnt_td()
+            .add_cod_cidade_nasc(user_data=user_data)
+            .add_sigl_pais_resid(user_data=user_data)
+            .add_num_seq_muni_end1(user_data=user_data)
+            .add_cod_tipo_colt()
+            .add_cod_cep_estr1()
+            .add_uf_estr1()
+            .add_num_class_risc_cmtt()
+            .add_desc_risc_cmtt()
+            .add_num_trab_empr(user_data=user_data)
+            .add_num_us_person(user_data=user_data)
+            .add_val_cfin(user_data=user_data)
+            .add_data_cfin(user_data=user_data)
+            .add_cd_cpf_conjuge(user_data=user_data)
+            .add_dt_nasc_conjuge(user_data=user_data)
+            .add_cd_cnpj_empresa(user_data=user_data)
+        )
+        return builder
+
+    @staticmethod
+    def _is_business_and_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
+        builder = ClientRegisterBuilder()
+        (
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
+            .add_dt_criacao(user_data=user_data)
+            .add_dt_atualiz()
+            .add_cd_cpfcgc(user_data=user_data)
+            .add_dt_nasc_fund(user_data=user_data)
+            .add_cd_con_dep()
+            .add_in_irsdiv(user_data=user_data)
+            .add_in_pess_vinc(user_data=user_data)
+            .add_nm_cliente(user_data=user_data)
+            .add_tp_cliente(user_data=user_data)
+            .add_tp_pessoa(user_data=user_data)
+            .add_tp_investidor(user_data=user_data)
+            .add_in_situac_cliger()
+            .add_cd_ativ(user_data=user_data)
+            .add_cd_cosif(user_data=user_data)
+            .add_cd_cosif_ci(user_data=user_data)
+            .add_cd_est_civil(user_data=user_data)
+            .add_cd_nacion(user_data=user_data)
+            .add_cd_tipo_doc(user_data=user_data)
+            .add_id_sexo(user_data=user_data)
+            .add_nm_conjuge(user_data=user_data)
+            .add_nm_e_mail(user_data=user_data)
+            .add_nm_loc_nasc(user_data=user_data)
+            .add_nm_mae(user_data=user_data)
+            .add_sg_estado_nasc(user_data=user_data)
+            .add_sg_pais(user_data=user_data)
+            .add_tp_regcas(user_data=user_data)
+            .add_cd_cep(user_data=user_data)
+            .add_cd_ddd_tel(user_data=user_data)
+            .add_in_ende()
+            .add_nm_bairro(user_data=user_data)
+            .add_nm_cidade(user_data=user_data)
+            .add_nm_logradouro(user_data=user_data)
+            .add_nr_predio(user_data=user_data)
+            .add_nr_telefone(user_data=user_data)
+            .add_sg_estado(user_data=user_data)
+            .add_sg_pais_ende1(user_data=user_data)
+            .add_cd_ddd_celular1(user_data=user_data)
+            .add_nr_celular1(user_data=user_data)
+            .add_cd_origem()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_cart_prop()
+            .add_in_situac()
+            .add_tp_cliente_bol()
+            .add_tp_investidor_bol()
+            .add_ind_pcta()
+            .add_ind_end_vinc_con()
+            .add_ind_end_crsp()
+            .add_ind_env_email_bvmf()
+            .add_tp_cliente_bmf()
+            .add_ind_oprc_td()
+            .add_ind_oprc_agnt_td()
+            .add_cod_cidade_nasc(user_data=user_data)
+            .add_sigl_pais_resid(user_data=user_data)
+            .add_num_seq_muni_end1(user_data=user_data)
+            .add_cod_tipo_colt()
+            .add_cod_cep_estr1()
+            .add_uf_estr1()
+            .add_num_class_risc_cmtt()
+            .add_desc_risc_cmtt()
+            .add_num_us_person(user_data=user_data)
+            .add_val_cfin(user_data=user_data)
+            .add_data_cfin(user_data=user_data)
+            .add_cd_cpf_conjuge(user_data=user_data)
+            .add_dt_nasc_conjuge(user_data=user_data)
+        )
+        return builder

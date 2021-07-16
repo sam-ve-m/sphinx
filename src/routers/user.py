@@ -21,6 +21,7 @@ from src.routers.validators.base import (
     QuizQuestionOption,
     IsUsPerson,
     UsTin,
+    NickName,
     IsCvmQualifiedInvestor,
 )
 from src.utils.jwt_utils import JWTHandler
@@ -30,7 +31,7 @@ from src.controllers.users.controller import UserController
 router = APIRouter()
 
 
-class UserSimple(Email, Name, OptionalPIN):
+class UserSimple(Email, NickName, OptionalPIN):
     pass
 
 
@@ -113,16 +114,6 @@ def update_change_user_to_client(quiz_response: QuizResponses, request: Request)
         "quiz": quiz_response.dict(),
     }
     return BaseController.run(UserController.change_user_to_client, payload, request)
-
-
-@router.put("/user/table_callback", tags=["user"])
-def user_table_callback(request: Request):
-    # TODO: Callback da STONEAGE MAKE BASEMODEL
-    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
-    if isinstance(jwt_data_or_error_response, Response):
-        return jwt_data_or_error_response
-    payload = {"x-thebes-answer": jwt_data_or_error_response}
-    return BaseController.run(UserController.table_callback, payload, request)
 
 
 @router.delete("/user", tags=["user"])
