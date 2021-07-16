@@ -30,6 +30,7 @@ class OracleInfrastructure(IOracle):
             service_name=config("ORACLE_SERVICE"),
         ),
         encoding=config("ORACLE_ENCODING"),
+        getmode=cx_Oracle.SPOOL_ATTRVAL_WAIT,
     )
 
     @contextmanager
@@ -51,12 +52,6 @@ class OracleInfrastructure(IOracle):
                 rows = self._normalize_encode(rows=rows)
                 return rows
 
-    def delete(self, sql: str, values: dict) -> list:
-        with self.get_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(sql, values)
-                connection.commit()
-
     @staticmethod
     def _normalize_encode(rows: List[tuple]) -> List[tuple]:
         new_rows = list()
@@ -68,12 +63,6 @@ class OracleInfrastructure(IOracle):
                 new_row.append(item)
             new_rows.append(tuple(new_row))
         return new_rows
-
-    def insert(self, sql: str, values: dict) -> None:
-        with self.get_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(sql, values)
-                connection.commit()
 
     def execute(self, sql, values) -> int:
         with self.get_connection() as connection:

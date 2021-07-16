@@ -1,5 +1,5 @@
 # STANDARD LIBS
-from typing import Type
+from typing import Type, Optional
 
 # SPHINX
 from src.infrastructures.oracle.infrastructure import OracleInfrastructure
@@ -9,15 +9,23 @@ from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 
 class ClientRegisterRepository(OracleInfrastructure):
     def register_validated_users(self, user_cpf: str):
-        # TODO: Validate this values
-        values = [1, "CD_USUARIO", "I", 0, user_cpf]
-        self.execute(name="PROC_IMPCLIH_V2", values=values)
+        values = {
+            "cd_empresa": '1',
+            "cd_usuario": '1',
+            "tp_ocorrencia": "I",
+            "cd_cliente_padrao": '1',
+            "cpf": str(user_cpf),
+        }
+        self.execute(
+            sql="call PROC_IMPCLIH_V2_LIONX.EXECIMPH(:cd_empresa, :cd_usuario, :tp_ocorrencia, :cd_cliente_padrao, :cpf)",
+            values=values,
+        )
 
     def cleanup_temp_tables(self, user_cpf: str):
         client_temp = "DELETE FROM TSCIMPCLIH WHERE CD_CPFCGC = :cpf"
-        self.delete(sql=client_temp, values={"cpf": user_cpf})
+        self.execute(sql=client_temp, values={"cpf": str(user_cpf)})
         error_temp = "DELETE FROM TSCERROH WHERE CD_CPFCGC = :cpf"
-        self.delete(sql=error_temp, values={"cpf": user_cpf})
+        self.execute(sql=error_temp, values={"cpf": str(user_cpf)})
 
     def validate_user_data_erros(self, user_cpf: int) -> bool:
         self._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
@@ -30,21 +38,50 @@ class ClientRegisterRepository(OracleInfrastructure):
             WHERE CD_CPFCGC = {user_cpf}
         """
         result = self.query(sql=sql)
-        return len(result) >= 0
+        return len(result) > 0
 
     def _run_data_validator_in_register_user_tmp_table(self, user_cpf: int) -> int:
-        self.execute(sql="call PROC_CLIECOH_V2_LIONX.EXECCONH(:s, :cpf)", values={'s': "S", 'cpf': str(user_cpf)})
+        self.execute(
+            sql="call PROC_CLIECOH_V2_LIONX.EXECCONH(:s, :cpf)",
+            values={"s": "S", "cpf": str(user_cpf)},
+        )
 
     def register_user_data_in_register_users_temp_table(
         self, builder: Type[ClientRegisterBuilder]
     ):
         client_register = builder.build()
         fields = client_register.keys()
-        sql = f"""INSERT INTO TSCIMPCLIH({','.join(fields)}) VALUES(:{',:'.join(fields)})"""
-        self.insert(sql=sql, values=client_register)
+        sql = f"INSERT INTO TSCIMPCLIH({','.join(fields)}) VALUES(:{',:'.join(fields)})"
+        self.execute(sql=sql, values=client_register)
+
+    def get_user_control_data_if_user_already_exists(self, user_cpf: int):
+        verify_user_data_sql = f"SELECT 1 FROM TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
+        verify_user_bovespa_account = (
+            f"SELECT 1 FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+        )
+        verify_user_bmf_account = (
+            f"SELECT 1 FROM TSCCLIBMF WHERE CD_CPFCGC = {user_cpf}"
+        )
+        verify_user_account = f"SELECT 1 FROM TSCCLICOMP WHERE CD_CPFCGC = {user_cpf}"
+        verify_user_treasury = f"SELECT 1 FROM TSCCLITSD WHERE CD_CPFCGC = {user_cpf}"
+        all_validation_query = [
+            verify_user_data_sql,
+            verify_user_bovespa_account,
+            verify_user_bmf_account,
+            verify_user_account,
+            verify_user_treasury,
+        ]
+        result = self.query(sql=" union ".join(all_validation_query))
+        if len(result) > 0:
+            result = self.query(sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}")
+            return result[0]
+        return None
 
     def get_builder(
-        self, user_data: dict, sinacor_types_repository=SinaCorTypesRepository()
+        self,
+        user_data: dict,
+        sinacor_user_control_data: Optional[tuple],
+        sinacor_types_repository=SinaCorTypesRepository(),
     ) -> Type[ClientRegisterBuilder]:
         activity = user_data["occupation"]["activity"]
         is_married = user_data["marital"]["status"] == "married"
@@ -92,15 +129,24 @@ class ClientRegisterRepository(OracleInfrastructure):
             ): ClientRegisterRepository._is_employed_and_not_married_person,
         }
         if callback := callbacks.get(callback_key):
-            return callback(user_data=user_data)
+            return callback(user_data=user_data, sinacor_user_control_data=sinacor_user_control_data)
 
     @staticmethod
     def _is_not_employed_or_business_and_not_married_person(
-        user_data: dict,
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
     ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
-            builder.add_tp_registro()
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
             .add_dt_criacao(user_data=user_data)
             .add_dt_atualiz()
             .add_cd_cpfcgc(user_data=user_data)
@@ -138,7 +184,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_cd_ddd_celular1(user_data=user_data)
             .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
-            .add_dv_cliente()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
             .add_in_cart_prop()
             .add_in_situac()
             .add_tp_cliente_bol()
@@ -158,7 +204,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_uf_estr1()
             .add_num_class_risc_cmtt()
             .add_desc_risc_cmtt()
-            .add_data_ult_atlz()
             .add_num_us_person()
             .add_val_cfin()
             .add_data_cfin()
@@ -166,10 +211,21 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def _is_employed_and_not_married_person(user_data: dict) -> ClientRegisterBuilder:
+    def _is_employed_and_not_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
-            builder.add_tp_registro()
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
             .add_dt_criacao(user_data=user_data)
             .add_dt_atualiz()
             .add_cd_cpfcgc(user_data=user_data)
@@ -207,7 +263,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_cd_ddd_celular1(user_data=user_data)
             .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
-            .add_dv_cliente()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
             .add_in_cart_prop()
             .add_in_situac()
             .add_tp_cliente_bol()
@@ -227,7 +283,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_uf_estr1()
             .add_num_class_risc_cmtt()
             .add_desc_risc_cmtt()
-            .add_data_ult_atlz()
             .add_num_trab_empr(user_data=user_data)
             .add_num_us_person(user_data=user_data)
             .add_val_cfin(user_data=user_data)
@@ -237,10 +292,21 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def _is_business_and_not_married_person(user_data: dict) -> ClientRegisterBuilder:
+    def _is_business_and_not_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
-            builder.add_tp_registro()
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
             .add_dt_criacao(user_data=user_data)
             .add_dt_atualiz()
             .add_cd_cpfcgc(user_data=user_data)
@@ -278,7 +344,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_cd_ddd_celular1(user_data=user_data)
             .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
-            .add_dv_cliente()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
             .add_in_cart_prop()
             .add_in_situac()
             .add_tp_cliente_bol()
@@ -298,7 +364,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_uf_estr1()
             .add_num_class_risc_cmtt()
             .add_desc_risc_cmtt()
-            .add_data_ult_atlz()
             .add_num_us_person(user_data=user_data)
             .add_val_cfin(user_data=user_data)
             .add_data_cfin(user_data=user_data)
@@ -308,11 +373,20 @@ class ClientRegisterRepository(OracleInfrastructure):
 
     @staticmethod
     def _is_not_employed_or_business_and_married_person(
-        user_data: dict,
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
     ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
-            builder.add_tp_registro()
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
             .add_dt_criacao(user_data=user_data)
             .add_dt_atualiz()
             .add_cd_cpfcgc(user_data=user_data)
@@ -352,7 +426,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_cd_ddd_celular1(user_data=user_data)
             .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
-            .add_dv_cliente()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
             .add_in_cart_prop()
             .add_in_situac()
             .add_tp_cliente_bol()
@@ -372,7 +446,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_uf_estr1()
             .add_num_class_risc_cmtt()
             .add_desc_risc_cmtt()
-            .add_data_ult_atlz()
             .add_num_us_person(user_data=user_data)
             .add_val_cfin(user_data=user_data)
             .add_data_cfin(user_data=user_data)
@@ -382,10 +455,21 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def _is_employed_and_married_person(user_data: dict) -> ClientRegisterBuilder:
+    def _is_employed_and_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
-            builder.add_tp_registro()
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
             .add_dt_criacao(user_data=user_data)
             .add_dt_atualiz()
             .add_cd_cpfcgc(user_data=user_data)
@@ -425,7 +509,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_cd_ddd_celular1(user_data=user_data)
             .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
-            .add_dv_cliente()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
             .add_in_cart_prop()
             .add_in_situac()
             .add_tp_cliente_bol()
@@ -445,7 +529,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_uf_estr1()
             .add_num_class_risc_cmtt()
             .add_desc_risc_cmtt()
-            .add_data_ult_atlz()
             .add_num_trab_empr(user_data=user_data)
             .add_num_us_person(user_data=user_data)
             .add_val_cfin(user_data=user_data)
@@ -457,10 +540,21 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def _is_business_and_married_person(user_data: dict) -> ClientRegisterBuilder:
+    def _is_business_and_married_person(
+        user_data: dict, sinacor_user_control_data: Optional[tuple]
+    ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
         (
-            builder.add_tp_registro()
+            builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
+            .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_in_rec_divi()
+            .add_in_emite_nota()
+            .add_pc_corcor_prin()
+            .add_in_emite_nota_cs()
+            .add_pc_corcor_prin_cs()
+            .add_val_lim_neg_td()
+            .add_val_taxa_agnt_td()
+            .add_txt_email_td(user_data=user_data)
             .add_dt_criacao(user_data=user_data)
             .add_dt_atualiz()
             .add_cd_cpfcgc(user_data=user_data)
@@ -500,7 +594,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_cd_ddd_celular1(user_data=user_data)
             .add_nr_celular1(user_data=user_data)
             .add_cd_origem()
-            .add_dv_cliente()
+            .add_dv_cliente(sinacor_user_control_data=sinacor_user_control_data)
             .add_in_cart_prop()
             .add_in_situac()
             .add_tp_cliente_bol()
@@ -520,7 +614,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_uf_estr1()
             .add_num_class_risc_cmtt()
             .add_desc_risc_cmtt()
-            .add_data_ult_atlz()
             .add_num_us_person(user_data=user_data)
             .add_val_cfin(user_data=user_data)
             .add_data_cfin(user_data=user_data)

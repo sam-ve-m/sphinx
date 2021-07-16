@@ -205,6 +205,17 @@ class SinaCorTypesRepository(OracleInfrastructure):
         )
         return dict_result
 
+    def get_nationality(self):
+        sql = """
+            SELECT TP_SITUAC as code, DS_SITUAC as description
+            FROM TSCTPSITUACAO
+        """
+        tuple_result = self.query(sql=sql)
+        dict_result = self.tuples_to_dict_list(
+            fields=["code", "description"], values=tuple_result
+        )
+        return dict_result
+
     def get_bmf_customer_type(self, client_type: str):
         sql = f"""
             SELECT TP_CLIENTE_BMF as code, DS_TIPO_CLIENTE as description

@@ -2,5 +2,5 @@ from enum import Enum
 
 
 class OperatesByTreasuryDirectAgent(Enum):
-    YES = "Y"
+    YES = "S"
     NO = "N"

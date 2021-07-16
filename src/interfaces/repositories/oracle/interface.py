@@ -18,9 +18,5 @@ class IOracle(ABC):
         pass
 
     @abstractmethod
-    def insert(self, sql, values):
-        pass
-
-    @abstractmethod
     def execute(self, name, values):
         pass

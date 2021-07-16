@@ -1,5 +1,6 @@
 # STANDARD LIBS
 from datetime import datetime
+from typing import Optional
 
 # SPHINX
 from src.repositories.sinacor_types.enum.register_type import RegisterType
@@ -51,6 +52,12 @@ from src.repositories.sinacor_types.enum.brokerage_note_issuance_indicator impor
 from src.repositories.sinacor_types.enum.foreign_zip_code import ForeignZipCode
 from src.repositories.sinacor_types.enum.foreign_state import ForeignState
 from src.repositories.sinacor_types.enum.bmf_client import BmfClient
+from src.repositories.sinacor_types.enum.brokerage_discount_percentage import (
+    BrokerageDiscountPercentage,
+)
+from src.repositories.sinacor_types.enum.home_execution_brokerage_note_issuance_indicator import (
+    HomeExecutionBrokerageNoteIssuanceIndicator,
+)
 
 
 class ClientRegisterBuilder:
@@ -60,8 +67,11 @@ class ClientRegisterBuilder:
     def build(self):
         return self._fields_added
 
-    def add_tp_registro(self):
-        self._fields_added.update({"TP_REGISTRO": RegisterType.UPDATE_INCLUSION.value})
+    def add_tp_registro(self, sinacor_user_id: Optional[int]):
+        value = RegisterType.INCLUSION.value
+        if sinacor_user_id:
+            value = RegisterType.UPDATE.value
+        self._fields_added.update({"TP_REGISTRO": value})
         return self
 
     def add_dt_criacao(self, user_data: dict):
@@ -264,7 +274,10 @@ class ClientRegisterBuilder:
         self._fields_added.update({"CD_ASSESSOR": value})
         return self
 
-    def add_cd_cliente(self, value=None):
+    def add_cd_cliente(self, sinacor_user_control_data: Optional[tuple]):
+        value = sinacor_user_control_data
+        if sinacor_user_control_data:
+            value = sinacor_user_control_data[0]
         self._fields_added.update({"CD_CLIENTE": value})
         return self
 
@@ -276,8 +289,11 @@ class ClientRegisterBuilder:
         self._fields_added.update({"CD_VINCULO": value})
         return self
 
-    def add_dv_cliente(self):
-        self._fields_added.update({"DV_CLIENTE": ClientDigit.DEFAULT.value})
+    def add_dv_cliente(self, sinacor_user_control_data: Optional[tuple]):
+        value = ClientDigit.DEFAULT.value
+        if sinacor_user_control_data:
+            value = sinacor_user_control_data[1]
+        self._fields_added.update({"DV_CLIENTE": value})
         return self
 
     def add_in_cart_prop(self):
@@ -296,8 +312,10 @@ class ClientRegisterBuilder:
         )
         return self
 
-    def add_pc_corcor_prin(self, value=None):
-        self._fields_added.update({"PC_CORCOR_PRIN": value})
+    def add_pc_corcor_prin(self):
+        self._fields_added.update(
+            {"PC_CORCOR_PRIN": BrokerageDiscountPercentage.DEFAULT.value}
+        )
         return self
 
     def add_tp_cliente_bol(self):
@@ -328,8 +346,10 @@ class ClientRegisterBuilder:
         self._fields_added.update({"COD_TIPO_COLT": value})
         return self
 
-    def add_in_emite_nota_cs(self, value=None):
-        self._fields_added.update({"IN_EMITE_NOTA_CS": value})
+    def add_in_emite_nota_cs(self):
+        self._fields_added.update(
+            {"IN_EMITE_NOTA_CS": HomeExecutionBrokerageNoteIssuanceIndicator.NO.value}
+        )
         return self
 
     def add_ind_end_vinc_con(self):
@@ -403,8 +423,8 @@ class ClientRegisterBuilder:
         self._fields_added.update({"DESC_RISC_CMTT": Risk.HIGH.value})
         return self
 
-    def add_data_ult_atlz(self):
-        self._fields_added.update({"DATA_ULT_ATLZ": datetime.now()})
+    def add_data_ult_atlz(self, value=None):
+        self._fields_added.update({"DATA_ULT_ATLZ": value})
         return self
 
     def add_num_trab_empr(self, user_data: dict):
@@ -707,12 +727,15 @@ class ClientRegisterBuilder:
         self._fields_added.update({"NM_CONTA": value})
         return self
 
-    def add_pc_corcor_prin_cs(self, value=None):
-        self._fields_added.update({"PC_CORCOR_PRIN_CS": value})
+    def add_pc_corcor_prin_cs(self):
+        # TODO: Define with operation table
+        self._fields_added.update(
+            {"PC_CORCOR_PRIN_CS": BrokerageDiscountPercentage.DEFAULT.value}
+        )
         return self
 
     def add_in_tipo_corret_exec_cs(self, value=None):
-        self._fields_added.update({"IN_TIPO_CORRET_EXEC_CS": value})
+        self._fields_added.update({"IN_TIPO_CORRET_EXEC_CS": 0})
         return self
 
     def add_pc_total_cs(self, value=None):
@@ -851,16 +874,18 @@ class ClientRegisterBuilder:
         self._fields_added.update({"IN_TRIBUT_ESPECIAL": value})
         return self
 
-    def add_txt_email_td(self, value=None):
-        self._fields_added.update({"TXT_EMAIL_TD": value})
+    def add_txt_email_td(self, user_data: dict):
+        self._fields_added.update({"TXT_EMAIL_TD": user_data["email"]})
         return self
 
     def add_val_lim_neg_td(self, value=None):
-        self._fields_added.update({"VAL_LIM_NEG_TD": value})
+        # TODO: Define with operation table
+        self._fields_added.update({"VAL_LIM_NEG_TD": 0})
         return self
 
     def add_val_taxa_agnt_td(self, value=None):
-        self._fields_added.update({"VAL_TAXA_AGNT_TD": value})
+        # TODO: Define with operation table
+        self._fields_added.update({"VAL_TAXA_AGNT_TD": 0})
         return self
 
     def add_cod_aeco_princ(self, value=None):
