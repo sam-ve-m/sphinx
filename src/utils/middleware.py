@@ -98,7 +98,7 @@ def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
     try:
         user_created = str(user_data.get("token_valid_after"))
         jwt_created_at = jwt_data.get("created_at")
-        is_token_valid = jwt_created_at > user_created
+        is_token_valid = jwt_created_at >= user_created
         return is_token_valid
     except ValueError:
         return False
