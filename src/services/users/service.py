@@ -408,6 +408,7 @@ class UserService(IUser):
         current_user_marital = current_user.get("marital")
 
         user_identifier_data = {
+            "email": current_user.get("email"),
             "cpf": current_user.get("cpf"),
             "cel_phone": current_user.get("cel_phone"),
             "marital_status": current_user_marital.get("marital_status"),
