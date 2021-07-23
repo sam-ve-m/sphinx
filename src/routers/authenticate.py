@@ -27,13 +27,6 @@ def answer(request: Request):
     )
 
 
-@router.put("/forgot_password", tags=["authentication"])
-def forgot_password(payload: Login, request: Request):
-    return BaseController.run(
-        AuthenticationController.forgot_password, dict(payload), request
-    )
-
-
 @router.get("/thebes_hall", tags=["authentication"])
 def thebes_hall(request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)

@@ -1,3 +1,6 @@
+# STANDARD LIBS
+from copy import deepcopy
+
 # OUTSIDE LIBRARIES
 from fastapi import status
 
@@ -26,7 +29,7 @@ class FeatureService(IFeature):
     def update(payload: dict, feature_repository=FeatureRepository()) -> dict:
         display_name = payload.get("model").get("display_name")
         old = feature_repository.find_one({"_id": payload.get("feature_id")})
-        new = dict(old)
+        new = deepcopy(old)
         new["display_name"] = display_name
         if feature_repository.update_one(old=old, new=new):
             return {

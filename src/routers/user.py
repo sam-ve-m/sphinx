@@ -62,7 +62,7 @@ def create_admin(user: UserSimple, request: Request):
 
 
 @router.get("/user/forgot_password", tags=["user"])
-def forgot_password(user: Email, request: Request):
+def forgot_password(request: Request, user: Email = Depends(Email)):
     return BaseController.run(UserController.forgot_password, user.dict(), request)
 
 

@@ -55,11 +55,11 @@ def route_is_public(url_request: str, method: str = None) -> bool:
         "/openapi.json",
         "/thebes_gate",
         "/thebes_hall",
+        "/user/forgot_password",
     ]
 
     public_paths_post = [
         "/user",
-        "/user/forgot_password",
         "/login",
         "/login/admin",
     ]

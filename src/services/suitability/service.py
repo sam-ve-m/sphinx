@@ -1,6 +1,7 @@
 # STANDARD LIBS
 from datetime import datetime
 from typing import List, Tuple, Union, Optional
+from copy import deepcopy
 
 # OUTSIDE LIBRARIES
 from fastapi import status
@@ -252,7 +253,7 @@ class SuitabilityService(ISuitability):
         ):
             raise InternalServerError("common.process_issue")
 
-        new = dict(old)
+        new = deepcopy(old)
         new.update(
             {
                 "suitability": {

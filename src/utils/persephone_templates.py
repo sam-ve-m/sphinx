@@ -19,7 +19,7 @@ def get_user_signed_term_template_with_data(payload: dict, file_type: str) -> di
         "term_type": file_type,
         "term_version": f"v{version}",
         "user_accept": True,
-        "term_answer_timestamp": int(datetime.utcnow().timestamp()),
+        "term_answer_time_stamp": int(datetime.utcnow().timestamp()),
     }
 
 

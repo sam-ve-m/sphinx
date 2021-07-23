@@ -1,3 +1,6 @@
+# STANDARD LIBS
+from copy import deepcopy
+
 # OUTSIDE LIBRARIES
 from fastapi import status
 
@@ -29,7 +32,7 @@ class ViewService(IView):
         old = view_repository.find_one({"_id": payload.get("view_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
-        new = dict(old)
+        new = deepcopy(old)
         new["display_name"] = display_name
         if view_repository.update_one(old=old, new=new):
             return {
@@ -62,7 +65,7 @@ class ViewService(IView):
             if features is None:
                 raise InternalServerError("common.process_issue")
             if feature_id not in features:
-                new = dict(old)
+                new = deepcopy(old)
                 new.get("features").append(feature_id)
                 if view_repository.update_one(old=old, new=new) is False:
                     raise InternalServerError("common.process_issue")

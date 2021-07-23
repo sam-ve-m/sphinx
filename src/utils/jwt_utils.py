@@ -11,6 +11,7 @@ from pathlib import Path
 from fastapi import Request, Response, status
 from jwt import JWT, jwk_from_dict, jwk_from_pem
 from jwt.utils import get_int_from_datetime
+from heimdall_client.bifrost import Heimdall
 
 # SPHINX
 from src.i18n.i18n_resolver import i18nResolver as i18n
@@ -22,6 +23,8 @@ from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 class JWTHandler:
     # TODO change this method to use heimdall to validate the given jwt and this to generate the jwt only
     instance = JWT()
+    logger = logging.getLogger(config("LOG_NAME"))
+    heimdall = Heimdall(logger=logging.getLogger(config("LOG_NAME")))
 
     @staticmethod
     def generate_token(payload: dict, ttl: int = 5) -> Optional[str]:
@@ -49,13 +52,7 @@ class JWTHandler:
     @staticmethod
     def decrypt_payload(encrypted_payload: str) -> Optional[dict]:
         try:
-            base_path = Path(__file__).parents[1]
-            path = os.path.join(base_path, "keys", "id_rsa.json")
-            with open(path, "r") as fh:
-                verifying_key = jwk_from_dict(json.load(fh))
-            payload = JWTHandler.instance.decode(
-                encrypted_payload, verifying_key, do_time_check=True
-            )
+            payload = JWTHandler.heimdall.decrypt_payload(jwt=encrypted_payload)
             return payload
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))

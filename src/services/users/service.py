@@ -88,7 +88,7 @@ class UserService(IUser):
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
-        new = dict(old)
+        new = deepcopy(old)
         new.update({"deleted": True})
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
@@ -104,7 +104,7 @@ class UserService(IUser):
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
-        new = dict(old)
+        new = deepcopy(old)
         new["pin"] = new_pin
         new = hash_field(key="pin", payload=new)
         if user_repository.update_one(old=old, new=new) is False:
@@ -123,7 +123,7 @@ class UserService(IUser):
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
-        new = dict(old)
+        new = deepcopy(old)
         new["scope"] = dict(old.get("scope"))
         new["scope"]["view_type"] = new_view
         if user_repository.update_one(old=old, new=new) is False:
@@ -156,7 +156,7 @@ class UserService(IUser):
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
-        new = dict(old)
+        new = deepcopy(old)
         new.update({"token_valid_after": datetime.now()})
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
@@ -170,7 +170,7 @@ class UserService(IUser):
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         old = payload.get("x-thebes-answer")
-        new = dict(old)
+        new = deepcopy(old)
         new_scope = new.get("scope")
         feature = payload.get("feature")
         if feature not in new_scope.get("features"):
@@ -191,7 +191,7 @@ class UserService(IUser):
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         old = payload.get("x-thebes-answer")
-        new = dict(old)
+        new = deepcopy(old)
         new_scope = new.get("scope")
         response = {"status_code": None, "payload": {"jwt": None}}
         if payload.get("feature") in new_scope.get("features"):
@@ -238,7 +238,7 @@ class UserService(IUser):
         if type(old) is not dict:
             raise BadRequestError("common.register_not_exists")
         file_type = payload.get("file_type")
-        new = dict(old)
+        new = deepcopy(old)
         UserService.fill_term_signed(
             payload=new,
             file_type=file_type.value,
@@ -310,7 +310,7 @@ class UserService(IUser):
                 .get("version")
             )
         except Exception:
-            raise BadRequestError("user.files.term_not_signed")
+            return {"status_code": status.HTTP_200_OK, "message_key": "user.files.term_not_signed"}
         try:
             link = file_repository.get_term_file_by_version(
                 file_type=file_type, version=version

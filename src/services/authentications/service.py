@@ -1,3 +1,6 @@
+# STANDARD LIBS
+from copy import deepcopy
+
 # OUTSIDE LIBRARIES
 from fastapi import status
 from src.utils.env_config import config
@@ -27,7 +30,7 @@ class AuthenticationService(IAuthentication):
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
-        new = dict(old)
+        new = deepcopy(old)
         is_active = old.get("is_active")
         has_pin = old.get("pin")
         response = {"status_code": None, "payload": {"jwt": None}}
@@ -108,22 +111,6 @@ class AuthenticationService(IAuthentication):
             message=page,
             subject=i18n.get_translate(key="email.subject.created", locale="pt"),
         )
-
-    @staticmethod
-    def forgot_password(payload: dict, user_repository=UserRepository()) -> dict:
-        entity = user_repository.find_one({"_id": payload.get("email")})
-        if entity is None:
-            raise BadRequestError("common.register_not_exists")
-        AuthenticationService.send_authentication_email(
-            email=entity.get("email"),
-            payload=entity,
-            ttl=10,
-            body="email.body.forgot_password",
-        )
-        return {
-            "status_code": status.HTTP_200_OK,
-            "message_key": "user.forgot_password",
-        }
 
     @staticmethod
     def thebes_hall(

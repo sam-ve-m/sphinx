@@ -11,6 +11,7 @@ bs4
 certifi
 cffi
 chardet
+charset-normalizer
 click
 colorama
 cryptography
@@ -21,6 +22,7 @@ fastapi
 fastapi-cache
 filelock
 h11
+heimdall-client
 hiredis
 idna
 importlib-metadata
