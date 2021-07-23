@@ -35,39 +35,36 @@ class BaseController(IController):
         except UnauthorizedError as e:
             return BaseController.compile_error_response(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                message=i18n.get_translate(str(e), locale=lang)
+                message=i18n.get_translate(str(e), locale=lang),
             )
         except ForbiddenError as e:
             return BaseController.compile_error_response(
                 status_code=status.HTTP_403_FORBIDDEN,
-                message=i18n.get_translate(str(e), locale=lang)
+                message=i18n.get_translate(str(e), locale=lang),
             )
         except BadRequestError as e:
             return BaseController.compile_error_response(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                message=i18n.get_translate(str(e), locale=lang)
+                message=i18n.get_translate(str(e), locale=lang),
             )
         except InternalServerError as e:
             return BaseController.compile_error_response(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                message=i18n.get_translate(str(e), locale=lang)
+                message=i18n.get_translate(str(e), locale=lang),
             )
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
             return BaseController.compile_error_response(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                message=i18n.get_translate("internal_error", locale=lang)
+                message=i18n.get_translate("internal_error", locale=lang),
             )
 
     @staticmethod
     def compile_error_response(status_code: status, message: str):
         return Response(
-                content=json.dumps([
-                    {"msg": message}
-                ]),
-                status_code=status_code
-            )
+            content=json.dumps({"detail": [{"msg": message}]}), status_code=status_code
+        )
 
     @staticmethod
     def create_response_payload(response_metadata: dict, lang: str) -> dict:

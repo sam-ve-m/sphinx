@@ -584,5 +584,7 @@ class RegistrationOfForeignInvestorsSecuritiesCommissionSource(Source):
     value: bool
 
 
-class RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource(Source):
+class RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource(
+    Source
+):
     value: bool

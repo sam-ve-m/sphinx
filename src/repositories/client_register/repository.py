@@ -11,10 +11,10 @@ from src.routers.validators.enum_template import MaritalStatusEnum
 class ClientRegisterRepository(OracleInfrastructure):
     def register_validated_users(self, user_cpf: str):
         values = {
-            "cd_empresa": '1',
-            "cd_usuario": '1',
+            "cd_empresa": "1",
+            "cd_usuario": "1",
             "tp_ocorrencia": "I",
-            "cd_cliente_padrao": '1',
+            "cd_cliente_padrao": "1",
             "cpf": str(user_cpf),
         }
         self.execute(
@@ -74,7 +74,9 @@ class ClientRegisterRepository(OracleInfrastructure):
         ]
         result = self.query(sql=" union ".join(all_validation_query))
         if len(result) > 0:
-            result = self.query(sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}")
+            result = self.query(
+                sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+            )
             return result[0]
         return None
 
@@ -85,7 +87,10 @@ class ClientRegisterRepository(OracleInfrastructure):
         sinacor_types_repository=SinaCorTypesRepository(),
     ) -> Type[ClientRegisterBuilder]:
         activity = user_data["occupation"]["activity"]
-        is_married = user_data["marital"]["status"] in  [MaritalStatusEnum.MARRIED.value, MaritalStatusEnum.STABLE_UNION.value]
+        is_married = user_data["marital"]["status"] in [
+            MaritalStatusEnum.MARRIED.value,
+            MaritalStatusEnum.STABLE_UNION.value,
+        ]
         is_business_person = sinacor_types_repository.is_business_person(value=activity)
         is_not_employed_or_business_person = sinacor_types_repository.is_others(
             value=activity
@@ -130,7 +135,9 @@ class ClientRegisterRepository(OracleInfrastructure):
             ): ClientRegisterRepository._is_employed_and_not_married_person,
         }
         if callback := callbacks.get(callback_key):
-            return callback(user_data=user_data, sinacor_user_control_data=sinacor_user_control_data)
+            return callback(
+                user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
+            )
 
     @staticmethod
     def _is_not_employed_or_business_and_not_married_person(

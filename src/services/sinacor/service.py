@@ -43,9 +43,13 @@ class SinacorService:
 
         client_register_repository.cleanup_temp_tables(user_cpf=new["cpf"])
         sinacor_user_control_data = (
-            client_register_repository.get_user_control_data_if_user_already_exists(user_cpf=new["cpf"])
+            client_register_repository.get_user_control_data_if_user_already_exists(
+                user_cpf=new["cpf"]
+            )
         )
-        builder = client_register_repository.get_builder(user_data=new, sinacor_user_control_data=sinacor_user_control_data)
+        builder = client_register_repository.get_builder(
+            user_data=new, sinacor_user_control_data=sinacor_user_control_data
+        )
         client_register_repository.register_user_data_in_register_users_temp_table(
             builder=builder
         )

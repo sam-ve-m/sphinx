@@ -16,7 +16,7 @@ from src.utils.middleware import (
     route_is_third_part_access,
     route_is_public,
     check_if_is_user_not_allowed_to_access_route,
-    check_if_third_party_user_is_not_allowed_to_access_route
+    check_if_third_party_user_is_not_allowed_to_access_route,
 )
 from src.utils.jwt_utils import JWTHandler
 

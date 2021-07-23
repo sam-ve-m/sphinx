@@ -120,7 +120,11 @@ class JWTHandler:
             lang = get_language_from_request(request=request)
             return Response(
                 content=json.dumps(
-                    [{"msg": i18n.get_translate('token_not_find', locale=lang)}]
+                    {
+                        "detail": [
+                            {"msg": i18n.get_translate("token_not_find", locale=lang)}
+                        ]
+                    }
                 ),
                 status_code=status.HTTP_401_UNAUTHORIZED,
             )

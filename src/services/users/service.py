@@ -310,7 +310,10 @@ class UserService(IUser):
                 .get("version")
             )
         except Exception:
-            return {"status_code": status.HTTP_200_OK, "message_key": "user.files.term_not_signed"}
+            return {
+                "status_code": status.HTTP_200_OK,
+                "message_key": "user.files.term_not_signed",
+            }
         try:
             link = file_repository.get_term_file_by_version(
                 file_type=file_type, version=version
@@ -515,4 +518,3 @@ class UserService(IUser):
         )
 
         return {"status_code": status.HTTP_200_OK, "payload": on_boarding_steps}
-

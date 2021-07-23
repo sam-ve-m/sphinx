@@ -147,24 +147,25 @@ def check_if_is_user_not_allowed_to_access_route(
             status_code = status.HTTP_401_UNAUTHORIZED
             return_response = True
     if return_response:
-        content.update([{"msg": message}])
+        content.update({"detail": [{"msg": message}]})
         return Response(content=json.dumps(content), status_code=status_code)
     return True
 
 
-def check_if_third_party_user_is_not_allowed_to_access_route(
-    request: Request
-):
+def check_if_third_party_user_is_not_allowed_to_access_route(request: Request):
     thebes_answer = None
     for header_tuple in request.headers.raw:
         if b"x-thebes-answer" in header_tuple:
             thebes_answer = header_tuple[1].decode()
             break
-    if thebes_answer != config('THIRD_PARTY_TOKEN'):
+    if thebes_answer != config("THIRD_PARTY_TOKEN"):
         locale = get_language_from_request(request=request)
         message = i18n.get_translate(
             "invalid_credential",
             locale=locale,
         )
-        return Response(content=json.dumps([{'msg': message}]), status_code=status.HTTP_401_UNAUTHORIZED)
+        return Response(
+            content=json.dumps({"detail": [{"msg": message}]}),
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
     return True

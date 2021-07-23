@@ -16,5 +16,4 @@ RUN apt install libaio1
 ENV LD_LIBRARY_PATH=/opt/instantclient
 COPY . /app/sphinx/
 RUN mkdir -p /opt/envs/sphinx.lionx.com.br
-COPY .env /opt/envs/sphinx.lionx.com.br/.
 ENTRYPOINT ["python","/app/sphinx/main.py"]
