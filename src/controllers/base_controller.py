@@ -33,41 +33,40 @@ class BaseController(IController):
                 status_code=response_metadata.get("status_code"),
             )
         except UnauthorizedError as e:
-            return Response(
-                content=json.dumps(
-                    {"message": i18n.get_translate(str(e), locale=lang)}
-                ),
+            return BaseController.compile_error_response(
                 status_code=status.HTTP_401_UNAUTHORIZED,
+                message=i18n.get_translate(str(e), locale=lang)
             )
         except ForbiddenError as e:
-            return Response(
-                content=json.dumps(
-                    {"message": i18n.get_translate(str(e), locale=lang)}
-                ),
+            return BaseController.compile_error_response(
                 status_code=status.HTTP_403_FORBIDDEN,
+                message=i18n.get_translate(str(e), locale=lang)
             )
         except BadRequestError as e:
-            return Response(
-                content=json.dumps(
-                    {"message": i18n.get_translate(str(e), locale=lang)}
-                ),
+            return BaseController.compile_error_response(
                 status_code=status.HTTP_400_BAD_REQUEST,
+                message=i18n.get_translate(str(e), locale=lang)
             )
         except InternalServerError as e:
-            return Response(
-                content=json.dumps(
-                    {"message": i18n.get_translate(str(e), locale=lang)}
-                ),
+            return BaseController.compile_error_response(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message=i18n.get_translate(str(e), locale=lang)
             )
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            return Response(
-                content=json.dumps(
-                    {"message": i18n.get_translate("internal_error", locale=lang)}
-                ),
+            return BaseController.compile_error_response(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                message=i18n.get_translate("internal_error", locale=lang)
+            )
+
+    @staticmethod
+    def compile_error_response(status_code: status, message: str):
+        return Response(
+                content=json.dumps([
+                    {"msg": message}
+                ]),
+                status_code=status_code
             )
 
     @staticmethod

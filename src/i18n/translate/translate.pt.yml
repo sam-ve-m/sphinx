@@ -51,6 +51,7 @@ pt:
     params:
       invalid: Nome e versao sao necessarios para criar o arquivo.
   invalid_token: Parece que seu acesso expirou, logue novamente.
+  token_not_find: Token nao informado.
   invalid_credential: Usuario nao tem permissao para acessar esta routa ou acao.
   valid_credential: Usuario possui permissao ou acesso para executar esta acao.
   not_allowed: Parece que você não tem eprmissão para isso.

@@ -147,7 +147,7 @@ def check_if_is_user_not_allowed_to_access_route(
             status_code = status.HTTP_401_UNAUTHORIZED
             return_response = True
     if return_response:
-        content.update({"message": message})
+        content.update([{"msg": message}])
         return Response(content=json.dumps(content), status_code=status_code)
     return True
 
@@ -166,5 +166,5 @@ def check_if_third_party_user_is_not_allowed_to_access_route(
             "invalid_credential",
             locale=locale,
         )
-        return Response(content=json.dumps(message), status_code=status.HTTP_401_UNAUTHORIZED)
+        return Response(content=json.dumps([{'msg': message}]), status_code=status.HTTP_401_UNAUTHORIZED)
     return True
