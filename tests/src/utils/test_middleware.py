@@ -139,7 +139,7 @@ def test_is_public_false():
 
 
 def test_forgot_password_post_is_public():
-    route_public = route_is_public(url_request="/user/forgot_password", method="POST")
+    route_public = route_is_public(url_request="/user/forgot_password", method="GET")
     assert route_public is True
 
 
@@ -216,7 +216,7 @@ def test_is_user_token_valid_false_because_created_at_date_is_invalid():
 
 def test_is_user_token_valid_false_because_token_is_expired():
     user_data = {
-        "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d")
+        "token_valid_after": datetime(year=2020, month=10, day=11).strftime("%Y-%m-%d")
     }
     jwt_data = {"created_at": "2020-10-10"}
     token_valid = is_user_token_valid(user_data=user_data, jwt_data=jwt_data)

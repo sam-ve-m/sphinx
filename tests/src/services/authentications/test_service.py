@@ -152,26 +152,6 @@ def test_login_with_pin():
     assert response.get("status_code") == status.HTTP_200_OK
 
 
-def test_forgot_password_not_register_exists():
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value=None)
-    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
-        AuthenticationService.forgot_password(
-            payload=payload, user_repository=stub_repository
-        )
-
-
-def test_forgot_password():
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={})
-    AuthenticationService.send_authentication_email = MagicMock(return_value=True)
-    response = AuthenticationService.forgot_password(
-        payload=payload, user_repository=stub_repository
-    )
-    assert response.get("status_code") == status.HTTP_200_OK
-    assert response.get("message_key") == "user.forgot_password"
-
-
 class StubThebesHall:
     pass
 
