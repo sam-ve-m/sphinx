@@ -112,13 +112,12 @@ class FileRepository(IFile):
         self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 3600
     ) -> Optional[str]:
         cache_key = f"get_term_file:{file_type.value}"
-        cached_value = cache.get(key=cache_key)
-        if cached_value:
-            return cached_value
+        # cached_value = cache.get(key=cache_key)
+        # if cached_value:
+        #     return cached_value
         path = self.resolve_term_path(file_type=file_type)
         try:
             file_path = self._get_last_saved_file_from_folder(path=path)
-
         except InternalServerError:
             return
         else:
@@ -180,7 +179,7 @@ class FileRepository(IFile):
         if not len(files_metadata) > 0:
             raise InternalServerError("files.is_empty")
 
-        sorted(files_metadata, key=lambda item: item.get("LastModified"), reverse=True)
+        files_metadata = sorted(files_metadata, key=lambda item: item.get("LastModified"), reverse=True)
         return files_metadata[0].get("Key")
 
     @staticmethod
