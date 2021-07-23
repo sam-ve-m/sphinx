@@ -1,3 +1,8 @@
+# Sphinx 
+_autenticação e autorização de usuários_
+-----------------------------------------
+Projeto destinado à manter as informações dos usuários (usuário, cliente) e autentica/autorizar o acesso aos demais serviços.
+
 #Sphinx
 Oracle 
 https://cx-oracle.readthedocs.io/en/latest/user_guide/installation.html
