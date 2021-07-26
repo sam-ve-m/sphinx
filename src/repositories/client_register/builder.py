@@ -278,6 +278,8 @@ class ClientRegisterBuilder:
         value = sinacor_user_control_data
         if sinacor_user_control_data:
             value = sinacor_user_control_data[0]
+        else:
+            value = 0
         self._fields_added.update({"CD_CLIENTE": value})
         return self
 
@@ -293,6 +295,8 @@ class ClientRegisterBuilder:
         value = ClientDigit.DEFAULT.value
         if sinacor_user_control_data:
             value = sinacor_user_control_data[1]
+        else:
+            value = 0
         self._fields_added.update({"DV_CLIENTE": value})
         return self
 

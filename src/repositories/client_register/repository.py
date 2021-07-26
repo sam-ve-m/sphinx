@@ -10,12 +10,11 @@ from src.utils.env_config import config
 
 
 class ClientRegisterRepository(OracleInfrastructure):
-    def register_validated_users(self, user_cpf: str, is_update: bool):
-        tp_ocorrencia = 'I' if is_update else 'U'
+    def register_validated_users(self, user_cpf: str, ):
         values = {
             "cd_empresa": config('COMPANY_OPERATION_CODE'),
             "cd_usuario": "1",
-            "tp_ocorrencia": tp_ocorrencia,
+            "tp_ocorrencia": 'I',
             "cd_cliente_padrao": "1",
             "cpf": str(user_cpf),
         }

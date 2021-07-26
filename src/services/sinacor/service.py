@@ -35,31 +35,32 @@ class SinacorService:
         #     raise InternalServerError("common.process_issue")
 
         # UPDATE user data
-        output = payload.get("output")
-        old = user_repository.find_one({"_id": output["email"]["value"]})
-        new = SinacorService.merge_data_and_get_completed_user_data(
-            output=output, user_database_document=old
+        stoneage_output = payload.get("output")
+        old_user_data = user_repository.find_one({"_id": stoneage_output["email"]["value"]})
+        new_user_data = SinacorService.merge_data_and_get_completed_user_data(
+            output=stoneage_output, user_database_document=old_user_data
         )
 
-        client_register_repository.cleanup_temp_tables(user_cpf=new["cpf"])
+        client_register_repository.cleanup_temp_tables(user_cpf=new_user_data["cpf"])
         sinacor_user_control_data = (
             client_register_repository.get_user_control_data_if_user_already_exists(
-                user_cpf=new["cpf"]
+                user_cpf=new_user_data["cpf"]
             )
         )
+        is_update = sinacor_user_control_data is not None
         builder = client_register_repository.get_builder(
-            user_data=new, sinacor_user_control_data=sinacor_user_control_data
+            user_data=new_user_data, sinacor_user_control_data=sinacor_user_control_data
         )
         client_register_repository.register_user_data_in_register_users_temp_table(
             builder=builder
         )
-        has_error = client_register_repository.validate_user_data_erros(
-            user_cpf=new["cpf"]
-        )
-        if has_error:
-            raise BadRequestError("bureau.error.fail")
-        is_update = sinacor_user_control_data is not None
-        client_register_repository.register_validated_users(user_cpf=new["cpf"], is_update=is_update)
+        if is_update is False:
+            has_error = client_register_repository.validate_user_data_erros(
+                user_cpf=new_user_data["cpf"]
+            )
+            if has_error:
+                raise BadRequestError("bureau.error.fail")
+        client_register_repository.register_validated_users(user_cpf=new_user_data["cpf"])
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "ok",
