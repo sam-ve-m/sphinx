@@ -179,7 +179,9 @@ class FileRepository(IFile):
         if not len(files_metadata) > 0:
             raise InternalServerError("files.is_empty")
 
-        files_metadata = sorted(files_metadata, key=lambda item: item.get("LastModified"), reverse=True)
+        files_metadata = sorted(
+            files_metadata, key=lambda item: item.get("LastModified"), reverse=True
+        )
         return files_metadata[0].get("Key")
 
     @staticmethod

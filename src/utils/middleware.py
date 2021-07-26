@@ -120,34 +120,24 @@ def check_if_is_user_not_allowed_to_access_route(
     request: Request, jwt_data: dict, user_repository: UserRepository = UserRepository()
 ) -> Union[Response, bool]:
     user_data = user_repository.find_one({"_id": jwt_data["email"]}, ttl=60)
-    token_is_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
-    is_admin_route = need_be_admin(url_request=request.url.path)
-    is_admin = user_data.get("is_admin")
-    content = {"message": None}
-    locale = get_language_from_request(request=request)
-    message = i18n.get_translate(
-        "valid_credential",
-        locale=locale,
-    )
-    status_code = 200
-    return_response = False
-    if not token_is_valid:
+
+    token_is_valid = False
+    is_admin_route = True
+    is_admin = False
+
+    if user_data:
+        token_is_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
+        is_admin_route = need_be_admin(url_request=request.url.path)
+        is_admin = user_data.get("is_admin")
+
+    if token_is_valid is False or (is_admin_route and is_admin is False):
+        locale = get_language_from_request(request=request)
         message = i18n.get_translate(
             "invalid_credential",
             locale=locale,
         )
         status_code = status.HTTP_401_UNAUTHORIZED
-        return_response = True
-    elif is_admin_route:
-        if not is_admin:
-            message = i18n.get_translate(
-                "invalid_credential",
-                locale=locale,
-            )
-            status_code = status.HTTP_401_UNAUTHORIZED
-            return_response = True
-    if return_response:
-        content.update({"detail": [{"msg": message}]})
+        content = {"detail": [{"msg": message}]}
         return Response(content=json.dumps(content), status_code=status_code)
     return True
 

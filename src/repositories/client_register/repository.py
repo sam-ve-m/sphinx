@@ -6,14 +6,16 @@ from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 from src.repositories.client_register.builder import ClientRegisterBuilder
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.routers.validators.enum_template import MaritalStatusEnum
+from src.utils.env_config import config
 
 
 class ClientRegisterRepository(OracleInfrastructure):
-    def register_validated_users(self, user_cpf: str):
+    def register_validated_users(self, user_cpf: str, is_update: bool):
+        tp_ocorrencia = 'I' if is_update else 'U'
         values = {
-            "cd_empresa": "1",
+            "cd_empresa": config('COMPANY_OPERATION_CODE'),
             "cd_usuario": "1",
-            "tp_ocorrencia": "I",
+            "tp_ocorrencia": tp_ocorrencia,
             "cd_cliente_padrao": "1",
             "cpf": str(user_cpf),
         }
