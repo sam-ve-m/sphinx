@@ -14,9 +14,10 @@ class StoneAge:
         """this functions will send the user_identifier_data and will return a quiz"""
 
         # TODO: Get cpf from user identifier data
-        response = StoneAge.run_sync_stone_age_app_entry_point(
-            entry_point="mock", body={"cpf": 123}
-        )
+        # response = StoneAge.run_sync_stone_age_app_entry_point(
+        #     entry_point="mock", body={"cpf": 123}
+        # )
+        response = {"output": dict(), "uuid": '1231234-asdfq34-5t-34564236', 'decision': 'MESA'}
         response["output"].update(
             {
                 "quiz": [
@@ -65,9 +66,10 @@ class StoneAge:
     @staticmethod
     def send_user_quiz_responses(quiz: dict) -> Optional[dict]:
         # TODO: Change body to quiz
-        response = StoneAge.run_sync_stone_age_app_entry_point(
-            entry_point="mock", body={"cpf": 123}
-        )
+        # response = StoneAge.run_sync_stone_age_app_entry_point(
+        #     entry_point="mock", body={"cpf": 123}
+        # )
+        response = {"output": dict(), "uuid": '1231234-asdfq34-5t-34564236', 'decision': 'MESA'}
         response["output"].update(
             {
                 "payload": {

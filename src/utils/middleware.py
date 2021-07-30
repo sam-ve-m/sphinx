@@ -54,7 +54,6 @@ def route_is_public(url_request: str, method: str = None) -> bool:
         "/docs",
         "/openapi.json",
         "/thebes_gate",
-        "/thebes_hall",
         "/user/forgot_password",
     ]
 
