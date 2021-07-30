@@ -97,6 +97,10 @@ class Score(BaseModel):
     score: int
 
 
+class FileBase64(BaseModel):
+    file_or_base64: str
+
+
 class Weight(BaseModel):
     weight: int
 

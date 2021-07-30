@@ -23,6 +23,7 @@ from src.routers.validators.base import (
     UsTin,
     NickName,
     IsCvmQualifiedInvestor,
+    FileBase64
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -184,9 +185,9 @@ def remove_features_to_user(feature: Feature, request: Request):
     return BaseController.run(UserController.delete_feature, dict(payload), request)
 
 
-@router.post("/user/self", tags=["user"], include_in_schema=False)
+@router.post("/user/self", tags=["user"], include_in_schema=True)
 async def save_user_self(
-    request: Request, file_or_base64: Union[UploadFile, str] = File(...)
+    request: Request, file_or_base64: FileBase64
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
