@@ -1,2 +1,77 @@
 pt:
+  ok: OK.
+  requests:
+    created: Registrado com sucesso.
+    updated: Registro atualizado.
+    deleted: Registro deletado.
+    not_modified: Nada para atualizar.
+  common:
+    invalid_params: Parametros invalidos.
+    register_exists: Registro já existe.
+    register_not_exists: Registro não existe.
+    process_issue: Erro no processo.
+    unable_to_process: Impossivel processar.
+  view:
+    feature_not_exists: O serviços enviado não existe.
+  user:
+    created: Enviamos para você um e-mail de confirmação.
+    forgot_password: Enviamos para você um e-mail de recuperação de pin.
+    active: Sua validação foi feita com sucesso.
+    pin_error: PIN invalido, tentenovamente.
+    need_pin: Informe seu PIN.
+    not_admin: Você não é adminitrador.
+    all_logged_out: Você deslogou de todos os dispositivos logados.
+    creating_account: Iremos criar sua conta bancaria, espere o email.
+    files:
+      term_not_signed: Você ainda não assinou estes termos.
+    quiz:
+      ok: Quiz recebido.
+      trouble: Falha ao obter Quiz.
+      missing_steps: Falha ao obeter o Quiz, por favor preencher todos os passos do onboarding
+  email:
+    login: Enviamos um email para a conta cadastrada, para concluir o login
+    forgot_password: Enviamos um email para efetura login e mudança do PIN
+    subject:
+      created: Confirme a sua conta
+      login: Conclua seu login
+      forgot_password: Recuperação de PIN
+    body:
+      created: Bem vindo! Clique no link para finalizar seu cadastro.
+      forgot_password: Clique no link para atualizar sua senha.
+    trouble:
+      send: Tivemos problema para enviar seu email, por favor tente novamente.
+  files:
+    error: Problema para processar o arquivo.
+    uploaded: Upload de arquivo feito com sucesso.
+    not_suported: Arquivo não suportado.
+    not_exists: Arquivo não existente.
+    bucket:
+      invalid_name: Nome invalido.
+    content:
+      empty: Conteudo nao pode ser vazio.
+    params:
+      invalid: Nome e versao sao necessarios para criar o arquivo.
   invalid_token: Parece que seu acesso expirou, logue novamente.
+  token_not_find: Token nao informado.
+  invalid_credential: Usuario nao tem permissao para acessar esta routa ou acao.
+  valid_credential: Usuario possui permissao ou acesso para executar esta acao.
+  not_allowed: Parece que você não tem eprmissão para isso.
+  internal_error: Tivemos problema, por favor tente novamente.
+  suitability:
+    create_quiz: O suitability foi salvo com sucesso.
+    create_profile: O perfil suitability foi salvo com sucesso.
+    error:
+      no_answers: Não existe nenhuma lista de respostas no banco de dados.
+      answers_format: O formato da lista de resposta está incorreto.
+      answers_incomplete_data: Os dados da lista de resposta está incompleto.
+      no_data: Dados vazio.
+      update_error: Não foi possivel fazer o update dos dados.
+      last_user_profile_format: O formato do perfil de usuário está incorreto.
+      last_user_profile_incomplete_data: Os dados de resposta de perfil de usuário está incompleto.
+      not_found: Suitability não encontrad.
+  cache:
+    error:
+      key: Chave invalida enviada para classe ce cache
+  bureau:
+    error:
+      fail: Erro na resposta da StoneAge

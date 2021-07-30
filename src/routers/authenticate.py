@@ -1,23 +1,37 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, Request, Response, status
+from src.utils.jwt_utils import JWTHandler
+from src.controllers.base_controller import BaseController
+from src.routers.validators.base import OptionalPIN, Email
+from src.controllers.authentications.controller import AuthenticationController
 
 router = APIRouter()
 
 
-class Login(BaseModel):
-    email: str
+class Login(Email, OptionalPIN):
+    pass
 
 
-@router.post("/login", tags=["authenticate"])
-async def login(login: Login):
-    return 200
+@router.post("/login", tags=["authentication"])
+def login(payload: Login, request: Request):
+    return BaseController.run(AuthenticationController.login, dict(payload), request)
 
 
-@router.post("/login/admin", tags=["authenticate"])
-async def login_admin(login: Login):
-    return 200
+@router.get("/thebes_gate", tags=["authentication"])
+def answer(request: Request):
+    # This will be called from the frontend after open TARGET_LINK (.env) received on the email confirmation
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    return BaseController.run(
+        AuthenticationController.thebes_gate, jwt_data_or_error_response, request
+    )
 
 
-@router.get("/thebes_gate/{token}", tags=["authenticate"])
-async def answer(token: str):
-    return 200
+@router.get("/thebes_hall", tags=["authentication"])
+def thebes_hall(request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    return BaseController.run(
+        AuthenticationController.thebes_hall, jwt_data_or_error_response, request
+    )

@@ -3,6 +3,6 @@ from fastapi import APIRouter
 router = APIRouter()
 
 
-@router.get("/pendencies", tags=["pendencies"])
-async def pendencies():
+@router.get("/dependency", tags=["dependency"])
+def pendencies():
     return 200

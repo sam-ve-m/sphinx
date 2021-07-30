@@ -1,7 +1,13 @@
-from src.repositories.base_repository import BaseRepository
-from decouple import config
+# OUTSIDE LIBRARIES
+from src.utils.env_config import config
 
-class ViewRepository(BaseRepository):
+# SPHINX
+from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
 
+
+class ViewRepository(MongoDBInfrastructure):
     def __init__(self) -> None:
-        super().__init__(database=config('MONGODB_DATABASE_NAME'), collection=config('MONGODB_VIEW_COLLECTION'))
+        super().__init__(
+            database=config("MONGODB_DATABASE_NAME"),
+            collection=config("MONGODB_VIEW_COLLECTION"),
+        )

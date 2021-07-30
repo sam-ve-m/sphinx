@@ -1,7 +1,13 @@
-from src.repositories.base_repository import BaseRepository
-from decouple import config
+# OUTSIDE LIBRARIES
+from src.utils.env_config import config
 
-class FeatureRepository(BaseRepository):
+# SPHINX
+from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
 
+
+class FeatureRepository(MongoDBInfrastructure):
     def __init__(self) -> None:
-        super().__init__(database=config('MONGODB_DATABASE_NAME'), collection=config('MONGODB_FEATURE_COLLECTION'))
+        super().__init__(
+            database=config("MONGODB_DATABASE_NAME"),
+            collection=config("MONGODB_FEATURE_COLLECTION"),
+        )

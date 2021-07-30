@@ -1,2 +1,77 @@
 en:
+  ok: OK.
+  requests:
+    created: Create successed.
+    updated: Register Updated.
+    deleted: Register deleted.
+    not_modified: Nothing to change.
+  common:
+    invalid_params: Invalid Params.
+    register_exists: Register alredy exists.
+    register_not_exists: Register not exists.
+    process_issue: Proccesses error.
+    unable_to_process: Unable to proccess.
+  view:
+    feature_not_exists: The provided features not exists.
+  user:
+    created: We sent you a valition email.
+    forgot_password: We sent you a recover email.
+    active: Your account was activated successfully.
+    pin_error: Invalid PIN, try again.
+    need_pin: Inform your PIN code.
+    not_admin: You are not administrator.
+    all_logged_out: You disconnect all your allowed devices.
+    creating_account: We will create your bank account, await a email.
+    files:
+      term_not_signed: You did not sign this term yet.
+    quiz:
+      ok: Quiz received.
+      trouble: Failed to get Quiz.
+      missing_steps: Failed to get Quiz, please complete all onboarding steps.
+  email:
+    login: We sent an email to the registered account, to conclude login
+    forgot_password: We sent an email to login and change your PIN
+    subject:
+      created: Account confirmation
+      login: Conclude your login
+      forgot_password: Reconvery PIN
+    body:
+      created: Wellcome! Use the link bellow to access and confirm your account.
+      forgot_password: Hi! Use the link bellow to change your PIN.
+    trouble:
+      send: We have some trouble to send you an email, please try again.
+  files:
+    error: Problem to process file.
+    uploaded: File uploaded.
+    not_suported: This file is not suported.
+    not_exists: This file not exists.
+    bucket:
+      invalid_name: Nome invalido.
+    content:
+      empty: Conteudo nao pode ser vazio.
+    params:
+      invalid: Nome e versao sao necessarios para criar o arquivo.
   invalid_token: Seems that your access has expired, try to login again.
+  token_not_find: Token not suplied.
+  invalid_credential: User don't have permition to access this route or feature.
+  valid_credential: User have permition to access this route or feature
+  not_allowed: Seems that your can accesse this.
+  internal_error: We have some issue, please try again.
+  suitability:
+    create_quiz: Suitability was been saved successfully
+    create_profile: Suitability profile was been saved successfully
+    error:
+      no_answers: There is no list of responses in the database.
+      answers_format: The reply list format is incorrect.
+      answers_incomplete_data: Response list data is incomplete.
+      no_data: Empty data.
+      update_error: Was not possible update data.
+      last_user_profile_format: User profile format is incorrect.
+      last_user_profile_incomplete_data: User profile response data is incomplete.
+      not_found: Suitability not found.
+  cache:
+    error:
+      key: Invalid key sent to cache class
+  bureau:
+    error:
+      fail: Error on StoneAge response
