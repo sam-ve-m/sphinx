@@ -156,6 +156,7 @@ class ClientRegisterBuilder:
     def add_cd_tipo_doc(self, user_data: dict):
         key_values = {
             "CPF": 523,
+            "RG": 3
         }
         value = key_values.get(user_data["identifier_document"]["type"])
         self._fields_added.update({"CD_TIPO_DOC": value})

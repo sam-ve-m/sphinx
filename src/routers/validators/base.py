@@ -122,7 +122,7 @@ class TermFile(BaseModel):
 
 
 class Cpf(BaseModel):
-    cpf: int
+    cpf: str
 
     @validator("cpf", always=True, allow_reuse=True)
     def validate_cpf(cls, e):
