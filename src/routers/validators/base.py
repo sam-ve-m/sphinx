@@ -97,6 +97,10 @@ class Score(BaseModel):
     score: int
 
 
+class FileBase64(BaseModel):
+    file_or_base64: str
+
+
 class Weight(BaseModel):
     weight: int
 
@@ -118,7 +122,7 @@ class TermFile(BaseModel):
 
 
 class Cpf(BaseModel):
-    cpf: int
+    cpf: str
 
     @validator("cpf", always=True, allow_reuse=True)
     def validate_cpf(cls, e):

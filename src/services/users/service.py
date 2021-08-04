@@ -403,10 +403,29 @@ class UserService(IUser):
         }
 
     @staticmethod
+    def can_send_quiz(user_onboarding_current_step: dict):
+        current_step = user_onboarding_current_step['payload']['current_on_boarding_step']
+        quiz_step_or_finished = current_step not in ('user_quiz_step', 'finished')
+        all_necessary_steps = not all(
+            [
+                user_onboarding_current_step['payload']['suitability_step'],
+                user_onboarding_current_step['payload']['user_identifier_data_step'],
+                user_onboarding_current_step['payload']['user_self_step'],
+                user_onboarding_current_step['payload']['user_complementary_step']
+             ]
+        )
+        return quiz_step_or_finished or all_necessary_steps
+
+    @staticmethod
     def user_quiz(
         payload: dict, stone_age=StoneAge, user_repository=UserRepository()
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
+
+        user_onboarding_current_step = UserService.get_on_boarding_user_current_step(payload=payload)
+        if UserService.can_send_quiz(user_onboarding_current_step=user_onboarding_current_step):
+            return {"status_code": status.HTTP_200_OK, "message_key": "user.quiz.missing_steps"}
+
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         current_user_marital = current_user.get("marital")
 
@@ -462,7 +481,11 @@ class UserService(IUser):
             stone_age_response = stone_age.send_user_quiz_responses(
                 quiz=payload.get("quiz")
             )
+            output = stone_age_response.get("output")
+            stone_age_decision = output.get("decision")
             current_user_updated = deepcopy(current_user)
+            if stone_age_decision is not None:
+                current_user_updated.update({"stone_age_decision": stone_age_decision})
             current_user_updated.update({"is_dtvm_user_client": True})
             user_repository.update_one(old=current_user, new=current_user_updated)
             return {
