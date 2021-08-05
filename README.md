@@ -14,14 +14,14 @@ pip install -r requirements.txt
 ```
 
 ### **Passo 3**
-Efetuar o Download dos binarios de conexao com o banco oracle.
+Efetuar o Download dos binários de conexão com o banco oracle.
 
 https://cx-oracle.readthedocs.io/en/latest/user_guide/installation.html
 
 > Versão 19
 
 ### **Passo 4**
-Exportar a variavel de ambiente para a pasta onde foi feito o download dos binários
+Exportar a variável de ambiente para a pasta onde foi feito o download dos binários
 
 ```bash
 export LD_LIBRARY_PATH=CAMINHO_PARA_OS_BINARIOS
