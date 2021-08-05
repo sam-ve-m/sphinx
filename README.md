@@ -1,13 +1,13 @@
 # Sphinx 
-## _autenticação e autorização de usuários_
+## _Autenticação e autorização de usuários_
 ---
-Projeto destinado à manter as informações dos usuários (usuário, cliente) e autentica/autorizar o acesso aos demais serviços.
+Projeto destinado a manter as informações dos usuários (usuário, cliente) e autentica/autorizar o acesso aos demais serviços.
 
 ### **Passo 1**
 Iniciar o virtual ENV do projeto.
 
 ### **Passo 2**
-Instalar os pacotes dentro do virtaul `ENV` listados no `requirements.txt`.
+Instalar os pacotes dentro do virtual `ENV` listados no `requirements.txt`.
 
 ```bash
 pip install -r requirements.txt
