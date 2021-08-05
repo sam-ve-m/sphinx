@@ -1,3 +1,4 @@
+--extra-index-url http://nexus:FILL_THIS_WITH_PASSWORD@18.231.147.30/repository/pypi/simple --trusted-host 18.231.147.30
 aioredis==1.3.1
 asgiref==3.4.1
 async-timeout==3.0.1
