@@ -56,3 +56,4 @@ src/keys/
 venv/
 .env
 email.html
+instantclient/
