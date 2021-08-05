@@ -81,7 +81,7 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def save_user_self(payload: dict, file_repository: FileRepository) -> dict:
+    def save_user_selfie(payload: dict, file_repository: FileRepository) -> dict:
         pass
 
     @staticmethod

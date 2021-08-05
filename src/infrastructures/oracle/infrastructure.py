@@ -13,28 +13,34 @@ import cx_Oracle
 from src.interfaces.repositories.oracle.interface import IOracle
 from src.utils.env_config import config
 
-cx_Oracle.init_oracle_client(lib_dir=config("LD_LIBRARY_PATH"))
+# cx_Oracle.init_oracle_client(lib_dir=config("LD_LIBRARY_PATH"))
 
 
 class OracleInfrastructure(IOracle):
 
-    pool = cx_Oracle.SessionPool(
-        user=config("ORACLE_USER"),
-        password=config("ORACLE_PASSWORD"),
-        min=2,
-        max=100,
-        increment=1,
-        dsn=cx_Oracle.makedsn(
-            config("ORACLE_BASE_DSN"),
-            config("ORACLE_PORT"),
-            service_name=config("ORACLE_SERVICE"),
-        ),
-        encoding=config("ORACLE_ENCODING"),
-        getmode=cx_Oracle.SPOOL_ATTRVAL_WAIT,
-    )
+    pool = None
+
+    @staticmethod
+    def start_oracle():
+        OracleInfrastructure.pool = cx_Oracle.SessionPool(
+            user=config("ORACLE_USER"),
+            password=config("ORACLE_PASSWORD"),
+            min=2,
+            max=100,
+            increment=1,
+            dsn=cx_Oracle.makedsn(
+                config("ORACLE_BASE_DSN"),
+                config("ORACLE_PORT"),
+                service_name=config("ORACLE_SERVICE"),
+            ),
+            encoding=config("ORACLE_ENCODING"),
+            getmode=cx_Oracle.SPOOL_ATTRVAL_WAIT,
+        )
 
     @contextmanager
     def get_connection(self):
+        if OracleInfrastructure.pool is None:
+            OracleInfrastructure.start_oracle()
         connection = self.pool.acquire()
         try:
             yield connection

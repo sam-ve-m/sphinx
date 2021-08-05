@@ -64,11 +64,11 @@ def test_login_admin_payload():
     assert type(response.status_code) == int
 
 
-def test_thebes_gate():
-    response = client.get("/thebes_gate")
-    assert response.status_code == 401
+# def test_thebes_gate():
+#     response = client.get("/thebes_gate")
+#     assert response.status_code == 401
 
 
-def test_thebes_gate_auth():
-    response = client.get("/thebes_gate/alal21889whx2387hn")
-    assert type(response.status_code) == int
+# def test_thebes_gate_auth():
+#     response = client.get("/thebes_gate/alal21889whx2387hn")
+#     assert type(response.status_code) == int

@@ -20,7 +20,7 @@ class FileRepository(IFile):
 
     # This dict keys must be TermsFileType, UserFileType constants
     file_extension_by_type = {
-        "user_self": ".jpg",
+        "user_selfie": ".jpg",
         "term_application": ".pdf",
         "term_open_account": ".pdf",
         "term_refusal": ".pdf",
@@ -112,9 +112,9 @@ class FileRepository(IFile):
         self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 3600
     ) -> Optional[str]:
         cache_key = f"get_term_file:{file_type.value}"
-        # cached_value = cache.get(key=cache_key)
-        # if cached_value:
-        #     return cached_value
+        cached_value = cache.get(key=cache_key)
+        if cached_value:
+            return cached_value
         path = self.resolve_term_path(file_type=file_type)
         try:
             file_path = self._get_last_saved_file_from_folder(path=path)

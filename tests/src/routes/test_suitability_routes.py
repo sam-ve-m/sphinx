@@ -104,11 +104,11 @@ def test_suitability_quiz_payload_without_answer_weight():
     assert response.status_code == 422
 
 
-def test_create_user_profile_is_active():
-    response = client.post("/suitability/profile", data=json.dumps({}))
-    assert response.status_code == 401
+# def test_create_user_profile_is_active():
+#     response = client.post("/suitability/profile", data=json.dumps({}))
+#     assert response.status_code == 401
 
 
-def test_get_user_profile_is_active():
-    response = client.get("/suitability/profile", data=json.dumps({}))
-    assert response.status_code == 401
+# def test_get_user_profile_is_active():
+#     response = client.get("/suitability/profile", data=json.dumps({}))
+#     assert response.status_code == 401

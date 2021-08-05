@@ -13,7 +13,7 @@ from src.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
 from src.services.persephone.service import PersephoneService
-from src.services.builders.user.on_boarding_steps_builder import OnBoardingStepBuilder
+from src.services.builders.user.onboarding_steps_builder import OnboardingStepBuilder
 
 from src.repositories.file.enum.user_file import UserFileType
 from src.repositories.file.repository import FileRepository
@@ -210,7 +210,7 @@ class UserService(IUser):
         return response
 
     @staticmethod
-    def save_user_self(
+    def save_user_selfie(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
     ) -> dict:
@@ -404,13 +404,13 @@ class UserService(IUser):
 
     @staticmethod
     def can_send_quiz(user_onboarding_current_step: dict):
-        current_step = user_onboarding_current_step['payload']['current_on_boarding_step']
+        current_step = user_onboarding_current_step['payload']['current_onboarding_step']
         quiz_step_or_finished = current_step not in ('user_quiz_step', 'finished')
         all_necessary_steps = not all(
             [
                 user_onboarding_current_step['payload']['suitability_step'],
                 user_onboarding_current_step['payload']['user_identifier_data_step'],
-                user_onboarding_current_step['payload']['user_self_step'],
+                user_onboarding_current_step['payload']['user_selfie_step'],
                 user_onboarding_current_step['payload']['user_complementary_step']
              ]
         )
@@ -422,7 +422,7 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
 
-        user_onboarding_current_step = UserService.get_on_boarding_user_current_step(payload=payload)
+        user_onboarding_current_step = UserService.get_onboarding_user_current_step(payload=payload)
         if UserService.can_send_quiz(user_onboarding_current_step=user_onboarding_current_step):
             return {"status_code": status.HTTP_200_OK, "message_key": "user.quiz.missing_steps"}
 
@@ -510,11 +510,11 @@ class UserService(IUser):
         payload["provided_by_bureaux"]["concluded_at"] = datetime.now()
 
     @staticmethod
-    def get_on_boarding_user_current_step(
+    def get_onboarding_user_current_step(
         payload: dict,
         user_repository=UserRepository(),
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
-        on_boarding_step_builder=OnBoardingStepBuilder(),
+        onboarding_step_builder=OnboardingStepBuilder(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         jwt_user_email = thebes_answer.get("email")
@@ -529,15 +529,15 @@ class UserService(IUser):
 
         user_suitability_profile = current_user.get("suitability")
 
-        on_boarding_steps = (
-            on_boarding_step_builder.user_suitability_step(
+        onboarding_steps = (
+            onboarding_step_builder.user_suitability_step(
                 user_suitability_profile=user_suitability_profile
             )
             .user_identifier_step(current_user=current_user)
-            .user_self_step(user_file_exists=user_file_exists)
+            .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
             .user_quiz_step(current_user=current_user)
             .build()
         )
 
-        return {"status_code": status.HTTP_200_OK, "payload": on_boarding_steps}
+        return {"status_code": status.HTTP_200_OK, "payload": onboarding_steps}

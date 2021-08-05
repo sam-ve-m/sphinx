@@ -44,8 +44,8 @@ class UserController:
         return UserService.delete_feature(payload=payload)
 
     @staticmethod
-    def save_user_self(payload: dict):
-        return UserService.save_user_self(payload=payload)
+    def save_user_selfie(payload: dict):
+        return UserService.save_user_selfie(payload=payload)
 
     @staticmethod
     def sign_term(payload: dict):
@@ -72,5 +72,5 @@ class UserController:
         return UserService.change_user_to_client(payload=payload)
 
     @staticmethod
-    def get_on_boarding_user_current_step(payload: dict):
-        return UserService.get_on_boarding_user_current_step(payload=payload)
+    def get_onboarding_user_current_step(payload: dict):
+        return UserService.get_onboarding_user_current_step(payload=payload)
