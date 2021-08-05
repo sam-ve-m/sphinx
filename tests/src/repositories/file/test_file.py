@@ -144,7 +144,7 @@ def test_resolve_path() -> None:
     path = FileRepository.resolve_user_path(
         user_email="marco@lionx.com.br", file_type=UserFileType.SELF
     )
-    assert path == "lionx.com.br/ma/marco@lionx.com.br/user_self/"
+    assert path == "lionx.com.br/ma/marco@lionx.com.br/user_selfie/"
 
 
 def test_resolve_content_byte():

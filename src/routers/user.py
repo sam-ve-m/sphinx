@@ -185,8 +185,8 @@ def remove_features_to_user(feature: Feature, request: Request):
     return BaseController.run(UserController.delete_feature, dict(payload), request)
 
 
-@router.post("/user/self", tags=["user"], include_in_schema=True)
-async def save_user_self(
+@router.post("/user/selfie", tags=["user"], include_in_schema=True)
+async def save_user_selfie(
     request: Request, file_or_base64: FileBase64
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
@@ -196,7 +196,7 @@ async def save_user_self(
         "x-thebes-answer": jwt_data_or_error_response,
         "file_or_base64": file_or_base64.file_or_base64,
     }
-    return BaseController.run(UserController.save_user_self, payload, request)
+    return BaseController.run(UserController.save_user_selfie, payload, request)
 
 
 @router.put("/user/sign_term", tags=["user"])
@@ -225,8 +225,8 @@ async def get_assigned_term(
     return BaseController.run(UserController.get_signed_term, payload, request)
 
 
-@router.get("/user/on_boarding_user_current_step", tags=["user"])
-async def get_on_boarding_user_current_step(
+@router.get("/user/onboarding_user_current_step", tags=["user"])
+async def get_onboarding_user_current_step(
     request: Request,
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
@@ -237,5 +237,5 @@ async def get_on_boarding_user_current_step(
         "x-thebes-answer": jwt_data_or_error_response,
     }
     return BaseController.run(
-        UserController.get_on_boarding_user_current_step, payload, request
+        UserController.get_onboarding_user_current_step, payload, request
     )

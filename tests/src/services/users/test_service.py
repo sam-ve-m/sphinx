@@ -355,10 +355,10 @@ def test_delete_feature_that_exists(get_user_data, get_new_stubby_repository):
     assert result.get("status_code") == status.HTTP_200_OK
 
 
-def test_save_user_self(get_user_data, get_new_stubby_repository):
+def test_save_user_selfie(get_user_data, get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
     stub_repository.save_user_file = MagicMock(return_value=None)
-    response = UserService.save_user_self(
+    response = UserService.save_user_selfie(
         payload={"x-thebes-answer": {"email": "lala"}, "file_or_base64": ""},
         file_repository=stub_repository,
     )
