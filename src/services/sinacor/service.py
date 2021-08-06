@@ -47,13 +47,13 @@ class SinacorService:
                 user_cpf=new_user_data["cpf"]
             )
         )
-        is_update = sinacor_user_control_data is not None
         builder = client_register_repository.get_builder(
             user_data=new_user_data, sinacor_user_control_data=sinacor_user_control_data
         )
         client_register_repository.register_user_data_in_register_users_temp_table(
             builder=builder
         )
+        is_update = sinacor_user_control_data is not None
         if is_update is False:
             has_error = client_register_repository.validate_user_data_erros(
                 user_cpf=new_user_data["cpf"]
