@@ -91,10 +91,11 @@ class JWTHandler:
             "created_at": payload.get("created_at"),
         }
         stone_age_decision = payload.get("stone_age_decision")
-
         if stone_age_decision:
             new_payload.update({"stone_age_decision": stone_age_decision})
-
+        user_electronic_signature = payload.get("electronic_signature")
+        if user_electronic_signature and stone_age_decision:
+            new_payload.update({"onboarding_finished": True})
         return new_payload
 
     @staticmethod

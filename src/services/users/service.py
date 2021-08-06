@@ -537,6 +537,7 @@ class UserService(IUser):
             .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
             .user_quiz_step(current_user=current_user)
+            .user_user_electronic_signature(current_user=current_user)
             .build()
         )
 
