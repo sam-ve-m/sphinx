@@ -73,6 +73,10 @@ class PIN(BaseModel):
     pin: constr(min_length=6, max_length=6)
 
 
+class ElectronicSignature(BaseModel):
+    electronic_signature: constr(regex=r'^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])(?=.*?[!"#\$%&\'\(\)\*\+,-\.\/:;<=>\?@[\]\^_`\{\|}~])[a-zA-Z0-9!"#\$%&\'\(\)\*\+,-\.\/:;<=>\?@[\]\^_`\{\|}~]{8,10}$')
+
+
 class Name(BaseModel):
     name: constr(min_length=1, max_length=50)
 

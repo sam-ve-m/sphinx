@@ -541,3 +541,22 @@ class UserService(IUser):
         )
 
         return {"status_code": status.HTTP_200_OK, "payload": onboarding_steps}
+
+    @staticmethod
+    def set_user_electronic_signature(payload: dict, user_repository=UserRepository()) -> dict:
+        thebes_answer = payload.get("x-thebes-answer")
+        electronic_signature = payload.get("electronic_signature")
+        old = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if old is None:
+            raise BadRequestError("common.register_not_exists")
+        if old.get('electronic_signature'):
+            raise BadRequestError("user.electronic_signature.already_set")
+        new = deepcopy(old)
+        new["electronic_signature"] = electronic_signature
+        new = hash_field(key="electronic_signature", payload=new)
+        if user_repository.update_one(old=old, new=new) is False:
+            raise InternalServerError("common.process_issue")
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
