@@ -405,7 +405,7 @@ class UserService(IUser):
     @staticmethod
     def can_send_quiz(user_onboarding_current_step: dict):
         current_step = user_onboarding_current_step['payload']['current_onboarding_step']
-        quiz_step_or_finished = current_step not in ('user_quiz_step', 'finished')
+        quiz_step_or_finished = current_step not in ('user_quiz_step')
         all_necessary_steps = not all(
             [
                 user_onboarding_current_step['payload']['suitability_step'],
@@ -459,7 +459,9 @@ class UserService(IUser):
 
         if stone_age_decision is not None:
             current_user_updated.update({"stone_age_decision": stone_age_decision})
-        user_repository.update_one(old=current_user, new=current_user_updated)
+
+        if user_repository.update_one(old=current_user, new=current_user_updated) is False:
+            raise InternalServerError("common.process_issue")
 
         return {"status_code": status.HTTP_200_OK, "payload": output}
 
@@ -477,24 +479,26 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
 
         is_dtvm_user_client = current_user.get("is_dtvm_user_client")
-        if is_dtvm_user_client is None or is_dtvm_user_client is False:
-            stone_age_response = stone_age.send_user_quiz_responses(
-                quiz=payload.get("quiz")
-            )
-            output = stone_age_response.get("output")
-            stone_age_decision = output.get("decision")
-            current_user_updated = deepcopy(current_user)
-            if stone_age_decision is not None:
-                current_user_updated.update({"stone_age_decision": stone_age_decision})
-            current_user_updated.update({"is_dtvm_user_client": True})
-            user_repository.update_one(old=current_user, new=current_user_updated)
+
+        if is_dtvm_user_client:
             return {
                 "status_code": status.HTTP_200_OK,
-                "message_key": "user.creating_account",
+                "message_key": "requests.not_modified",
             }
+
+        stone_age_response = stone_age.send_user_quiz_responses(
+            quiz=payload.get("quiz")
+        )
+        output = stone_age_response.get("output")
+        stone_age_decision = output.get("decision")
+        current_user_updated = deepcopy(current_user)
+        if stone_age_decision is not None:
+            current_user_updated.update({"stone_age_decision": stone_age_decision})
+        current_user_updated.update({"is_dtvm_user_client": True})
+        user_repository.update_one(old=current_user, new=current_user_updated)
         return {
             "status_code": status.HTTP_200_OK,
-            "message_key": "requests.not_modified",
+            "message_key": "user.creating_account",
         }
 
     @staticmethod
@@ -542,3 +546,22 @@ class UserService(IUser):
         )
 
         return {"status_code": status.HTTP_200_OK, "payload": onboarding_steps}
+
+    @staticmethod
+    def set_user_electronic_signature(payload: dict, user_repository=UserRepository()) -> dict:
+        thebes_answer = payload.get("x-thebes-answer")
+        electronic_signature = payload.get("electronic_signature")
+        old = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if old is None:
+            raise BadRequestError("common.register_not_exists")
+        if old.get('electronic_signature'):
+            raise BadRequestError("user.electronic_signature.already_set")
+        new = deepcopy(old)
+        new["electronic_signature"] = electronic_signature
+        new = hash_field(key="electronic_signature", payload=new)
+        if user_repository.update_one(old=old, new=new) is False:
+            raise InternalServerError("common.process_issue")
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }

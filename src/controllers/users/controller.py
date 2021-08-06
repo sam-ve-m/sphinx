@@ -74,3 +74,7 @@ class UserController:
     @staticmethod
     def get_onboarding_user_current_step(payload: dict):
         return UserService.get_onboarding_user_current_step(payload=payload)
+
+    @staticmethod
+    def set_user_electronic_signature(payload: dict):
+        return UserService.set_user_electronic_signature(payload=payload)

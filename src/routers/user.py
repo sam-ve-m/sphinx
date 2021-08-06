@@ -23,7 +23,8 @@ from src.routers.validators.base import (
     UsTin,
     NickName,
     IsCvmQualifiedInvestor,
-    FileBase64
+    FileBase64,
+    ElectronicSignature
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -239,3 +240,15 @@ async def get_onboarding_user_current_step(
     return BaseController.run(
         UserController.get_onboarding_user_current_step, payload, request
     )
+
+
+@router.put("/user/electronic_signature", tags=["user"])
+def set_user_electronic_signature(electronic_signature: ElectronicSignature, request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+        "electronic_signature": electronic_signature.dict().get("electronic_signature"),
+    }
+    return BaseController.run(UserController.set_user_electronic_signature, payload, request)
