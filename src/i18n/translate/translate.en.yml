@@ -28,6 +28,8 @@ en:
       ok: Quiz received.
       trouble: Failed to get Quiz.
       missing_steps: Failed to get Quiz, please complete all onboarding steps.
+    electronic_signature:
+      already_set: Your alredy have a electronic signature
   email:
     login: We sent an email to the registered account, to conclude login
     forgot_password: We sent an email to login and change your PIN
