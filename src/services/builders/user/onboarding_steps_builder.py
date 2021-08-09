@@ -11,12 +11,12 @@ class OnboardingStepBuilder:
             "finished": False,
         }
         self.__steps: list = [
-            'suitability_step',
-            'user_identifier_data_step',
-            'user_selfie_step',
-            'user_complementary_step',
-            'user_quiz_step',
-            'user_electronic_signature'
+            "suitability_step",
+            "user_identifier_data_step",
+            "user_selfie_step",
+            "user_complementary_step",
+            "user_quiz_step",
+            "user_electronic_signature",
         ]
 
     def user_suitability_step(self, user_suitability_profile):

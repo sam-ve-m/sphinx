@@ -13,7 +13,7 @@ import cx_Oracle
 from src.interfaces.repositories.oracle.interface import IOracle
 from src.utils.env_config import config
 
-# cx_Oracle.init_oracle_client(lib_dir=config("LD_LIBRARY_PATH"))
+cx_Oracle.init_oracle_client(lib_dir=config("LD_LIBRARY_PATH"))
 
 
 class OracleInfrastructure(IOracle):

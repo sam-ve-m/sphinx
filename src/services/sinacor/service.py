@@ -36,7 +36,9 @@ class SinacorService:
 
         # UPDATE user data
         stoneage_output = payload.get("output")
-        old_user_data = user_repository.find_one({"_id": stoneage_output["email"]["value"]})
+        old_user_data = user_repository.find_one(
+            {"_id": stoneage_output["email"]["value"]}
+        )
         new_user_data = SinacorService.merge_data_and_get_completed_user_data(
             output=stoneage_output, user_database_document=old_user_data
         )
@@ -60,7 +62,9 @@ class SinacorService:
             )
             if has_error:
                 raise BadRequestError("bureau.error.fail")
-        client_register_repository.register_validated_users(user_cpf=new_user_data["cpf"])
+        client_register_repository.register_validated_users(
+            user_cpf=new_user_data["cpf"]
+        )
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "ok",

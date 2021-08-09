@@ -74,7 +74,9 @@ class PIN(BaseModel):
 
 
 class ElectronicSignature(BaseModel):
-    electronic_signature: constr(regex=r'^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$')
+    electronic_signature: constr(
+        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$"
+    )
 
 
 class Name(BaseModel):
