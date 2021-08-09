@@ -41,7 +41,7 @@ def test_answer_register_exists():
 
 def test_answer_process_issue():
     stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={"is_active": False})
+    stub_repository.find_one = MagicMock(return_value={"is_active_user": False})
     stub_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         AuthenticationService.thebes_gate(
@@ -55,7 +55,7 @@ def test_answer_is_active():
     generate_token_value = "lalala"
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(
-        return_value={"pin": "", "_id": "", "is_active": True}
+        return_value={"pin": "", "_id": "", "is_active_user": True}
     )
     stub_repository.update_one = MagicMock(return_value=True)
     StubTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
@@ -71,7 +71,7 @@ def test_answer_is_not_active():
     generate_token_value = "lalala"
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(
-        return_value={"pin": "", "_id": "", "is_active": False}
+        return_value={"pin": "", "_id": "", "is_active_user": False}
     )
     stub_repository.update_one = MagicMock(return_value=True)
     StubTokenHandler.generate_token = MagicMock(return_value=generate_token_value)

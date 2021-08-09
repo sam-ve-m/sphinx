@@ -1,14 +1,15 @@
 # STANDARD LIBS
+import json
 from copy import deepcopy
 from fastapi import status
 
 # SPHINX
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
-from src.exceptions.exceptions import BadRequestError
 from src.services.persephone.service import PersephoneService
 from src.utils.stone_age import StoneAge
 from src.utils.base_model_normalizer import normalize_enum_types
+from src.exceptions.exceptions import BadRequestError, InternalServerError
 
 
 class SinacorService:
@@ -39,6 +40,7 @@ class SinacorService:
         old_user_data = user_repository.find_one(
             {"_id": stoneage_output["email"]["value"]}
         )
+
         new_user_data = SinacorService.merge_data_and_get_completed_user_data(
             output=stoneage_output, user_database_document=old_user_data
         )
@@ -65,6 +67,16 @@ class SinacorService:
         client_register_repository.register_validated_users(
             user_cpf=new_user_data["cpf"]
         )
+
+        new_user_data.update({"sinacor": True, "sincad": False})
+
+        # Call SolutionTech sync
+        # call da function da solutiontech
+        new_user_data.update({"solutiontech": 'send'})
+
+        if user_repository.update_one(old=old_user_data, new=new_user_data) is False:
+            raise InternalServerError("common.process_issue")
+
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "ok",
@@ -77,7 +89,7 @@ class SinacorService:
         new = deepcopy(user_database_document)
         output_normalized = StoneAge.get_only_values_from_user_data(user_data=output)
         normalize_enum_types(output_normalized)
-        new.update({"stone_age_decision": output_normalized["decision"]})
+        new.update({"register_analyses": output_normalized["decision"]})
         del output_normalized["decision"]
         del output_normalized["status"]
         del output_normalized["email"]

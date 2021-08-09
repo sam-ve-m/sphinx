@@ -83,7 +83,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cpfcgc(self, user_data: dict):
-        self._fields_added.update({"CD_CPFCGC": user_data["cpf"]})
+        self._fields_added.update({"CD_CPFCGC": int(user_data["cpf"])})
         return self
 
     def add_dt_nasc_fund(self, user_data: dict):
