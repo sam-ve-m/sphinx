@@ -8,7 +8,6 @@ from src.utils.env_config import config
 # SPHINX
 from src.utils.email import HtmlModifier
 from src.repositories.user.repository import UserRepository
-from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 from src.controllers.jwts.controller import JwtController
 from src.utils.jwt_utils import JWTHandler
 from src.exceptions.exceptions import (
@@ -106,8 +105,7 @@ class AuthenticationService(IAuthentication):
     def thebes_hall(
         payload: dict,
         user_repository=UserRepository(),
-        token_handler=JWTHandler,
-        thebes_hall=ThebesHall,
+        token_handler=JWTHandler
     ) -> dict:
         user_old = user_repository.find_one({"_id": payload.get("email")})
         if user_old is None:
@@ -145,13 +143,13 @@ class AuthenticationService(IAuthentication):
             client_has_trade_allowed_status["solutiontech"][
                 "status"
             ] = solutiontech_status
-            client_has_trade_allowed_status["solutiontech"]["status_changed"] = True
+            client_has_trade_allowed_status["solutiontech"]["status_changed"] = user.get("solutiontech") != solutiontech_status
         if user.get("sincad") is False:
             sincad_status = AuthenticationService.sinacor_is_synced_with_sincad(
                 user_cpf=user.get("cpf")
             )
             client_has_trade_allowed_status["sincad"]["status"] = sincad_status
-            client_has_trade_allowed_status["sincad"]["status_changed"] = True
+            client_has_trade_allowed_status["sincad"]["status_changed"] = user.get("sincad") != sincad_status
 
         return client_has_trade_allowed_status
 
