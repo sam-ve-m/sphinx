@@ -40,7 +40,6 @@ class IAuthentication(ABC):
     def thebes_hall(
         payload: dict,
         user_repository: UserRepository,
-        token_handler: JWTHandler,
-        thebes_hall: ThebesHall,
+        token_handler: JWTHandler
     ) -> dict:
         pass

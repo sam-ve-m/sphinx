@@ -83,7 +83,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cpfcgc(self, user_data: dict):
-        self._fields_added.update({"CD_CPFCGC": user_data["cpf"]})
+        self._fields_added.update({"CD_CPFCGC": int(user_data["cpf"])})
         return self
 
     def add_dt_nasc_fund(self, user_data: dict):
@@ -154,10 +154,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_tipo_doc(self, user_data: dict):
-        key_values = {
-            "CPF": 523,
-            "RG": 3
-        }
+        key_values = {"CPF": 523, "RG": 3}
         value = key_values.get(user_data["identifier_document"]["type"])
         self._fields_added.update({"CD_TIPO_DOC": value})
         return self

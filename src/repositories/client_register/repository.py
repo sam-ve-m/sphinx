@@ -10,11 +10,14 @@ from src.utils.env_config import config
 
 
 class ClientRegisterRepository(OracleInfrastructure):
-    def register_validated_users(self, user_cpf: str, ):
+    def register_validated_users(
+        self,
+        user_cpf: str,
+    ):
         values = {
-            "cd_empresa": config('COMPANY_OPERATION_CODE'),
+            "cd_empresa": config("COMPANY_OPERATION_CODE"),
             "cd_usuario": "1",
-            "tp_ocorrencia": 'I',
+            "tp_ocorrencia": "I",
             "cd_cliente_padrao": "1",
             "cpf": str(user_cpf),
         }
@@ -78,6 +81,13 @@ class ClientRegisterRepository(OracleInfrastructure):
             result = self.query(
                 sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
             )
+            return result[0]
+        return None
+
+    def get_sincad_status(self, user_cpf: int):
+        sql = f"SELECT COD_SITU_ENVIO FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+        result = self.query(sql=sql)
+        if len(result) > 0:
             return result[0]
         return None
 

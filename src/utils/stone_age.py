@@ -17,7 +17,11 @@ class StoneAge:
         # response = StoneAge.run_sync_stone_age_app_entry_point(
         #     entry_point="mock", body={"cpf": 123}
         # )
-        response = {"output": dict(), "uuid": '1231234-asdfq34-5t-34564236', 'decision': 'MESA'}
+        response = {
+            "output": dict(),
+            "uuid": "1231234-asdfq34-5t-34564236",
+            "decision": None,
+        }
         response["output"].update(
             {
                 "quiz": [
@@ -69,64 +73,11 @@ class StoneAge:
         # response = StoneAge.run_sync_stone_age_app_entry_point(
         #     entry_point="mock", body={"cpf": 123}
         # )
-        response = {"output": dict(), "uuid": '1231234-asdfq34-5t-34564236', 'decision': 'MESA'}
-        response["output"].update(
-            {
-                "payload": {
-                    "gender": {"value": "string", "source": "string"},
-                    "birthDate": {"value": 5465465456456456, "source": "string"},
-                    "naturalness": {"value": "string", "source": "string"},
-                    "nationality": {"value": "string", "source": "string"},
-                    "mother_name": {"value": "string", "source": "string"},
-                    "identifier_document": {
-                        "type": {"value": "string", "source": "string"},
-                        "document_data": {
-                            "number": {"value": "string", "source": "string"},
-                            "date": {"value": 5456456, "source": "string"},
-                            "state": {"value": "string", "source": "string"},
-                            "issuer": {"value": "string", "source": "string"},
-                        },
-                    },
-                    "address": {
-                        "street_name": {"value": "string", "source": "string"},
-                        "number": {"value": 5464564, "source": "string"},
-                        "state": {"value": "string", "source": "string"},
-                        "city": {"value": "string", "source": "string"},
-                        "zipCode": {"value": "string", "source": "string"},
-                        "phone_number": {"value": "string", "source": "string"},
-                    },
-                    "occupation": {
-                        "status": {"value": "Assalariado", "source": "string"},
-                        "company": {
-                            "name": {"value": "string", "source": "string"},
-                            "cpnj": {"value": 46564564564656544, "source": "string"},
-                        },
-                    },
-                    "assets": {
-                        "patrimony": {"value": 5446456.44, "source": "string"},
-                        "income": {"value": 5446456.44, "source": "string"},
-                    },
-                    "education": {
-                        "level": {"value": "Médio incompleto", "source": "string"},
-                        "course": {"value": "string", "source": "string"},
-                    },
-                    "documents_photos": {
-                        "identifier_document": {"value": "string", "source": "string"},
-                        "address_document": {"value": "string", "source": "string"},
-                    },
-                    "politically_exposed_person": {
-                        "is_politically_exposed_person": {
-                            "value": False,
-                            "source": "string",
-                        }
-                    },
-                    "date_of_acquisition": {
-                        "value": 5465465456456456,
-                        "source": "string",
-                    },
-                }
-            }
-        )
+        response = {
+            "output": dict(),
+            "uuid": "1231234-asdfq34-5t-34564236",
+            "decision": "MESA",
+        }
         return response
 
     @staticmethod

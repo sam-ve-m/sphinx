@@ -8,12 +8,12 @@ from src.interfaces.services.builders.thebes_hall.validators.interface import IV
 class AccountData(IValidator):
     @staticmethod
     def run(payload: dict) -> dict:
-        provided_by_bureaux = payload.get("provided_by_bureaux")
-        if provided_by_bureaux:
-            concluded_at = provided_by_bureaux.get("concluded_at")
+        last_modified_date = payload.get("last_modified_date")
+        if last_modified_date:
+            concluded_at = last_modified_date.get("concluded_at")
             if concluded_at:
                 months_past = AccountData.months_past(concluded_at=concluded_at)
-                provided_by_bureaux["months_past"] = months_past
+                last_modified_date["months_past"] = months_past
         return payload
 
     @staticmethod

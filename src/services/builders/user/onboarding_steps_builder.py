@@ -11,12 +11,12 @@ class OnboardingStepBuilder:
             "finished": False,
         }
         self.__steps: list = [
-            'suitability_step',
-            'user_identifier_data_step',
-            'user_selfie_step',
-            'user_complementary_step',
-            'user_quiz_step',
-            'user_electronic_signature'
+            "suitability_step",
+            "user_identifier_data_step",
+            "user_selfie_step",
+            "user_complementary_step",
+            "user_quiz_step",
+            "user_electronic_signature",
         ]
 
     def user_suitability_step(self, user_suitability_profile):
@@ -64,9 +64,8 @@ class OnboardingStepBuilder:
         return self
 
     def user_quiz_step(self, current_user):
-        has_stone_age_contract_uuid = current_user.get("is_dtvm_user_client")
-
-        if has_stone_age_contract_uuid is not None:
+        register_analyses = current_user.get("register_analyses")
+        if register_analyses is not None:
             self.__onboarding_steps["user_quiz_step"] = True
 
         return self

@@ -74,28 +74,39 @@ class JWTHandler:
         suitability_months_past = None
         if suitability:
             suitability_months_past = suitability.get("months_past")
-        user_account_data = payload.get("user_account_data")
-        user_account_data_months_past = None
-        if user_account_data:
-            user_account_data_months_past = user_account_data.get("months_past")
+        last_modified_date = payload.get("last_modified_date")
+        last_modified_date_months_past = None
+        if last_modified_date:
+            last_modified_date_months_past = last_modified_date.get("months_past")
 
         new_payload = {
             "nick_name": payload.get("nick_name"),
             "email": payload.get("email"),
             "scope": payload.get("scope"),
-            "is_active": payload.get("is_active"),
+            "is_active_user": payload.get("is_active_user"),
             "terms": payload.get("terms"),
             "suitability_months_past": suitability_months_past,
-            "user_account_data_months_past": user_account_data_months_past,
-            "exp": payload.get("exp"),
+            "last_modified_date_months_past": last_modified_date_months_past,
+            "client_has_trade_allowed": False,
             "created_at": payload.get("created_at"),
+            "exp": payload.get("exp"),
         }
-        stone_age_decision = payload.get("stone_age_decision")
-        if stone_age_decision:
-            new_payload.update({"stone_age_decision": stone_age_decision})
-        user_electronic_signature = payload.get("electronic_signature")
-        if user_electronic_signature and stone_age_decision:
-            new_payload.update({"onboarding_finished": True})
+        register_analyses = payload.get("register_analyses")
+
+        bovespa_account = payload.get("bovespa_account")
+        bmf_account = payload.get("bmf_account")
+
+        if bmf_account and bovespa_account:
+            new_payload.update({"bovespa_account": bovespa_account, "bmf_account": bmf_account})
+
+        if register_analyses:
+            new_payload.update({"register_analyses": register_analyses})
+
+        solutiontech = payload.get("solutiontech")
+        sincad = payload.get("sincad")
+        if solutiontech == "sync" and sincad:
+            new_payload.update({"client_has_trade_allowed": True})
+
         return new_payload
 
     @staticmethod
