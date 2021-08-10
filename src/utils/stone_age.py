@@ -20,7 +20,7 @@ class StoneAge:
         response = {
             "output": dict(),
             "uuid": "1231234-asdfq34-5t-34564236",
-            "decision": "MESA",
+            "decision": None,
         }
         response["output"].update(
             {
