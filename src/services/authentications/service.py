@@ -114,12 +114,14 @@ class AuthenticationService(IAuthentication):
             raise BadRequestError("common.register_not_exists")
 
         user_new = deepcopy(user_old)
-        client_has_trade_allowed = AuthenticationService.dtvm_client_has_trade_allowed(user=user_old)
+        client_has_trade_allowed = AuthenticationService.dtvm_client_has_trade_allowed(
+            user=user_old
+        )
         must_update = False
         for key, value in client_has_trade_allowed.items():
-            if value['status_changed']:
+            if value["status_changed"]:
                 must_update = True
-                user_new.update({key: value['status']})
+                user_new.update({key: value["status"]})
 
         if must_update:
             if user_repository.update_one(old=user_old, new=user_new) is False:
@@ -132,27 +134,30 @@ class AuthenticationService(IAuthentication):
     def dtvm_client_has_trade_allowed(user: dict) -> dict:
         client_has_trade_allowed_status = {
             "solutiontech": {
-                "status": user.get('solutiontech'),
-                "status_changed": False
+                "status": user.get("solutiontech"),
+                "status_changed": False,
             },
-            "sincad": {
-                "status": user.get('sincad'),
-                "status_changed": False
-            }
+            "sincad": {"status": user.get("sincad"), "status_changed": False},
         }
-        if user.get('solutiontech') == 'send':
+        if user.get("solutiontech") == "send":
             # Validaçao da solutiontech
-            solutiontech_status = 'sync'
-            client_has_trade_allowed_status["solutiontech"]["status"] = solutiontech_status
+            solutiontech_status = "sync"
+            client_has_trade_allowed_status["solutiontech"][
+                "status"
+            ] = solutiontech_status
             client_has_trade_allowed_status["solutiontech"]["status_changed"] = True
-        if user.get('sincad') is False:
-            sincad_status = AuthenticationService.sinacor_is_synced_with_sincad(user_cpf=user.get('cpf'))
+        if user.get("sincad") is False:
+            sincad_status = AuthenticationService.sinacor_is_synced_with_sincad(
+                user_cpf=user.get("cpf")
+            )
             client_has_trade_allowed_status["sincad"]["status"] = sincad_status
             client_has_trade_allowed_status["sincad"]["status_changed"] = True
 
         return client_has_trade_allowed_status
 
     @staticmethod
-    def sinacor_is_synced_with_sincad(user_cpf: int, client_register_repository=ClientRegisterRepository()) -> bool:
+    def sinacor_is_synced_with_sincad(
+        user_cpf: int, client_register_repository=ClientRegisterRepository()
+    ) -> bool:
         sincad_status = client_register_repository.get_sincad_status(user_cpf=user_cpf)
-        return sincad_status and sincad_status[0] in ['ACE', 'ECM']
+        return sincad_status and sincad_status[0] in ["ACE", "ECM"]

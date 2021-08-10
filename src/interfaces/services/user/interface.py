@@ -112,7 +112,7 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def change_user_to_client(
+    def send_quiz_responses(
         payload: dict,
         user_repository=UserRepository(),
         stone_age=StoneAge,

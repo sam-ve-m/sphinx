@@ -106,8 +106,8 @@ def user_quiz(request: Request):
     return BaseController.run(UserController.user_quiz, payload, request)
 
 
-@router.put("/user/change_user_to_client", tags=["user"])
-def update_change_user_to_client(quiz_response: QuizResponses, request: Request):
+@router.put("/user/send_quiz_responses", tags=["user"])
+def send_quiz_responses(quiz_response: QuizResponses, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
@@ -115,7 +115,7 @@ def update_change_user_to_client(quiz_response: QuizResponses, request: Request)
         "x-thebes-answer": jwt_data_or_error_response,
         "quiz": quiz_response.dict(),
     }
-    return BaseController.run(UserController.change_user_to_client, payload, request)
+    return BaseController.run(UserController.send_quiz_responses, payload, request)
 
 
 @router.delete("/user", tags=["user"])

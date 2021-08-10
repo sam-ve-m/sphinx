@@ -97,7 +97,7 @@ class JWTHandler:
 
         solutiontech = payload.get("solutiontech")
         sincad = payload.get("sincad")
-        if solutiontech == 'sync' and sincad:
+        if solutiontech == "sync" and sincad:
             new_payload.update({"client_has_trade_allowed": True})
 
         return new_payload
