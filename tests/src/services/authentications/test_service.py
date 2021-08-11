@@ -164,7 +164,6 @@ def test_thebes_hall_not_register_exists():
             payload=payload,
             user_repository=stub_repository,
             token_handler=StubTokenHandler,
-            thebes_hall=StubThebesHall,
         )
 
 
@@ -177,7 +176,6 @@ def test_thebes_hall():
     response = AuthenticationService.thebes_hall(
         payload=payload,
         user_repository=stub_repository,
-        thebes_hall=StubThebesHall,
         token_handler=StubTokenHandler,
     )
     assert response.get("status_code") == status.HTTP_200_OK
