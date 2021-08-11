@@ -11,6 +11,7 @@ RUN touch /opt/envs/sphinx.lionx.com.br/.env
 RUN touch /opt/envs/heimdall.lionx.com.br/.env
 WORKDIR /app/sphinx
 COPY ./requirements.txt /app/sphinx/
+RUN pip install -r /app/sphinx/requirements.txt --trusted-host 18.231.147.30
 COPY ./instantclient /opt/instantclient/
 RUN cd /opt/instantclient
 RUN ls -al /opt/instantclient
