@@ -91,7 +91,7 @@ class UserService(IUser):
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
-        new.update({"is_active_client": True})
+        new.update({"is_active_client": False})
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 

@@ -110,7 +110,7 @@ def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
 def invalidate_user(user_data: dict, jwt_data: dict) -> bool:
     is_active_client = is_user_deleted(user_data=user_data)
     is_active_user = is_user_active(user_data=user_data)
-    if not is_active_client and is_active_user:
+    if is_active_client and is_active_user:
         return is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
     return False
 
