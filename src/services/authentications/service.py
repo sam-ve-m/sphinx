@@ -20,6 +20,7 @@ from src.services.email_sender.grid_email_sender import EmailSender as SendGridE
 from src.utils.genarate_id import hash_field
 from src.interfaces.services.authentication.interface import IAuthentication
 from src.repositories.client_register.repository import ClientRegisterRepository
+from src.utils.solutiontech import Solutiontech
 
 
 class AuthenticationService(IAuthentication):
@@ -103,9 +104,7 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def thebes_hall(
-        payload: dict,
-        user_repository=UserRepository(),
-        token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         user_old = user_repository.find_one({"_id": payload.get("email")})
         if user_old is None:
@@ -138,18 +137,25 @@ class AuthenticationService(IAuthentication):
             "sincad": {"status": user.get("sincad"), "status_changed": False},
         }
         if user.get("solutiontech") == "send":
-            # Validaçao da solutiontech
-            solutiontech_status = "sync"
+            solutiontech_status = (
+                Solutiontech.check_if_client_is_synced_with_solutiontech(
+                    user_bmf_code=int(user.get("bmf_account"))
+                )
+            )
             client_has_trade_allowed_status["solutiontech"][
                 "status"
             ] = solutiontech_status
-            client_has_trade_allowed_status["solutiontech"]["status_changed"] = user.get("solutiontech") != solutiontech_status
+            client_has_trade_allowed_status["solutiontech"]["status_changed"] = (
+                user.get("solutiontech") != solutiontech_status
+            )
         if user.get("sincad") is False:
             sincad_status = AuthenticationService.sinacor_is_synced_with_sincad(
                 user_cpf=user.get("cpf")
             )
             client_has_trade_allowed_status["sincad"]["status"] = sincad_status
-            client_has_trade_allowed_status["sincad"]["status_changed"] = user.get("sincad") != sincad_status
+            client_has_trade_allowed_status["sincad"]["status_changed"] = (
+                user.get("sincad") != sincad_status
+            )
 
         return client_has_trade_allowed_status
 

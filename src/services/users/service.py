@@ -5,6 +5,7 @@ from copy import deepcopy
 
 # OUTSIDE LIBRARIES
 from fastapi import status
+from fordev.generators import rg
 
 # SPHINX
 from src.controllers.jwts.controller import JwtController
@@ -505,7 +506,10 @@ class UserService(IUser):
 
         if must_send_quiz:
             current_user_updated.update({"register_analyses": "PENDING"})
-            if user_repository.update_one(old=current_user, new=current_user_updated) is False:
+            if (
+                user_repository.update_one(old=current_user, new=current_user_updated)
+                is False
+            ):
                 raise InternalServerError("common.process_issue")
 
         # MOCK FEIO DA STONE AGE
@@ -610,15 +614,19 @@ class UserService(IUser):
                 },
                 "mother_name": {"source": "PH3W", "value": "Antonia dos Santos Jr."},
                 "identifier_document": {
-                    "type": {"source": "PH3W", "value": "CPF"},
+                    "type": {"source": "PH3W", "value": "RG"},
                     "document_data": {
-                        "number": {"source": "PH3W", "value": int(cpf)},
+                        # GENERATE
+                        "number": {
+                            "source": "PH3W",
+                            "value": int(rg().replace(".", "").replace("-", "")),
+                        },
                         "date": {
                             "source": "PH3W",
                             "value": datetime(2018, 7, 12, 16, 31, 31),
                         },
                         "state": {"source": "PH3W", "value": "SP"},
-                        "issuer": {"source": "PH3W", "value": "SSP/SP"},
+                        "issuer": {"source": "PH3W", "value": "SSP"},
                     },
                 },
                 "address": {

@@ -113,10 +113,7 @@ class SuitabilityService(ISuitability):
         )
         new = user_repository.find_one({"_id": user_email})
         jwt = token_handler.generate_token(payload=new, ttl=525600)
-        return {
-            "status_code": status.HTTP_201_CREATED,
-            "payload": {"jwt": jwt}
-        }
+        return {"status_code": status.HTTP_201_CREATED, "payload": {"jwt": jwt}}
 
     @staticmethod
     def get_user_profile(

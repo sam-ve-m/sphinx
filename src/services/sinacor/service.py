@@ -11,10 +11,10 @@ from src.services.persephone.service import PersephoneService
 from src.utils.stone_age import StoneAge
 from src.utils.base_model_normalizer import normalize_enum_types
 from src.exceptions.exceptions import BadRequestError, InternalServerError
+from src.utils.solutiontech import Solutiontech
 
 
 class SinacorService:
-
     @staticmethod
     def process_callback(
         payload: dict,
@@ -66,7 +66,7 @@ class SinacorService:
 
         database_and_bureau_dtvm_client_data_merged = SinacorService.add_dtvm_client_trade_metadata(
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
-            client_register_repository=client_register_repository
+            client_register_repository=client_register_repository,
         )
 
         user_is_updated = user_repository.update_one(
@@ -76,6 +76,9 @@ class SinacorService:
 
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
+
+        bmf_account = database_and_bureau_dtvm_client_data_merged.get("bmf_account")
+        Solutiontech.request_client_sync(user_bmf_code=int(bmf_account))
 
         return {
             "status_code": status.HTTP_200_OK,
@@ -118,15 +121,17 @@ class SinacorService:
 
     @staticmethod
     def add_dtvm_client_trade_metadata(
-            database_and_bureau_dtvm_client_data_merged: dict,
-            client_register_repository: ClientRegisterRepository
+        database_and_bureau_dtvm_client_data_merged: dict,
+        client_register_repository: ClientRegisterRepository,
     ) -> dict:
 
         database_and_bureau_dtvm_client_data_merged.update(
             {"sinacor": True, "sincad": False}
         )
         sync_status = SinacorService.require_sync_to_solutiontech_from_sinacor()
-        database_and_bureau_dtvm_client_data_merged.update({"solutiontech": sync_status})
+        database_and_bureau_dtvm_client_data_merged.update(
+            {"solutiontech": sync_status}
+        )
 
         sinacor_user_control_data = (
             client_register_repository.get_user_control_data_if_user_already_exists(
@@ -138,16 +143,12 @@ class SinacorService:
         account_digit = sinacor_user_control_data[1]
 
         bovespa_account = SinacorService.build_bovespa_account_mask(
-            account_prefix=account_prefix,
-            account_digit=account_digit
+            account_prefix=account_prefix, account_digit=account_digit
         )
         bmf_account = SinacorService.build_bmf_account(account_prefix=account_prefix)
 
         database_and_bureau_dtvm_client_data_merged.update(
-            {
-                "bovespa_account": bovespa_account,
-                "bmf_account": bmf_account
-            }
+            {"bovespa_account": bovespa_account, "bmf_account": bmf_account}
         )
 
         database_and_bureau_dtvm_client_data_merged.update(
@@ -162,9 +163,13 @@ class SinacorService:
     def build_bovespa_account_mask(account_prefix: int, account_digit: int):
         number_of_account_prefix_digits = 9
         str_account_prefix = str(account_prefix)
-        str_account_prefix_filled_with_zeros = str_account_prefix.zfill(number_of_account_prefix_digits)
+        str_account_prefix_filled_with_zeros = str_account_prefix.zfill(
+            number_of_account_prefix_digits
+        )
         str_account_digit = str(account_digit)
-        bovespa_account_mask = f"{str_account_prefix_filled_with_zeros}-{str_account_digit}"
+        bovespa_account_mask = (
+            f"{str_account_prefix_filled_with_zeros}-{str_account_digit}"
+        )
         return bovespa_account_mask
 
     @staticmethod

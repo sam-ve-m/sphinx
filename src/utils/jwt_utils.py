@@ -97,7 +97,9 @@ class JWTHandler:
         bmf_account = payload.get("bmf_account")
 
         if bmf_account and bovespa_account:
-            new_payload.update({"bovespa_account": bovespa_account, "bmf_account": bmf_account})
+            new_payload.update(
+                {"bovespa_account": bovespa_account, "bmf_account": bmf_account}
+            )
 
         if register_analyses:
             new_payload.update({"register_analyses": register_analyses})
