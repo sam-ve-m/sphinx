@@ -56,18 +56,17 @@ class OnboardingStepBuilder:
 
         return self
 
-    def user_user_electronic_signature(self, current_user):
-        has_electronic_signature = current_user.get("electronic_signature")
-        if has_electronic_signature is not None:
-            self.__onboarding_steps["user_electronic_signature"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "user_quiz_step"
-        return self
-
     def user_quiz_step(self, current_user):
         register_analyses = current_user.get("register_analyses")
         if register_analyses is not None:
             self.__onboarding_steps["user_quiz_step"] = True
+            self.__onboarding_steps["current_onboarding_step"] = "electronic_signature"
+        return self
 
+    def user_user_electronic_signature(self, current_user):
+        has_electronic_signature = current_user.get("electronic_signature")
+        if has_electronic_signature is not None:
+            self.__onboarding_steps["user_electronic_signature"] = True
         return self
 
     def is_finished(self):
