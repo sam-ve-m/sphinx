@@ -22,8 +22,9 @@ email-validator==1.1.3
 fastapi==0.66.0
 fastapi-cache==0.1.0
 filelock==3.0.12
+fordev==1.0.3
 h11==0.12.0
-heimdall-client==0.1.4
+heimdall-client==0.1.5
 hiredis==2.0.0
 idna==3.2
 importlib-metadata==4.6.1
