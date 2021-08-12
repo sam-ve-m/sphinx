@@ -433,7 +433,7 @@ class UserService(IUser):
             user_onboarding_current_step=user_onboarding_current_step
         ):
             return {
-                "status_code": status.HTTP_200_OK,
+                "status_code": status.HTTP_204_NO_CONTENT,
                 "message_key": "user.quiz.missing_steps",
             }
 
