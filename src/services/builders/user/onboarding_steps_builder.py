@@ -52,7 +52,7 @@ class OnboardingStepBuilder:
 
         if marital is not None and (is_us_person is False or is_us_person is not None):
             self.__onboarding_steps["user_complementary_step"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "electronic_signature"
+            self.__onboarding_steps["current_onboarding_step"] = "user_quiz_step"
 
         return self
 
