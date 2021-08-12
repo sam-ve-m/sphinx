@@ -433,7 +433,7 @@ class UserService(IUser):
             user_onboarding_current_step=user_onboarding_current_step
         ):
             return {
-                "status_code": status.HTTP_200_OK,
+                "status_code": status.HTTP_204_NO_CONTENT,
                 "message_key": "user.quiz.missing_steps",
             }
 
@@ -556,8 +556,8 @@ class UserService(IUser):
             .user_identifier_step(current_user=current_user)
             .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
-            .user_user_electronic_signature(current_user=current_user)
             .user_quiz_step(current_user=current_user)
+            .user_user_electronic_signature(current_user=current_user)
             .build()
         )
 
