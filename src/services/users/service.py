@@ -727,8 +727,10 @@ class UserService(IUser):
 
         return fake_response
 
-    def onboarding_step_validator(self, payload: dict, on_board_step: str):
+    @staticmethod
+    def onboarding_step_validator(payload: dict, on_board_step: str):
         onboarding_steps = UserService.get_onboarding_user_current_step(payload)
-        current_onboarding_step = onboarding_steps.get("current_onboarding_step")
+        payload_from_onboarding_steps = onboarding_steps.get("payload")
+        current_onboarding_step = payload_from_onboarding_steps.get("current_onboarding_step")
         if current_onboarding_step != on_board_step:
             raise BadRequestError("user.invalid_on_boarding_step")
