@@ -31,7 +31,7 @@ from src.utils.persephone_templates import (
     get_user_signed_term_template_with_data,
 )
 from src.utils.env_config import config
-
+from src.utils.encrypt.password.util import PasswordEncrypt
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 
 
@@ -576,17 +576,19 @@ class UserService(IUser):
         UserService.onboarding_step_validator(payload=payload, on_board_step="user_electronic_signature")
         thebes_answer = payload.get("x-thebes-answer")
         electronic_signature = payload.get("electronic_signature")
+        encrypted_eletronic_signature = PasswordEncrypt.encrypt_password(electronic_signature)
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         if old.get("electronic_signature"):
             raise BadRequestError("user.electronic_signature.already_set")
         new = deepcopy(old)
-        new["electronic_signature"] = electronic_signature
+        new["electronic_signature"] = encrypted_eletronic_signature
         new["is_blocked_electronic_signature"] = False
         new["electronic_signature_wrong_attempts"] = 0
 
-        new = hash_field(key="electronic_signature", payload=new)
+        #
+        # new = hash_field(key="electronic_signature", payload=new)
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
