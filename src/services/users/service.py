@@ -583,6 +583,9 @@ class UserService(IUser):
             raise BadRequestError("user.electronic_signature.already_set")
         new = deepcopy(old)
         new["electronic_signature"] = electronic_signature
+        new["is_blocked_electronic_signature"] = False
+        new["electronic_signature_wrong_attempts"] = 0
+
         new = hash_field(key="electronic_signature", payload=new)
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
