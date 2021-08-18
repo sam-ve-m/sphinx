@@ -96,9 +96,27 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
+    def add_user_control_metadata(payload: dict):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def fill_term_signed(payload: dict, file_type: str, version: int):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def get_signed_term(
+            payload: dict,
+            file_repository,
+    ) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
     def user_identifier_data(
         payload: dict,
-        user_repository=UserRepository(),
+        user_repository,
     ) -> dict:
         pass
 
@@ -106,7 +124,7 @@ class IUser(ABC):
     @abstractmethod
     def user_complementary_data(
         payload: dict,
-        user_repository=UserRepository(),
+        user_repository,
     ) -> dict:
         pass
 
@@ -114,23 +132,25 @@ class IUser(ABC):
     @abstractmethod
     def send_quiz_responses(
         payload: dict,
-        user_repository=UserRepository(),
-        stone_age=StoneAge,
-        persephone_client=PersephoneService.get_client(),
+        user_repository,
+        stone_age,
+        persephone_client,
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def user_quiz(
-        payload: dict, stone_age=StoneAge, user_repository=UserRepository()
+        payload: dict, stone_age, user_repository
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def table_callback(
+    def get_onboarding_user_current_step(
+        self,
         payload: dict,
-        persephone_client=PersephoneService.get_client(),
+        user_repository,
+        file_repository
     ) -> dict:
         pass
