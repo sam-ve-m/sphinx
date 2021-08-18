@@ -15,6 +15,7 @@ pt:
     feature_not_exists: O serviços enviado não existe.
   user:
     created: Enviamos para você um e-mail de confirmação.
+    invalid_on_boarding_step: Etapa de de onboarding inválida. Verifique a sua etapa atual no endpoint /user/onboarding_user_current_step
     forgot_password: Enviamos para você um e-mail de recuperação de pin.
     active: Sua validação foi feita com sucesso.
     pin_error: PIN invalido, tentenovamente.
