@@ -36,6 +36,7 @@ from src.exceptions.exceptions import BadRequestError, InternalServerError
 
 
 class UserService(IUser):
+
     @staticmethod
     def create(
         payload: dict,
@@ -535,13 +536,13 @@ class UserService(IUser):
             payload["provided_by_bureaux"].update({key: value})
         payload["provided_by_bureaux"]["concluded_at"] = datetime.now()
 
-    @staticmethod
     def get_onboarding_user_current_step(
+        self,
         payload: dict,
         user_repository=UserRepository(),
-        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
-        onboarding_step_builder=OnboardingStepBuilder(),
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF"))
     ) -> dict:
+        onboarding_step_builder = OnboardingStepBuilder()
         thebes_answer = payload.get("x-thebes-answer")
         jwt_user_email = thebes_answer.get("email")
 
