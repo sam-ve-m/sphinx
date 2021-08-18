@@ -83,7 +83,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cpfcgc(self, user_data: dict):
-        self._fields_added.update({"CD_CPFCGC": user_data["cpf"]})
+        self._fields_added.update({"CD_CPFCGC": int(user_data["cpf"])})
         return self
 
     def add_dt_nasc_fund(self, user_data: dict):
@@ -154,16 +154,64 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_tipo_doc(self, user_data: dict):
-        key_values = {
-            "CPF": 523,
-            "RG": 3
-        }
-        value = key_values.get(user_data["identifier_document"]["type"])
+        value = user_data["identifier_document"]["type"]
         self._fields_added.update({"CD_TIPO_DOC": value})
         return self
 
     def add_cd_doc_ident(self, user_data: dict):
-        self._fields_added.update({"CD_DOC_IDENT": user_data["cpf"]})
+        type = user_data["identifier_document"]["type"]
+        value = None
+        if type != "RG":
+            value = user_data["identifier_document"]["document_data"]["number"]
+        self._fields_added.update({"CD_DOC_IDENT": value})
+        return self
+
+    def add_cd_org_emit(self, user_data: dict):
+        type = user_data["identifier_document"]["type"]
+        value = None
+        if type != "RG":
+            value = user_data["identifier_document"]["document_data"]["issuer"]
+        self._fields_added.update({"CD_ORG_EMIT": value})
+        return self
+
+    def add_dt_doc_ident(self, user_data: dict):
+        type = user_data["identifier_document"]["type"]
+        value = None
+        if type != "RG":
+            value = user_data["identifier_document"]["document_data"]["date"]
+        self._fields_added.update({"DT_DOC_IDENT": value})
+        return self
+
+    def add_nr_rg(self, user_data: dict):
+        type = user_data["identifier_document"]["type"]
+        value = None
+        if type == "RG":
+            value = user_data["identifier_document"]["document_data"]["number"]
+        self._fields_added.update({"NR_RG": value})
+        return self
+
+    def add_sg_estado_emiss_rg(self, user_data: dict):
+        type = user_data["identifier_document"]["type"]
+        value = None
+        if type == "RG":
+            value = user_data["identifier_document"]["document_data"]["state"]
+        self._fields_added.update({"SG_ESTADO_EMISS_RG": value})
+        return self
+
+    def add_dt_emiss_rg(self, user_data: dict):
+        type = user_data["identifier_document"]["type"]
+        value = None
+        if type == "RG":
+            value = user_data["identifier_document"]["document_data"]["date"]
+        self._fields_added.update({"DT_EMISS_RG": value})
+        return self
+
+    def add_cd_org_emit_rg(self, user_data: dict):
+        type = user_data["identifier_document"]["type"]
+        value = None
+        if type == "RG":
+            value = user_data["identifier_document"]["document_data"]["issuer"]
+        self._fields_added.update({"CD_ORG_EMIT_RG": value})
         return self
 
     def add_id_sexo(self, user_data: dict):
@@ -484,16 +532,8 @@ class ClientRegisterBuilder:
         self._fields_added.update({"DS_CARGO": value})
         return self
 
-    def add_cd_doc_ident(self, value=None):
-        self._fields_added.update({"CD_DOC_IDENT": value})
-        return self
-
-    def add_cd_org_emit(self, value=None):
-        self._fields_added.update({"CD_ORG_EMIT": value})
-        return self
-
-    def add_dt_doc_ident(self, value=None):
-        self._fields_added.update({"DT_DOC_IDENT": value})
+    def add_sg_estado_emis(self, value=None):
+        self._fields_added.update({"SG_ESTADO_EMIS": value})
         return self
 
     def add_nm_empresa(self, value=None):
@@ -502,26 +542,6 @@ class ClientRegisterBuilder:
 
     def add_nm_pai(self, value=None):
         self._fields_added.update({"NM_PAI": value})
-        return self
-
-    def add_sg_estado_emis(self, value=None):
-        self._fields_added.update({"SG_ESTADO_EMIS": value})
-        return self
-
-    def add_sg_estado_emiss_rg(self, value=None):
-        self._fields_added.update({"SG_ESTADO_EMISS_RG": value})
-        return self
-
-    def add_dt_emiss_rg(self, value=None):
-        self._fields_added.update({"DT_EMISS_RG": value})
-        return self
-
-    def add_cd_org_emit_rg(self, value=None):
-        self._fields_added.update({"CD_ORG_EMIT_RG": value})
-        return self
-
-    def add_nr_rg(self, value=None):
-        self._fields_added.update({"NR_RG": value})
         return self
 
     def add_cd_ddd_celular2(self, value=None):

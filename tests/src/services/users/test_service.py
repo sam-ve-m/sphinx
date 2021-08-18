@@ -44,8 +44,8 @@ def get_user_data():
         "email": "afl@lionx.com.br",
         "name": "anderson",
         "scope": {"view_type": None, "features": ["real_time_data"]},
-        "is_active": True,
-        "deleted": False,
+        "is_active_user": True,
+        "is_active_client": False,
         "use_magic_link": False,
         "token_valid_after": {"$date": "2021-05-29T20:00:52.571Z"},
     }

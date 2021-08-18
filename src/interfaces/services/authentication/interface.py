@@ -38,9 +38,6 @@ class IAuthentication(ABC):
     @staticmethod
     @abstractmethod
     def thebes_hall(
-        payload: dict,
-        user_repository: UserRepository,
-        token_handler: JWTHandler,
-        thebes_hall: ThebesHall,
+        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
     ) -> dict:
         pass

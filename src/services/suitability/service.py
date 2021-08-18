@@ -19,6 +19,7 @@ from src.interfaces.services.suitability.interface import ISuitability
 from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
 from src.utils.persephone_templates import get_user_suitability_template_with_data
 from src.services.persephone.service import PersephoneService
+from src.utils.jwt_utils import JWTHandler
 
 
 class SuitabilityService(ISuitability):
@@ -63,6 +64,7 @@ class SuitabilityService(ISuitability):
         suitability_repository=SuitabilityRepository(),
         suitability_user_profile_repository=SuitabilityUserProfileRepository(),
         persephone_client=PersephoneService.get_client(),
+        token_handler=JWTHandler,
     ) -> Union[dict, Exception]:
         thebes_answer: dict = payload.get("x-thebes-answer")
         user_email: str = thebes_answer.get("email")
@@ -109,11 +111,9 @@ class SuitabilityService(ISuitability):
                 submission_date=suitability_submission_date,
             )
         )
-
-        return {
-            "status_code": status.HTTP_201_CREATED,
-            "message_key": "suitability.create_profile",
-        }
+        new = user_repository.find_one({"_id": user_email})
+        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        return {"status_code": status.HTTP_201_CREATED, "payload": {"jwt": jwt}}
 
     @staticmethod
     def get_user_profile(

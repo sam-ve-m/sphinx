@@ -5,6 +5,7 @@ from copy import deepcopy
 
 # OUTSIDE LIBRARIES
 from fastapi import status
+from fordev.generators import rg
 
 # SPHINX
 from src.controllers.jwts.controller import JwtController
@@ -20,6 +21,7 @@ from src.repositories.file.repository import FileRepository
 from src.repositories.user.repository import UserRepository
 
 from src.domain.persephone_queue import PersephoneQueue
+from src.services.sinacor.service import SinacorService
 
 from src.utils.genarate_id import generate_id, hash_field
 from src.utils.jwt_utils import JWTHandler
@@ -29,7 +31,7 @@ from src.utils.persephone_templates import (
     get_user_signed_term_template_with_data,
 )
 from src.utils.env_config import config
-
+from src.utils.encrypt.password.util import PasswordEncrypt
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 
 
@@ -89,7 +91,7 @@ class UserService(IUser):
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
-        new.update({"deleted": True})
+        new.update({"is_active_client": False})
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
@@ -215,6 +217,7 @@ class UserService(IUser):
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
+        UserService.onboarding_step_validator(payload=payload, on_board_step="user_selfie_step")
         file_repository.save_user_file(
             file_type=UserFileType.SELF,
             content=payload.get("file_or_base64"),
@@ -264,8 +267,8 @@ class UserService(IUser):
         payload.update(
             {
                 "scope": {"view_type": None, "features": []},
-                "is_active": False,
-                "deleted": False,
+                "is_active_user": False,
+                "is_active_client": False,
                 "use_magic_link": True,
                 "token_valid_after": datetime.utcnow(),
                 "terms": {
@@ -331,6 +334,9 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+
+        UserService.onboarding_step_validator(payload=payload, on_board_step="user_identifier_data_step")
+
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
         user_identifier_data = payload.get("user_identifier")
@@ -364,6 +370,7 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
     ) -> dict:
+        UserService.onboarding_step_validator(payload=payload, on_board_step="user_complementary_step")
         thebes_answer = payload.get("x-thebes-answer")
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         if current_user is None:
@@ -404,15 +411,17 @@ class UserService(IUser):
 
     @staticmethod
     def can_send_quiz(user_onboarding_current_step: dict):
-        current_step = user_onboarding_current_step['payload']['current_onboarding_step']
-        quiz_step_or_finished = current_step not in ('user_quiz_step')
+        current_step = user_onboarding_current_step["payload"][
+            "current_onboarding_step"
+        ]
+        quiz_step_or_finished = current_step not in ("user_quiz_step")
         all_necessary_steps = not all(
             [
-                user_onboarding_current_step['payload']['suitability_step'],
-                user_onboarding_current_step['payload']['user_identifier_data_step'],
-                user_onboarding_current_step['payload']['user_selfie_step'],
-                user_onboarding_current_step['payload']['user_complementary_step']
-             ]
+                user_onboarding_current_step["payload"]["suitability_step"],
+                user_onboarding_current_step["payload"]["user_identifier_data_step"],
+                user_onboarding_current_step["payload"]["user_selfie_step"],
+                user_onboarding_current_step["payload"]["user_complementary_step"],
+            ]
         )
         return quiz_step_or_finished or all_necessary_steps
 
@@ -420,11 +429,19 @@ class UserService(IUser):
     def user_quiz(
         payload: dict, stone_age=StoneAge, user_repository=UserRepository()
     ) -> dict:
+        UserService.onboarding_step_validator(payload=payload, on_board_step="user_quiz_step")
         thebes_answer = payload.get("x-thebes-answer")
 
-        user_onboarding_current_step = UserService.get_onboarding_user_current_step(payload=payload)
-        if UserService.can_send_quiz(user_onboarding_current_step=user_onboarding_current_step):
-            return {"status_code": status.HTTP_200_OK, "message_key": "user.quiz.missing_steps"}
+        user_onboarding_current_step = UserService.get_onboarding_user_current_step(
+            payload=payload
+        )
+        if UserService.can_send_quiz(
+            user_onboarding_current_step=user_onboarding_current_step
+        ):
+            return {
+                "status_code": status.HTTP_400_BAD_REQUEST,
+                "message_key": "user.quiz.missing_steps",
+            }
 
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         current_user_marital = current_user.get("marital")
@@ -450,23 +467,24 @@ class UserService(IUser):
         response = stone_age.get_user_quiz(user_identifier_data)
 
         output = response.get("output")
-        stone_age_decision = output.get("decision")
         stone_age_contract_uuid = response.get("uuid")
         current_user_updated = deepcopy(current_user)
         current_user_updated.update(
             {"stone_age_contract_uuid": stone_age_contract_uuid}
         )
 
-        if stone_age_decision is not None:
-            current_user_updated.update({"stone_age_decision": stone_age_decision})
+        current_user_updated.update({"register_analyses": output.get("decision")})
 
-        if user_repository.update_one(old=current_user, new=current_user_updated) is False:
+        if (
+            user_repository.update_one(old=current_user, new=current_user_updated)
+            is False
+        ):
             raise InternalServerError("common.process_issue")
 
         return {"status_code": status.HTTP_200_OK, "payload": output}
 
     @staticmethod
-    def change_user_to_client(
+    def send_quiz_responses(
         payload: dict,
         user_repository=UserRepository(),
         stone_age=StoneAge,
@@ -478,24 +496,28 @@ class UserService(IUser):
         if type(current_user) is not dict:
             raise BadRequestError("common.register_not_exists")
 
-        is_dtvm_user_client = current_user.get("is_dtvm_user_client")
+        current_user_updated = deepcopy(current_user)
+        must_send_quiz = current_user_updated.get("register_analyses") is None
 
-        if is_dtvm_user_client:
+        if must_send_quiz is False:
             return {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.not_modified",
             }
 
+        # NAO SABEMOS O QUE A STONE AGE IRA RETORNAR AO ENVIARMOS AS RESPOSTAS DO QUIZ, VERIFICAR O QUE FAZER COM ESSE RETORNO
         stone_age_response = stone_age.send_user_quiz_responses(
             quiz=payload.get("quiz")
         )
-        output = stone_age_response.get("output")
-        stone_age_decision = output.get("decision")
-        current_user_updated = deepcopy(current_user)
-        if stone_age_decision is not None:
-            current_user_updated.update({"stone_age_decision": stone_age_decision})
-        current_user_updated.update({"is_dtvm_user_client": True})
-        user_repository.update_one(old=current_user, new=current_user_updated)
+
+        if must_send_quiz:
+            current_user_updated.update({"register_analyses": "PENDING"})
+            if (
+                user_repository.update_one(old=current_user, new=current_user_updated)
+                is False
+            ):
+                raise InternalServerError("common.process_issue")
+
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "user.creating_account",
@@ -541,7 +563,179 @@ class UserService(IUser):
             .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
             .user_quiz_step(current_user=current_user)
+            .user_user_electronic_signature(current_user=current_user)
             .build()
         )
 
         return {"status_code": status.HTTP_200_OK, "payload": onboarding_steps}
+
+    @staticmethod
+    def set_user_electronic_signature(
+        payload: dict, user_repository=UserRepository()
+    ) -> dict:
+        UserService.onboarding_step_validator(payload=payload, on_board_step="user_electronic_signature")
+        thebes_answer = payload.get("x-thebes-answer")
+        electronic_signature = payload.get("electronic_signature")
+        encrypted_eletronic_signature = PasswordEncrypt.encrypt_password(electronic_signature)
+        old = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if old is None:
+            raise BadRequestError("common.register_not_exists")
+        if old.get("electronic_signature"):
+            raise BadRequestError("user.electronic_signature.already_set")
+        new = deepcopy(old)
+        new["electronic_signature"] = encrypted_eletronic_signature
+        new["is_blocked_electronic_signature"] = False
+        new["electronic_signature_wrong_attempts"] = 0
+
+        #
+        # new = hash_field(key="electronic_signature", payload=new)
+        if user_repository.update_one(old=old, new=new) is False:
+            raise InternalServerError("common.process_issue")
+
+        # MOCK FEIO DA STONE AGE
+        payload = UserService.fake_stone_age_callback(
+            email=thebes_answer.get("email"), cpf=new.get("cpf")
+        )
+        SinacorService.process_callback(payload=payload)
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
+
+    @staticmethod
+    def fake_stone_age_callback(email: str, cpf: str):
+
+        fake_response = {
+            "error": None,
+            "successful": True,
+            "appName": "lionx",
+            "uuid": "21b00324-d240-4c61-a79c-9a0bd7ff6e45",
+            "output": {
+                "status": "OK",
+                "decision": "APROVADO",
+                "gender": {"source": "PH3W", "value": "M"},
+                "email": {"source": "PH3W", "value": email},
+                "name": {"source": "PH3W", "value": "Antonio Armando Piaui"},
+                "birth_date": {"source": "PH3W", "value": datetime(1993, 7, 12, 0, 0)},
+                "birthplace": {
+                    "nationality": {"source": "PH3W", "value": 1},
+                    "country": {"source": "PH3W", "value": "BRA"},
+                    "state": {"source": "PH3W", "value": "GO"},
+                    "city": {"source": "PH3W", "value": "FORMOSA"},
+                    "id_city": {"source": "PH3W", "value": 968},
+                },
+                "mother_name": {"source": "PH3W", "value": "Antonia dos Santos Jr."},
+                "identifier_document": {
+                    "type": {"source": "PH3W", "value": "RG"},
+                    "document_data": {
+                        # GENERATE
+                        "number": {
+                            "source": "PH3W",
+                            "value": int(rg().replace(".", "").replace("-", "")),
+                        },
+                        "date": {
+                            "source": "PH3W",
+                            "value": datetime(2018, 7, 12, 16, 31, 31),
+                        },
+                        "state": {"source": "PH3W", "value": "SP"},
+                        "issuer": {"source": "PH3W", "value": "SSP"},
+                    },
+                },
+                "address": {
+                    "country": {"source": "PH3W", "value": "BRA"},
+                    "street_name": {"source": "PH3W", "value": "R. 2"},
+                    "number": {"source": "PH3W", "value": "126"},
+                    "neighborhood": {"source": "PH3W", "value": "Formosinha"},
+                    "state": {"source": "PH3W", "value": "GO"},
+                    "city": {"source": "PH3W", "value": "FORMOSA"},
+                    "id_city": {"source": "PH3W", "value": 968},
+                    "zip_code": {"source": "PH3W", "value": 73813190},
+                    "phone_number": {"source": "PH3W", "value": "11952909954"},
+                },
+                "occupation": {
+                    "activity": {"source": "PH3W", "value": 304},
+                    "company": {
+                        "cpnj": {"source": "PH3W", "value": "25811052000179"},
+                        "name": {"source": "PH3W", "value": "Tudo nosso .com.br"},
+                    },
+                },
+                "assets": {
+                    "patrimony": {"source": "PH3W", "value": 5446456.44},
+                    "income": {"source": "PH3W", "value": 5446456.44},
+                    "income_tax_type": {"source": "PH3W", "value": 1},
+                    "date": {"source": "PH3W", "value": datetime(1993, 7, 12, 0, 0)},
+                },
+                "education": {
+                    "level": {"source": "PH3W", "value": "Médio incompleto"},
+                    "course": {"source": "PH3W", "value": "Escola James Riwbon"},
+                },
+                "politically_exposed_person": {
+                    "is_politically_exposed_person": {"source": "PH3W", "value": False}
+                },
+                "date_of_acquisition": {
+                    "source": "PH3W",
+                    "value": datetime(2018, 7, 12, 16, 31, 31),
+                },
+                "connected_person": {"source": "PH3W", "value": "N"},
+                "person_type": {"source": "PH3W", "value": "F"},
+                "client_type": {"source": "PH3W", "value": 1},
+                "investor_type": {"source": "PH3W", "value": 101},
+                "cosif_tax_classification": {"source": "PH3W", "value": 21},
+                "marital_update": {
+                    "marital_regime": {"source": "PH3W", "value": 1},
+                    "spouse_birth_date": {
+                        "source": "PH3W",
+                        "value": datetime(1993, 7, 12, 0, 0),
+                    },
+                },
+                "cpf": {"source": "PH3W", "value": int(cpf)},
+                "self_link": {"source": "PH3W", "value": "http://self_user.jpg"},
+                "is_us_person": {"source": "PH3W", "value": True},
+                "us_tin": {"source": "PH3W", "value": 126516515},
+                "irs_sharing": {"source": "PH3W", "value": True},
+                "father_name": {"source": "PH3W", "value": "Antonio dos Santos"},
+                "midia_person": {"source": "PH3W", "value": False},
+                "person_related_to_market_influencer": {
+                    "source": "PH3W",
+                    "value": False,
+                },
+                "court_orders": {"source": "PH3W", "value": False},
+                "lawsuits": {"source": "PH3W", "value": False},
+                "fund_admin_registration": {"source": "PH3W", "value": False},
+                "investment_fund_administrators_registration": {
+                    "source": "PH3W",
+                    "value": False,
+                },
+                "register_auditors_securities_commission": {
+                    "source": "PH3W",
+                    "value": False,
+                },
+                "registration_of_other_market_participants_securities_commission": {
+                    "source": "PH3W",
+                    "value": False,
+                },
+                "foreign_investors_register_of_annex_iv_not_reregistered": {
+                    "source": "PH3W",
+                    "value": False,
+                },
+                "registration_of_foreign_investors_securities_commission": {
+                    "source": "PH3W",
+                    "value": False,
+                },
+                "registration_representative_of_nonresident_investors_securities_commission": {
+                    "source": "PH3W",
+                    "value": False,
+                },
+            },
+        }
+
+        return fake_response
+
+    @staticmethod
+    def onboarding_step_validator(payload: dict, on_board_step: str):
+        onboarding_steps = UserService.get_onboarding_user_current_step(payload)
+        payload_from_onboarding_steps = onboarding_steps.get("payload")
+        current_onboarding_step = payload_from_onboarding_steps.get("current_onboarding_step")
+        if current_onboarding_step != on_board_step:
+            raise BadRequestError("user.invalid_on_boarding_step")

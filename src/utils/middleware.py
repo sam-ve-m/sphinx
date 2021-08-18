@@ -85,12 +85,8 @@ def need_be_admin(url_request: str) -> bool:
     return need_admin
 
 
-def is_user_deleted(user_data: dict) -> bool:
-    return user_data.get("deleted")
-
-
 def is_user_active(user_data: dict) -> bool:
-    return user_data.get("is_active")
+    return user_data.get("is_active_user")
 
 
 def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
@@ -108,9 +104,8 @@ def is_user_token_valid(user_data: dict, jwt_data: dict) -> bool:
 
 
 def invalidate_user(user_data: dict, jwt_data: dict) -> bool:
-    is_deleted = is_user_deleted(user_data=user_data)
-    is_active = is_user_active(user_data=user_data)
-    if not is_deleted and is_active:
+    is_active_user = is_user_active(user_data=user_data)
+    if is_active_user:
         return is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
     return False
 

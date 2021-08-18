@@ -189,12 +189,12 @@ def test_user_admin_need_be_admin():
 
 
 def test_is_user_deleted_true():
-    user_data = {"deleted": True}
+    user_data = {"is_active_client": True}
     assert is_user_deleted(user_data=user_data)
 
 
 def test_is_user_deleted_false():
-    user_data = {"deleted": False}
+    user_data = {"is_active_client": False}
     assert is_user_deleted(user_data=user_data) is False
 
 
@@ -235,7 +235,7 @@ def test_is_user_token_valid_true():
 def test_invalidate_user_false():
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10),
-        "deleted": False,
+        "is_active_client": False,
     }
     jwt_data = {"created_at": "2020-11-01"}
     is_invalidate_user = invalidate_user(user_data=user_data, jwt_data=jwt_data)
@@ -245,7 +245,7 @@ def test_invalidate_user_false():
 def test_invalidate_user_is_deleted():
     user_data = {
         "token_valid_after": datetime(year=2020, month=11, day=10),
-        "deleted": True,
+        "is_active_client": True,
     }
     jwt_data = {"created_at": "2020-11-01"}
     is_user_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
@@ -258,7 +258,7 @@ def test_check_if_user_is_allowed_to_access_route_user_is_admin(
     request = get_new_stubby_request_random_path
     user_data = {
         "token_valid_after": "2020-07-01",
-        "deleted": False,
+        "is_active_client": False,
         "is_admin": True,
     }
     user_repository = get_new_stubby_repository
@@ -276,7 +276,7 @@ def test_check_if_is_user_not_allowed_to_access_route_user_not_admin(
     request = get_new_stubby_request_views
     user_data = {
         "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d"),
-        "deleted": False,
+        "is_active_client": False,
         "is_admin": False,
     }
     user_repository = get_new_stubby_repository
@@ -294,7 +294,7 @@ def test_check_if_is_user_not_allowed_to_access_route_user_not_admin_and_user_is
     request = get_new_stubby_request_views
     user_data = {
         "token_valid_after": datetime(year=2020, month=11, day=10).strftime("%Y-%m-%d"),
-        "deleted": True,
+        "is_active_client": True,
         "is_admin": False,
     }
     user_repository = get_new_stubby_repository
@@ -312,7 +312,7 @@ def test_check_if_is_user_not_allowed_to_access_route_user_is_admin_and_user_is_
     request = get_new_stubby_request_views
     user_data = {
         "token_valid_after": datetime(year=2020, month=11, day=10).strftime("%Y-%m-%d"),
-        "deleted": True,
+        "is_active_client": True,
         "is_admin": True,
     }
     user_repository = get_new_stubby_repository

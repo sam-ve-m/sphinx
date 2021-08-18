@@ -23,7 +23,8 @@ from src.routers.validators.base import (
     UsTin,
     NickName,
     IsCvmQualifiedInvestor,
-    FileBase64
+    FileBase64,
+    ElectronicSignature,
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -105,8 +106,8 @@ def user_quiz(request: Request):
     return BaseController.run(UserController.user_quiz, payload, request)
 
 
-@router.put("/user/change_user_to_client", tags=["user"])
-def update_change_user_to_client(quiz_response: QuizResponses, request: Request):
+@router.put("/user/send_quiz_responses", tags=["user"])
+def send_quiz_responses(quiz_response: QuizResponses, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
@@ -114,7 +115,7 @@ def update_change_user_to_client(quiz_response: QuizResponses, request: Request)
         "x-thebes-answer": jwt_data_or_error_response,
         "quiz": quiz_response.dict(),
     }
-    return BaseController.run(UserController.change_user_to_client, payload, request)
+    return BaseController.run(UserController.send_quiz_responses, payload, request)
 
 
 @router.delete("/user", tags=["user"])
@@ -186,9 +187,7 @@ def remove_features_to_user(feature: Feature, request: Request):
 
 
 @router.post("/user/selfie", tags=["user"], include_in_schema=True)
-async def save_user_selfie(
-    request: Request, file_or_base64: FileBase64
-):
+async def save_user_selfie(request: Request, file_or_base64: FileBase64):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
@@ -238,4 +237,20 @@ async def get_onboarding_user_current_step(
     }
     return BaseController.run(
         UserController.get_onboarding_user_current_step, payload, request
+    )
+
+
+@router.put("/user/electronic_signature", tags=["user"])
+def set_user_electronic_signature(
+    electronic_signature: ElectronicSignature, request: Request
+):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+        "electronic_signature": electronic_signature.dict().get("electronic_signature"),
+    }
+    return BaseController.run(
+        UserController.set_user_electronic_signature, payload, request
     )

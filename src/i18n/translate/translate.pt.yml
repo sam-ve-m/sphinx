@@ -15,6 +15,7 @@ pt:
     feature_not_exists: O serviços enviado não existe.
   user:
     created: Enviamos para você um e-mail de confirmação.
+    invalid_on_boarding_step: Etapa de de onboarding inválida. Verifique a sua etapa atual no endpoint /user/onboarding_user_current_step
     forgot_password: Enviamos para você um e-mail de recuperação de pin.
     active: Sua validação foi feita com sucesso.
     pin_error: PIN invalido, tentenovamente.
@@ -28,6 +29,8 @@ pt:
       ok: Quiz recebido.
       trouble: Falha ao obter Quiz.
       missing_steps: Falha ao obeter o Quiz, por favor preencher todos os passos do onboarding
+    electronic_signature:
+      already_set: Você já definiu um assinatura eletrônica
   email:
     login: Enviamos um email para a conta cadastrada, para concluir o login
     forgot_password: Enviamos um email para efetura login e mudança do PIN

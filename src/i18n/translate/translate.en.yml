@@ -15,6 +15,7 @@ en:
     feature_not_exists: The provided features not exists.
   user:
     created: We sent you a valition email.
+    invalid_on_boarding_step: Invalid on boarding step, check your current step on /user/onboarding_user_current_step
     forgot_password: We sent you a recover email.
     active: Your account was activated successfully.
     pin_error: Invalid PIN, try again.
@@ -28,6 +29,8 @@ en:
       ok: Quiz received.
       trouble: Failed to get Quiz.
       missing_steps: Failed to get Quiz, please complete all onboarding steps.
+    electronic_signature:
+      already_set: Your alredy have a electronic signature
   email:
     login: We sent an email to the registered account, to conclude login
     forgot_password: We sent an email to login and change your PIN
