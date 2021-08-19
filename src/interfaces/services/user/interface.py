@@ -148,7 +148,6 @@ class IUser(ABC):
     @staticmethod
     @abstractmethod
     def get_onboarding_user_current_step(
-        self,
         payload: dict,
         user_repository,
         file_repository

@@ -536,8 +536,8 @@ class UserService(IUser):
             payload["provided_by_bureaux"].update({key: value})
         payload["provided_by_bureaux"]["concluded_at"] = datetime.now()
 
+    @staticmethod
     def get_onboarding_user_current_step(
-        self,
         payload: dict,
         user_repository=UserRepository(),
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF"))
