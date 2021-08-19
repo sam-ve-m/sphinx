@@ -19,45 +19,45 @@ class StoneAge:
         # )
         response = {
             "output": dict(),
-            "uuid": "1231234-asdfq34-5t-34564236",
+            "uuid": "6d6e2a04-00e4-11ec-9a03-0242ac130003",
             "decision": None,
         }
         response["output"].update(
             {
                 "quiz": [
                     {
-                        "questionId": "39663338-fad5-11eb-9a03-0242ac130003",
+                        "questionId": "6d6e2a04-00e4-11ec-9a03-0242ac130003",
                         "question": "Qual desse números é seu?",
                         "options": [
                             {
                                 "value": "+5511952896753",
-                                "optionId": "428dc8b8-fad5-11eb-9a03-0242ac130003",
+                                "optionId": "81acd16e-00e4-11ec-9a03-0242ac130003",
                             },
                             {
                                 "value": "+5511952006753",
-                                "optionId": "472d1fcc-fad5-11eb-9a03-0242ac130003",
+                                "optionId": "891952f6-00e4-11ec-9a03-0242ac130003",
                             },
                             {
                                 "value": "+5511933896753",
-                                "optionId": "4b502fcc-fad5-11eb-9a03-0242ac130003",
+                                "optionId": "8dcdbb2a-00e4-11ec-9a03-0242ac130003",
                             },
                         ],
                     },
                     {
-                        "questionId": "b9e0546e-252c-4380-8ce0-df532a5e6c78",
+                        "questionId": "7c4d1fa8-00e4-11ec-9a03-0242ac130003",
                         "question": "Qual desses endereções é o seu?",
                         "options": [
                             {
                                 "value": "R.jagunça 999, Cabrobro",
-                                "optionId": "428dc8b8-fad5-11eb-9a03-0242ac130003",
+                                "optionId": "81acd16e-00e4-11ec-9a03-0242ac130003",
                             },
                             {
                                 "value": "R. jabuti aqueroso 43, Cabuti",
-                                "optionId": "472d1fcc-fad5-11eb-9a03-0242ac130003",
+                                "optionId": "891952f6-00e4-11ec-9a03-0242ac130003",
                             },
                             {
                                 "value": "R. antoni carlos 123, São Pedro",
-                                "optionId": "4b502fcc-fad5-11eb-9a03-0242ac130003",
+                                "optionId": "8dcdbb2a-00e4-11ec-9a03-0242ac130003",
                             },
                         ],
                     },
@@ -75,7 +75,7 @@ class StoneAge:
         # )
         response = {
             "output": dict(),
-            "uuid": "1231234-asdfq34-5t-34564236",
+            "uuid": "94f3dc22-00e4-11ec-9a03-0242ac130003",
             "decision": "MESA",
         }
         return response
