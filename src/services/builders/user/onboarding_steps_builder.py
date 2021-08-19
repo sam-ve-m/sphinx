@@ -60,7 +60,7 @@ class OnboardingStepBuilder:
         register_analyses = current_user.get("register_analyses")
         if register_analyses is not None:
             self.__onboarding_steps["user_quiz_step"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "electronic_signature"
+            self.__onboarding_steps["current_onboarding_step"] = "user_electronic_signature"
         return self
 
     def user_user_electronic_signature(self, current_user):
