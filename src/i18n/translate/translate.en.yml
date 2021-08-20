@@ -29,6 +29,7 @@ en:
       ok: Quiz received.
       trouble: Failed to get Quiz.
       missing_steps: Failed to get Quiz, please complete all onboarding steps.
+      send: Quiz sent
     electronic_signature:
       already_set: Your alredy have a electronic signature
   email:

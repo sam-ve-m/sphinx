@@ -29,6 +29,7 @@ pt:
       ok: Quiz recebido.
       trouble: Falha ao obter Quiz.
       missing_steps: Falha ao obeter o Quiz, por favor preencher todos os passos do onboarding
+      send: Quiz enviado
     electronic_signature:
       already_set: Você já definiu um assinatura eletrônica
   email:

@@ -521,7 +521,7 @@ class UserService(IUser):
 
         return {
             "status_code": status.HTTP_200_OK,
-            "message_key": "user.creating_account",
+            "message_key": "user.quiz.send",
         }
 
     @staticmethod
