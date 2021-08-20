@@ -79,6 +79,16 @@ class ElectronicSignature(BaseModel):
     )
 
 
+class NewElectronicSignature(BaseModel):
+    new_electronic_signature: constr(
+        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$"
+    )
+
+
+class ChangeElectronicSignature(ElectronicSignature, NewElectronicSignature):
+    pass
+
+
 class Name(BaseModel):
     name: constr(min_length=1, max_length=50)
 
