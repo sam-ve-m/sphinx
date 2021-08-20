@@ -24,10 +24,15 @@ class SinacorService:
     ):
         successful = payload.get("successful")
         error = payload.get("error")
+        dtvm_client_data_provided_by_bureau = payload.get("output")
+
         if successful is False or error is not None:
             raise BadRequestError("bureau.error.fail")
 
-        dtvm_client_data_provided_by_bureau = payload.get("output")
+        user_by_cpf = user_repository.find_one({"cpf": dtvm_client_data_provided_by_bureau["cpf"]["value"]})
+        if user_by_cpf is not None:
+            raise BadRequestError("common.register_exists")
+
         user_database_document = user_repository.find_one(
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
         )
