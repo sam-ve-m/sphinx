@@ -404,13 +404,17 @@ class UserService(IUser):
         user_repository=UserRepository(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        user_identifier_data = payload.get("user_identifier")
+
+        current_user = user_repository.find_one({
+            "_id": thebes_answer.get("email"),
+            "cpf":  user_identifier_data.get("cpf")
+        })
 
         UserService.onboarding_step_validator(payload=payload, on_board_step="user_identifier_data_step")
 
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
-        user_identifier_data = payload.get("user_identifier")
 
         current_user_with_identifier_data = dict(current_user)
         UserService.add_user_identifier_data_on_current_user(
