@@ -267,7 +267,7 @@ class UserService(IUser):
     def add_user_control_metadata(payload: dict):
         payload.update(
             {
-                "scope": {"view_type": None, "features": []},
+                "scope": {"view_type": 'default', "features": ['default', 'realtime']},
                 "is_active_user": False,
                 "is_active_client": False,
                 "use_magic_link": True,
