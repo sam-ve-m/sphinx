@@ -406,12 +406,15 @@ class UserService(IUser):
         thebes_answer = payload.get("x-thebes-answer")
         user_identifier_data = payload.get("user_identifier")
 
-        current_user = user_repository.find_one({
-            "_id": thebes_answer.get("email"),
-            "cpf":  user_identifier_data.get("cpf")
-        })
+        user_by_cpf = user_repository.find_one({"cpf": int(user_identifier_data.get("cpf"))})
+        if user_by_cpf is not None:
+            raise BadRequestError("common.register_exists")
 
         UserService.onboarding_step_validator(payload=payload, on_board_step="user_identifier_data_step")
+
+        current_user = user_repository.find_one({
+            "_id": thebes_answer.get("email")
+        })
 
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
@@ -787,7 +790,7 @@ class UserService(IUser):
                         "value": datetime(1993, 7, 12, 0, 0),
                     },
                 },
-                "cpf": {"source": "PH3W", "value": int(cpf)},
+                "cpf": {"source": "PH3W", "value": cpf},
                 "self_link": {"source": "PH3W", "value": "http://self_user.jpg"},
                 "is_us_person": {"source": "PH3W", "value": True},
                 "us_tin": {"source": "PH3W", "value": 126516515},
