@@ -71,17 +71,18 @@ class JWTHandler:
     def filter_payload_helper(payload: dict) -> dict:
         ThebesHall.validate(payload=payload)
         suitability = payload.get("suitability")
-        suitability_months_past = None
+        suitability_months_past = 0
         if suitability:
             suitability_months_past = suitability.get("months_past")
         last_modified_date = payload.get("last_modified_date")
-        last_modified_date_months_past = None
+        last_modified_date_months_past = 0
         if last_modified_date:
             last_modified_date_months_past = last_modified_date.get("months_past")
 
         new_payload = {
             "nick_name": payload.get("nick_name"),
             "email": payload.get("email"),
+            "scope": payload.get("scope"),
             "scope": payload.get("scope"),
             "is_active_user": payload.get("is_active_user"),
             "terms": payload.get("terms"),
@@ -107,7 +108,14 @@ class JWTHandler:
         solutiontech = payload.get("solutiontech")
         sincad = payload.get("sincad")
         is_active_client = payload.get("is_active_client")
-        if solutiontech == "sync" and sincad and is_active_client:
+
+        if (
+                solutiontech == "sync" and
+                sincad and
+                is_active_client and
+                suitability_months_past < 24 and
+                last_modified_date_months_past < 24
+        ):
             new_payload.update({"client_has_trade_allowed": True})
 
         return new_payload
