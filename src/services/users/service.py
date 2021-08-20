@@ -169,7 +169,8 @@ class UserService(IUser):
         encrypted_new_electronic_signature = PasswordEncrypt.encrypt_password(new_electronic_signature)
         encrypted_electronic_signature_from_database = user_from_database.get('electronic_signature')
 
-        is_correct_electronic_signature_typed = encrypted_current_electronic_signature == encrypted_electronic_signature_from_database
+        is_correct_electronic_signature_typed = encrypted_current_electronic_signature ==\
+                                                encrypted_electronic_signature_from_database
 
         if not is_correct_electronic_signature_typed:
             raise UnauthorizedError("user.wrong_electronic_signature")
