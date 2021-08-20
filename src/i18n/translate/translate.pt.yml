@@ -17,11 +17,14 @@ pt:
     created: Enviamos para você um e-mail de confirmação.
     invalid_on_boarding_step: Etapa de de onboarding inválida. Verifique a sua etapa atual no endpoint /user/onboarding_user_current_step
     forgot_password: Enviamos para você um e-mail de recuperação de pin.
+    forgot_electronic_signature: Enviamos para você um e-mail de recuperação da sua assinatura eletrônica.
     active: Sua validação foi feita com sucesso.
     pin_error: PIN invalido, tentenovamente.
     need_pin: Informe seu PIN.
     not_admin: Você não é adminitrador.
     all_logged_out: Você deslogou de todos os dispositivos logados.
+    electronic_signature_is_blocked: Sua assinatura eletrônica está bloqueada.
+    wrong_electronic_signature: Assinatura eletrônica  incorreta.
     creating_account: Iremos criar sua conta bancaria, espere o email.
     files:
       term_not_signed: Você ainda não assinou estes termos.
@@ -29,18 +32,21 @@ pt:
       ok: Quiz recebido.
       trouble: Falha ao obter Quiz.
       missing_steps: Falha ao obeter o Quiz, por favor preencher todos os passos do onboarding
+      send: Quiz enviado
     electronic_signature:
       already_set: Você já definiu um assinatura eletrônica
   email:
     login: Enviamos um email para a conta cadastrada, para concluir o login
-    forgot_password: Enviamos um email para efetura login e mudança do PIN
+    forgot_password: Enviamos um email para efetuar login e mudança do PIN
+    forgot_electronic_signature: Enviamos para você um e-mail de recuperação da sua assinatura eletrônica.
     subject:
       created: Confirme a sua conta
       login: Conclua seu login
       forgot_password: Recuperação de PIN
     body:
       created: Bem vindo! Clique no link para finalizar seu cadastro.
-      forgot_password: Clique no link para atualizar sua senha.
+      forgot_password: Clique no link para alterar sua senha.
+      forgot_electronic_signature: Clique no link para alterar sua assinatura eletrônica.
     trouble:
       send: Tivemos problema para enviar seu email, por favor tente novamente.
   files:

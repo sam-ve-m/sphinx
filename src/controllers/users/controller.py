@@ -78,3 +78,15 @@ class UserController:
     @staticmethod
     def set_user_electronic_signature(payload: dict):
         return UserService.set_user_electronic_signature(payload=payload)
+
+    @staticmethod
+    def forgot_electronic_signature(payload: dict):
+        return UserService.forgot_electronic_signature(payload=payload)
+
+    @staticmethod
+    def reset_electronic_signature(payload: dict):
+        return UserService.reset_electronic_signature(payload=payload)
+
+    @staticmethod
+    def change_electronic_signature(payload: dict):
+        return UserService.change_electronic_signature(payload=payload)

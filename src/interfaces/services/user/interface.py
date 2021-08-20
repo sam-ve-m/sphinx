@@ -153,3 +153,27 @@ class IUser(ABC):
         file_repository
     ) -> dict:
         pass
+
+    @staticmethod
+    @abstractmethod
+    def forgot_electronic_signature(
+        payload: dict,
+        user_repository,
+        file_repository
+    ) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def reset_electronic_signature(
+            payload: dict,
+            user_repository
+    ) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def change_electronic_signature(
+            payload: dict,
+            user_repository=UserRepository()) -> dict:
+        pass

@@ -62,10 +62,10 @@ class AuthenticationService(IAuthentication):
         if entity.get("is_active_client"):
             raise UnauthorizedError("invalid_credential")
         if entity.get("use_magic_link") is True:
+            payload_jwt = JWTHandler.generate_token(payload=entity, ttl=10)
             AuthenticationService.send_authentication_email(
                 email=entity.get("email"),
-                payload=entity,
-                ttl=10,
+                payload_jwt=payload_jwt,
                 body="email.body.created",
             )
             return {
@@ -88,9 +88,8 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def send_authentication_email(
-        email: str, payload: dict, body: str, ttl: int, email_sender=SendGridEmail
+        email: str, payload_jwt: str, body: str, email_sender=SendGridEmail
     ) -> None:
-        payload_jwt = JWTHandler.generate_token(payload=payload, ttl=ttl)
         page = HtmlModifier(
             "src/services/asset",
             i18n.get_translate(key=body, locale="pt"),
