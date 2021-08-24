@@ -59,7 +59,7 @@ class AuthenticationService(IAuthentication):
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
-        if entity.get("is_active_client"):
+        if entity.get("is_active_client") is False:
             raise UnauthorizedError("invalid_credential")
         if entity.get("use_magic_link") is True:
             payload_jwt = JWTHandler.generate_token(payload=entity, ttl=10)
