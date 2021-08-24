@@ -382,7 +382,6 @@ class UserService(IUser):
             {
                 "scope": {"view_type": "default", "features": ["default", "realtime"]},
                 "is_active_user": False,
-                "is_active_client": False,
                 "use_magic_link": True,
                 "token_valid_after": datetime.utcnow(),
                 "terms": {
