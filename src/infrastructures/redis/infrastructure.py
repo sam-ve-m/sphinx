@@ -6,7 +6,6 @@ from src.utils.env_config import config
 
 
 class RedisInfrastructure:
-
     @staticmethod
     def get_redis():
         return Redis(

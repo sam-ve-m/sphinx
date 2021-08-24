@@ -60,7 +60,7 @@ pt:
       empty: Conteudo nao pode ser vazio.
     params:
       invalid: Nome e versao sao necessarios para criar o arquivo.
-  invalid_token: Parece que seu acesso expirou, logue novamente.
+  invalid_token: Token invalido.
   token_not_find: Token nao informado.
   invalid_credential: Usuario nao tem permissao para acessar esta routa ou acao.
   valid_credential: Usuario possui permissao ou acesso para executar esta acao.

@@ -107,8 +107,8 @@ class IUser(ABC):
     @staticmethod
     @abstractmethod
     def get_signed_term(
-            payload: dict,
-            file_repository,
+        payload: dict,
+        file_repository,
     ) -> dict:
         pass
 
@@ -140,40 +140,31 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def user_quiz(
-        payload: dict, stone_age, user_repository
-    ) -> dict:
+    def user_quiz(payload: dict, stone_age, user_repository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def get_onboarding_user_current_step(
-        payload: dict,
-        user_repository,
-        file_repository
+        payload: dict, user_repository, file_repository
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def forgot_electronic_signature(
-        payload: dict,
-        user_repository,
-        file_repository
+        payload: dict, user_repository, file_repository
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def reset_electronic_signature(
-            payload: dict,
-            user_repository
-    ) -> dict:
+    def reset_electronic_signature(payload: dict, user_repository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def change_electronic_signature(
-            payload: dict,
-            user_repository=UserRepository()) -> dict:
+        payload: dict, user_repository=UserRepository()
+    ) -> dict:
         pass

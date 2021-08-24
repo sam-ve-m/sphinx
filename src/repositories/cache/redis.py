@@ -3,7 +3,6 @@ import pickle
 from typing import Optional
 
 
-
 # SPHINX
 from src.utils.env_config import config
 from src.interfaces.repositories.redis.interface import IRedis
