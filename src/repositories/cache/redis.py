@@ -2,25 +2,19 @@
 import pickle
 from typing import Optional
 
-# OUTSIDE LIBRARIES
-from src.utils.env_config import config
-from redis import Redis
 
 # SPHINX
+from src.utils.env_config import config
 from src.interfaces.repositories.redis.interface import IRedis
 from src.exceptions.exceptions import InternalServerError
+from src.infrastructures.redis.infrastructure import RedisInfrastructure
 
 
 class RepositoryRedis(IRedis):
 
     # Behind the scenes, redis-py uses a connection pool to manage connections to a Redis server.
     # https://pypi.org/project/redis/#connection-pools
-    redis = Redis(
-        host=config("REDIS_HOST"),
-        port=config("REDIS_PORT"),
-        db=config("REDIS_DB"),
-        password=config("REDIS_PASSWORD"),
-    )
+    redis = RedisInfrastructure.get_redis()
 
     @staticmethod
     def set(key: str, value: dict, redis=redis, ttl: int = 0):

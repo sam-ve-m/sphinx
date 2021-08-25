@@ -24,7 +24,7 @@ fastapi-cache==0.1.0
 filelock==3.0.12
 fordev==1.0.3
 h11==0.12.0
-heimdall-client==0.1.7
+heimdall-client==0.1.8
 hiredis==2.0.0
 idna==3.2
 importlib-metadata==4.6.1

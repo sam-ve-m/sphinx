@@ -24,10 +24,11 @@ class SinacorService:
     ):
         successful = payload.get("successful")
         error = payload.get("error")
+        dtvm_client_data_provided_by_bureau = payload.get("output")
+
         if successful is False or error is not None:
             raise BadRequestError("bureau.error.fail")
 
-        dtvm_client_data_provided_by_bureau = payload.get("output")
         user_database_document = user_repository.find_one(
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
         )
@@ -77,9 +78,6 @@ class SinacorService:
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
 
-        bmf_account = database_and_bureau_dtvm_client_data_merged.get("bmf_account")
-        Solutiontech.request_client_sync(user_bmf_code=int(bmf_account))
-
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "ok",
@@ -116,8 +114,10 @@ class SinacorService:
         return sinacor_user_control_data
 
     @staticmethod
-    def require_sync_to_solutiontech_from_sinacor() -> str:
-        return "send"
+    def require_sync_to_solutiontech_from_sinacor(bmf_account: int) -> str:
+        if Solutiontech.request_client_sync(user_bmf_code=bmf_account):
+            return "send"
+        return "failed"
 
     @staticmethod
     def add_dtvm_client_trade_metadata(
@@ -128,11 +128,6 @@ class SinacorService:
         database_and_bureau_dtvm_client_data_merged.update(
             {"sinacor": True, "sincad": False}
         )
-        sync_status = SinacorService.require_sync_to_solutiontech_from_sinacor()
-        database_and_bureau_dtvm_client_data_merged.update(
-            {"solutiontech": sync_status}
-        )
-
         sinacor_user_control_data = (
             client_register_repository.get_user_control_data_if_user_already_exists(
                 user_cpf=database_and_bureau_dtvm_client_data_merged["cpf"]
@@ -147,6 +142,11 @@ class SinacorService:
         )
         bmf_account = SinacorService.build_bmf_account(account_prefix=account_prefix)
 
+        sync_status = SinacorService.require_sync_to_solutiontech_from_sinacor(int(bmf_account))
+        database_and_bureau_dtvm_client_data_merged.update(
+            {"solutiontech": sync_status}
+        )
+
         database_and_bureau_dtvm_client_data_merged.update(
             {"bovespa_account": bovespa_account, "bmf_account": bmf_account}
         )
@@ -154,6 +154,7 @@ class SinacorService:
         database_and_bureau_dtvm_client_data_merged.update(
             {
                 "last_modified_date": {"concluded_at": datetime.datetime.now()},
+                "is_active_client": True
             }
         )
 

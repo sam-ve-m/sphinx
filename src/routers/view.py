@@ -12,13 +12,13 @@ class View(Name, DisplayName):
 
 @router.post("/views", tags=["views"])
 def create_view(view: View, request: Request):
-    return BaseController.run(ViewController.create, dict(view), request)
+    return BaseController.run(ViewController.create, view.dict(), request)
 
 
 @router.put("/views/{view_id}", tags=["views"])
 def update_view(view_id: str, view: DisplayName, request: Request):
     return BaseController.run(
-        ViewController.update, {"view_id": view_id, "model": dict(view)}, request
+        ViewController.update, {"view_id": view_id, "model": view.dict()}, request
     )
 
 
@@ -29,6 +29,7 @@ def delete_view(view_id: str, request: Request):
 
 @router.put("/views/{view_id}/{feature_id}", tags=["views"])
 def link_feature(view_id: str, feature_id: str, request: Request):
+    # TODO: Create validator to ensure the view_id and feature_id
     return BaseController.run(
         ViewController.link_feature,
         {"view_id": view_id, "feature_id": feature_id},

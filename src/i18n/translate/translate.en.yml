@@ -17,11 +17,14 @@ en:
     created: We sent you a valition email.
     invalid_on_boarding_step: Invalid on boarding step, check your current step on /user/onboarding_user_current_step
     forgot_password: We sent you a recover email.
+    forgot_electronic_signature: We sent an email to login and change your electrionic signature.
     active: Your account was activated successfully.
     pin_error: Invalid PIN, try again.
     need_pin: Inform your PIN code.
     not_admin: You are not administrator.
     all_logged_out: You disconnect all your allowed devices.
+    electronic_signature_is_blocked: Your electronic signature is blocked.
+    wrong_electronic_signature: Wrong electronic signature.
     creating_account: We will create your bank account, await a email.
     files:
       term_not_signed: You did not sign this term yet.
@@ -29,11 +32,13 @@ en:
       ok: Quiz received.
       trouble: Failed to get Quiz.
       missing_steps: Failed to get Quiz, please complete all onboarding steps.
+      send: Quiz sent
     electronic_signature:
       already_set: Your alredy have a electronic signature
   email:
     login: We sent an email to the registered account, to conclude login
     forgot_password: We sent an email to login and change your PIN
+    forgot_electronic_signature: We sent an email to login and change your electrionic signature
     subject:
       created: Account confirmation
       login: Conclude your login
@@ -41,6 +46,7 @@ en:
     body:
       created: Wellcome! Use the link bellow to access and confirm your account.
       forgot_password: Hi! Use the link bellow to change your PIN.
+      forgot_electronic_signature: Hi! Use the link bellow to change your electronic signature.
     trouble:
       send: We have some trouble to send you an email, please try again.
   files:
@@ -54,7 +60,7 @@ en:
       empty: Conteudo nao pode ser vazio.
     params:
       invalid: Nome e versao sao necessarios para criar o arquivo.
-  invalid_token: Seems that your access has expired, try to login again.
+  invalid_token: The given token was invalid.
   token_not_find: Token not suplied.
   invalid_credential: User don't have permition to access this route or feature.
   valid_credential: User have permition to access this route or feature

@@ -32,11 +32,14 @@ from src.utils.persephone_templates import (
 )
 from src.utils.env_config import config
 from src.utils.encrypt.password.util import PasswordEncrypt
-from src.exceptions.exceptions import BadRequestError, InternalServerError
+from src.exceptions.exceptions import (
+    BadRequestError,
+    InternalServerError,
+    UnauthorizedError,
+)
 
 
 class UserService(IUser):
-
     @staticmethod
     def create(
         payload: dict,
@@ -64,10 +67,11 @@ class UserService(IUser):
 
         if (sent_to_persephone and was_user_inserted) is False:
             raise InternalServerError("common.process_issue")
+
+        payload_jwt = JWTHandler.generate_token(payload=payload, ttl=10)
         authentication_service.send_authentication_email(
             email=payload.get("email"),
-            payload=payload,
-            ttl=10,
+            payload_jwt=payload_jwt,
             body="email.body.created",
         )
         return {
@@ -118,6 +122,110 @@ class UserService(IUser):
         }
 
     @staticmethod
+    def reset_electronic_signature(
+        payload: dict, user_repository=UserRepository()
+    ) -> dict:
+        thebes_answer = payload.get("x-thebes-answer")
+        forgot_electronic_signature = thebes_answer.get("forgot_electronic_signature")
+
+        if not forgot_electronic_signature:
+            raise UnauthorizedError("invalid_credential")
+
+        new_electronic_signature = payload.get("new_electronic_signature")
+
+        user_from_database = user_repository.find_one(
+            {"_id": thebes_answer.get("email")}
+        )
+        if user_from_database is None:
+            raise BadRequestError("common.register_not_exists")
+
+        encrypted_electronic_signature = PasswordEncrypt.encrypt_password(
+            new_electronic_signature
+        )
+
+        user_from_database_to_update = deepcopy(user_from_database)
+        user_from_database_to_update[
+            "electronic_signature"
+        ] = encrypted_electronic_signature
+        user_from_database_to_update["is_blocked_electronic_signature"] = False
+        user_from_database_to_update["electronic_signature_wrong_attempts"] = 0
+
+        if (
+            user_repository.update_one(
+                old=user_from_database, new=user_from_database_to_update
+            )
+            is False
+        ):
+            raise InternalServerError("common.process_issue")
+
+        jwt = JWTHandler.generate_token(
+            payload=user_from_database_to_update, ttl=525600
+        )
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"jwt": jwt},
+            "message_key": "requests.updated",
+        }
+
+    @staticmethod
+    def change_electronic_signature(
+        payload: dict, user_repository=UserRepository()
+    ) -> dict:
+        thebes_answer = payload.get("x-thebes-answer")
+        current_electronic_signature = payload.get("current_electronic_signature")
+        new_electronic_signature = payload.get("new_electronic_signature")
+
+        user_from_database = user_repository.find_one(
+            {"_id": thebes_answer.get("email")}
+        )
+        if user_from_database is None:
+            raise BadRequestError("common.register_not_exists")
+
+        is_blocked_electronic_signature = user_from_database.get(
+            "is_blocked_electronic_signature"
+        )
+        user_has_electronic_signature_blocked = is_blocked_electronic_signature is True
+        if user_has_electronic_signature_blocked:
+            raise UnauthorizedError("user.electronic_signature_is_blocked")
+
+        encrypted_current_electronic_signature = PasswordEncrypt.encrypt_password(
+            current_electronic_signature
+        )
+        encrypted_new_electronic_signature = PasswordEncrypt.encrypt_password(
+            new_electronic_signature
+        )
+        encrypted_electronic_signature_from_database = user_from_database.get(
+            "electronic_signature"
+        )
+
+        is_correct_electronic_signature_typed = (
+            encrypted_current_electronic_signature
+            == encrypted_electronic_signature_from_database
+        )
+
+        if not is_correct_electronic_signature_typed:
+            raise UnauthorizedError("user.wrong_electronic_signature")
+
+        user_from_database_to_update = deepcopy(user_from_database)
+        user_from_database_to_update[
+            "electronic_signature"
+        ] = encrypted_new_electronic_signature
+
+        if (
+            user_repository.update_one(
+                old=user_from_database, new=user_from_database_to_update
+            )
+            is False
+        ):
+            raise InternalServerError("common.process_issue")
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
+
+    @staticmethod
     def change_view(
         payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
@@ -143,10 +251,13 @@ class UserService(IUser):
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
+        to_add_into_jwt = {"forgot_password": True}
+        payload_jwt = JWTHandler.generate_token(
+            payload=entity, args=to_add_into_jwt, ttl=10
+        )
         authentication_service.send_authentication_email(
             email=entity.get("email"),
-            payload=entity,
-            ttl=10,
+            payload_jwt=payload_jwt,
             body="email.body.forgot_password",
         )
         return {
@@ -218,7 +329,9 @@ class UserService(IUser):
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        UserService.onboarding_step_validator(payload=payload, on_board_step="user_selfie_step")
+        UserService.onboarding_step_validator(
+            payload=payload, on_board_step="user_selfie_step"
+        )
         file_repository.save_user_file(
             file_type=UserFileType.SELF,
             content=payload.get("file_or_base64"),
@@ -267,9 +380,8 @@ class UserService(IUser):
     def add_user_control_metadata(payload: dict):
         payload.update(
             {
-                "scope": {"view_type": None, "features": []},
+                "scope": {"view_type": "default", "features": ["default", "realtime"]},
                 "is_active_user": False,
-                "is_active_client": False,
                 "use_magic_link": True,
                 "token_valid_after": datetime.utcnow(),
                 "terms": {
@@ -334,13 +446,23 @@ class UserService(IUser):
         user_repository=UserRepository(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        user_identifier_data = payload.get("user_identifier")
 
-        UserService.onboarding_step_validator(payload=payload, on_board_step="user_identifier_data_step")
+        user_by_cpf = user_repository.find_one(
+            {"cpf": user_identifier_data.get("cpf")}
+        )
+
+        if user_by_cpf is not None:
+            raise BadRequestError("common.register_exists")
+
+        UserService.onboarding_step_validator(
+            payload=payload, on_board_step="user_identifier_data_step"
+        )
+
+        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
 
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
-        user_identifier_data = payload.get("user_identifier")
 
         current_user_with_identifier_data = dict(current_user)
         UserService.add_user_identifier_data_on_current_user(
@@ -371,7 +493,9 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
     ) -> dict:
-        UserService.onboarding_step_validator(payload=payload, on_board_step="user_complementary_step")
+        UserService.onboarding_step_validator(
+            payload=payload, on_board_step="user_complementary_step"
+        )
         thebes_answer = payload.get("x-thebes-answer")
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         if current_user is None:
@@ -430,7 +554,9 @@ class UserService(IUser):
     def user_quiz(
         payload: dict, stone_age=StoneAge, user_repository=UserRepository()
     ) -> dict:
-        UserService.onboarding_step_validator(payload=payload, on_board_step="user_quiz_step")
+        UserService.onboarding_step_validator(
+            payload=payload, on_board_step="user_quiz_step"
+        )
         thebes_answer = payload.get("x-thebes-answer")
 
         user_onboarding_current_step = UserService.get_onboarding_user_current_step(
@@ -521,7 +647,7 @@ class UserService(IUser):
 
         return {
             "status_code": status.HTTP_200_OK,
-            "message_key": "user.creating_account",
+            "message_key": "user.quiz.send",
         }
 
     @staticmethod
@@ -540,7 +666,7 @@ class UserService(IUser):
     def get_onboarding_user_current_step(
         payload: dict,
         user_repository=UserRepository(),
-        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF"))
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
     ) -> dict:
         onboarding_step_builder = OnboardingStepBuilder()
         thebes_answer = payload.get("x-thebes-answer")
@@ -554,12 +680,8 @@ class UserService(IUser):
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
 
-        user_suitability_profile = current_user.get("suitability")
-
         onboarding_steps = (
-            onboarding_step_builder.user_suitability_step(
-                user_suitability_profile=user_suitability_profile
-            )
+            onboarding_step_builder.user_suitability_step(current_user=current_user)
             .user_identifier_step(current_user=current_user)
             .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
@@ -574,17 +696,21 @@ class UserService(IUser):
     def set_user_electronic_signature(
         payload: dict, user_repository=UserRepository()
     ) -> dict:
-        UserService.onboarding_step_validator(payload=payload, on_board_step="user_electronic_signature")
+        UserService.onboarding_step_validator(
+            payload=payload, on_board_step="user_electronic_signature"
+        )
         thebes_answer = payload.get("x-thebes-answer")
         electronic_signature = payload.get("electronic_signature")
-        encrypted_eletronic_signature = PasswordEncrypt.encrypt_password(electronic_signature)
+        encrypted_electronic_signature = PasswordEncrypt.encrypt_password(
+            electronic_signature
+        )
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         if old.get("electronic_signature"):
             raise BadRequestError("user.electronic_signature.already_set")
         new = deepcopy(old)
-        new["electronic_signature"] = encrypted_eletronic_signature
+        new["electronic_signature"] = encrypted_electronic_signature
         new["is_blocked_electronic_signature"] = False
         new["electronic_signature_wrong_attempts"] = 0
 
@@ -602,6 +728,30 @@ class UserService(IUser):
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "requests.updated",
+        }
+
+    @staticmethod
+    def forgot_electronic_signature(
+        payload: dict,
+        user_repository=UserRepository(),
+        authentication_service=AuthenticationService,
+    ):
+        thebes_answer = payload.get("x-thebes-answer")
+        entity = user_repository.find_one({"_id": thebes_answer.get("email")})
+        if entity is None:
+            raise BadRequestError("common.register_not_exists")
+        to_add_into_jwt = {"forgot_electronic_signature": True}
+        payload_jwt = JWTHandler.generate_token(
+            payload=entity, args=to_add_into_jwt, ttl=10
+        )
+        authentication_service.send_authentication_email(
+            email=entity.get("email"),
+            payload_jwt=payload_jwt,
+            body="email.body.forgot_electronic_signature",
+        )
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "email.forgot_electronic_signature",
         }
 
     @staticmethod
@@ -690,7 +840,7 @@ class UserService(IUser):
                         "value": datetime(1993, 7, 12, 0, 0),
                     },
                 },
-                "cpf": {"source": "PH3W", "value": int(cpf)},
+                "cpf": {"source": "PH3W", "value": cpf},
                 "self_link": {"source": "PH3W", "value": "http://self_user.jpg"},
                 "is_us_person": {"source": "PH3W", "value": True},
                 "us_tin": {"source": "PH3W", "value": 126516515},
@@ -737,6 +887,8 @@ class UserService(IUser):
     def onboarding_step_validator(payload: dict, on_board_step: str):
         onboarding_steps = UserService.get_onboarding_user_current_step(payload)
         payload_from_onboarding_steps = onboarding_steps.get("payload")
-        current_onboarding_step = payload_from_onboarding_steps.get("current_onboarding_step")
+        current_onboarding_step = payload_from_onboarding_steps.get(
+            "current_onboarding_step"
+        )
         if current_onboarding_step != on_board_step:
             raise BadRequestError("user.invalid_on_boarding_step")

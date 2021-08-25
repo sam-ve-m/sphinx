@@ -12,4 +12,6 @@ class PasswordEncrypt(IPasswordEncrypt):
 
     @staticmethod
     def encrypt_password(user_password: str):
-        return PasswordEncrypt.mist.generate_encrypted_password(user_password=user_password)
+        return PasswordEncrypt.mist.generate_encrypted_password(
+            user_password=user_password
+        )

@@ -45,7 +45,7 @@ class StoneAge:
                     },
                     {
                         "questionId": "7c4d1fa8-00e4-11ec-9a03-0242ac130003",
-                        "question": "Qual desses endereções é o seu?",
+                        "question": "Qual desses endereços é o seu?",
                         "options": [
                             {
                                 "value": "R.jagunça 999, Cabrobro",

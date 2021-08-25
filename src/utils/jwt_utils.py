@@ -27,7 +27,7 @@ class JWTHandler:
     heimdall = Heimdall(logger=logging.getLogger(config("LOG_NAME")))
 
     @staticmethod
-    def generate_token(payload: dict, ttl: int = 5) -> Optional[str]:
+    def generate_token(payload: dict, args: dict = None, ttl: int = 5) -> Optional[str]:
         """The ttl value in minutes"""
         payload.update(
             {
@@ -40,8 +40,11 @@ class JWTHandler:
         try:
             with open("src/keys/id_rsa", "rb") as fh:
                 signing_key = jwk_from_pem(fh.read())
+            user_metadata_to_add_into_jwt = JWTHandler.filter_payload_to_jwt(
+                payload, args=args
+            )
             compact_jws = JWTHandler.instance.encode(
-                JWTHandler.filter_payload_to_jwt(payload), signing_key, alg="RS256"
+                user_metadata_to_add_into_jwt, signing_key, alg="RS256"
             )
             return compact_jws
         except Exception as e:
@@ -60,22 +63,22 @@ class JWTHandler:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def filter_payload_to_jwt(payload: dict) -> dict:
-        new_payload = JWTHandler.filter_payload_helper(payload=payload)
+    def filter_payload_to_jwt(payload: dict, args: dict) -> dict:
+        new_payload = JWTHandler.filter_payload_helper(payload=payload, args=args)
         JWTHandler.convert_datetime_field_in_str(payload=new_payload)
         if payload.get("is_admin"):
             new_payload.update({"is_admin": payload.get("is_admin")})
         return new_payload
 
     @staticmethod
-    def filter_payload_helper(payload: dict) -> dict:
+    def filter_payload_helper(payload: dict, args: dict) -> dict:
         ThebesHall.validate(payload=payload)
         suitability = payload.get("suitability")
-        suitability_months_past = None
+        suitability_months_past = 0
         if suitability:
             suitability_months_past = suitability.get("months_past")
         last_modified_date = payload.get("last_modified_date")
-        last_modified_date_months_past = None
+        last_modified_date_months_past = 0
         if last_modified_date:
             last_modified_date_months_past = last_modified_date.get("months_past")
 
@@ -83,7 +86,11 @@ class JWTHandler:
             "nick_name": payload.get("nick_name"),
             "email": payload.get("email"),
             "scope": payload.get("scope"),
+            "scope": payload.get("scope"),
             "is_active_user": payload.get("is_active_user"),
+            "is_blocked_electronic_signature": payload.get(
+                "is_blocked_electronic_signature"
+            ),
             "terms": payload.get("terms"),
             "suitability_months_past": suitability_months_past,
             "last_modified_date_months_past": last_modified_date_months_past,
@@ -91,6 +98,10 @@ class JWTHandler:
             "created_at": payload.get("created_at"),
             "exp": payload.get("exp"),
         }
+
+        if args is not None:
+            new_payload.update(args)
+
         register_analyses = payload.get("register_analyses")
 
         bovespa_account = payload.get("bovespa_account")
@@ -107,7 +118,14 @@ class JWTHandler:
         solutiontech = payload.get("solutiontech")
         sincad = payload.get("sincad")
         is_active_client = payload.get("is_active_client")
-        if solutiontech == "sync" and sincad and is_active_client:
+
+        if (
+            solutiontech == "sync"
+            and sincad
+            and is_active_client
+            and suitability_months_past < 24
+            and last_modified_date_months_past < 24
+        ):
             new_payload.update({"client_has_trade_allowed": True})
 
         return new_payload
@@ -127,17 +145,28 @@ class JWTHandler:
             if b"x-thebes-answer" in header_tuple:
                 thebes_answer = header_tuple[1].decode()
                 break
-        try:
-            payload = dict(JWTHandler.decrypt_payload(thebes_answer))
-        except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-            lang = get_language_from_request(request=request)
+        lang = get_language_from_request(request=request)
+        if thebes_answer is None:
             return Response(
                 content=json.dumps(
                     {
                         "detail": [
                             {"msg": i18n.get_translate("token_not_find", locale=lang)}
+                        ]
+                    }
+                ),
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
+        try:
+            payload = dict(JWTHandler.decrypt_payload(thebes_answer))
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
+            return Response(
+                content=json.dumps(
+                    {
+                        "detail": [
+                            {"msg": i18n.get_translate("invalid_token", locale=lang)}
                         ]
                     }
                 ),

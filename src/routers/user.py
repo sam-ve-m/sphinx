@@ -25,6 +25,7 @@ from src.routers.validators.base import (
     IsCvmQualifiedInvestor,
     FileBase64,
     ElectronicSignature,
+    ChangeElectronicSignature,
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -253,4 +254,61 @@ def set_user_electronic_signature(
     }
     return BaseController.run(
         UserController.set_user_electronic_signature, payload, request
+    )
+
+
+@router.get("/user/forgot_electronic_signature", tags=["user"])
+def forgot_electronic_signature(request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+    }
+
+    return BaseController.run(
+        UserController.forgot_electronic_signature, payload, request
+    )
+
+
+@router.put("/user/reset_electronic_signature", tags=["user"])
+def reset_electronic_signature(
+    electronic_signature: ElectronicSignature, request: Request
+):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+        "new_electronic_signature": electronic_signature.dict().get(
+            "electronic_signature"
+        ),
+    }
+
+    return BaseController.run(
+        UserController.reset_electronic_signature, payload, request
+    )
+
+
+@router.put("/user/change_electronic_signature", tags=["user"])
+def change_electronic_signature(
+    electronic_signatures: ChangeElectronicSignature, request: Request
+):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    electronic_signatures_dict = electronic_signatures.dict()
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+        "current_electronic_signature": electronic_signatures_dict.get(
+            "electronic_signature"
+        ),
+        "new_electronic_signature": electronic_signatures_dict.get(
+            "new_electronic_signature"
+        ),
+    }
+
+    return BaseController.run(
+        UserController.change_electronic_signature, payload, request
     )

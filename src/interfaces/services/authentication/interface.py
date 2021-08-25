@@ -25,13 +25,8 @@ class IAuthentication(ABC):
 
     @staticmethod
     @abstractmethod
-    def forgot_password(payload: dict, user_repository: UserRepository) -> dict:
-        pass
-
-    @staticmethod
-    @abstractmethod
     def send_authentication_email(
-        email: str, payload: dict, body: str, ttl: int, email_sender=SendGridEmail
+        email: str, payload_jwt: str, body: str, email_sender=SendGridEmail
     ) -> None:
         pass
 
