@@ -40,8 +40,12 @@ class JWTHandler:
         try:
             with open("src/keys/id_rsa", "rb") as fh:
                 signing_key = jwk_from_pem(fh.read())
-            user_metadata_to_add_into_jwt = JWTHandler.filter_payload_to_jwt(payload, args=args)
-            compact_jws = JWTHandler.instance.encode(user_metadata_to_add_into_jwt, signing_key, alg="RS256")
+            user_metadata_to_add_into_jwt = JWTHandler.filter_payload_to_jwt(
+                payload, args=args
+            )
+            compact_jws = JWTHandler.instance.encode(
+                user_metadata_to_add_into_jwt, signing_key, alg="RS256"
+            )
             return compact_jws
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
@@ -84,7 +88,9 @@ class JWTHandler:
             "scope": payload.get("scope"),
             "scope": payload.get("scope"),
             "is_active_user": payload.get("is_active_user"),
-            "is_blocked_electronic_signature": payload.get("is_blocked_electronic_signature"),
+            "is_blocked_electronic_signature": payload.get(
+                "is_blocked_electronic_signature"
+            ),
             "terms": payload.get("terms"),
             "suitability_months_past": suitability_months_past,
             "last_modified_date_months_past": last_modified_date_months_past,
@@ -114,11 +120,11 @@ class JWTHandler:
         is_active_client = payload.get("is_active_client")
 
         if (
-                solutiontech == "sync" and
-                sincad and
-                is_active_client and
-                suitability_months_past < 24 and
-                last_modified_date_months_past < 24
+            solutiontech == "sync"
+            and sincad
+            and is_active_client
+            and suitability_months_past < 24
+            and last_modified_date_months_past < 24
         ):
             new_payload.update({"client_has_trade_allowed": True})
 
@@ -139,17 +145,28 @@ class JWTHandler:
             if b"x-thebes-answer" in header_tuple:
                 thebes_answer = header_tuple[1].decode()
                 break
-        try:
-            payload = dict(JWTHandler.decrypt_payload(thebes_answer))
-        except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-            lang = get_language_from_request(request=request)
+        lang = get_language_from_request(request=request)
+        if thebes_answer is None:
             return Response(
                 content=json.dumps(
                     {
                         "detail": [
                             {"msg": i18n.get_translate("token_not_find", locale=lang)}
+                        ]
+                    }
+                ),
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
+        try:
+            payload = dict(JWTHandler.decrypt_payload(thebes_answer))
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
+            return Response(
+                content=json.dumps(
+                    {
+                        "detail": [
+                            {"msg": i18n.get_translate("invalid_token", locale=lang)}
                         ]
                     }
                 ),

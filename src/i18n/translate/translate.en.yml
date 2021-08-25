@@ -60,7 +60,7 @@ en:
       empty: Conteudo nao pode ser vazio.
     params:
       invalid: Nome e versao sao necessarios para criar o arquivo.
-  invalid_token: Seems that your access has expired, try to login again.
+  invalid_token: The given token was invalid.
   token_not_find: Token not suplied.
   invalid_credential: User don't have permition to access this route or feature.
   valid_credential: User have permition to access this route or feature

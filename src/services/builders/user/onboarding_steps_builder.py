@@ -19,8 +19,11 @@ class OnboardingStepBuilder:
             "user_electronic_signature",
         ]
 
-    def user_suitability_step(self, user_suitability_profile):
-        if user_suitability_profile is not None:
+    def user_suitability_step(self, current_user):
+        user_suitability_profile = current_user.get("suitability")
+        terms = current_user.get("terms")
+        has_signed_refusal_term = terms.get("term_refusal")
+        if user_suitability_profile is not None or has_signed_refusal_term is not None:
             self.__onboarding_steps["suitability_step"] = True
             self.__onboarding_steps[
                 "current_onboarding_step"
@@ -60,7 +63,9 @@ class OnboardingStepBuilder:
         register_analyses = current_user.get("register_analyses")
         if register_analyses is not None:
             self.__onboarding_steps["user_quiz_step"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "user_electronic_signature"
+            self.__onboarding_steps[
+                "current_onboarding_step"
+            ] = "user_electronic_signature"
         return self
 
     def user_user_electronic_signature(self, current_user):

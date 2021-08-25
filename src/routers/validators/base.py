@@ -143,7 +143,7 @@ class Cpf(BaseModel):
     @validator("cpf", always=True, allow_reuse=True)
     def validate_cpf(cls, e):
         if is_cpf_valid(cpf=e):
-            return e.replace('.', '').replace('-', '').replace('/', '')
+            return e.replace(".", "").replace("-", "").replace("/", "")
         raise ValueError("invalid cpf")
 
 
@@ -271,7 +271,7 @@ class CpfOrCnpjSource(Source):
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
         if is_cpf_valid(cpf=e) or is_cnpj_valid(cnpj=e):
-            return e.replace('.', '').replace('-', '').replace('/', '')
+            return e.replace(".", "").replace("-", "").replace("/", "")
         raise ValueError("invalid cpf")
 
 
@@ -281,7 +281,7 @@ class CpfSource(Source):
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
         if is_cpf_valid(cpf=e):
-            return e.replace('.', '').replace('-', '').replace('/', '')
+            return e.replace(".", "").replace("-", "").replace("/", "")
         raise ValueError("invalid cpf")
 
 
@@ -389,7 +389,7 @@ class CnpjSource(Source):
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
         if is_cnpj_valid(cnpj=e):
-            return e.replace('.', '').replace('-', '').replace('/', '')
+            return e.replace(".", "").replace("-", "").replace("/", "")
         raise ValueError("invalid cnpj")
 
 
