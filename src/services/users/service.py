@@ -449,8 +449,9 @@ class UserService(IUser):
         user_identifier_data = payload.get("user_identifier")
 
         user_by_cpf = user_repository.find_one(
-            {"cpf": int(user_identifier_data.get("cpf"))}
+            {"cpf": user_identifier_data.get("cpf")}
         )
+
         if user_by_cpf is not None:
             raise BadRequestError("common.register_exists")
 
