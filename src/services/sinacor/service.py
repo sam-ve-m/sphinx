@@ -148,8 +148,8 @@ class SinacorService:
 
         database_and_bureau_dtvm_client_data_merged.update(
             {
-                "sinacor": SinacorClientStatus.CREATED,
-                "sincad": SinacorClientStatus.NOT_CREATED
+                "sinacor": SinacorClientStatus.CREATED.value,
+                "sincad": SinacorClientStatus.NOT_CREATED.value
             }
         )
 
