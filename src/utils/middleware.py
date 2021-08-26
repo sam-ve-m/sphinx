@@ -51,6 +51,7 @@ def route_is_public(url_request: str, method: str = None) -> bool:
     public_route = False
     public_paths_get = [
         "/term",
+        "/terms",
         "/docs",
         "/openapi.json",
         "/thebes_gate",

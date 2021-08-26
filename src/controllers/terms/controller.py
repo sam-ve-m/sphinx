@@ -9,3 +9,7 @@ class TermsController:
     @staticmethod
     def get_term(payload: dict):
         return TermsService.get_term(payload=payload)
+
+    @staticmethod
+    def get_terms(payload: dict):
+        return TermsService.get_terms(payload=payload)
