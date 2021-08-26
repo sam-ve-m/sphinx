@@ -714,8 +714,6 @@ class UserService(IUser):
         new["is_blocked_electronic_signature"] = False
         new["electronic_signature_wrong_attempts"] = 0
 
-        #
-        # new = hash_field(key="electronic_signature", payload=new)
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
@@ -723,6 +721,7 @@ class UserService(IUser):
         payload = UserService.fake_stone_age_callback(
             email=thebes_answer.get("email"), cpf=new.get("cpf")
         )
+
         SinacorService.process_callback(payload=payload)
 
         return {

@@ -4,13 +4,14 @@ import logging
 import json
 
 from src.exceptions.exceptions import InternalServerError
+from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 
 
 class Solutiontech:
 
     response_message_map = {
-        "Cliente encontrado!": "sync",
-        "Cliente não encontrado!": "send",
+        "Cliente encontrado!": SolutiontechClientImportStatus.SYNC.value,
+        "Cliente não encontrado!": SolutiontechClientImportStatus.SEND.value,
     }
 
     @staticmethod

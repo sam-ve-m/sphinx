@@ -4,8 +4,8 @@ from copy import deepcopy
 # OUTSIDE LIBRARIES
 from fastapi import status
 
-from src.domain.sincad.user_sync_status import SincadUserImportStatus
-from src.domain.solutiontech.user_import_status import SolutiontechUserImportStatus
+from src.domain.sincad.client_sync_status import SincadClientImportStatus
+from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 from src.utils.env_config import config
 
 # SPHINX
@@ -159,7 +159,7 @@ class AuthenticationService(IAuthentication):
                 user_solutiontech_status_from_check_status_request=user_solutiontech_status_from_check_status_request
             )
 
-        user_is_already_sync_with_sincad = user_sincad_status_from_database is SincadUserImportStatus.NOT_SYNCED.value
+        user_is_already_sync_with_sincad = user_sincad_status_from_database is SincadClientImportStatus.NOT_SYNCED.value
         if user_is_already_sync_with_sincad:
             sincad_status_from_sinacor = AuthenticationService.sinacor_is_synced_with_sincad(
                 user_cpf=user_cpf_from_database
@@ -216,8 +216,8 @@ class AuthenticationService(IAuthentication):
     @staticmethod
     def check_if_user_has_valid_solutiontech_status_in_database(user_solutiontech_status_from_database: str):
         user_has_valid_solutiontech_status_in_database = user_solutiontech_status_from_database == \
-                                                         SolutiontechUserImportStatus.SEND.value or user_solutiontech_status_from_database ==\
-                                                         SolutiontechUserImportStatus.FAILED.value
+                                                         SolutiontechClientImportStatus.SEND.value or user_solutiontech_status_from_database == \
+                                                         SolutiontechClientImportStatus.FAILED.value
 
         return user_has_valid_solutiontech_status_in_database
 

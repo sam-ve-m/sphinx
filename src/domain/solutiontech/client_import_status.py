@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SolutiontechUserImportStatus(Enum):
+class SolutiontechClientImportStatus(Enum):
     SEND = "send"
     SYNC = "sync"
     FAILED = "failed"

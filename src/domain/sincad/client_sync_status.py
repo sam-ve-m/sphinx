@@ -1,6 +1,6 @@
 from enum import Enum
 
 
-class SincadUserImportStatus(Enum):
+class SincadClientImportStatus(Enum):
     SYNCED = True
     NOT_SYNCED = False
