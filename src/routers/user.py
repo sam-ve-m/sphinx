@@ -3,7 +3,7 @@ from typing import Union, List, Optional
 
 # OUTSIDE LIBRARIES
 from fastapi import APIRouter, Request, Response, UploadFile, File, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, constr, ValidationError
 
 # SPHINX
 from src.routers.validators.base import (
@@ -54,6 +54,17 @@ class QuizResponses(BaseModel):
     responses: List[QuizQuestionOption]
 
 
+class Signature_check(BaseModel):
+    signature: constr(
+        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$"
+    )
+    signature_expire_time: int = None
+
+
+class EletronicSignature(Signature_check):
+    pass
+
+
 @router.post("/user", tags=["user"])
 def create_user(user: UserSimple, request: Request):
     return BaseController.run(UserController.create, dict(user), request)
@@ -83,7 +94,7 @@ def update_user_identifier_data(user_identifier: UserIdentifierData, request: Re
 
 @router.put("/user/complementary_data", tags=["user"])
 def update_user_complementary_data(
-    user_identifier: UserComplementaryData, request: Request
+        user_identifier: UserComplementaryData, request: Request
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -201,8 +212,8 @@ async def save_user_selfie(request: Request, file_or_base64: FileBase64):
 
 @router.put("/user/sign_term", tags=["user"])
 async def sign_term(
-    request: Request,
-    file_type: TermFile,
+        request: Request,
+        file_type: TermFile,
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -214,8 +225,8 @@ async def sign_term(
 
 @router.get("/user/signed_term", tags=["user"])
 async def get_assigned_term(
-    request: Request,
-    file_type: TermFile = Depends(TermFile),
+        request: Request,
+        file_type: TermFile = Depends(TermFile),
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -227,7 +238,7 @@ async def get_assigned_term(
 
 @router.get("/user/onboarding_user_current_step", tags=["user"])
 async def get_onboarding_user_current_step(
-    request: Request,
+        request: Request,
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -243,7 +254,7 @@ async def get_onboarding_user_current_step(
 
 @router.put("/user/electronic_signature", tags=["user"])
 def set_user_electronic_signature(
-    electronic_signature: ElectronicSignature, request: Request
+        electronic_signature: ElectronicSignature, request: Request
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -273,7 +284,7 @@ def forgot_electronic_signature(request: Request):
 
 @router.put("/user/reset_electronic_signature", tags=["user"])
 def reset_electronic_signature(
-    electronic_signature: ElectronicSignature, request: Request
+        electronic_signature: ElectronicSignature, request: Request
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -292,7 +303,7 @@ def reset_electronic_signature(
 
 @router.put("/user/change_electronic_signature", tags=["user"])
 def change_electronic_signature(
-    electronic_signatures: ChangeElectronicSignature, request: Request
+        electronic_signatures: ChangeElectronicSignature, request: Request
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -312,3 +323,20 @@ def change_electronic_signature(
     return BaseController.run(
         UserController.change_electronic_signature, payload, request
     )
+
+
+@router.post("/user/create_eletronic_signature", tags=["user"])
+def change_electronic_signature(
+        eletronic_signature: EletronicSignature, request: Request
+):
+    eletronic_signature = eletronic_signature.dict()
+
+    print(eletronic_signature)
+    try:
+        Signature_check(**eletronic_signature)
+
+    except ValidationError as err:
+        print(err)
+
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    return JWTHandler.generate_session_jwt(eletronic_signature, jwt_data_or_error_response.get("email"))
