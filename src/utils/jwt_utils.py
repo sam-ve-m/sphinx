@@ -174,10 +174,10 @@ class JWTHandler:
 
     @staticmethod
     def generate_session_jwt(eletronic_signature: dict, email: str):
-        print(eletronic_signature)
         session_dict = {
             "email": email,
             "password": eletronic_signature.get("signature"),
             "signatureExpireTime": eletronic_signature.get("signature_expire_time")
         }
+        JWTHandler.mist.validate_jwt()
         return JWTHandler.mist.generate_jwt(session_dict)
