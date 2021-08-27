@@ -891,3 +891,17 @@ class UserService(IUser):
         )
         if current_onboarding_step != on_board_step:
             raise BadRequestError("user.invalid_on_boarding_step")
+
+    @staticmethod
+    def get_customer_registration_data(
+            payload: dict,
+            user_repository=UserRepository(),
+    ):
+        pass
+
+    @staticmethod
+    def update_customer_registration_data(
+            payload: dict,
+            user_repository=UserRepository(),
+    ):
+        pass

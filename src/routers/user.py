@@ -312,3 +312,34 @@ def change_electronic_signature(
     return BaseController.run(
         UserController.change_electronic_signature, payload, request
     )
+
+
+@router.get("/user/customer_registration_data", tags=["user"])
+def get_customer_registration_data(request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+    }
+
+    BaseController.run(
+        UserController.get_customer_registration_data, payload, request
+    )
+
+
+@router.put("/user/customer_registration_data", tags=["user"])
+def update_customer_registration_data(request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+    }
+
+    BaseController.run(
+        UserController.update_customer_registration_data, payload, request
+    )
+
