@@ -4,20 +4,22 @@ import logging
 import json
 
 from src.exceptions.exceptions import InternalServerError
+from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 
 
 class Solutiontech:
 
     response_message_map = {
-        "Cliente encontrado!": "sync",
-        "Cliente não encontrado!": "send",
+        "Cliente encontrado!": SolutiontechClientImportStatus.SYNC.value,
     }
 
     @staticmethod
-    def check_if_client_is_synced_with_solutiontech(user_bmf_code: int) -> str:
+    def check_if_client_is_synced_with_solutiontech(user_bmf_code: int, user_solutiontech_status_from_database: str) -> str:
         base_url_solutiontech = config("SOLUTIONTECH_BASE_URL")
         solutiontech_verify_dtvm_client = config("SOLUTIONTECH_VERIFY_DTVM_CLIENT")
         response_message = None
+
+        Solutiontech.response_message_map.update({"Cliente não encontrado!": user_solutiontech_status_from_database})
         try:
             # Verificar necessidade de retirar o verify=False
             response = requests.get(
@@ -33,9 +35,10 @@ class Solutiontech:
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(
-                msg=f"response  = {response_message} -  error = {str(e)}", exc_info=e
+                msg=f"user_bmf_code {user_bmf_code} - response  = {response_message} -  error = {str(e)}", exc_info=e
             )
-        raise InternalServerError("common.process_issue")
+
+        return user_solutiontech_status_from_database
 
     @staticmethod
     def request_client_sync(user_bmf_code: int):
@@ -59,6 +62,7 @@ class Solutiontech:
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(
-                msg=f"response  = {response_message} -  error = {str(e)}", exc_info=e
+                msg=f"user_bmf_code: {user_bmf_code} - Solution Tech Response  = {response_message} -  error = {str(e)}", exc_info=e
             )
-        raise InternalServerError("common.process_issue")
+
+        return False

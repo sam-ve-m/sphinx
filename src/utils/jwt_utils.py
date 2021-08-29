@@ -3,6 +3,8 @@ import os.path
 from typing import Union, Optional
 from datetime import datetime, timezone, timedelta
 import logging
+
+from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 from src.utils.env_config import config
 import json
 from pathlib import Path
@@ -73,19 +75,20 @@ class JWTHandler:
     @staticmethod
     def filter_payload_helper(payload: dict, args: dict) -> dict:
         ThebesHall.validate(payload=payload)
-        suitability = payload.get("suitability")
         suitability_months_past = 0
+        last_modified_date_months_past = 0
+        suitability = payload.get("suitability")
+        last_modified_date = payload.get("last_modified_date")
+
         if suitability:
             suitability_months_past = suitability.get("months_past")
-        last_modified_date = payload.get("last_modified_date")
-        last_modified_date_months_past = 0
+
         if last_modified_date:
             last_modified_date_months_past = last_modified_date.get("months_past")
 
         new_payload = {
             "nick_name": payload.get("nick_name"),
             "email": payload.get("email"),
-            "scope": payload.get("scope"),
             "scope": payload.get("scope"),
             "is_active_user": payload.get("is_active_user"),
             "is_blocked_electronic_signature": payload.get(
@@ -103,7 +106,6 @@ class JWTHandler:
             new_payload.update(args)
 
         register_analyses = payload.get("register_analyses")
-
         bovespa_account = payload.get("bovespa_account")
         bmf_account = payload.get("bmf_account")
 
@@ -119,14 +121,8 @@ class JWTHandler:
         sincad = payload.get("sincad")
         is_active_client = payload.get("is_active_client")
 
-        if (
-            solutiontech == "sync"
-            and sincad
-            and is_active_client
-            and suitability_months_past < 24
-            and last_modified_date_months_past < 24
-        ):
-            new_payload.update({"client_has_trade_allowed": True})
+        client_has_trade_allowed = solutiontech == SolutiontechClientImportStatus.SYNC.value and sincad and is_active_client and suitability_months_past < 24 and last_modified_date_months_past < 24
+        new_payload.update({"client_has_trade_allowed": client_has_trade_allowed})
 
         return new_payload
 

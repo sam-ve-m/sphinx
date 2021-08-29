@@ -5,6 +5,7 @@ from fastapi import status
 # SPHINX
 from src.repositories.file.repository import FileRepository
 from src.interfaces.services.term.interface import ITerm
+from src.repositories.file.enum.term_file import TermsFileType
 
 
 class TermsService(ITerm):
@@ -32,4 +33,13 @@ class TermsService(ITerm):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"link": link},
+        }
+
+    @staticmethod
+    def get_terms(
+        payload: dict
+    ):
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"terms": [term_enum.value for term_enum in list(TermsFileType)]},
         }
