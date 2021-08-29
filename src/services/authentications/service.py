@@ -140,7 +140,7 @@ class AuthenticationService(IAuthentication):
 
         client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
-            user_sincad_status_from_database=user_sincad_status_from_database
+            user_sincad_status_from_database=user_sincad_status_from_database,
         )
 
         user_has_valid_solutiontech_status_in_database = AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
@@ -149,17 +149,20 @@ class AuthenticationService(IAuthentication):
 
         if user_has_valid_solutiontech_status_in_database:
             user_solutiontech_status_from_check_status_request = Solutiontech.check_if_client_is_synced_with_solutiontech(
-                    user_bmf_code=user_bmf_account_from_database,
-                    user_solutiontech_status_from_database=user_solutiontech_status_from_database
-                )
+                user_bmf_code=user_bmf_account_from_database,
+                user_solutiontech_status_from_database=user_solutiontech_status_from_database,
+            )
 
             client_has_trade_allowed_status_with_database_user = AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
                 client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
-                user_solutiontech_status_from_check_status_request=user_solutiontech_status_from_check_status_request
+                user_solutiontech_status_from_check_status_request=user_solutiontech_status_from_check_status_request,
             )
 
-        user_is_already_sync_with_sincad = user_sincad_status_from_database is SincadClientImportStatus.NOT_SYNCED.value
+        user_is_already_sync_with_sincad = (
+            user_sincad_status_from_database
+            is SincadClientImportStatus.NOT_SYNCED.value
+        )
         if user_is_already_sync_with_sincad:
             sincad_status_from_sinacor = AuthenticationService.sinacor_is_synced_with_sincad(
                 user_cpf=user_cpf_from_database
@@ -168,56 +171,79 @@ class AuthenticationService(IAuthentication):
             AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
                 client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
                 sincad_status_from_sinacor=sincad_status_from_sinacor,
-                user_sincad_status_from_database=user_sincad_status_from_database
+                user_sincad_status_from_database=user_sincad_status_from_database,
             )
 
         return client_has_trade_allowed_status_with_database_user
 
     @staticmethod
     def _get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database: str,
-            user_sincad_status_from_database: str):
+        user_solutiontech_status_from_database: str,
+        user_sincad_status_from_database: str,
+    ):
         client_has_trade_allowed_status_with_database_user = {
             "solutiontech": {
                 "status": user_solutiontech_status_from_database,
                 "status_changed": False,
             },
-            "sincad": {"status": user_sincad_status_from_database, "status_changed": False},
+            "sincad": {
+                "status": user_sincad_status_from_database,
+                "status_changed": False,
+            },
         }
 
         return client_has_trade_allowed_status_with_database_user
 
     @staticmethod
     def _update_client_has_trade_allowed_status_with_solutiontech_status_response(
-            client_has_trade_allowed_status_with_database_user: dict,
-            user_solutiontech_status_from_database: str,
-            user_solutiontech_status_from_check_status_request: str):
+        client_has_trade_allowed_status_with_database_user: dict,
+        user_solutiontech_status_from_database: str,
+        user_solutiontech_status_from_check_status_request: str,
+    ):
 
-        solutiontech_status_changed = user_solutiontech_status_from_database != user_solutiontech_status_from_check_status_request
+        solutiontech_status_changed = (
+            user_solutiontech_status_from_database
+            != user_solutiontech_status_from_check_status_request
+        )
 
-        client_has_trade_allowed_status_with_database_user["solutiontech"]["status"] = user_solutiontech_status_from_check_status_request
-        client_has_trade_allowed_status_with_database_user["solutiontech"]["status_changed"] = solutiontech_status_changed
+        client_has_trade_allowed_status_with_database_user["solutiontech"][
+            "status"
+        ] = user_solutiontech_status_from_check_status_request
+        client_has_trade_allowed_status_with_database_user["solutiontech"][
+            "status_changed"
+        ] = solutiontech_status_changed
 
         return client_has_trade_allowed_status_with_database_user
 
     @staticmethod
     def _update_client_has_trade_allowed_status_with_sincad_status_response(
-            client_has_trade_allowed_status_with_database_user: dict,
-            sincad_status_from_sinacor: bool,
-            user_sincad_status_from_database: bool
+        client_has_trade_allowed_status_with_database_user: dict,
+        sincad_status_from_sinacor: bool,
+        user_sincad_status_from_database: bool,
     ):
 
-        sincad_status_changed = user_sincad_status_from_database != sincad_status_from_sinacor
-        client_has_trade_allowed_status_with_database_user["sincad"]["status"] = sincad_status_from_sinacor
-        client_has_trade_allowed_status_with_database_user["sincad"]["status_changed"] = sincad_status_changed
+        sincad_status_changed = (
+            user_sincad_status_from_database != sincad_status_from_sinacor
+        )
+        client_has_trade_allowed_status_with_database_user["sincad"][
+            "status"
+        ] = sincad_status_from_sinacor
+        client_has_trade_allowed_status_with_database_user["sincad"][
+            "status_changed"
+        ] = sincad_status_changed
 
         return client_has_trade_allowed_status_with_database_user
 
     @staticmethod
-    def check_if_user_has_valid_solutiontech_status_in_database(user_solutiontech_status_from_database: str):
-        user_has_valid_solutiontech_status_in_database = user_solutiontech_status_from_database == \
-                                                         SolutiontechClientImportStatus.SEND.value or user_solutiontech_status_from_database == \
-                                                         SolutiontechClientImportStatus.FAILED.value
+    def check_if_user_has_valid_solutiontech_status_in_database(
+        user_solutiontech_status_from_database: str,
+    ):
+        user_has_valid_solutiontech_status_in_database = (
+            user_solutiontech_status_from_database
+            == SolutiontechClientImportStatus.SEND.value
+            or user_solutiontech_status_from_database
+            == SolutiontechClientImportStatus.FAILED.value
+        )
 
         return user_has_valid_solutiontech_status_in_database
 

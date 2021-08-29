@@ -29,7 +29,7 @@ async def process_thebes_answer(request: Request, call_next):
     is_third_part_access = route_is_third_part_access(
         url_request=request.url.path,
         third_part_access_path=THIRD_PART_ACCESS_PATH,
-        method=request.method
+        method=request.method,
     )
     if is_third_part_access:
         return await resolve_third_part_request(request=request, call_next=call_next)

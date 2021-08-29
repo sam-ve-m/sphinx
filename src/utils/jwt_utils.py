@@ -121,7 +121,13 @@ class JWTHandler:
         sincad = payload.get("sincad")
         is_active_client = payload.get("is_active_client")
 
-        client_has_trade_allowed = solutiontech == SolutiontechClientImportStatus.SYNC.value and sincad and is_active_client and suitability_months_past < 24 and last_modified_date_months_past < 24
+        client_has_trade_allowed = (
+            solutiontech == SolutiontechClientImportStatus.SYNC.value
+            and sincad
+            and is_active_client
+            and suitability_months_past < 24
+            and last_modified_date_months_past < 24
+        )
         new_payload.update({"client_has_trade_allowed": client_has_trade_allowed})
 
         return new_payload

@@ -441,16 +441,11 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def user_identifier_data(
-        payload: dict,
-        user_repository=UserRepository(),
-    ) -> dict:
+    def user_identifier_data(payload: dict, user_repository=UserRepository(),) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         user_identifier_data = payload.get("user_identifier")
 
-        user_by_cpf = user_repository.find_one(
-            {"cpf": user_identifier_data.get("cpf")}
-        )
+        user_by_cpf = user_repository.find_one({"cpf": user_identifier_data.get("cpf")})
 
         if user_by_cpf is not None:
             raise BadRequestError("common.register_exists")
@@ -490,8 +485,7 @@ class UserService(IUser):
 
     @staticmethod
     def user_complementary_data(
-        payload: dict,
-        user_repository=UserRepository(),
+        payload: dict, user_repository=UserRepository(),
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_complementary_step"
@@ -894,14 +888,12 @@ class UserService(IUser):
 
     @staticmethod
     def get_customer_registration_data(
-            payload: dict,
-            user_repository=UserRepository(),
+        payload: dict, user_repository=UserRepository(),
     ):
         pass
 
     @staticmethod
     def update_customer_registration_data(
-            payload: dict,
-            user_repository=UserRepository(),
+        payload: dict, user_repository=UserRepository(),
     ):
         pass

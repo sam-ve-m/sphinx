@@ -37,10 +37,6 @@ PUBLIC_PATHS_POST = {
     "/login/admin",
 }
 
-PRIVATE_PATHS = {
-    "/user/admin",
-    "/views",
-    "/feature",
-    "/term",
-    "/suitability/quiz"
-}
+PRIVATE_PATHS = {"/user/admin", "/views", "/feature", "/term", "/suitability/quiz"}
+
+PATH_WITH_ELECTRONIC_SIGNATURE_REQUIRED = {}

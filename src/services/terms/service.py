@@ -16,8 +16,7 @@ class TermsService(ITerm):
     ):
         file_type = payload.get("file_type")
         file_repository.save_term_file(
-            file_type=file_type,
-            content=payload.get("file_or_base64"),
+            file_type=file_type, content=payload.get("file_or_base64"),
         )
         return {
             "status_code": status.HTTP_200_OK,
@@ -36,10 +35,10 @@ class TermsService(ITerm):
         }
 
     @staticmethod
-    def get_terms(
-        payload: dict
-    ):
+    def get_terms(payload: dict):
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {"terms": [term_enum.value for term_enum in list(TermsFileType)]},
+            "payload": {
+                "terms": [term_enum.value for term_enum in list(TermsFileType)]
+            },
         }

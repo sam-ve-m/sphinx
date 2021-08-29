@@ -106,35 +106,23 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_signed_term(
-        payload: dict,
-        file_repository,
-    ) -> dict:
+    def get_signed_term(payload: dict, file_repository,) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def user_identifier_data(
-        payload: dict,
-        user_repository,
-    ) -> dict:
+    def user_identifier_data(payload: dict, user_repository,) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def user_complementary_data(
-        payload: dict,
-        user_repository,
-    ) -> dict:
+    def user_complementary_data(payload: dict, user_repository,) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def send_quiz_responses(
-        payload: dict,
-        user_repository,
-        stone_age,
-        persephone_client,
+        payload: dict, user_repository, stone_age, persephone_client,
     ) -> dict:
         pass
 

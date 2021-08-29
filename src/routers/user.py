@@ -201,8 +201,7 @@ async def save_user_selfie(request: Request, file_or_base64: FileBase64):
 
 @router.put("/user/sign_term", tags=["user"])
 async def sign_term(
-    request: Request,
-    file_type: TermFile,
+    request: Request, file_type: TermFile,
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -214,8 +213,7 @@ async def sign_term(
 
 @router.get("/user/signed_term", tags=["user"])
 async def get_assigned_term(
-    request: Request,
-    file_type: TermFile = Depends(TermFile),
+    request: Request, file_type: TermFile = Depends(TermFile),
 ):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
@@ -226,9 +224,7 @@ async def get_assigned_term(
 
 
 @router.get("/user/onboarding_user_current_step", tags=["user"])
-async def get_onboarding_user_current_step(
-    request: Request,
-):
+async def get_onboarding_user_current_step(request: Request,):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
@@ -324,9 +320,7 @@ def get_customer_registration_data(request: Request):
         "x-thebes-answer": jwt_data_or_error_response,
     }
 
-    BaseController.run(
-        UserController.get_customer_registration_data, payload, request
-    )
+    BaseController.run(UserController.get_customer_registration_data, payload, request)
 
 
 @router.put("/user/customer_registration_data", tags=["user"])
@@ -342,4 +336,3 @@ def update_customer_registration_data(request: Request):
     BaseController.run(
         UserController.update_customer_registration_data, payload, request
     )
-
