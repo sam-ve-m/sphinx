@@ -177,13 +177,11 @@ class JWTHandler:
             )
         return payload
 
-
     @staticmethod
-    def generate_session_jwt(eletronic_signature: dict, email: str):
+    def generate_session_jwt(electronic_signature: dict, email: str):
         session_dict = {
             "email": email,
-            "password": eletronic_signature.get("signature"),
-            "signatureExpireTime": eletronic_signature.get("signature_expire_time")
+            "password": electronic_signature.get("signature"),
+            "signatureExpireTime": electronic_signature.get("signature_expire_time")
         }
-        JWTHandler.mist.validate_jwt()
         return JWTHandler.mist.generate_jwt(session_dict)

@@ -98,3 +98,7 @@ class UserController:
     @staticmethod
     def update_customer_registration_data(payload: dict):
         return UserService.update_customer_registration_data(payload=payload)
+
+    @staticmethod
+    def create_electronic_signature(payload: dict):
+        return UserService.create_electronic_signature(payload=payload)

@@ -54,15 +54,11 @@ class QuizResponses(BaseModel):
     responses: List[QuizQuestionOption]
 
 
-class Signature_check(BaseModel):
+class SignatureCheck(BaseModel):
     signature: constr(
         regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$"
     )
     signature_expire_time: int = None
-
-
-class EletronicSignature(Signature_check):
-    pass
 
 
 @router.post("/user", tags=["user"])
@@ -325,18 +321,34 @@ def change_electronic_signature(
     )
 
 
-@router.post("/user/create_eletronic_signature", tags=["user"])
+@router.post("/user/create_electronic_signature", tags=["user"])
 def change_electronic_signature(
-        eletronic_signature: EletronicSignature, request: Request
+        electronic_signature: SignatureCheck, request: Request
 ):
-    eletronic_signature = eletronic_signature.dict()
-
-    print(eletronic_signature)
-    try:
-        Signature_check(**eletronic_signature)
-
-    except ValidationError as err:
-        print(err)
-
+    electronic_signature = electronic_signature.dict()
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
-    return JWTHandler.generate_session_jwt(eletronic_signature, jwt_data_or_error_response.get("email"))
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "electronic_signature": electronic_signature,
+        "email": jwt_data_or_error_response.get("email")
+    }
+    return BaseController.run(
+        UserController.create_electronic_signature, payload, request
+    )
+
+
+@router.get("/user/profile_data", tags=["user"])
+def change_electronic_signature(request: Request):
+    return {'a': 1}
+    # electronic_signature = electronic_signature.dict()
+    # jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    # if isinstance(jwt_data_or_error_response, Response):
+    #     return jwt_data_or_error_response
+    # payload = {
+    #     "electronic_signature": electronic_signature,
+    #     "email": jwt_data_or_error_response.get("email")
+    # }
+    # return BaseController.run(
+    #     UserController.create_electronic_signature, payload, request
+    # )

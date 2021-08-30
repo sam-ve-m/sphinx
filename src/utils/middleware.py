@@ -15,6 +15,7 @@ from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import NoPath
 from mist_client.asgard import Mist
 from src.domain.sphinx_constants import *
+from src.utils.jwt_utils import JWTHandler
 
 
 def route_is_third_part_access(
@@ -125,13 +126,12 @@ def validate_electronic_signature(request: Request, user_data: dict) -> bool:
         if b"x-mist" in header_tuple:
             mist_token = header_tuple[1].decode()
             break
-    logger = logging.getLogger(config("LOG_NAME"))
-    mist = Mist(logger)
-    is_valid = mist.validate_jwt(jwt=mist_token)
+    is_valid = JWTHandler.mist.validate_jwt(jwt=mist_token)
     if is_valid:
-        content = mist.decrypt_payload(jwt=mist_token)
+        mist_content = JWTHandler.mist.decrypt_payload(jwt=mist_token)
+        if user_data['email'] == mist_content['email']:
+            return True
     return False
-    # TODO: Make Changes here
 
 
 def check_if_third_party_user_is_not_allowed_to_access_route(request: Request):
