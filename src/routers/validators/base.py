@@ -90,7 +90,7 @@ class ChangeElectronicSignature(ElectronicSignature, NewElectronicSignature):
 
 
 class Name(BaseModel):
-    name: constr(min_length=1, max_length=50)
+    name: constr(min_length=1, max_length=100)
 
 
 class NickName(BaseModel):
@@ -242,6 +242,10 @@ class BirthDateSource(Source):
             raise ValueError("Wrong timestamp supplied")
 
 
+class CelPhoneSource(Source):
+    value: constr(min_length=11, max_length=11)
+
+
 class CountrySource(Source):
     value: constr(min_length=3, max_length=3)
 
@@ -266,6 +270,8 @@ class StateSource(Source):
 
 class MotherNameSource(Source):
     value: str
+
+
 
 
 class DocumentTypeSource(Source):
@@ -499,6 +505,10 @@ class CountySource(Source):
         raise ValueError("nationality not exists")
 
 
+class OccupationActivitySource(Source):
+    value: int
+
+
 class MaritalRegimeSource(Source):
     value: int
 
@@ -508,6 +518,14 @@ class MaritalRegimeSource(Source):
         if sinacor_types_repository.validate_marital_regime(value=e):
             return e
         raise ValueError("nationality not exists")
+
+
+class MaritalSpouseNameSource(Source):
+    value: str
+
+
+class MaritalStatusSource(BaseModel):
+    value: MaritalStatusEnum
 
 
 class NeighborhoodSource(Source):
@@ -577,6 +595,10 @@ class PersonRelatedToMarketInfluencerSource(Source):
 
 class CourtOrdersSource(Source):
     value: bool
+
+
+class IdentityDocumentNumber(Source):
+    value: int
 
 
 class LawsuitsSource(Source):

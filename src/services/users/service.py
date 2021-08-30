@@ -13,7 +13,7 @@ from src.controllers.jwts.controller import JwtController
 from src.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
-from src.services.builders.customer_registration.builder import CustomerRegistrationBuilder
+from src.services.builders.user.customer_registration import CustomerRegistrationBuilder
 from src.services.persephone.service import PersephoneService
 from src.services.builders.user.onboarding_steps_builder import OnboardingStepBuilder
 
@@ -905,7 +905,9 @@ class UserService(IUser):
             "cpf": 1,
             "marital": 1,
             "us_tin": 1,
-            "email": 1
+            "email": 1,
+            "father_name": 1,
+            "mother_name": 1,
         }
         customer_registration_data = user_repository.find_one_with_specific_columns({"_id": email}, necessary_data)
         if customer_registration_data is None:
@@ -917,14 +919,16 @@ class UserService(IUser):
                 .personal_birth_date()
                 .personal_email()
                 .personal_phone()
+                .person_gender()
+                .personal_parentage()
                 .personal_patrimony()
                 .personal_work_company_name()
-                .marital_marital_status()
+                .marital_status()
                 .marital_spouse_name()
                 .marital_spouse_cpf()
                 .documents_cpf()
                 .documents_identity_number()
-                .documents_shipping_date()
+                .documents_expedition_date()
                 .documents_issuer()
                 .documents_state()
                 .address_country()

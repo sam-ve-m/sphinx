@@ -1,4 +1,5 @@
 # STANDARD LIBS
+from enum import Enum
 from typing import Union, List, Optional
 
 # OUTSIDE LIBRARIES
@@ -26,7 +27,28 @@ from src.routers.validators.base import (
     FileBase64,
     ElectronicSignature,
     ChangeElectronicSignature,
+    GenderSource,
+    PatrimonySource,
+    CompanyNameSource,
+    CelPhoneSource,
+    NationalitySource,
+    CpfSource,
+    CitySource,
+    StreetNameSource,
+    ZipCodeSource,
+    UsTinSource,
+    IsUsPersonSource,
+    MaritalSpouseNameSource,
+    NameSource,
+    CountrySource,
+    StateSource,
+    MaritalStatusSource,
+    OccupationActivitySource,
+    IssuerSource,
+    Date,
+    IdentityDocumentNumber
 )
+
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
@@ -52,6 +74,35 @@ class UserComplementaryData(MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedInve
 
 class QuizResponses(BaseModel):
     responses: List[QuizQuestionOption]
+
+
+class UpdateCustomerRegistrationData(BaseModel):
+    name: Optional[NameSource]
+    gender: Optional[GenderSource]
+    cel_phone: Optional[CelPhoneSource]
+    patrimony: Optional[PatrimonySource]
+
+    cpf: Optional[CpfSource]
+    document_issuer: Optional[IssuerSource]
+    document_state: Optional[StateSource]
+    document_expedition_date: Optional[Date]
+    document_identity_number: Optional[IdentityDocumentNumber]
+
+    marital_spouse_name: Optional[MaritalSpouseNameSource]
+    marital_status: Optional[MaritalStatusSource]
+
+    company_name: Optional[CompanyNameSource]
+    occupation_activity: Optional[OccupationActivitySource]
+
+    address_city: Optional[CitySource]
+    address_nationality: Optional[NationalitySource]
+    address_street_name_source: Optional[StreetNameSource]
+    address_country: Optional[CountrySource]
+    address_zip_code_source: Optional[ZipCodeSource]
+    address_state: Optional[StateSource]
+
+    us_tin_source: Optional[UsTinSource]
+    is_us_personSource: Optional[IsUsPersonSource]
 
 
 @router.post("/user", tags=["user"])
@@ -313,6 +364,7 @@ def change_electronic_signature(
         UserController.change_electronic_signature, payload, request
     )
 
+
 @router.get("/user/profile_data", tags=["user"])
 def change_electronic_signature(request: Request):
     return {'a': 1}
@@ -345,13 +397,16 @@ def get_customer_registration_data(request: Request):
 
 
 @router.put("/user/customer_registration_data", tags=["user"])
-def update_customer_registration_data(request: Request):
+def update_customer_registration_data(
+        customer_registration_data: UpdateCustomerRegistrationData, request: Request
+):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
+        "customer_registration_data": customer_registration_data.dict()
     }
 
     BaseController.run(

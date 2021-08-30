@@ -19,6 +19,18 @@ class CustomerRegistrationBuilder:
         self.__buffer["personal"].update({"birth_date": birth_date})
         return self
 
+    def personal_parentage(self):
+        father_name = self.__personal_data.get("father_name")
+        self.__buffer["personal"].update({"father_name": father_name})
+        mother_name = self.__personal_data.get("mother_name")
+        self.__buffer["personal"].update({"father_name": mother_name})
+        return self
+
+    def person_gender(self):
+        gender = self.__personal_data.get("gender")
+        self.__buffer["personal"].update({"gender": gender})
+        return self
+
     def personal_email(self):
         email = self.__personal_data.get("email")
         self.__buffer["personal"].update({"email": email})
@@ -36,6 +48,14 @@ class CustomerRegistrationBuilder:
         self.__buffer["personal"].update({"patrimony": patrimony})
         return self
 
+    def personal_occupation_activity(self):
+        occupation_activity = (self.__personal_data
+                               .get("occupation", {})
+                               .get("activity"))
+
+        self.__buffer["personal"].update({"occupation_activity": occupation_activity})
+        return self
+
     def personal_work_company_name(self):
         work_company_name = (self.__personal_data
                              .get("occupation", {})
@@ -44,7 +64,7 @@ class CustomerRegistrationBuilder:
         self.__buffer["personal"].update({"work_company_name": work_company_name})
         return self
 
-    def marital_marital_status(self):
+    def marital_status(self):
         marital_status = (self.__personal_data
                           .get("marital", {})
                           .get("status"))
@@ -80,12 +100,12 @@ class CustomerRegistrationBuilder:
         self.__buffer["documents"].update({"identity_number": identity_number})
         return self
 
-    def documents_shipping_date(self):
-        shipping_date = (self.__personal_data
+    def documents_expedition_date(self):
+        expedition_date = (self.__personal_data
                          .get("identifier_document", {})
                          .get("document_data", {})
                          .get("date"))
-        self.__buffer["documents"].update({"shipping_date": shipping_date})
+        self.__buffer["documents"].update({"expedition_date": expedition_date})
         return self
 
     def documents_issuer(self):
