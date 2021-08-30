@@ -125,6 +125,13 @@ class Order(BaseModel):
     order: int
 
 
+class SignatureCheck(BaseModel):
+    signature: constr(
+        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$"
+    )
+    signature_expire_time: int = None
+
+
 class ValueText(BaseModel):
     value_text: constr(min_length=1, max_length=520)
 

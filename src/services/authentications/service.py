@@ -253,3 +253,11 @@ class AuthenticationService(IAuthentication):
     ) -> bool:
         sincad_status = client_register_repository.get_sincad_status(user_cpf=user_cpf)
         return sincad_status and sincad_status[0] in ["ACE", "ECM"]
+
+    @staticmethod
+    def create_electronic_signature_jwt(payload: dict):
+        jwt_mist_session = JWTHandler.generate_session_jwt(payload.get('electronic_signature'), payload.get("email"))
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": jwt_mist_session[0],
+        }

@@ -54,13 +54,6 @@ class QuizResponses(BaseModel):
     responses: List[QuizQuestionOption]
 
 
-class SignatureCheck(BaseModel):
-    signature: constr(
-        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$"
-    )
-    signature_expire_time: int = None
-
-
 @router.post("/user", tags=["user"])
 def create_user(user: UserSimple, request: Request):
     return BaseController.run(UserController.create, dict(user), request)
@@ -319,24 +312,6 @@ def change_electronic_signature(
     return BaseController.run(
         UserController.change_electronic_signature, payload, request
     )
-
-
-@router.post("/user/create_electronic_signature", tags=["user"])
-def change_electronic_signature(
-        electronic_signature: SignatureCheck, request: Request
-):
-    electronic_signature = electronic_signature.dict()
-    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
-    if isinstance(jwt_data_or_error_response, Response):
-        return jwt_data_or_error_response
-    payload = {
-        "electronic_signature": electronic_signature,
-        "email": jwt_data_or_error_response.get("email")
-    }
-    return BaseController.run(
-        UserController.create_electronic_signature, payload, request
-    )
-
 
 @router.get("/user/profile_data", tags=["user"])
 def change_electronic_signature(request: Request):
