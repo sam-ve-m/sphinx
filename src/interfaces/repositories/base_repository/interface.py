@@ -31,6 +31,10 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
+    def find_one_with_specific_columns(self, query: dict, query_limit: dict) -> Optional[Cursor]:
+        pass
+
+    @abstractmethod
     def update_one(self, old, new) -> bool:
         pass
 

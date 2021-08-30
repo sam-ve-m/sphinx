@@ -13,6 +13,7 @@ from src.controllers.jwts.controller import JwtController
 from src.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
+from src.services.builders.customer_registration.builder import CustomerRegistrationBuilder
 from src.services.persephone.service import PersephoneService
 from src.services.builders.user.onboarding_steps_builder import OnboardingStepBuilder
 
@@ -888,13 +889,59 @@ class UserService(IUser):
 
     @staticmethod
     def get_customer_registration_data(
-        payload: dict, user_repository=UserRepository(),
+            payload: dict, user_repository=UserRepository(),
     ):
-        pass
+        thebes_answer = payload.get("x-thebes-answer")
+        email = thebes_answer.get("email")
+        necessary_data: dict = {
+            "_id": 0,
+            "name": 1,
+            "birth_date": 1,
+            "occupation": 1,
+            "identifier_document": 1,
+            "address": 1,
+            "assets": 1,
+            "cel_phone": 1,
+            "cpf": 1,
+            "marital": 1,
+            "us_tin": 1,
+            "email": 1
+        }
+        customer_registration_data = user_repository.find_one_with_specific_columns({"_id": email}, necessary_data)
+        if customer_registration_data is None:
+            raise BadRequestError("common.register_not_exists")
+
+        customer_registration_data_built = (
+                CustomerRegistrationBuilder(customer_registration_data)
+                .personal_name()
+                .personal_birth_date()
+                .personal_email()
+                .personal_phone()
+                .personal_patrimony()
+                .personal_work_company_name()
+                .marital_marital_status()
+                .marital_spouse_name()
+                .marital_spouse_cpf()
+                .documents_cpf()
+                .documents_identity_number()
+                .documents_shipping_date()
+                .documents_issuer()
+                .documents_state()
+                .address_country()
+                .address_street_name()
+                .address_city()
+                .address_zip_code()
+                .address_state()
+                ).build()
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": customer_registration_data_built
+        }
 
     @staticmethod
     def update_customer_registration_data(
-        payload: dict, user_repository=UserRepository(),
+            payload: dict, user_repository=UserRepository(),
     ):
         pass
 
