@@ -14,6 +14,7 @@ from fastapi import Request, Response, status
 from jwt import JWT, jwk_from_dict, jwk_from_pem
 from jwt.utils import get_int_from_datetime
 from heimdall_client.bifrost import Heimdall
+from mist_client.asgard import Mist
 
 # SPHINX
 from src.i18n.i18n_resolver import i18nResolver as i18n
@@ -21,12 +22,12 @@ from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import InternalServerError
 from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 
-
 class JWTHandler:
     # TODO change this method to use heimdall to validate the given jwt and this to generate the jwt only
     instance = JWT()
     logger = logging.getLogger(config("LOG_NAME"))
     heimdall = Heimdall(logger=logging.getLogger(config("LOG_NAME")))
+    mist = Mist(logger=logging.getLogger(config("LOG_NAME")))
 
     @staticmethod
     def generate_token(payload: dict, args: dict = None, ttl: int = 5) -> Optional[str]:
@@ -169,3 +170,14 @@ class JWTHandler:
                 status_code=status.HTTP_401_UNAUTHORIZED,
             )
         return payload
+
+
+    @staticmethod
+    def generate_session_jwt(eletronic_signature: dict, email: str):
+        session_dict = {
+            "email": email,
+            "password": eletronic_signature.get("signature"),
+            "signatureExpireTime": eletronic_signature.get("signature_expire_time")
+        }
+        JWTHandler.mist.validate_jwt()
+        return JWTHandler.mist.generate_jwt(session_dict)

@@ -62,6 +62,7 @@ def route_is_public(url_request: str, method: str = None) -> bool:
         "/user",
         "/login",
         "/login/admin",
+        "/user/create_eletronic_signature"
     ]
     if method == "POST":
         if url_request in public_paths_post:
