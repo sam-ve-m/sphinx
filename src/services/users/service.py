@@ -806,7 +806,7 @@ class UserService(IUser):
                 "occupation": {
                     "activity": {"source": "PH3W", "value": 304},
                     "company": {
-                        "cpnj": {"source": "PH3W", "value": "25811052000179"},
+                        "cnpj": {"source": "PH3W", "value": "25811052000179"},
                         "name": {"source": "PH3W", "value": "Tudo nosso .com.br"},
                     },
                 },

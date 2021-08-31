@@ -99,7 +99,7 @@ class Address(BaseModel):
 
 
 class Company(BaseModel):
-    cpnj: CnpjSource
+    cnpj: CnpjSource
     name: CompanyNameSource
 
 
