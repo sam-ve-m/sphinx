@@ -101,39 +101,94 @@ class UpdateCustomerRegistrationBuilder:
         return self
 
     def marital_status(self):
-        marital_status = (self.__old_personal_data
+        old_marital_status = (self.__old_personal_data
                           .get("marital", {})
                           .get("status"))
-        self.__update_buffer["marital"].update({"marital_status": marital_status})
+
+        if new_marital_status := self._get_new_value("marital_status"):
+            if self.__update_buffer.get("marital") is None:
+                self.__update_buffer["marital"] = {}
+
+            self.__update_buffer["marital"]["status"] = new_marital_status
+            self._update_diff_date(
+                field="marital_status",
+                old_field=old_marital_status,
+                new_filed=new_marital_status
+            )
         return self
 
     def marital_spouse_name(self):
-        spouse_name = (self.__old_personal_data
+        old_spouse_name = (self.__old_personal_data
                        .get("marital", {})
                        .get("spouse", {})
                        .get("name"))
-        self.__update_buffer["marital"].update({"spouse_name": spouse_name})
+
+        if new_marital_spouse_name := self._get_new_value("marital_spouse_name"):
+            if self.__update_buffer.get("marital") is None:
+                self.__update_buffer["marital"] = {}
+
+            if self.__update_buffer["marital"].get("spouse") is None:
+                self.__update_buffer["marital"]["spouse"] = {}
+
+            self.__update_buffer["marital"]["spouse"]["name"] = new_marital_spouse_name
+            self._update_diff_date(
+                field="marital_spouse_name",
+                old_field=old_spouse_name,
+                new_filed=new_marital_spouse_name
+            )
         return self
 
     def documents_cpf(self):
-        cpf = self.__old_personal_data.get("cpf")
-        self.__update_buffer["documents"].update({"cpf": cpf})
+        old_cpf = self.__old_personal_data.get("cpf")
+        if new_cpf := self._get_new_value("cpf"):
+            self.__update_buffer.update({"cpf": new_cpf})
+            self._update_diff_date(
+                field="cpf",
+                old_field=old_cpf,
+                new_filed=new_cpf
+            )
         return self
 
     def documents_identity_number(self):
-        identity_number = (self.__old_personal_data
+        old_document_identity_number = (self.__old_personal_data
                            .get("identifier_document", {})
                            .get("document_data", {})
                            .get("number"))
-        self.__update_buffer["documents"].update({"identity_number": identity_number})
+
+        if new_document_identity_number := self._get_new_value("document_identity_number"):
+            if self.__update_buffer.get("identifier_document") is None:
+                self.__update_buffer["identifier_document"] = {}
+
+            if self.__update_buffer["identifier_document"].get("document_data") is None:
+                self.__update_buffer["identifier_document"]["document_data"] = {}
+
+            self.__update_buffer["identifier_document"]["document_data"]["number"] = new_document_identity_number
+            self._update_diff_date(
+                field="document_identity_number",
+                old_field=old_document_identity_number,
+                new_filed=new_document_identity_number
+            )
         return self
 
     def documents_expedition_date(self):
-        expedition_date = (self.__old_personal_data
+        old_document_expedition_date = (self.__old_personal_data
                            .get("identifier_document", {})
                            .get("document_data", {})
                            .get("date"))
-        self.__update_buffer["documents"].update({"expedition_date": expedition_date})
+
+        if new_document_expedition_date := self._get_new_value("document_expedition_date"):
+            if self.__update_buffer.get("identifier_document") is None:
+                self.__update_buffer["identifier_document"] = {}
+
+            if self.__update_buffer["identifier_document"].get("document_data") is None:
+                self.__update_buffer["identifier_document"]["document_data"] = {}
+
+            self.__update_buffer["identifier_document"]["document_data"]["number"] = new_document_expedition_date
+            self._update_diff_date(
+                field="document_expedition_date",
+                old_field=old_document_expedition_date,
+                new_filed=new_document_expedition_date
+            )
         return self
 
     def documents_issuer(self):
