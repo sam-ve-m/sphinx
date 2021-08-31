@@ -25,12 +25,7 @@ class SinacorService:
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ):
-        dtvm_client_data_provided_by_bureau = payload.get("output")
-        successful = payload.get("successful")
-        error = payload.get("error")
-
-        if successful is False or error is not None:
-            raise BadRequestError("bureau.error.fail")
+        dtvm_client_data_provided_by_bureau = payload.get("data")
 
         user_database_document = user_repository.find_one(
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}

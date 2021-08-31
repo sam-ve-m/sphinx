@@ -179,8 +179,8 @@ class UsTin(BaseModel):
 # Bureau validators
 
 
-class Uuid(BaseModel):
-    uuid: str
+class ProposalId(BaseModel):
+    proposal_id: str
 
 
 class AppName(BaseModel):

@@ -25,7 +25,7 @@ def get_user_signed_term_template_with_data(payload: dict, file_type: str) -> di
 
 def get_table_response_template_with_data(payload: dict) -> dict:
     return {
-        "stone_age_id": payload.get("uuid"),
+        "stone_age_id": payload.get("proposal_id"),
         "user_id": payload.get("email"),
         "status": payload.get("status"),
         "cpf": payload.get("cpf"),

@@ -7,10 +7,7 @@ from pydantic import BaseModel
 
 # SPHINX
 from src.routers.validators.base import (
-    Uuid,
-    AppName,
-    Successful,
-    Error,
+    ProposalId,
     Decision,
     Status,
     GenderSource,
@@ -98,12 +95,12 @@ class Address(BaseModel):
 
 
 class Company(BaseModel):
-    cnpj: CnpjSource
-    name: CompanyNameSource
+    cnpj: Optional[CnpjSource]
+    name: Optional[CompanyNameSource]
 
 
 class Occupation(BaseModel):
-    activity: ActivitySource
+    activity: Optional[ActivitySource]
     company: Optional[Company]
 
 
@@ -136,7 +133,7 @@ class Birthplace(BaseModel):
     id_city: IdCitySource
 
 
-class Output(Decision, Status):
+class Data(Decision, Status):
     email: Optional[EmailSource]
     name: Optional[NameSource]
     cpf: Optional[CpfSource]
@@ -175,8 +172,8 @@ class Output(Decision, Status):
     date_of_acquisition: Optional[DateOfAcquisition]
 
 
-class BureauCallback(Uuid, AppName, Successful, Error):
-    output: Output
+class BureauCallback(ProposalId):
+    data: Data
 
 
 @router.put("/bureau_callback", tags=["bureau_callback"])

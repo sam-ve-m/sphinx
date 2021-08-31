@@ -594,7 +594,7 @@ class UserService(IUser):
         response = stone_age.get_user_quiz(user_identifier_data)
 
         output = response.get("output")
-        stone_age_contract_uuid = response.get("uuid")
+        stone_age_contract_uuid = response.get("proposal_id")
         current_user_updated = deepcopy(current_user)
         current_user_updated.update(
             {"stone_age_contract_uuid": stone_age_contract_uuid}
@@ -753,7 +753,7 @@ class UserService(IUser):
             "error": None,
             "successful": True,
             "appName": "lionx",
-            "uuid": "21b00324-d240-4c61-a79c-9a0bd7ff6e45",
+            "proposal_id": "21b00324-d240-4c61-a79c-9a0bd7ff6e45",
             "output": {
                 "status": "OK",
                 "decision": "APROVADO",

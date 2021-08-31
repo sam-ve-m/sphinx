@@ -19,7 +19,7 @@ class StoneAge:
         # )
         response = {
             "output": dict(),
-            "uuid": "6d6e2a04-00e4-11ec-9a03-0242ac130003",
+            "proposal_id": "6d6e2a04-00e4-11ec-9a03-0242ac130003",
             "decision": None,
         }
         response["output"].update(
@@ -75,7 +75,7 @@ class StoneAge:
         # )
         response = {
             "output": dict(),
-            "uuid": "94f3dc22-00e4-11ec-9a03-0242ac130003",
+            "proposal_id": "94f3dc22-00e4-11ec-9a03-0242ac130003",
             "decision": "MESA",
         }
         return response
