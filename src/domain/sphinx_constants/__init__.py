@@ -42,7 +42,8 @@ PRIVATE_PATHS = {
     "/views",
     "/feature",
     "/term",
-    "/suitability/quiz"
+    "/suitability/quiz",
+    "/user/customer_registration_data",
 }
 
 PATH_WITH_ELECTRONIC_SIGNATURE_REQUIRED = {
