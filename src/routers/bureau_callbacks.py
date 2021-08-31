@@ -137,42 +137,42 @@ class Birthplace(BaseModel):
 
 
 class Output(Decision, Status):
-    email: EmailSource
-    name: NameSource
-    cpf: CpfSource
-    self_link: SelfLinkSource
-    connected_person: ConnectedPersonSource
-    person_type: PersonTypeSource
-    client_type: ClientTypeSource
-    investor_type: InvestorTypeSource
-    cosif_tax_classification: CosifTaxClassificationSource
-    gender: GenderSource
-    is_us_person: IsUsPersonSource
-    us_tin: UsTinSource
-    irs_sharing: IrsSharingSource
-    birth_date: BirthDateSource
-    birthplace: Birthplace
-    mother_name: MotherNameSource
-    father_name: FatherNameSource
-    identifier_document: IdentifierDocument
+    email: Optional[EmailSource]
+    name: Optional[NameSource]
+    cpf: Optional[CpfSource]
+    self_link: Optional[SelfLinkSource]
+    connected_person: Optional[ConnectedPersonSource]
+    person_type: Optional[PersonTypeSource]
+    client_type: Optional[ClientTypeSource]
+    investor_type: Optional[InvestorTypeSource]
+    cosif_tax_classification: Optional[CosifTaxClassificationSource]
+    gender: Optional[GenderSource]
+    is_us_person: Optional[IsUsPersonSource]
+    us_tin: Optional[UsTinSource]
+    irs_sharing: Optional[IrsSharingSource]
+    birth_date: Optional[BirthDateSource]
+    birthplace: Optional[Birthplace]
+    mother_name: Optional[MotherNameSource]
+    father_name: Optional[FatherNameSource]
+    identifier_document: Optional[IdentifierDocument]
     marital_update: Optional[Marital]
-    address: Address
-    occupation: Occupation
-    assets: Assets
-    education: Education
-    politically_exposed_person: PoliticallyExposedPerson
-    midia_person: MidiaPersonSource
-    person_related_to_market_influencer: PersonRelatedToMarketInfluencerSource
-    court_orders: CourtOrdersSource
-    lawsuits: LawsuitsSource
-    fund_admin_registration: FundAdminRegistrationSource
-    investment_fund_administrators_registration: InvestmentFundAdministratorsRegistrationSource
-    register_auditors_securities_commission: RegisterAuditorsSecuritiesCommissionSource
-    registration_of_other_market_participants_securities_commission: RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource
-    foreign_investors_register_of_annex_iv_not_registered: ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource
-    registration_of_foreign_investors_securities_commission: RegistrationOfForeignInvestorsSecuritiesCommissionSource
-    registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
-    date_of_acquisition: DateOfAcquisition
+    address: Optional[Address]
+    occupation: Optional[Occupation]
+    assets: Optional[Assets]
+    education: Optional[Education]
+    politically_exposed_person: Optional[PoliticallyExposedPerson]
+    midia_person: Optional[MidiaPersonSource]
+    person_related_to_market_influencer: Optional[PersonRelatedToMarketInfluencerSource]
+    court_orders: Optional[CourtOrdersSource]
+    lawsuits: Optional[LawsuitsSource]
+    fund_admin_registration: Optional[FundAdminRegistrationSource]
+    investment_fund_administrators_registration: Optional[InvestmentFundAdministratorsRegistrationSource]
+    register_auditors_securities_commission: Optional[RegisterAuditorsSecuritiesCommissionSource]
+    registration_of_other_market_participants_securities_commission: Optional[RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource]
+    foreign_investors_register_of_annex_iv_not_registered: Optional[ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource]
+    registration_of_foreign_investors_securities_commission: Optional[RegistrationOfForeignInvestorsSecuritiesCommissionSource]
+    registration_representative_of_nonresident_investors_securities_commission: Optional[RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource]
+    date_of_acquisition: Optional[DateOfAcquisition]
 
 
 class BureauCallback(Uuid, AppName, Successful, Error):
