@@ -459,7 +459,7 @@ class PersonTypeSource(Source):
     value: PersonType
 
 
-class InvestorTypeTypeSource(Source):
+class InvestorTypeSource(Source):
     value: int
 
     @validator("value", always=True, allow_reuse=True)

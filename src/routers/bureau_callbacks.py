@@ -41,7 +41,7 @@ from src.routers.validators.base import (
     ConnectedPersonSource,
     ClientTypeSource,
     PersonTypeSource,
-    InvestorTypeTypeSource,
+    InvestorTypeSource,
     CosifTaxClassificationSource,
     MaritalRegimeSource,
     NeighborhoodSource,
@@ -86,7 +86,6 @@ class IdentifierDocument(BaseModel):
 
 
 class Address(BaseModel):
-    country: CountrySource
     street_name: StreetNameSource
     number: AddressNumberSource
     neighborhood: NeighborhoodSource
@@ -99,7 +98,7 @@ class Address(BaseModel):
 
 
 class Company(BaseModel):
-    cpnj: CnpjSource
+    cnpj: CnpjSource
     name: CompanyNameSource
 
 
@@ -138,31 +137,30 @@ class Birthplace(BaseModel):
 
 
 class Output(Decision, Status):
-    gender: GenderSource
     email: EmailSource
     name: NameSource
+    cpf: CpfSource
+    self_link: SelfLinkSource
+    connected_person: ConnectedPersonSource
+    person_type: PersonTypeSource
+    client_type: ClientTypeSource
+    investor_type: InvestorTypeSource
+    cosif_tax_classification: CosifTaxClassificationSource
+    gender: GenderSource
+    is_us_person: IsUsPersonSource
+    us_tin: UsTinSource
+    irs_sharing: IrsSharingSource
     birth_date: BirthDateSource
     birthplace: Birthplace
     mother_name: MotherNameSource
+    father_name: FatherNameSource
     identifier_document: IdentifierDocument
+    marital_update: Optional[Marital]
     address: Address
     occupation: Occupation
     assets: Assets
     education: Education
     politically_exposed_person: PoliticallyExposedPerson
-    date_of_acquisition: DateOfAcquisition
-    connected_person: ConnectedPersonSource
-    person_type: PersonTypeSource
-    client_type: ClientTypeSource
-    investor_type: InvestorTypeTypeSource
-    cosif_tax_classification: CosifTaxClassificationSource
-    marital_update: Optional[Marital]
-    cpf: CpfSource
-    self_link: SelfLinkSource
-    is_us_person: IsUsPersonSource
-    us_tin: UsTinSource
-    irs_sharing: IrsSharingSource
-    father_name: FatherNameSource
     midia_person: MidiaPersonSource
     person_related_to_market_influencer: PersonRelatedToMarketInfluencerSource
     court_orders: CourtOrdersSource
@@ -171,9 +169,10 @@ class Output(Decision, Status):
     investment_fund_administrators_registration: InvestmentFundAdministratorsRegistrationSource
     register_auditors_securities_commission: RegisterAuditorsSecuritiesCommissionSource
     registration_of_other_market_participants_securities_commission: RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource
-    foreign_investors_register_of_annex_iv_not_reregistered: ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource
+    foreign_investors_register_of_annex_iv_not_registered: ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource
     registration_of_foreign_investors_securities_commission: RegistrationOfForeignInvestorsSecuritiesCommissionSource
     registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
+    date_of_acquisition: DateOfAcquisition
 
 
 class BureauCallback(Uuid, AppName, Successful, Error):
