@@ -45,8 +45,8 @@ from src.routers.validators.base import (
     MaritalStatusSource,
     OccupationActivitySource,
     IssuerSource,
-    Date,
-    IdentityDocumentNumber
+    IdentityDocumentNumber, DateSource, AddressNumberSource, AddressIdCitySource, PhoneNumberSource, NeighborhoodSource,
+    CnpjSource, DocumentTypeSource
 )
 
 from src.utils.jwt_utils import JWTHandler
@@ -82,27 +82,33 @@ class UpdateCustomerRegistrationData(BaseModel):
     cel_phone: Optional[CelPhoneSource]
     patrimony: Optional[PatrimonySource]
 
-    cpf: Optional[CpfSource]
+    document_cpf: Optional[CpfSource]
     document_issuer: Optional[IssuerSource]
     document_state: Optional[StateSource]
-    document_expedition_date: Optional[Date]
+    document_expedition_date: Optional[DateSource]
     document_identity_number: Optional[IdentityDocumentNumber]
+    document_type: Optional[DocumentTypeSource]
 
     marital_spouse_name: Optional[MaritalSpouseNameSource]
     marital_status: Optional[MaritalStatusSource]
+    marital_nationality: Optional[NationalitySource]
+    marital_cpf: Optional[CpfSource]
 
     company_name: Optional[CompanyNameSource]
     occupation_activity: Optional[OccupationActivitySource]
+    occupation_cnpj: Optional[CnpjSource]
 
     address_city: Optional[CitySource]
     address_nationality: Optional[NationalitySource]
-    address_street_name_source: Optional[StreetNameSource]
+    address_street_name: Optional[StreetNameSource]
     address_country: Optional[CountrySource]
-    address_zip_code_source: Optional[ZipCodeSource]
+    address_zip_code: Optional[ZipCodeSource]
     address_state: Optional[StateSource]
+    address_number: Optional[AddressNumberSource]
+    address_id_city: Optional[AddressIdCitySource]
+    address_neighborhood: Optional[NeighborhoodSource]
 
-    us_tin_source: Optional[UsTinSource]
-    is_us_personSource: Optional[IsUsPersonSource]
+    us_tin: Optional[UsTinSource]
 
 
 @router.post("/user", tags=["user"])
@@ -412,3 +418,5 @@ def update_customer_registration_data(
     BaseController.run(
         UserController.update_customer_registration_data, payload, request
     )
+
+

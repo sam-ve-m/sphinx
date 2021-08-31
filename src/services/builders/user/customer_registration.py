@@ -26,7 +26,7 @@ class CustomerRegistrationBuilder:
         self.__buffer["personal"].update({"father_name": mother_name})
         return self
 
-    def person_gender(self):
+    def personal_gender(self):
         gender = self.__personal_data.get("gender")
         self.__buffer["personal"].update({"gender": gender})
         return self
@@ -48,6 +48,12 @@ class CustomerRegistrationBuilder:
         self.__buffer["personal"].update({"patrimony": patrimony})
         return self
 
+    def personal_us_tin(self):
+        us_tin = (self.__personal_data
+                  .get("us_tin"))
+        self.__buffer["personal"].update({"us_tin": us_tin})
+        return self
+
     def personal_occupation_activity(self):
         occupation_activity = (self.__personal_data
                                .get("occupation", {})
@@ -56,12 +62,12 @@ class CustomerRegistrationBuilder:
         self.__buffer["personal"].update({"occupation_activity": occupation_activity})
         return self
 
-    def personal_work_company_name(self):
-        work_company_name = (self.__personal_data
-                             .get("occupation", {})
-                             .get("company", {})
-                             .get("name"))
-        self.__buffer["personal"].update({"work_company_name": work_company_name})
+    def personal_company_name(self):
+        company_name = (self.__personal_data
+                         .get("occupation", {})
+                         .get("company", {})
+                         .get("name"))
+        self.__buffer["personal"].update({"company_name": company_name})
         return self
 
     def marital_status(self):
@@ -85,6 +91,22 @@ class CustomerRegistrationBuilder:
                       .get("spouse", {})
                       .get("cpf"))
         self.__buffer["marital"].update({"spouse_cpf": spouse_cpf})
+        return self
+
+    def marital_cpf(self):
+        marital_cpf = (self.__personal_data
+                           .get("marital", {})
+                           .get("spouse", {})
+                           .get("cpf"))
+        self.__buffer["marital"].update({"marital_cpf": marital_cpf})
+        return self
+
+    def marital_nationality(self):
+        nationality = (self.__personal_data
+                           .get("marital", {})
+                           .get("spouse", {})
+                           .get("nationality"))
+        self.__buffer["marital"].update({"nationality": nationality})
         return self
 
     def documents_cpf(self):
@@ -131,6 +153,13 @@ class CustomerRegistrationBuilder:
         self.__buffer["address"].update({"country": country})
         return self
 
+    def address_number(self):
+        number = (self.__personal_data
+                   .get("address", {})
+                   .get("number"))
+        self.__buffer["address"].update({"number": number})
+        return self
+
     def address_street_name(self):
         street_name = (self.__personal_data
                        .get("address", {})
@@ -143,6 +172,13 @@ class CustomerRegistrationBuilder:
                 .get("address", {})
                 .get("city"))
         self.__buffer["address"].update({"city": city})
+        return self
+
+    def address_neighborhood(self):
+        neighborhood = (self.__personal_data
+                        .get("address", {})
+                        .get("neighborhood"))
+        self.__buffer["address"].update({"neighborhood": neighborhood})
         return self
 
     def address_zip_code(self):
