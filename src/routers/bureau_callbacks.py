@@ -71,15 +71,15 @@ router = APIRouter()
 
 
 class DocumentData(BaseModel):
-    number: CpfOrCnpjSource
-    date: DateSource
-    state: StateSource
-    issuer: IssuerSource
+    number: Optional[CpfOrCnpjSource]
+    date: Optional[DateSource]
+    state: Optional[StateSource]
+    issuer: Optional[IssuerSource]
 
 
 class IdentifierDocument(BaseModel):
-    type: DocumentTypeSource
-    document_data: DocumentData
+    type: Optional[DocumentTypeSource]
+    document_data: Optional[DocumentData]
 
 
 class Address(BaseModel):
@@ -105,10 +105,10 @@ class Occupation(BaseModel):
 
 
 class Assets(BaseModel):
-    patrimony: PatrimonySource
-    income: IncomeSource
-    income_tax_type: IncomeTaxTypeSource
-    date: AssetsDateSource
+    patrimony: Optional[PatrimonySource]
+    income: Optional[IncomeSource]
+    income_tax_type: Optional[IncomeTaxTypeSource]
+    date: Optional[AssetsDateSource]
 
 
 class Education(BaseModel):
@@ -117,20 +117,23 @@ class Education(BaseModel):
 
 
 class PoliticallyExposedPerson(BaseModel):
-    is_politically_exposed_person: IsPoliticallyExposedPerson
+    is_politically_exposed_person: Optional[IsPoliticallyExposedPerson]
 
 
 class Marital(BaseModel):
-    marital_regime: MaritalRegimeSource
-    spouse_birth_date: BirthDateSource
+    marital_regime: Optional[MaritalRegimeSource]
+    cpf: Optional[CpfSource]
+    name: Optional[NameSource]
+    nationality: Optional[NationalitySource]
+    spouse_birth_date: Optional[BirthDateSource]
 
 
 class Birthplace(BaseModel):
-    nationality: NationalitySource
-    country: CountrySource
-    state: StateSource
-    city: CitySource
-    id_city: IdCitySource
+    nationality: Optional[NationalitySource]
+    country: Optional[CountrySource]
+    state: Optional[StateSource]
+    city: Optional[CitySource]
+    id_city: Optional[IdCitySource]
 
 
 class Data(Decision, Status):

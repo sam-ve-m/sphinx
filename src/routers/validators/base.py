@@ -243,7 +243,7 @@ class CountrySource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_country(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("Country not exists in our country enum")
 
 
 class StateSource(Source):
@@ -254,7 +254,7 @@ class StateSource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_state(value=e):
             return e
-        raise ValueError("naturalness not exists")
+        raise ValueError("State not exists in our state enum")
 
 
 class MotherNameSource(Source):
@@ -296,18 +296,6 @@ class DateSource(Source):
         except:
             raise ValueError("Wrong timestamp supplied")
 
-
-class StateSource(Source):
-    value: constr(min_length=2, max_length=2)
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_state(value=e):
-            return e
-        raise ValueError("state not exists")
-
-
 class IssuerSource(Source):
     value: str
 
@@ -320,17 +308,6 @@ class AddressNumberSource(Source):
     value: str
 
 
-class CountrySource(Source):
-    value: constr(min_length=3, max_length=3)
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_country(value=e):
-            return e
-        raise ValueError("nationality not exists")
-
-
 class NationalitySource(Source):
     value: int
 
@@ -339,7 +316,7 @@ class NationalitySource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_nationality(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("Nationality not exists in our nationality enum")
 
 
 class CitySource(Source):
@@ -350,7 +327,7 @@ class CitySource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_city(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("City not exists in our City enum")
 
 
 class IdCitySource(Source):
@@ -361,7 +338,7 @@ class IdCitySource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_city_id(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("IdCity not exists in our IdCity enum")
 
 
 class ZipCodeSource(Source):
@@ -380,7 +357,7 @@ class ActivitySource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_activity(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("Activity not exists in our activity enum")
 
 
 class CnpjSource(Source):
@@ -418,7 +395,7 @@ class IsPoliticallyExposedPerson(Source):
 
 
 class DateOfAcquisition(Source):
-    value: int
+    value: float
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
@@ -437,7 +414,7 @@ class IncomeTaxTypeSource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_income_tax_type(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("IncomeTaxType not exists in our income tax type enum")
 
 
 class ConnectedPersonSource(Source):
@@ -452,7 +429,7 @@ class ClientTypeSource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_client_type(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("ClientType not exists in our client type enum")
 
 
 class PersonTypeSource(Source):
@@ -467,7 +444,7 @@ class InvestorTypeSource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_investor_type(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("InvestorType not exists in our investor type enum")
 
 
 class CosifTaxClassificationSource(Source):
@@ -478,7 +455,7 @@ class CosifTaxClassificationSource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_cosif_tax_classification(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("CosifTaxClassificationSource not exists in our contry enum")
 
 
 class CountySource(Source):
@@ -489,7 +466,7 @@ class CountySource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_county(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("Contry not exists in our contry enum")
 
 
 class MaritalRegimeSource(Source):
@@ -500,7 +477,7 @@ class MaritalRegimeSource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_marital_regime(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("Marital regime not exists in our marital regime enum")
 
 
 class NeighborhoodSource(Source):
@@ -541,7 +518,7 @@ class NameSource(Source):
 
 
 class SelfLinkSource(Source):
-    value: str
+    value: str = None
 
 
 class IsUsPersonSource(Source):
@@ -573,10 +550,6 @@ class CourtOrdersSource(Source):
 
 
 class LawsuitsSource(Source):
-    value: bool
-
-
-class FundAdminRegistrationSource(Source):
     value: bool
 
 

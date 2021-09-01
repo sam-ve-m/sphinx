@@ -30,6 +30,10 @@ class SinacorService:
         user_database_document = user_repository.find_one(
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
         )
+
+        fake_stone_age = SinacorService._get_fake_stone_age_callback(email=user_database_document.get("_id"), cpf=user_database_document.get("cpf"))
+        dtvm_client_data_provided_by_bureau = SinacorService._merge_fake_object_with_stone_age_data(fake_object=fake_stone_age.get("data"), stone_age_data=dtvm_client_data_provided_by_bureau)
+
         database_and_bureau_dtvm_client_data_merged = (
             SinacorService._merge_bureau_client_data_with_user_database(
                 output=dtvm_client_data_provided_by_bureau,
@@ -57,8 +61,6 @@ class SinacorService:
             new=database_and_bureau_dtvm_client_data_merged,
         )
 
-        fake_stone_age = SinacorService._get_fake_stone_age_callback(email=user_database_document.get("_id"), cpf=user_database_document.get("cpf"))
-
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
 
@@ -66,6 +68,35 @@ class SinacorService:
             "status_code": status.HTTP_200_OK,
             "message_key": "ok",
         }
+
+    @staticmethod
+    def _merge_fake_object_with_stone_age_data(fake_object: dict, stone_age_data: dict) -> dict:
+        fake_object_keys = fake_object.keys()
+
+        for fake_object_key in fake_object_keys:
+            if fake_object_key == "self_link":
+                print(fake_object_key)
+            stone_age_data[fake_object_key] = SinacorService.chupeta(fake_object=fake_object[fake_object_key], stone_age_data=stone_age_data[fake_object_key])
+
+        return stone_age_data
+
+    @staticmethod
+    def chupeta(fake_object: dict, stone_age_data: dict):
+        if stone_age_data is None:
+            stone_age_data = fake_object
+        elif type(fake_object) is dict:
+            inside_keys = fake_object.keys()
+            for inside_key in inside_keys:
+                updated_value = SinacorService.chupeta(
+                    fake_object=fake_object[inside_key],
+                    stone_age_data=stone_age_data[inside_key],
+                )
+                stone_age_data[inside_key] = updated_value
+        else:
+            if stone_age_data is None:
+                stone_age_data = fake_object
+
+        return stone_age_data
 
     @staticmethod
     def _create_client_into_sinacor(
@@ -279,7 +310,7 @@ class SinacorService:
                 "occupation": {
                     "activity": {"source": "PH3W", "value": 304},
                     "company": {
-                        "cpnj": {"source": "PH3W", "value": "25811052000179"},
+                        "cnpj": {"source": "PH3W", "value": "25811052000179"},
                         "name": {"source": "PH3W", "value": "Tudo nosso .com.br"},
                     },
                 },
@@ -338,7 +369,7 @@ class SinacorService:
                     "source": "PH3W",
                     "value": False,
                 },
-                "foreign_investors_register_of_annex_iv_not_reregistered": {
+                "foreign_investors_register_of_annex_iv_not_registered": {
                     "source": "PH3W",
                     "value": False,
                 },
