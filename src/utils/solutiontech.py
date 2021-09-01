@@ -11,7 +11,6 @@ class Solutiontech:
 
     response_message_map = {
         "Cliente encontrado!": SolutiontechClientImportStatus.SYNC.value,
-        "Cliente não encontrado!": SolutiontechClientImportStatus.SEND.value,
     }
 
     @staticmethod
@@ -21,6 +20,8 @@ class Solutiontech:
         base_url_solutiontech = config("SOLUTIONTECH_BASE_URL")
         solutiontech_verify_dtvm_client = config("SOLUTIONTECH_VERIFY_DTVM_CLIENT")
         response_message = None
+
+        Solutiontech.response_message_map.update({"Cliente não encontrado!": user_solutiontech_status_from_database})
         try:
             # Verificar necessidade de retirar o verify=False
             response = requests.get(

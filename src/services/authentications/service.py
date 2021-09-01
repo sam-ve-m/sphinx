@@ -135,7 +135,7 @@ class AuthenticationService(IAuthentication):
 
         user_solutiontech_status_from_database = user.get("solutiontech")
         user_sincad_status_from_database = user.get("sincad")
-        user_bmf_account_from_database = int(user.get("bmf_account"))
+        user_bmf_account_from_database = user.get("bmf_account")
         user_cpf_from_database = user.get("cpf")
 
         client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
@@ -149,9 +149,9 @@ class AuthenticationService(IAuthentication):
 
         if user_has_valid_solutiontech_status_in_database:
             user_solutiontech_status_from_check_status_request = Solutiontech.check_if_client_is_synced_with_solutiontech(
-                user_bmf_code=user_bmf_account_from_database,
-                user_solutiontech_status_from_database=user_solutiontech_status_from_database,
-            )
+                    user_bmf_code=int(user_bmf_account_from_database),
+                    user_solutiontech_status_from_database=user_solutiontech_status_from_database
+                )
 
             client_has_trade_allowed_status_with_database_user = AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
                 client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
