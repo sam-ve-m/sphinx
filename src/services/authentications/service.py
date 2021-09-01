@@ -149,9 +149,9 @@ class AuthenticationService(IAuthentication):
 
         if user_has_valid_solutiontech_status_in_database:
             user_solutiontech_status_from_check_status_request = Solutiontech.check_if_client_is_synced_with_solutiontech(
-                    user_bmf_code=int(user_bmf_account_from_database),
-                    user_solutiontech_status_from_database=user_solutiontech_status_from_database
-                )
+                user_bmf_code=int(user_bmf_account_from_database),
+                user_solutiontech_status_from_database=user_solutiontech_status_from_database,
+            )
 
             client_has_trade_allowed_status_with_database_user = AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
                 client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -164,8 +164,10 @@ class AuthenticationService(IAuthentication):
             is SincadClientImportStatus.NOT_SYNCED.value
         )
         if user_is_already_sync_with_sincad:
-            sincad_status_from_sinacor = AuthenticationService.sinacor_is_synced_with_sincad(
-                user_cpf=user_cpf_from_database
+            sincad_status_from_sinacor = (
+                AuthenticationService.sinacor_is_synced_with_sincad(
+                    user_cpf=user_cpf_from_database
+                )
             )
 
             AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
@@ -256,7 +258,9 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def create_electronic_signature_jwt(payload: dict):
-        jwt_mist_session = JWTHandler.generate_session_jwt(payload.get('electronic_signature'), payload.get("email"))
+        jwt_mist_session = JWTHandler.generate_session_jwt(
+            payload.get("electronic_signature"), payload.get("email")
+        )
         return {
             "status_code": status.HTTP_200_OK,
             "payload": jwt_mist_session[0],

@@ -265,7 +265,9 @@ def test_add_feature_already_exists(get_user_data, get_new_stubby_repository):
 
 def test_add_feature_process_issue(get_user_data, get_new_stubby_repository):
     copy = dict(get_user_data)
-    copy.update({"scope": {"view_type": None, "features": []}},)
+    copy.update(
+        {"scope": {"view_type": None, "features": []}},
+    )
     payload = {
         "x-thebes-answer": copy,
         "feature": "real_time_data",
@@ -492,7 +494,8 @@ def test_user_identifier_data_register_not_exists(
     StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         UserService.user_identifier_data(
-            payload=payload_user_identifier_data, user_repository=stub_user_repository,
+            payload=payload_user_identifier_data,
+            user_repository=stub_user_repository,
         )
 
 
@@ -519,7 +522,8 @@ def test_user_identifier_data_process_issue_v2(
     StubStoneAge.send_user_identifier_data = MagicMock(return_value={"a": 123})
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.user_identifier_data(
-            payload=payload_user_identifier_data, user_repository=stub_user_repository,
+            payload=payload_user_identifier_data,
+            user_repository=stub_user_repository,
         )
 
 
@@ -529,7 +533,8 @@ def test_user_identifier_data(get_user_data, get_new_stubby_repository):
     StubStoneAge.send_user_identifier_data = MagicMock(return_value={"a": 123})
     stub_user_repository.update_one = MagicMock(return_value=True)
     response = UserService.user_identifier_data(
-        payload=payload_user_identifier_data, user_repository=stub_user_repository,
+        payload=payload_user_identifier_data,
+        user_repository=stub_user_repository,
     )
     assert response.get("status_code") == status.HTTP_200_OK
 
@@ -626,7 +631,15 @@ def test_fill_term_signed_empty_terms_on_payload():
 
 
 def test_fill_term_signed_filled_terms_on_payload():
-    payload = {"terms": {"aaa": {"version": 2, "date": None, "is_deprecated": False,}}}
+    payload = {
+        "terms": {
+            "aaa": {
+                "version": 2,
+                "date": None,
+                "is_deprecated": False,
+            }
+        }
+    }
     UserService.fill_term_signed(payload=payload, file_type="xxx", version=1)
     assert type(payload.get("terms")) == dict
     assert len(payload.get("terms")) == 2

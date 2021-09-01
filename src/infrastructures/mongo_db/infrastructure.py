@@ -82,7 +82,9 @@ class MongoDBInfrastructure(IRepository):
             logger.error(e, exc_info=True)
             return
 
-    def find_one_with_specific_columns(self, query: dict, query_limit: dict) -> Optional[dict]:
+    def find_one_with_specific_columns(
+        self, query: dict, query_limit: dict
+    ) -> Optional[dict]:
         try:
             return self.collection.find_one(query, query_limit)
         except Exception as e:
@@ -144,7 +146,9 @@ class MongoDBInfrastructure(IRepository):
 
         query_hash = hash_field(payload=query)
         cache.set(
-            key=f"{self.base_identifier}:{query_hash}", value=data, ttl=ttl,
+            key=f"{self.base_identifier}:{query_hash}",
+            value=data,
+            ttl=ttl,
         )
 
     @staticmethod

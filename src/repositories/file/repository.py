@@ -49,7 +49,10 @@ class FileRepository(IFile):
         return bucket_name
 
     def save_user_file(
-        self, file_type: UserFileType, content: Union[str, bytes], user_email: str,
+        self,
+        file_type: UserFileType,
+        content: Union[str, bytes],
+        user_email: str,
     ) -> None:
         path = self.resolve_user_path(user_email=user_email, file_type=file_type)
         file_name = file_type.value
@@ -71,7 +74,9 @@ class FileRepository(IFile):
             raise InternalServerError("files.error")
 
         objects = self.s3_client.list_objects(
-            Bucket=self.bucket_name, Prefix=prefix, Delimiter="/",
+            Bucket=self.bucket_name,
+            Prefix=prefix,
+            Delimiter="/",
         )
 
         content = objects.get("Contents")

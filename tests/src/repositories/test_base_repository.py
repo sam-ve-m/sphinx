@@ -242,7 +242,13 @@ def test__get_from_cache_query_is_none() -> None:
     stub_cache = StubCache()
     stub_cache.get = MagicMock(return_value=None)
     stub_cache.set = MagicMock(return_value=None)
-    assert stub_base_repository._get_from_cache(query=None, cache=stub_cache,) is None
+    assert (
+        stub_base_repository._get_from_cache(
+            query=None,
+            cache=stub_cache,
+        )
+        is None
+    )
 
 
 def test__get_from_cache_cached() -> None:
@@ -254,6 +260,10 @@ def test__get_from_cache_cached() -> None:
     stub_cache = StubCache()
     stub_cache.get = MagicMock(return_value={"test__get_from_cache_cached": 1})
     stub_cache.set = MagicMock(return_value=None)
-    assert stub_base_repository._get_from_cache(
-        query={"test_insert_user_false": "test_insert_user_false"}, cache=stub_cache,
-    ) == {"test__get_from_cache_cached": 1}
+    assert (
+        stub_base_repository._get_from_cache(
+            query={"test_insert_user_false": "test_insert_user_false"},
+            cache=stub_cache,
+        )
+        == {"test__get_from_cache_cached": 1}
+    )

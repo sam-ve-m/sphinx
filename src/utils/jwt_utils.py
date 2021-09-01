@@ -22,6 +22,7 @@ from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import InternalServerError
 from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 
+
 class JWTHandler:
     # TODO change this method to use heimdall to validate the given jwt and this to generate the jwt only
     instance = JWT()
@@ -182,6 +183,6 @@ class JWTHandler:
         session_dict = {
             "email": email,
             "password": electronic_signature.get("signature"),
-            "signatureExpireTime": electronic_signature.get("signature_expire_time")
+            "signatureExpireTime": electronic_signature.get("signature_expire_time"),
         }
         return JWTHandler.mist.generate_jwt(session_dict)

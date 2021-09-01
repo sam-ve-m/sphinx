@@ -34,19 +34,40 @@ class SinacorService:
         user_database_document = user_repository.find_one(
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
         )
-        database_and_bureau_dtvm_client_data_merged = SinacorService._merge_bureau_client_data_with_user_database(
-            output=dtvm_client_data_provided_by_bureau,
-            user_database_document=user_database_document,
+        database_and_bureau_dtvm_client_data_merged = (
+            SinacorService._merge_bureau_client_data_with_user_database(
+                output=dtvm_client_data_provided_by_bureau,
+                user_database_document=user_database_document,
+            )
         )
 
+        SinacorService.save_or_update_client_data(
+            user_data=database_and_bureau_dtvm_client_data_merged,
+            client_register_repository=client_register_repository,
+            user_repository=user_repository,
+            persephone_client=persephone_client
+        )
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "ok",
+        }
+
+    @staticmethod
+    def save_or_update_client_data(
+            user_data: dict,
+            client_register_repository=ClientRegisterRepository(),
+            user_repository=UserRepository(),
+            persephone_client=PersephoneService.get_client(),
+    ):
         SinacorService._send_dtvm_client_data_to_persephone(
             persephone_client=persephone_client,
-            dtvm_client_data=database_and_bureau_dtvm_client_data_merged,
+            dtvm_client_data=user_data,
         )
 
         database_and_bureau_dtvm_client_data_merged = SinacorService._create_client_into_sinacor(
             client_register_repository=client_register_repository,
-            database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
+            database_and_bureau_dtvm_client_data_merged=user_data,
         )
 
         database_and_bureau_dtvm_client_data_merged = SinacorService._add_dtvm_client_trade_metadata(
@@ -55,16 +76,12 @@ class SinacorService:
         )
 
         user_is_updated = user_repository.update_one(
-            old=user_database_document, new=database_and_bureau_dtvm_client_data_merged,
+            old={"_id": database_and_bureau_dtvm_client_data_merged.get("email")},
+            new=database_and_bureau_dtvm_client_data_merged,
         )
 
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
-
-        return {
-            "status_code": status.HTTP_200_OK,
-            "message_key": "ok",
-        }
 
     @staticmethod
     def _create_client_into_sinacor(
@@ -116,8 +133,10 @@ class SinacorService:
             user_cpf=database_and_bureau_dtvm_client_data_merged["cpf"]
         )
 
-        sinacor_user_control_data = client_register_repository.get_user_control_data_if_user_already_exists(
-            user_cpf=database_and_bureau_dtvm_client_data_merged["cpf"]
+        sinacor_user_control_data = (
+            client_register_repository.get_user_control_data_if_user_already_exists(
+                user_cpf=database_and_bureau_dtvm_client_data_merged["cpf"]
+            )
         )
 
         return sinacor_user_control_data
@@ -147,8 +166,10 @@ class SinacorService:
             }
         )
 
-        sinacor_user_control_data = client_register_repository.get_user_control_data_if_user_already_exists(
-            user_cpf=client_cpf
+        sinacor_user_control_data = (
+            client_register_repository.get_user_control_data_if_user_already_exists(
+                user_cpf=client_cpf
+            )
         )
 
         account_prefix = sinacor_user_control_data[0]

@@ -126,9 +126,7 @@ class Order(BaseModel):
 
 
 class SignatureCheck(BaseModel):
-    signature: constr(
-        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$"
-    )
+    signature: constr(regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$")
     signature_expire_time: int = None
 
 
@@ -272,8 +270,6 @@ class MotherNameSource(Source):
     value: str
 
 
-
-
 class DocumentTypeSource(Source):
     value: DocumentTypes
 
@@ -335,6 +331,7 @@ class AddressNumberSource(Source):
 
 class AddressIdCitySource(Source):
     value: int
+
 
 class CountrySource(Source):
     value: constr(min_length=3, max_length=3)

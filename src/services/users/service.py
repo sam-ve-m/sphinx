@@ -14,7 +14,9 @@ from src.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
 from src.services.builders.user.customer_registration import CustomerRegistrationBuilder
-from src.services.builders.user.customer_registration_update import UpdateCustomerRegistrationBuilder
+from src.services.builders.user.customer_registration_update import (
+    UpdateCustomerRegistrationBuilder,
+)
 from src.services.persephone.service import PersephoneService
 from src.services.builders.user.onboarding_steps_builder import OnboardingStepBuilder
 
@@ -44,10 +46,10 @@ from src.exceptions.exceptions import (
 class UserService(IUser):
     @staticmethod
     def create(
-            payload: dict,
-            user_repository=UserRepository(),
-            authentication_service=AuthenticationService,
-            persephone_client=PersephoneService.get_client(),
+        payload: dict,
+        user_repository=UserRepository(),
+        authentication_service=AuthenticationService,
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         payload = generate_id("email", payload, must_remove=False)
         has_pin = payload.get("pin")
@@ -92,7 +94,7 @@ class UserService(IUser):
 
     @staticmethod
     def delete(
-            payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
@@ -125,7 +127,7 @@ class UserService(IUser):
 
     @staticmethod
     def reset_electronic_signature(
-            payload: dict, user_repository=UserRepository()
+        payload: dict, user_repository=UserRepository()
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         forgot_electronic_signature = thebes_answer.get("forgot_electronic_signature")
@@ -153,10 +155,10 @@ class UserService(IUser):
         user_from_database_to_update["electronic_signature_wrong_attempts"] = 0
 
         if (
-                user_repository.update_one(
-                    old=user_from_database, new=user_from_database_to_update
-                )
-                is False
+            user_repository.update_one(
+                old=user_from_database, new=user_from_database_to_update
+            )
+            is False
         ):
             raise InternalServerError("common.process_issue")
 
@@ -172,7 +174,7 @@ class UserService(IUser):
 
     @staticmethod
     def change_electronic_signature(
-            payload: dict, user_repository=UserRepository()
+        payload: dict, user_repository=UserRepository()
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         current_electronic_signature = payload.get("current_electronic_signature")
@@ -202,8 +204,8 @@ class UserService(IUser):
         )
 
         is_correct_electronic_signature_typed = (
-                encrypted_current_electronic_signature
-                == encrypted_electronic_signature_from_database
+            encrypted_current_electronic_signature
+            == encrypted_electronic_signature_from_database
         )
 
         if not is_correct_electronic_signature_typed:
@@ -215,10 +217,10 @@ class UserService(IUser):
         ] = encrypted_new_electronic_signature
 
         if (
-                user_repository.update_one(
-                    old=user_from_database, new=user_from_database_to_update
-                )
-                is False
+            user_repository.update_one(
+                old=user_from_database, new=user_from_database_to_update
+            )
+            is False
         ):
             raise InternalServerError("common.process_issue")
 
@@ -229,7 +231,7 @@ class UserService(IUser):
 
     @staticmethod
     def change_view(
-            payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         new_view = payload.get("new_view")
@@ -246,9 +248,9 @@ class UserService(IUser):
 
     @staticmethod
     def forgot_password(
-            payload: dict,
-            user_repository=UserRepository(),
-            authentication_service=AuthenticationService,
+        payload: dict,
+        user_repository=UserRepository(),
+        authentication_service=AuthenticationService,
     ):
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
@@ -283,7 +285,7 @@ class UserService(IUser):
 
     @staticmethod
     def add_feature(
-            payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         old = payload.get("x-thebes-answer")
         new = deepcopy(old)
@@ -304,7 +306,7 @@ class UserService(IUser):
 
     @staticmethod
     def delete_feature(
-            payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
         old = payload.get("x-thebes-answer")
         new = deepcopy(old)
@@ -327,8 +329,8 @@ class UserService(IUser):
 
     @staticmethod
     def save_user_selfie(
-            payload: dict,
-            file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
+        payload: dict,
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         UserService.onboarding_step_validator(
@@ -346,11 +348,11 @@ class UserService(IUser):
 
     @staticmethod
     def sign_term(
-            payload: dict,
-            file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
-            user_repository=UserRepository(),
-            token_handler=JWTHandler,
-            persephone_client=PersephoneService.get_client(),
+        payload: dict,
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
+        user_repository=UserRepository(),
+        token_handler=JWTHandler,
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         old = user_repository.find_one({"_id": thebes_answer.get("email")})
@@ -372,7 +374,7 @@ class UserService(IUser):
             schema_key="term_schema",
         )
         if (
-                sent_to_persephone and user_repository.update_one(old=old, new=new)
+            sent_to_persephone and user_repository.update_one(old=old, new=new)
         ) is False:
             raise InternalServerError("common.unable_to_process")
         jwt = token_handler.generate_token(payload=new, ttl=525600)
@@ -416,16 +418,16 @@ class UserService(IUser):
 
     @staticmethod
     def get_signed_term(
-            payload: dict,
-            file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
+        payload: dict,
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
     ) -> dict:
         file_type = payload.get("file_type")
         try:
             version = (
                 payload.get("x-thebes-answer")
-                    .get("terms")
-                    .get(file_type.value)
-                    .get("version")
+                .get("terms")
+                .get(file_type.value)
+                .get("version")
             )
         except Exception:
             return {
@@ -443,7 +445,10 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def user_identifier_data(payload: dict, user_repository=UserRepository(), ) -> dict:
+    def user_identifier_data(
+        payload: dict,
+        user_repository=UserRepository(),
+    ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         user_identifier_data = payload.get("user_identifier")
 
@@ -467,10 +472,10 @@ class UserService(IUser):
             user_identifier_data=user_identifier_data,
         )
         if (
-                user_repository.update_one(
-                    old=current_user, new=current_user_with_identifier_data
-                )
-                is False
+            user_repository.update_one(
+                old=current_user, new=current_user_with_identifier_data
+            )
+            is False
         ):
             raise InternalServerError("common.process_issue")
         return {
@@ -480,14 +485,15 @@ class UserService(IUser):
 
     @staticmethod
     def add_user_identifier_data_on_current_user(
-            payload: dict, user_identifier_data: dict
+        payload: dict, user_identifier_data: dict
     ):
         payload["cpf"] = user_identifier_data.get("cpf")
         payload["cel_phone"] = user_identifier_data.get("cel_phone")
 
     @staticmethod
     def user_complementary_data(
-            payload: dict, user_repository=UserRepository(),
+        payload: dict,
+        user_repository=UserRepository(),
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_complementary_step"
@@ -505,10 +511,10 @@ class UserService(IUser):
         )
 
         if (
-                user_repository.update_one(
-                    old=current_user, new=current_user_with_complementary_data
-                )
-                is False
+            user_repository.update_one(
+                old=current_user, new=current_user_with_complementary_data
+            )
+            is False
         ):
             raise InternalServerError("common.process_issue")
         return {
@@ -518,7 +524,7 @@ class UserService(IUser):
 
     @staticmethod
     def add_user_complementary_data_on_current_user(
-            payload: dict, user_complementary_data
+        payload: dict, user_complementary_data
     ):
         payload["is_us_person"] = user_complementary_data.get("is_us_person")
         payload["us_tin"] = user_complementary_data.get("us_tin")
@@ -548,7 +554,7 @@ class UserService(IUser):
 
     @staticmethod
     def user_quiz(
-            payload: dict, stone_age=StoneAge, user_repository=UserRepository()
+        payload: dict, stone_age=StoneAge, user_repository=UserRepository()
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_quiz_step"
@@ -559,7 +565,7 @@ class UserService(IUser):
             payload=payload
         )
         if UserService.can_send_quiz(
-                user_onboarding_current_step=user_onboarding_current_step
+            user_onboarding_current_step=user_onboarding_current_step
         ):
             return {
                 "status_code": status.HTTP_400_BAD_REQUEST,
@@ -599,8 +605,8 @@ class UserService(IUser):
         current_user_updated.update({"register_analyses": output.get("decision")})
 
         if (
-                user_repository.update_one(old=current_user, new=current_user_updated)
-                is False
+            user_repository.update_one(old=current_user, new=current_user_updated)
+            is False
         ):
             raise InternalServerError("common.process_issue")
 
@@ -608,10 +614,10 @@ class UserService(IUser):
 
     @staticmethod
     def send_quiz_responses(
-            payload: dict,
-            user_repository=UserRepository(),
-            stone_age=StoneAge,
-            persephone_client=PersephoneService.get_client(),
+        payload: dict,
+        user_repository=UserRepository(),
+        stone_age=StoneAge,
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
 
         thebes_answer = payload.get("x-thebes-answer")
@@ -636,8 +642,8 @@ class UserService(IUser):
         if must_send_quiz:
             current_user_updated.update({"register_analyses": "PENDING"})
             if (
-                    user_repository.update_one(old=current_user, new=current_user_updated)
-                    is False
+                user_repository.update_one(old=current_user, new=current_user_updated)
+                is False
             ):
                 raise InternalServerError("common.process_issue")
 
@@ -648,21 +654,21 @@ class UserService(IUser):
 
     @staticmethod
     def fill_account_data_on_user_document(
-            payload: dict, stone_age_user_data: dict, stone_age=StoneAge
+        payload: dict, stone_age_user_data: dict, stone_age=StoneAge
     ):
         if payload.get("provided_by_bureaux") is None:
             payload["provided_by_bureaux"] = dict()
         for key, value in stone_age.get_only_values_from_user_data(
-                user_data=stone_age_user_data
+            user_data=stone_age_user_data
         ).items():
             payload["provided_by_bureaux"].update({key: value})
         payload["provided_by_bureaux"]["concluded_at"] = datetime.now()
 
     @staticmethod
     def get_onboarding_user_current_step(
-            payload: dict,
-            user_repository=UserRepository(),
-            file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
+        payload: dict,
+        user_repository=UserRepository(),
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
     ) -> dict:
         onboarding_step_builder = OnboardingStepBuilder()
         thebes_answer = payload.get("x-thebes-answer")
@@ -678,19 +684,19 @@ class UserService(IUser):
 
         onboarding_steps = (
             onboarding_step_builder.user_suitability_step(current_user=current_user)
-                .user_identifier_step(current_user=current_user)
-                .user_selfie_step(user_file_exists=user_file_exists)
-                .user_complementary_step(current_user=current_user)
-                .user_quiz_step(current_user=current_user)
-                .user_user_electronic_signature(current_user=current_user)
-                .build()
+            .user_identifier_step(current_user=current_user)
+            .user_selfie_step(user_file_exists=user_file_exists)
+            .user_complementary_step(current_user=current_user)
+            .user_quiz_step(current_user=current_user)
+            .user_user_electronic_signature(current_user=current_user)
+            .build()
         )
 
         return {"status_code": status.HTTP_200_OK, "payload": onboarding_steps}
 
     @staticmethod
     def set_user_electronic_signature(
-            payload: dict, user_repository=UserRepository()
+        payload: dict, user_repository=UserRepository()
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_electronic_signature"
@@ -727,9 +733,9 @@ class UserService(IUser):
 
     @staticmethod
     def forgot_electronic_signature(
-            payload: dict,
-            user_repository=UserRepository(),
-            authentication_service=AuthenticationService,
+        payload: dict,
+        user_repository=UserRepository(),
+        authentication_service=AuthenticationService,
     ):
         thebes_answer = payload.get("x-thebes-answer")
         entity = user_repository.find_one({"_id": thebes_answer.get("email")})
@@ -890,7 +896,8 @@ class UserService(IUser):
 
     @staticmethod
     def get_customer_registration_data(
-            payload: dict, user_repository=UserRepository(),
+        payload: dict,
+        user_repository=UserRepository(),
     ):
         thebes_answer = payload.get("x-thebes-answer")
         email = thebes_answer.get("email")
@@ -931,15 +938,20 @@ class UserService(IUser):
 
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": customer_registration_data_built
+            "payload": customer_registration_data_built,
         }
+
 
     @staticmethod
     def update_customer_registration_data(
-            payload: dict, user_repository=UserRepository(),
+        payload: dict,
+        user_repository=UserRepository(),
     ):
         email: str = payload.get("x-thebes-answer", {}).get("email")
-        update_customer_registration_data: dict = payload.get("customer_registration_data")
+        update_customer_registration_data: dict = payload.get(
+            "customer_registration_data"
+        )
+        update_customer_registration_data = {k: v for k, v in update_customer_registration_data.items() if v is not None}
         old_customer_registration_data = user_repository.find_one({"_id": email})
         if old_customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
@@ -948,38 +960,37 @@ class UserService(IUser):
             UpdateCustomerRegistrationBuilder(
                 old_personal_data=old_customer_registration_data,
                 new_personal_data=update_customer_registration_data,
-                email=email
-            ).personal_name()
-             .person_us_tin()
-             .personal_phone()
-             .personal_patrimony()
-             .personal_occupation_activity()
-             .personal_occupation_cnpj()
-             .personal_company_name()
-             .marital_status()
-             .marital_cpf()
-             .marital_nationality()
-             .marital_spouse_name()
-             .documents_cpf()
-             .documents_identity_number()
-             .documents_expedition_date()
-             .documents_issuer()
-             .documents_state()
-             .address_country()
-             .address_street_name()
-             .address_city()
-             .address_number()
-             .address_id_city()
-             .address_zip_code()
-             .address_neighborhood()
-             .address_state()
+                email=email,
+            )
+            .personal_name()
+            .person_us_tin()
+            .personal_phone()
+            .personal_patrimony()
+            .personal_occupation_activity()
+            .personal_occupation_cnpj()
+            .personal_company_name()
+            .marital_status()
+            .marital_cpf()
+            .marital_nationality()
+            .marital_spouse_name()
+            .documents_cpf()
+            .documents_identity_number()
+            .documents_expedition_date()
+            .documents_issuer()
+            .documents_state()
+            .address_country()
+            .address_street_name()
+            .address_city()
+            .address_number()
+            .address_id_city()
+            .address_zip_code()
+            .address_neighborhood()
+            .address_state()
         ).build()
 
-        user_repository.update_one(
-            old_customer_registration_data,
-            new_customer_registration_data
-        )
+        SinacorService.save_or_update_client_data(user_data=new_customer_registration_data)
 
         return {
             "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
         }

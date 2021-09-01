@@ -18,7 +18,10 @@ class IFile(ABC):
 
     @abstractmethod
     def save_user_file(
-        self, file_type: UserFileType, content: Union[str, bytes], user_email: str,
+        self,
+        file_type: UserFileType,
+        content: Union[str, bytes],
+        user_email: str,
     ) -> None:
         pass
 

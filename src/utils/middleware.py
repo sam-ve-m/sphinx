@@ -5,7 +5,7 @@ import json
 
 # OUTSIDE LIBRARIES
 from fastapi import Request, Response, status
-from datetime import datetime
+
 
 # SPHINX
 from src.utils.env_config import config
@@ -13,7 +13,6 @@ from src.repositories.user.repository import UserRepository
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import NoPath
-from mist_client.asgard import Mist
 from src.domain.sphinx_constants import *
 from src.utils.jwt_utils import JWTHandler
 
@@ -113,7 +112,10 @@ def check_if_is_user_not_allowed_to_access_route(
         or (is_signed_route and is_electronic_signature_valid is False)
     ):
         locale = get_language_from_request(request=request)
-        message = i18n.get_translate("invalid_credential", locale=locale,)
+        message = i18n.get_translate(
+            "invalid_credential",
+            locale=locale,
+        )
         status_code = status.HTTP_401_UNAUTHORIZED
         content = {"detail": [{"msg": message}]}
         return Response(content=json.dumps(content), status_code=status_code)
@@ -129,7 +131,7 @@ def validate_electronic_signature(request: Request, user_data: dict) -> bool:
     is_valid = JWTHandler.mist.validate_jwt(jwt=mist_token)
     if is_valid:
         mist_content = JWTHandler.mist.decrypt_payload(jwt=mist_token)
-        if user_data['email'] == mist_content['email']:
+        if user_data["email"] == mist_content["email"]:
             return True
     return False
 
@@ -142,7 +144,10 @@ def check_if_third_party_user_is_not_allowed_to_access_route(request: Request):
             break
     if thebes_answer != config("THIRD_PARTY_TOKEN"):
         locale = get_language_from_request(request=request)
-        message = i18n.get_translate("invalid_credential", locale=locale,)
+        message = i18n.get_translate(
+            "invalid_credential",
+            locale=locale,
+        )
         return Response(
             content=json.dumps({"detail": [{"msg": message}]}),
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -21,7 +21,9 @@ class Solutiontech:
         solutiontech_verify_dtvm_client = config("SOLUTIONTECH_VERIFY_DTVM_CLIENT")
         response_message = None
 
-        Solutiontech.response_message_map.update({"Cliente não encontrado!": user_solutiontech_status_from_database})
+        Solutiontech.response_message_map.update(
+            {"Cliente não encontrado!": user_solutiontech_status_from_database}
+        )
         try:
             # Verificar necessidade de retirar o verify=False
             response = requests.get(
