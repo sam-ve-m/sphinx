@@ -1,5 +1,7 @@
 # STANDARD LIBS
 import datetime
+import logging
+
 import json
 from copy import deepcopy
 from fastapi import status
@@ -14,6 +16,7 @@ from src.utils.stone_age import StoneAge
 from src.utils.base_model_normalizer import normalize_enum_types
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.solutiontech import Solutiontech
+
 
 
 class SinacorService:
@@ -71,11 +74,12 @@ class SinacorService:
 
     @staticmethod
     def _merge_fake_object_with_stone_age_data(fake_object: dict, stone_age_data: dict) -> dict:
+        message = f"stone_age_data: {stone_age_data} - fake_object: {fake_object}"
+        logging.info(msg=message)
         fake_object_keys = fake_object.keys()
-
         for fake_object_key in fake_object_keys:
-            if fake_object_key == "self_link":
-                print(fake_object_key)
+            message = f"root-key: {fake_object_key}"
+            logging.info(msg=message)
             stone_age_data[fake_object_key] = SinacorService.chupeta(fake_object=fake_object[fake_object_key], stone_age_data=stone_age_data[fake_object_key])
 
         return stone_age_data
@@ -83,10 +87,12 @@ class SinacorService:
     @staticmethod
     def chupeta(fake_object: dict, stone_age_data: dict):
         if stone_age_data is None:
+            logging.info(msg=fake_object)
             stone_age_data = fake_object
         elif type(fake_object) is dict:
             inside_keys = fake_object.keys()
             for inside_key in inside_keys:
+                logging.info(msg=inside_key)
                 updated_value = SinacorService.chupeta(
                     fake_object=fake_object[inside_key],
                     stone_age_data=stone_age_data[inside_key],
@@ -94,6 +100,7 @@ class SinacorService:
                 stone_age_data[inside_key] = updated_value
         else:
             if stone_age_data is None:
+                logging.info(msg=fake_object)
                 stone_age_data = fake_object
 
         return stone_age_data
