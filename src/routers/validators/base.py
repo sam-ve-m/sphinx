@@ -179,8 +179,8 @@ class UsTin(BaseModel):
 # Bureau validators
 
 
-class ProposalId(BaseModel):
-    proposal_id: str
+class Uuid(BaseModel):
+    uuid: str
 
 
 class AppName(BaseModel):
@@ -224,7 +224,7 @@ class GenderSource(Source):
 
 
 class BirthDateSource(Source):
-    value: int
+    value: float
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):

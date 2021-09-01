@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 # SPHINX
 from src.routers.validators.base import (
-    ProposalId,
+    Uuid,
     Decision,
     Status,
     GenderSource,
@@ -172,7 +172,7 @@ class Data(Decision, Status):
     date_of_acquisition: Optional[DateOfAcquisition]
 
 
-class BureauCallback(ProposalId):
+class BureauCallback(Uuid):
     data: Data
 
 
