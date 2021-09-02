@@ -1,10 +1,9 @@
 # STANDARD LIBS
-from enum import Enum
-from typing import Union, List, Optional
+from typing import List, Optional
 
 # OUTSIDE LIBRARIES
-from fastapi import APIRouter, Request, Response, UploadFile, File, Depends
-from pydantic import BaseModel, constr, ValidationError
+from fastapi import APIRouter, Request, Response, Depends
+from pydantic import BaseModel
 
 # SPHINX
 from src.routers.validators.base import (
@@ -37,7 +36,6 @@ from src.routers.validators.base import (
     StreetNameSource,
     ZipCodeSource,
     UsTinSource,
-    IsUsPersonSource,
     NameSource,
     CountrySource,
     StateSource,
@@ -46,15 +44,12 @@ from src.routers.validators.base import (
     DateSource,
     AddressNumberSource,
     AddressIdCitySource,
-    PhoneNumberSource,
     NeighborhoodSource,
     CnpjSource,
     DocumentTypeSource,
-    MaritalRegimeSource,
     ActivitySource,
-    MaritalRegime,
     MaritalStatusSource,
-    DocumentNumber
+    DocumentNumber,
     DeviceInformation,
     DeviceInformationOptional
 )

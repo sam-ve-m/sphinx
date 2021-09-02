@@ -156,7 +156,7 @@ class Data(Decision, Status):
     mother_name: Optional[MotherNameSource]
     father_name: Optional[FatherNameSource]
     identifier_document: Optional[IdentifierDocument]
-    marital_update: Optional[Marital]
+    marital: Optional[Marital]
     address: Optional[Address]
     occupation: Optional[Occupation]
     assets: Optional[Assets]
