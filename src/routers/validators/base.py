@@ -319,16 +319,6 @@ class DocumentNumber(Source):
         return e.replace(".", "").replace("-", "").replace("/", "")
 
 
-class CpfOrCnpjSource(Source):
-    value: str
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        if is_cpf_valid(cpf=e) or is_cnpj_valid(cnpj=e):
-            return e.replace(".", "").replace("-", "").replace("/", "")
-        raise ValueError("invalid cpf")
-
-
 class CpfSource(Source):
     value: str
 
@@ -364,17 +354,6 @@ class AddressNumberSource(Source):
 
 class AddressIdCitySource(Source):
     value: int
-
-
-class CountrySource(Source):
-    value: constr(min_length=3, max_length=3)
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_country(value=e):
-            return e
-        raise ValueError("nationality not exists")
 
 
 class NationalitySource(Source):

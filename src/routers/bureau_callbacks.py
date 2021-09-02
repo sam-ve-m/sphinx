@@ -14,7 +14,6 @@ from src.routers.validators.base import (
     BirthDateSource,
     MotherNameSource,
     DocumentTypeSource,
-    CpfOrCnpjSource,
     DateSource,
     StateSource,
     IssuerSource,
