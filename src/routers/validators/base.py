@@ -114,7 +114,6 @@ class DeviceInformation(BaseModel):
     device_is_in_root_mode: bool
     device_network_interfaces: str
     public_ip: str
-    public_ip_in_root_mode: bool
     public_wifi_ip: str = None
     geolocation: str = None
 
@@ -128,7 +127,6 @@ class DeviceInformationOptional(BaseModel):
     device_is_in_root_mode: bool = None
     device_network_interfaces: str = None
     public_ip: str = None
-    public_ip_in_root_mode: bool = None
     public_wifi_ip: str = None
     geolocation: str = None
 

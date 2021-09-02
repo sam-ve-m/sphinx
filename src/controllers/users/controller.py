@@ -69,7 +69,7 @@ class UserController:
 
     @staticmethod
     def user_quiz_put(payload: dict):
-        return UserService.user_quiz(payload=payload)
+        return UserService.user_quiz_put(payload=payload)
 
     @staticmethod
     def send_quiz_responses(payload: dict):

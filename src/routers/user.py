@@ -53,6 +53,7 @@ class UserComplementaryData(MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedInve
 
 
 class QuizResponses(BaseModel):
+    device_information: Optional[DeviceInformationOptional]
     responses: List[QuizQuestionOption]
 
 
@@ -138,9 +139,12 @@ def send_quiz_responses(quiz_response: QuizResponses, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
+
+    quiz_response_dict = quiz_response.dict()
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
-        "quiz": quiz_response.dict(),
+        "quiz": quiz_response_dict.get('responses'),
+        "device_information": quiz_response_dict.get('device_information')
     }
     return BaseController.run(UserController.send_quiz_responses, payload, request)
 
