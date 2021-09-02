@@ -17,6 +17,7 @@ from src.exceptions.exceptions import (
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
 from src.interfaces.controllers.base_controller.interface import IController
+from src.utils.json_encoder.date_encoder import DateEncoder
 
 
 class BaseController(IController):
@@ -29,7 +30,7 @@ class BaseController(IController):
                 response_metadata=response_metadata, lang=lang
             )
             return Response(
-                content=json.dumps(payload),
+                content=json.dumps(payload, cls=DateEncoder),
                 status_code=response_metadata.get("status_code"),
             )
         except UnauthorizedError as e:

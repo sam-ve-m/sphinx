@@ -94,3 +94,11 @@ class UserController:
     @staticmethod
     def change_electronic_signature(payload: dict):
         return UserService.change_electronic_signature(payload=payload)
+
+    @staticmethod
+    def get_customer_registration_data(payload: dict):
+        return UserService.get_customer_registration_data(payload=payload)
+
+    @staticmethod
+    def update_customer_registration_data(payload: dict):
+        return UserService.update_customer_registration_data(payload=payload)

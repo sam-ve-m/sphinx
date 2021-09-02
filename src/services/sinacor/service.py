@@ -17,7 +17,6 @@ from src.utils.solutiontech import Solutiontech
 
 
 class SinacorService:
-
     @staticmethod
     def process_callback(
         payload: dict,
@@ -42,14 +41,33 @@ class SinacorService:
             )
         )
 
+        SinacorService.save_or_update_client_data(
+            user_data=database_and_bureau_dtvm_client_data_merged,
+            client_register_repository=client_register_repository,
+            user_repository=user_repository,
+            persephone_client=persephone_client
+        )
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "ok",
+        }
+
+    @staticmethod
+    def save_or_update_client_data(
+            user_data: dict,
+            client_register_repository=ClientRegisterRepository(),
+            user_repository=UserRepository(),
+            persephone_client=PersephoneService.get_client(),
+    ):
         SinacorService._send_dtvm_client_data_to_persephone(
             persephone_client=persephone_client,
-            dtvm_client_data=database_and_bureau_dtvm_client_data_merged,
+            dtvm_client_data=user_data,
         )
 
         database_and_bureau_dtvm_client_data_merged = SinacorService._create_client_into_sinacor(
             client_register_repository=client_register_repository,
-            database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged
+            database_and_bureau_dtvm_client_data_merged=user_data,
         )
 
         database_and_bureau_dtvm_client_data_merged = SinacorService._add_dtvm_client_trade_metadata(
@@ -58,22 +76,17 @@ class SinacorService:
         )
 
         user_is_updated = user_repository.update_one(
-            old=user_database_document,
+            old={"_id": database_and_bureau_dtvm_client_data_merged.get("email")},
             new=database_and_bureau_dtvm_client_data_merged,
         )
 
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
 
-        return {
-            "status_code": status.HTTP_200_OK,
-            "message_key": "ok",
-        }
-
     @staticmethod
     def _create_client_into_sinacor(
-            client_register_repository: ClientRegisterRepository,
-            database_and_bureau_dtvm_client_data_merged: dict
+        client_register_repository: ClientRegisterRepository,
+        database_and_bureau_dtvm_client_data_merged: dict,
     ):
 
         sinacor_client_control_data = SinacorService._clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
@@ -94,9 +107,7 @@ class SinacorService:
         )
 
         cpf_client = database_and_bureau_dtvm_client_data_merged.get("cpf")
-        client_register_repository.register_validated_users(
-            user_cpf=cpf_client
-        )
+        client_register_repository.register_validated_users(user_cpf=cpf_client)
 
         return database_and_bureau_dtvm_client_data_merged
 
@@ -132,7 +143,9 @@ class SinacorService:
 
     @staticmethod
     def _require_sync_to_solutiontech_from_sinacor(bmf_account: int) -> str:
-        is_synced_with_solutiontech = Solutiontech.request_client_sync(user_bmf_code=bmf_account)
+        is_synced_with_solutiontech = Solutiontech.request_client_sync(
+            user_bmf_code=bmf_account
+        )
 
         if is_synced_with_solutiontech:
             return SolutiontechClientImportStatus.SEND.value
@@ -149,23 +162,40 @@ class SinacorService:
         database_and_bureau_dtvm_client_data_merged.update(
             {
                 "sinacor": SinacorClientStatus.CREATED.value,
-                "sincad": SinacorClientStatus.NOT_CREATED.value
+                "sincad": SinacorClientStatus.NOT_CREATED.value,
             }
         )
 
-        sinacor_user_control_data = client_register_repository.get_user_control_data_if_user_already_exists(user_cpf=client_cpf)
+        sinacor_user_control_data = (
+            client_register_repository.get_user_control_data_if_user_already_exists(
+                user_cpf=client_cpf
+            )
+        )
 
         account_prefix = sinacor_user_control_data[0]
         account_digit = sinacor_user_control_data[1]
 
-        bovespa_account = SinacorService._build_bovespa_account_mask(account_prefix=account_prefix, account_digit=account_digit)
+        bovespa_account = SinacorService._build_bovespa_account_mask(
+            account_prefix=account_prefix, account_digit=account_digit
+        )
         bmf_account = SinacorService._build_bmf_account(account_prefix=account_prefix)
 
-        sync_status = SinacorService._require_sync_to_solutiontech_from_sinacor(int(bmf_account))
+        sync_status = SinacorService._require_sync_to_solutiontech_from_sinacor(
+            int(bmf_account)
+        )
 
-        database_and_bureau_dtvm_client_data_merged.update({"solutiontech": sync_status})
-        database_and_bureau_dtvm_client_data_merged.update({"bovespa_account": bovespa_account, "bmf_account": bmf_account})
-        database_and_bureau_dtvm_client_data_merged.update({"last_modified_date": {"concluded_at": datetime.datetime.now()}, "is_active_client": True})
+        database_and_bureau_dtvm_client_data_merged.update(
+            {"solutiontech": sync_status}
+        )
+        database_and_bureau_dtvm_client_data_merged.update(
+            {"bovespa_account": bovespa_account, "bmf_account": bmf_account}
+        )
+        database_and_bureau_dtvm_client_data_merged.update(
+            {
+                "last_modified_date": {"concluded_at": datetime.datetime.now()},
+                "is_active_client": True,
+            }
+        )
 
         return database_and_bureau_dtvm_client_data_merged
 

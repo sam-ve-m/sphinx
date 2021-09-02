@@ -13,6 +13,10 @@ from src.controllers.jwts.controller import JwtController
 from src.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
+from src.services.builders.user.customer_registration import CustomerRegistrationBuilder
+from src.services.builders.user.customer_registration_update import (
+    UpdateCustomerRegistrationBuilder,
+)
 from src.services.persephone.service import PersephoneService
 from src.services.builders.user.onboarding_steps_builder import OnboardingStepBuilder
 
@@ -448,9 +452,7 @@ class UserService(IUser):
         thebes_answer = payload.get("x-thebes-answer")
         user_identifier_data = payload.get("user_identifier")
 
-        user_by_cpf = user_repository.find_one(
-            {"cpf": user_identifier_data.get("cpf")}
-        )
+        user_by_cpf = user_repository.find_one({"cpf": user_identifier_data.get("cpf")})
 
         if user_by_cpf is not None:
             raise BadRequestError("common.register_exists")
@@ -951,3 +953,104 @@ class UserService(IUser):
         )
         if current_onboarding_step != on_board_step:
             raise BadRequestError("user.invalid_on_boarding_step")
+
+    @staticmethod
+    def get_customer_registration_data(
+        payload: dict,
+        user_repository=UserRepository(),
+    ):
+        thebes_answer = payload.get("x-thebes-answer")
+        email = thebes_answer.get("email")
+        customer_registration_data = user_repository.find_one({"_id": email})
+        if customer_registration_data is None:
+            raise BadRequestError("common.register_not_exists")
+
+        customer_registration_data_built = (
+            CustomerRegistrationBuilder(customer_registration_data)
+            .personal_name()
+            .personal_birth_date()
+            .personal_parentage()
+            .personal_gender()
+            .personal_email()
+            .personal_phone()
+            .personal_patrimony()
+            .personal_us_tin()
+            .personal_occupation_activity()
+            .personal_company_name()
+            .marital_status()
+            .marital_spouse_name()
+            .marital_spouse_cpf()
+            .marital_cpf()
+            .marital_nationality()
+            .documents_cpf()
+            .documents_identity_number()
+            .documents_expedition_date()
+            .documents_issuer()
+            .documents_state()
+            .address_country()
+            .address_number()
+            .address_street_name()
+            .address_city()
+            .address_neighborhood()
+            .address_zip_code()
+            .address_state()
+        ).build()
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": customer_registration_data_built,
+        }
+
+
+    @staticmethod
+    def update_customer_registration_data(
+        payload: dict,
+        user_repository=UserRepository(),
+    ):
+        email: str = payload.get("x-thebes-answer", {}).get("email")
+        update_customer_registration_data: dict = payload.get(
+            "customer_registration_data"
+        )
+        update_customer_registration_data = {k: v for k, v in update_customer_registration_data.items() if v is not None}
+        old_customer_registration_data = user_repository.find_one({"_id": email})
+        if old_customer_registration_data is None:
+            raise BadRequestError("common.register_not_exists")
+
+        new_customer_registration_data, modified_register_data = (
+            UpdateCustomerRegistrationBuilder(
+                old_personal_data=old_customer_registration_data,
+                new_personal_data=update_customer_registration_data,
+                email=email,
+            )
+            .personal_name()
+            .person_us_tin()
+            .personal_phone()
+            .personal_patrimony()
+            .personal_occupation_activity()
+            .personal_occupation_cnpj()
+            .personal_company_name()
+            .marital_status()
+            .marital_cpf()
+            .marital_nationality()
+            .marital_spouse_name()
+            .documents_cpf()
+            .documents_identity_number()
+            .documents_expedition_date()
+            .documents_issuer()
+            .documents_state()
+            .address_country()
+            .address_street_name()
+            .address_city()
+            .address_number()
+            .address_id_city()
+            .address_zip_code()
+            .address_neighborhood()
+            .address_state()
+        ).build()
+
+        SinacorService.save_or_update_client_data(user_data=new_customer_registration_data)
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }

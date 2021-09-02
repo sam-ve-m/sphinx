@@ -14,12 +14,16 @@ class Solutiontech:
     }
 
     @staticmethod
-    def check_if_client_is_synced_with_solutiontech(user_bmf_code: int, user_solutiontech_status_from_database: str) -> str:
+    def check_if_client_is_synced_with_solutiontech(
+        user_bmf_code: int, user_solutiontech_status_from_database: str
+    ) -> str:
         base_url_solutiontech = config("SOLUTIONTECH_BASE_URL")
         solutiontech_verify_dtvm_client = config("SOLUTIONTECH_VERIFY_DTVM_CLIENT")
         response_message = None
 
-        Solutiontech.response_message_map.update({"Cliente não encontrado!": user_solutiontech_status_from_database})
+        Solutiontech.response_message_map.update(
+            {"Cliente não encontrado!": user_solutiontech_status_from_database}
+        )
         try:
             # Verificar necessidade de retirar o verify=False
             response = requests.get(
@@ -35,7 +39,8 @@ class Solutiontech:
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(
-                msg=f"user_bmf_code {user_bmf_code} - response  = {response_message} -  error = {str(e)}", exc_info=e
+                msg=f"user_bmf_code {user_bmf_code} - response  = {response_message} -  error = {str(e)}",
+                exc_info=e,
             )
 
         return user_solutiontech_status_from_database
@@ -62,7 +67,8 @@ class Solutiontech:
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(
-                msg=f"user_bmf_code: {user_bmf_code} - Solution Tech Response  = {response_message} -  error = {str(e)}", exc_info=e
+                msg=f"user_bmf_code: {user_bmf_code} - Solution Tech Response  = {response_message} -  error = {str(e)}",
+                exc_info=e,
             )
 
         return False
