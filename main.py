@@ -8,7 +8,6 @@ from fastapi import FastAPI, Request, Response
 from src.routers.user import router as user_router
 from src.routers.feature import router as feature_router
 from src.routers.authenticate import router as authenticate_router
-from src.routers.pendencies import router as pendencies_router
 from src.routers.term import router as term_router
 from src.routers.suitability import router as suitability_router
 from src.routers.view import router as view_router
@@ -22,13 +21,17 @@ from src.utils.middleware import (
 )
 from src.utils.jwt_utils import JWTHandler
 
+from src.domain.sphinx_constants import *
+
 app = FastAPI()
 
 
 @app.middleware("http")
 async def process_thebes_answer(request: Request, call_next):
     is_third_part_access = route_is_third_part_access(
-        url_request=request.url.path, method=request.method
+        url_request=request.url.path,
+        third_part_access_path=THIRD_PART_ACCESS_PATH,
+        method=request.method,
     )
     if is_third_part_access:
         return await resolve_third_part_request(request=request, call_next=call_next)
@@ -62,7 +65,6 @@ app.include_router(feature_router)
 app.include_router(authenticate_router)
 app.include_router(view_router)
 app.include_router(authenticate_router)
-app.include_router(pendencies_router)
 app.include_router(suitability_router)
 app.include_router(term_router)
 app.include_router(client_register_enums_router)
@@ -75,6 +77,6 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8000,
         access_log=True,
-        log_config="./log.ini",
+        # log_config="./log.ini",
         log_level="info",
     )

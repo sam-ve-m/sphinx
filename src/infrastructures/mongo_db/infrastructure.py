@@ -56,7 +56,7 @@ class MongoDBInfrastructure(IRepository):
             if not data:  # pragma: no cover
                 data = self.collection.find_one(query)
 
-            if has_ttl:  # pragma: no cover
+            if has_ttl and data is not None:  # pragma: no cover
                 self._save_cache(query=query, cache=cache, ttl=ttl, data=data)
 
             return data
@@ -81,6 +81,16 @@ class MongoDBInfrastructure(IRepository):
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
             return
+
+    def find_one_with_specific_columns(
+        self, query: dict, query_limit: dict
+    ) -> Optional[dict]:
+        try:
+            return self.collection.find_one(query, query_limit)
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(e, exc_info=True)
+            return None
 
     def update_one(self, old, new, ttl=60, cache=RepositoryRedis) -> bool:
         if not old or len(old) == 0:

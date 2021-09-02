@@ -22,6 +22,7 @@ from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import InternalServerError
 from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 
+
 class JWTHandler:
     # TODO change this method to use heimdall to validate the given jwt and this to generate the jwt only
     instance = JWT()
@@ -122,7 +123,13 @@ class JWTHandler:
         sincad = payload.get("sincad")
         is_active_client = payload.get("is_active_client")
 
-        client_has_trade_allowed = solutiontech == SolutiontechClientImportStatus.SYNC.value and sincad and is_active_client and suitability_months_past < 24 and last_modified_date_months_past < 24
+        client_has_trade_allowed = (
+            solutiontech == SolutiontechClientImportStatus.SYNC.value
+            and sincad
+            and is_active_client
+            and suitability_months_past < 24
+            and last_modified_date_months_past < 24
+        )
         new_payload.update({"client_has_trade_allowed": client_has_trade_allowed})
 
         return new_payload
@@ -171,13 +178,11 @@ class JWTHandler:
             )
         return payload
 
-
     @staticmethod
-    def generate_session_jwt(eletronic_signature: dict, email: str):
+    def generate_session_jwt(electronic_signature: dict, email: str):
         session_dict = {
             "email": email,
-            "password": eletronic_signature.get("signature"),
-            "signatureExpireTime": eletronic_signature.get("signature_expire_time")
+            "password": electronic_signature.get("signature"),
+            "signatureExpireTime": electronic_signature.get("signature_expire_time"),
         }
-        JWTHandler.mist.validate_jwt()
         return JWTHandler.mist.generate_jwt(session_dict)

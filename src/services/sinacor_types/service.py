@@ -3,6 +3,8 @@ from fastapi import status
 
 # PERSEPHONE
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.repositories.sinacor_types.enum.person_gender import PersonGender
+from src.routers.validators.enum_template import MaritalStatusEnum
 
 
 class SinaCorTypes:
@@ -164,4 +166,83 @@ class SinaCorTypes:
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_account_type()},
+        }
+
+    @staticmethod
+    def get_gender():
+        genders = [{"code": gender.value, "value": gender.name.title()} for gender in list(PersonGender)]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"enums": genders},
+        }
+
+    @staticmethod
+    def get_marital_status_update():
+        titles = {
+            "married": "Casado",
+            "divorced": "Divorciado",
+            "not_married": "Solteiro",
+            "stable_union": "União estável",
+            "widower": "Viúvo"
+        }
+        marital_status = [{"code": gender.value, "value": titles.get(gender.value)} for gender in list(MaritalStatusEnum)]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"enums": marital_status},
+        }
+
+
+    @staticmethod
+    def get_nationality_update(sinacor_types_repository=SinaCorTypesRepository()):
+        nationalities = sinacor_types_repository.get_nationality()
+        nationalities_enum = [{"code": nationality['code'], "value": nationality['description'].title()} for nationality in nationalities]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"enums": nationalities_enum},
+        }
+
+    @staticmethod
+    def get_country_update(sinacor_types_repository=SinaCorTypesRepository()):
+        countries = sinacor_types_repository.get_country()
+        countries_enum = [{"code": country['initials'], "value": country['description'].title()} for country in
+                          countries]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"enums": countries_enum},
+        }
+
+    @staticmethod
+    def get_county_update(payload: dict, sinacor_types_repository=SinaCorTypesRepository()):
+        counties = sinacor_types_repository.get_county(
+                    country=payload.get("country"), state=payload.get("state")
+        )
+        counties_enum = [{"code": county['code'], "value": county['description'].title()} for county in
+                          counties]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {
+                "enums": counties_enum
+            },
+        }
+
+    @staticmethod
+    def get_state_update(payload: dict, sinacor_types_repository=SinaCorTypesRepository()):
+        states = sinacor_types_repository.get_state(country=payload.get("country"))
+        states_enum = [{"code": state['initials'], "value": state['description'].title()} for state in
+                         states]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {
+                "enums": states_enum
+            },
+        }
+
+    @staticmethod
+    def get_economic_activity_update(sinacor_types_repository=SinaCorTypesRepository()):
+        activities = sinacor_types_repository.get_economic_activity()
+        activities_enum = [{"code": activity['code'], "value": activity['description'].title()} for activity in
+                         activities]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"enums": activities_enum},
         }

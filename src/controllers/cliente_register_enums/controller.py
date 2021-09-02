@@ -82,3 +82,31 @@ class ClientRegisterEnumsController:
     @staticmethod
     def get_account_type(payload: dict):
         return SinaCorTypes.get_account_type()
+
+    @staticmethod
+    def get_gender_update(payload: dict):
+        return SinaCorTypes.get_gender()
+
+    @staticmethod
+    def get_marital_status_update(payload: dict):
+        return SinaCorTypes.get_marital_status_update()
+
+    @staticmethod
+    def get_nationality_update(payload: dict):
+        return SinaCorTypes.get_nationality_update()
+
+    @staticmethod
+    def get_county_update(payload: dict):
+        return SinaCorTypes.get_county_update(payload=payload)
+
+    @staticmethod
+    def get_state_update(payload: dict):
+        return SinaCorTypes.get_state_update(payload=payload)
+
+    @staticmethod
+    def get_country_update(payload: dict):
+        return SinaCorTypes.get_country_update()
+
+    @staticmethod
+    def get_economic_activity_update(payload: dict):
+        return SinaCorTypes.get_economic_activity_update()
