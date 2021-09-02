@@ -37,7 +37,6 @@ from src.routers.validators.base import (
     StreetNameSource,
     ZipCodeSource,
     UsTinSource,
-    IsUsPersonSource,
     NameSource,
     CountrySource,
     StateSource,
@@ -45,16 +44,13 @@ from src.routers.validators.base import (
     IdentityDocumentNumber,
     DateSource,
     AddressNumberSource,
-    AddressIdCitySource,
-    PhoneNumberSource,
+    IdCitySource,
     NeighborhoodSource,
     CnpjSource,
     DocumentTypeSource,
-    MaritalRegimeSource,
     ActivitySource,
-    MaritalRegime,
     MaritalStatusSource,
-    DocumentNumber
+    DocumentNumber,
     DeviceInformation,
     DeviceInformationOptional
 )
@@ -116,7 +112,7 @@ class UpdateCustomerRegistrationData(BaseModel):
     address_zip_code: Optional[ZipCodeSource]
     address_state: Optional[StateSource]
     address_number: Optional[AddressNumberSource]
-    address_id_city: Optional[AddressIdCitySource]
+    address_id_city: Optional[IdCitySource]
     address_neighborhood: Optional[NeighborhoodSource]
 
     us_tin: Optional[UsTinSource]

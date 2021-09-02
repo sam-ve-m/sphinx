@@ -374,10 +374,6 @@ class AddressNumberSource(Source):
     value: str
 
 
-class AddressIdCitySource(Source):
-    value: int
-
-
 class CountrySource(Source):
     value: constr(min_length=3, max_length=3)
 
