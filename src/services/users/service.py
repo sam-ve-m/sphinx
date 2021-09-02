@@ -614,7 +614,7 @@ class UserService(IUser):
 
     @staticmethod
     def user_quiz_put(
-            payload: dict, stone_age=StoneAge, user_repository=UserRepository()
+        payload: dict, stone_age=StoneAge, user_repository=UserRepository()
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_quiz_step"
@@ -625,7 +625,7 @@ class UserService(IUser):
             payload=payload
         )
         if UserService.can_send_quiz(
-                user_onboarding_current_step=user_onboarding_current_step
+            user_onboarding_current_step=user_onboarding_current_step
         ):
             return {
                 "status_code": status.HTTP_400_BAD_REQUEST,
@@ -665,8 +665,8 @@ class UserService(IUser):
         current_user_updated.update({"register_analyses": output.get("decision")})
 
         if (
-                user_repository.update_one(old=current_user, new=current_user_updated)
-                is False
+            user_repository.update_one(old=current_user, new=current_user_updated)
+            is False
         ):
             raise InternalServerError("common.process_issue")
 
@@ -747,8 +747,8 @@ class UserService(IUser):
             .user_identifier_step(current_user=current_user)
             .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
-            .user_quiz_step(current_user=current_user)
             .user_user_electronic_signature(current_user=current_user)
+            .user_quiz_step(current_user=current_user)
             .build()
         )
 
@@ -1001,7 +1001,6 @@ class UserService(IUser):
             "payload": customer_registration_data_built,
         }
 
-
     @staticmethod
     def update_customer_registration_data(
         payload: dict,
@@ -1011,7 +1010,9 @@ class UserService(IUser):
         update_customer_registration_data: dict = payload.get(
             "customer_registration_data"
         )
-        update_customer_registration_data = {k: v for k, v in update_customer_registration_data.items() if v is not None}
+        update_customer_registration_data = {
+            k: v for k, v in update_customer_registration_data.items() if v is not None
+        }
         old_customer_registration_data = user_repository.find_one({"_id": email})
         if old_customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
@@ -1048,7 +1049,9 @@ class UserService(IUser):
             .address_state()
         ).build()
 
-        SinacorService.save_or_update_client_data(user_data=new_customer_registration_data)
+        SinacorService.save_or_update_client_data(
+            user_data=new_customer_registration_data
+        )
 
         return {
             "status_code": status.HTTP_200_OK,

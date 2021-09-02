@@ -189,6 +189,13 @@ class MaritalStatus(BaseModel):
 class Nationality(BaseModel):
     nationality: str
 
+    @validator("nationality", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_nationality(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
 
 class QuizQuestionOption(BaseModel):
     quiz_question_id: UUID1
@@ -278,7 +285,7 @@ class MaritalRegime(BaseModel):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_marital_regime(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("marital not exists")
 
 
 class CountrySource(Source):
@@ -289,7 +296,7 @@ class CountrySource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_country(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("country not exists")
 
 
 class StateSource(Source):
