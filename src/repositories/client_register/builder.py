@@ -252,7 +252,7 @@ class ClientRegisterBuilder:
 
     def add_tp_regcas(self, user_data: dict):
         self._fields_added.update(
-            {"TP_REGCAS": user_data["marital_update"]["marital_regime"]}
+            {"TP_REGCAS": user_data["marital"]["marital_regime"]}
         )
         return self
 
@@ -510,7 +510,7 @@ class ClientRegisterBuilder:
 
     def add_dt_nasc_conjuge(self, user_data: dict):
         self._fields_added.update(
-            {"DT_NASC_CONJUGE": user_data["marital_update"]["spouse_birth_date"]}
+            {"DT_NASC_CONJUGE": user_data["marital"]["spouse_birth_date"]}
         )
         return self
 

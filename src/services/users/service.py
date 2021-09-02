@@ -887,7 +887,7 @@ class UserService(IUser):
                 "client_type": {"source": "PH3W", "value": 1},
                 "investor_type": {"source": "PH3W", "value": 101},
                 "cosif_tax_classification": {"source": "PH3W", "value": 21},
-                "marital_update": {
+                "marital": {
                     "marital_regime": {"source": "PH3W", "value": 1},
                     "spouse_birth_date": {
                         "source": "PH3W",
