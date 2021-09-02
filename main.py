@@ -1,4 +1,6 @@
 # OUTSIDE LIBRARIES
+import logging
+
 import uvicorn
 from fastapi import FastAPI, Request, Response
 
