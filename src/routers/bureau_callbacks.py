@@ -66,6 +66,7 @@ from src.routers.validators.base import (
     UsTinSource,
     IrsSharingSource,
     FatherNameSource,
+    DocumentNumber
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
@@ -74,7 +75,7 @@ router = APIRouter()
 
 
 class DocumentData(BaseModel):
-    number: CpfOrCnpjSource
+    number: DocumentNumber
     date: DateSource
     state: StateSource
     issuer: IssuerSource

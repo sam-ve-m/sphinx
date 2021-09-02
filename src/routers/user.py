@@ -38,12 +38,9 @@ from src.routers.validators.base import (
     ZipCodeSource,
     UsTinSource,
     IsUsPersonSource,
-    MaritalSpouseNameSource,
     NameSource,
     CountrySource,
     StateSource,
-    MaritalStatusSource,
-    OccupationActivitySource,
     IssuerSource,
     IdentityDocumentNumber,
     DateSource,
@@ -53,6 +50,11 @@ from src.routers.validators.base import (
     NeighborhoodSource,
     CnpjSource,
     DocumentTypeSource,
+    MaritalRegimeSource,
+    ActivitySource,
+    MaritalRegime,
+    MaritalStatusSource,
+    DocumentNumber
 )
 
 from src.utils.jwt_utils import JWTHandler
@@ -88,20 +90,20 @@ class UpdateCustomerRegistrationData(BaseModel):
     cel_phone: Optional[CelPhoneSource]
     patrimony: Optional[PatrimonySource]
 
-    document_cpf: Optional[CpfSource]
+    document_number: Optional[DocumentNumber]
     document_issuer: Optional[IssuerSource]
     document_state: Optional[StateSource]
     document_expedition_date: Optional[DateSource]
     document_identity_number: Optional[IdentityDocumentNumber]
     document_type: Optional[DocumentTypeSource]
 
-    marital_spouse_name: Optional[MaritalSpouseNameSource]
+    marital_spouse_name: Optional[NameSource]
     marital_status: Optional[MaritalStatusSource]
     marital_nationality: Optional[NationalitySource]
     marital_cpf: Optional[CpfSource]
 
     company_name: Optional[CompanyNameSource]
-    occupation_activity: Optional[OccupationActivitySource]
+    occupation_activity: Optional[ActivitySource]
     occupation_cnpj: Optional[CnpjSource]
 
     address_city: Optional[CitySource]

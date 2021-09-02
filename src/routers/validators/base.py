@@ -244,6 +244,17 @@ class CelPhoneSource(Source):
     value: constr(min_length=11, max_length=11)
 
 
+class MaritalRegime(BaseModel):
+    marital_status: int
+
+    @validator("marital_status", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_marital_regime(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
 class CountrySource(Source):
     value: constr(min_length=3, max_length=3)
 
@@ -272,6 +283,14 @@ class MotherNameSource(Source):
 
 class DocumentTypeSource(Source):
     value: DocumentTypes
+
+
+class DocumentNumber(Source):
+    value: str
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        return e.replace(".", "").replace("-", "").replace("/", "")
 
 
 class CpfOrCnpjSource(Source):
@@ -505,10 +524,6 @@ class CountySource(Source):
         raise ValueError("nationality not exists")
 
 
-class OccupationActivitySource(Source):
-    value: int
-
-
 class MaritalRegimeSource(Source):
     value: int
 
@@ -518,10 +533,6 @@ class MaritalRegimeSource(Source):
         if sinacor_types_repository.validate_marital_regime(value=e):
             return e
         raise ValueError("nationality not exists")
-
-
-class MaritalSpouseNameSource(Source):
-    value: str
 
 
 class MaritalStatusSource(BaseModel):
