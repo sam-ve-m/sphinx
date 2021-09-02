@@ -26,6 +26,8 @@ from src.routers.validators.base import (
     FileBase64,
     ElectronicSignature,
     ChangeElectronicSignature,
+    DeviceInformation,
+    DeviceInformationOptional
 )
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
@@ -51,6 +53,7 @@ class UserComplementaryData(MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedInve
 
 
 class QuizResponses(BaseModel):
+    device_information: Optional[DeviceInformationOptional]
     responses: List[QuizQuestionOption]
 
 
@@ -118,14 +121,30 @@ def user_quiz(request: Request):
     return BaseController.run(UserController.user_quiz, payload, request)
 
 
+@router.put("/user/quiz", tags=["user"])
+def user_quiz(device_information: DeviceInformation, request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+
+    payload = {
+        "x-thebes-answer": jwt_data_or_error_response,
+        "device_information": device_information
+    }
+    return BaseController.run(UserController.user_quiz_put, payload, request)
+
+
 @router.put("/user/send_quiz_responses", tags=["user"])
 def send_quiz_responses(quiz_response: QuizResponses, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
+
+    quiz_response_dict = quiz_response.dict()
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
-        "quiz": quiz_response.dict(),
+        "quiz": quiz_response_dict.get('responses'),
+        "device_information": quiz_response_dict.get('device_information')
     }
     return BaseController.run(UserController.send_quiz_responses, payload, request)
 

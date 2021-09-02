@@ -611,6 +611,66 @@ class UserService(IUser):
         return {"status_code": status.HTTP_200_OK, "payload": output}
 
     @staticmethod
+    def user_quiz_put(
+            payload: dict, stone_age=StoneAge, user_repository=UserRepository()
+    ) -> dict:
+        UserService.onboarding_step_validator(
+            payload=payload, on_board_step="user_quiz_step"
+        )
+        thebes_answer = payload.get("x-thebes-answer")
+
+        user_onboarding_current_step = UserService.get_onboarding_user_current_step(
+            payload=payload
+        )
+        if UserService.can_send_quiz(
+                user_onboarding_current_step=user_onboarding_current_step
+        ):
+            return {
+                "status_code": status.HTTP_400_BAD_REQUEST,
+                "message_key": "user.quiz.missing_steps",
+            }
+
+        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        current_user_marital = current_user.get("marital")
+
+        user_identifier_data = {
+            "email": current_user.get("email"),
+            "cpf": current_user.get("cpf"),
+            "cel_phone": current_user.get("cel_phone"),
+            "marital_status": current_user_marital.get("marital_status"),
+            "is_us_person": current_user.get("is_us_person"),
+        }
+
+        current_user_is_us_person = current_user.get("is_us_person")
+
+        if current_user_is_us_person:
+            user_identifier_data["us_tin"] = current_user.get("us_tin")
+
+        spouse = current_user_marital.get("spouse")
+
+        if spouse is not None:
+            user_identifier_data["spouse"] = spouse
+
+        response = stone_age.get_user_quiz(user_identifier_data)
+
+        output = response.get("output")
+        stone_age_contract_uuid = response.get("uuid")
+        current_user_updated = deepcopy(current_user)
+        current_user_updated.update(
+            {"stone_age_contract_uuid": stone_age_contract_uuid}
+        )
+
+        current_user_updated.update({"register_analyses": output.get("decision")})
+
+        if (
+                user_repository.update_one(old=current_user, new=current_user_updated)
+                is False
+        ):
+            raise InternalServerError("common.process_issue")
+
+        return {"status_code": status.HTTP_200_OK, "payload": output}
+
+    @staticmethod
     def send_quiz_responses(
         payload: dict,
         user_repository=UserRepository(),

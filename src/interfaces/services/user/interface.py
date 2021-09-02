@@ -145,6 +145,11 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
+    def user_quiz_put(payload: dict, stone_age, user_repository) -> dict:
+        pass
+
+    @staticmethod
+    @abstractmethod
     def get_onboarding_user_current_step(
         payload: dict, user_repository, file_repository
     ) -> dict:
