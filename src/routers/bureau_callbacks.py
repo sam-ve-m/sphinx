@@ -39,7 +39,6 @@ from src.routers.validators.base import (
     PersonTypeSource,
     InvestorTypeSource,
     CosifTaxClassificationSource,
-    MaritalRegimeSource,
     NeighborhoodSource,
     AssetsDateSource,
     NationalitySource,
@@ -62,7 +61,7 @@ from src.routers.validators.base import (
     UsTinSource,
     IrsSharingSource,
     FatherNameSource,
-    DocumentNumber
+    DocumentNumber, MaritalStatusSource
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
@@ -120,12 +119,15 @@ class PoliticallyExposedPerson(BaseModel):
     is_politically_exposed_person: Optional[IsPoliticallyExposedPerson]
 
 
-class Marital(BaseModel):
-    marital_regime: Optional[MaritalRegimeSource]
+class Spouse(BaseModel):
     cpf: Optional[CpfSource]
     name: Optional[NameSource]
     nationality: Optional[NationalitySource]
-    spouse_birth_date: Optional[BirthDateSource]
+
+
+class Marital(BaseModel):
+    status: Optional[MaritalStatusSource]
+    spouse: Optional[Spouse]
 
 
 class Birthplace(BaseModel):

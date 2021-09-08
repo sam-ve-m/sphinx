@@ -139,14 +139,8 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_est_civil(self, user_data: dict):
-        key_values = {
-            "not_married": 1,
-            "married": 5,
-            "divorced": 4,
-            "widower": 3,
-        }
-        value = key_values.get(user_data["marital"]["status"])
-        self._fields_added.update({"CD_EST_CIVIL": value})
+        status = user_data["marital"]["status"]
+        self._fields_added.update({"CD_EST_CIVIL": status})
         return self
 
     def add_cd_nacion(self, user_data: dict):
@@ -250,11 +244,11 @@ class ClientRegisterBuilder:
         self._fields_added.update({"SG_PAIS": user_data["birthplace"]["country"]})
         return self
 
-    def add_tp_regcas(self, user_data: dict):
-        self._fields_added.update(
-            {"TP_REGCAS": user_data["marital"]["marital_regime"]}
-        )
-        return self
+    # def add_tp_regcas(self, user_data: dict):
+    #     self._fields_added.update(
+    #         {"TP_REGCAS": user_data["marital"]["marital_regime"]}
+    #     )
+    #     return self
 
     def add_cd_cep(self, user_data: dict):
         self._fields_added.update({"CD_CEP": int(user_data["address"]["zip_code"])})
@@ -508,11 +502,11 @@ class ClientRegisterBuilder:
         )
         return self
 
-    def add_dt_nasc_conjuge(self, user_data: dict):
-        self._fields_added.update(
-            {"DT_NASC_CONJUGE": user_data["marital"]["spouse_birth_date"]}
-        )
-        return self
+    # def add_dt_nasc_conjuge(self, user_data: dict):
+    #     self._fields_added.update(
+    #         {"DT_NASC_CONJUGE": user_data["marital"]["spouse"]["birth_date"]}
+    #     )
+    #     return self
 
     def add_cd_cnpj_empresa(self, user_data: dict):
         self._fields_added.update(

@@ -249,7 +249,9 @@ class SinaCorTypesRepository(OracleInfrastructure):
             partial_value = self.query(sql=sql)
             value = {"value": partial_value}
             cache.set(key=key, value=value, ttl=86400)
-        return value.get("value")
+
+        value = value.get("value")
+        return value
 
     def base_validator(self, sql: str) -> bool:
         value = self.query_with_cache(sql=sql)
@@ -375,4 +377,8 @@ class SinaCorTypesRepository(OracleInfrastructure):
             FROM TSCREGCAS
             WHERE TP_REGCAS = {value}
         """
+        return self.base_validator(sql=sql)
+
+    def validate_marital_status(self, value: str) -> bool:
+        sql = f""" SELECT 1 FROM TSCESTCIV where CD_EST_CIVIL = {value}"""
         return self.base_validator(sql=sql)

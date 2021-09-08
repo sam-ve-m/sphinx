@@ -19,7 +19,6 @@ from src.repositories.sinacor_types.enum.decision import Decisions
 from src.repositories.sinacor_types.enum.status import OutputStatus
 from src.utils.brazil_register_number_validator import is_cpf_valid
 from src.utils.brazil_register_number_validator import is_cnpj_valid
-from src.routers.validators.enum_template import MaritalStatusEnum
 from src.repositories.sinacor_types.enum.person_gender import PersonGender
 from src.repositories.sinacor_types.enum.document_type import DocumentTypes
 from src.repositories.sinacor_types.enum.connected_person import ConnectedPerson
@@ -183,7 +182,14 @@ class CelPhone(BaseModel):
 
 
 class MaritalStatus(BaseModel):
-    marital_status: MaritalStatusEnum
+    value: int
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_marital_status(value=e):
+            return e
+        raise ValueError("Marital status not exists in our marital regime enum")
 
 
 class Nationality(BaseModel):
@@ -268,17 +274,6 @@ class BirthDateSource(Source):
 
 class CelPhoneSource(Source):
     value: constr(min_length=11, max_length=11)
-
-
-class MaritalRegime(BaseModel):
-    marital_status: int
-
-    @validator("marital_status", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_marital_regime(value=e):
-            return e
-        raise ValueError("nationality not exists")
 
 
 class CountrySource(Source):
@@ -517,19 +512,15 @@ class CountySource(Source):
         raise ValueError("Contry not exists in our contry enum")
 
 
-class MaritalRegimeSource(Source):
+class MaritalStatusSource(Source):
     value: int
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
         sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_marital_regime(value=e):
+        if sinacor_types_repository.validate_marital_status(value=e):
             return e
-        raise ValueError("Marital regime not exists in our marital regime enum")
-
-
-class MaritalStatusSource(BaseModel):
-    value: MaritalStatusEnum
+        raise ValueError("Marital status not exists in our marital regime enum")
 
 
 class NeighborhoodSource(Source):

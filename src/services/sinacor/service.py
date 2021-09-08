@@ -18,7 +18,6 @@ from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.solutiontech import Solutiontech
 
 
-
 class SinacorService:
     @staticmethod
     def process_callback(
@@ -374,11 +373,12 @@ class SinacorService:
                 "investor_type": {"source": "PH3W", "value": 101},
                 "cosif_tax_classification": {"source": "PH3W", "value": 21},
                 "marital": {
-                    "marital_regime": {"source": "PH3W", "value": 1},
-                    "spouse_birth_date": {
-                        "source": "PH3W",
-                        "value": datetime.datetime(1993, 7, 12, 0, 0),
-                    },
+                    "status": {"source": "PH3W", "value": 5},
+                    "spouse": {
+                        "cpf": {"value": "16746756076", "source": "REQUEST"},
+                        "name": {"value": "Flavio Antobio Felicio", "source": "REQUEST"},
+                        "nationality": {"value": 1, "source": "REQUEST"}
+                    }
                 },
                 "cpf": {"source": "PH3W", "value": cpf},
                 "self_link": {"source": "PH3W", "value": "http://self_user.jpg"},

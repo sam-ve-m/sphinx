@@ -4,7 +4,6 @@ from fastapi import status
 # PERSEPHONE
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.repositories.sinacor_types.enum.person_gender import PersonGender
-from src.routers.validators.enum_template import MaritalStatusEnum
 
 
 class SinaCorTypes:
@@ -60,7 +59,7 @@ class SinaCorTypes:
             "status_code": status.HTTP_200_OK,
             "payload": {
                 "enums": sinacor_types_repository.get_cosif_tax_classification()
-            },
+            }
         }
 
     @staticmethod
@@ -177,20 +176,20 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_marital_status_update():
-        titles = {
-            "married": "Casado",
-            "divorced": "Divorciado",
-            "not_married": "Solteiro",
-            "stable_union": "União estável",
-            "widower": "Viúvo"
-        }
-        marital_status = [{"code": gender.value, "value": titles.get(gender.value)} for gender in list(MaritalStatusEnum)]
+    def get_marital_status_update(sinacor_types_repository=SinaCorTypesRepository()):
+        sinacor_marital_status_list = sinacor_types_repository.get_marital_status()
+        sinacor_marital_status_list_max_len = len(sinacor_marital_status_list)
+
+        for sinacor_marital_status_list_index in range(sinacor_marital_status_list_max_len):
+            marital_status_description = sinacor_marital_status_list[sinacor_marital_status_list_index].get("description")
+            marital_status_description_lower_case = marital_status_description.title()
+            marital_status_description_lower_case = marital_status_description_lower_case.replace("(A)", "(a)")
+            sinacor_marital_status_list[sinacor_marital_status_list_index].update({"description": marital_status_description_lower_case})
+
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {"enums": marital_status},
+            "payload": {"enums": sinacor_marital_status_list},
         }
-
 
     @staticmethod
     def get_nationality_update(sinacor_types_repository=SinaCorTypesRepository()):

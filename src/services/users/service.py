@@ -532,7 +532,7 @@ class UserService(IUser):
             "is_cvm_qualified_investor"
         )
         payload["marital"] = {
-            "status": user_complementary_data.get("marital_status"),
+            "status": user_complementary_data.get("status"),
             "spouse": user_complementary_data.get("spouse"),
         }
 
@@ -579,7 +579,7 @@ class UserService(IUser):
             "email": current_user.get("email"),
             "cpf": current_user.get("cpf"),
             "cel_phone": current_user.get("cel_phone"),
-            "marital_status": current_user_marital.get("marital_status"),
+            "status": current_user_marital.get("status"),
             "is_us_person": current_user.get("is_us_person"),
         }
 
@@ -639,7 +639,7 @@ class UserService(IUser):
             "email": current_user.get("email"),
             "cpf": current_user.get("cpf"),
             "cel_phone": current_user.get("cel_phone"),
-            "marital_status": current_user_marital.get("marital_status"),
+            "status": current_user_marital.get("status"),
             "is_us_person": current_user.get("is_us_person"),
         }
 
@@ -888,11 +888,7 @@ class UserService(IUser):
                 "investor_type": {"source": "PH3W", "value": 101},
                 "cosif_tax_classification": {"source": "PH3W", "value": 21},
                 "marital": {
-                    "marital_regime": {"source": "PH3W", "value": 1},
-                    "spouse_birth_date": {
-                        "source": "PH3W",
-                        "value": datetime(1993, 7, 12, 0, 0),
-                    },
+                    "status": {"source": "PH3W", "value": 3},
                 },
                 "cpf": {"source": "PH3W", "value": cpf},
                 "self_link": {"source": "PH3W", "value": "http://self_user.jpg"},
