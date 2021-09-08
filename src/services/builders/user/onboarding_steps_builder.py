@@ -86,7 +86,7 @@ class OnboardingStepBuilder:
             ] = "user_electronic_signature"
         return self
 
-    def user_user_electronic_signature(self, current_user):
+    def user_electronic_signature(self, current_user):
         has_electronic_signature = current_user.get("electronic_signature")
         if (
             has_electronic_signature is not None
