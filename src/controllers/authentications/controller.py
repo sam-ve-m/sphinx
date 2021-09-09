@@ -13,3 +13,7 @@ class AuthenticationController:
     @staticmethod
     def thebes_hall(payload: dict):
         return AuthenticationService.thebes_hall(payload=payload)
+
+    @staticmethod
+    def validate_electronic_signature(payload: dict):
+        return AuthenticationService.create_electronic_signature_jwt(payload=payload)

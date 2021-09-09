@@ -10,10 +10,7 @@ from src.utils.env_config import config
 
 
 class ClientRegisterRepository(OracleInfrastructure):
-    def register_validated_users(
-        self,
-        user_cpf: str,
-    ):
+    def register_validated_users(self, user_cpf: str):
         values = {
             "cd_empresa": config("COMPANY_OPERATION_CODE"),
             "cd_usuario": "1",

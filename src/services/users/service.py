@@ -13,6 +13,10 @@ from src.controllers.jwts.controller import JwtController
 from src.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
+from src.services.builders.user.customer_registration import CustomerRegistrationBuilder
+from src.services.builders.user.customer_registration_update import (
+    UpdateCustomerRegistrationBuilder,
+)
 from src.services.persephone.service import PersephoneService
 from src.services.builders.user.onboarding_steps_builder import OnboardingStepBuilder
 
@@ -448,9 +452,7 @@ class UserService(IUser):
         thebes_answer = payload.get("x-thebes-answer")
         user_identifier_data = payload.get("user_identifier")
 
-        user_by_cpf = user_repository.find_one(
-            {"cpf": user_identifier_data.get("cpf")}
-        )
+        user_by_cpf = user_repository.find_one({"cpf": user_identifier_data.get("cpf")})
 
         if user_by_cpf is not None:
             raise BadRequestError("common.register_exists")
@@ -611,6 +613,66 @@ class UserService(IUser):
         return {"status_code": status.HTTP_200_OK, "payload": output}
 
     @staticmethod
+    def user_quiz_put(
+        payload: dict, stone_age=StoneAge, user_repository=UserRepository()
+    ) -> dict:
+        UserService.onboarding_step_validator(
+            payload=payload, on_board_step="user_quiz_step"
+        )
+        thebes_answer = payload.get("x-thebes-answer")
+
+        user_onboarding_current_step = UserService.get_onboarding_user_current_step(
+            payload=payload
+        )
+        if UserService.can_send_quiz(
+            user_onboarding_current_step=user_onboarding_current_step
+        ):
+            return {
+                "status_code": status.HTTP_400_BAD_REQUEST,
+                "message_key": "user.quiz.missing_steps",
+            }
+
+        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        current_user_marital = current_user.get("marital")
+
+        user_identifier_data = {
+            "email": current_user.get("email"),
+            "cpf": current_user.get("cpf"),
+            "cel_phone": current_user.get("cel_phone"),
+            "marital_status": current_user_marital.get("marital_status"),
+            "is_us_person": current_user.get("is_us_person"),
+        }
+
+        current_user_is_us_person = current_user.get("is_us_person")
+
+        if current_user_is_us_person:
+            user_identifier_data["us_tin"] = current_user.get("us_tin")
+
+        spouse = current_user_marital.get("spouse")
+
+        if spouse is not None:
+            user_identifier_data["spouse"] = spouse
+
+        response = stone_age.get_user_quiz(user_identifier_data)
+
+        output = response.get("output")
+        stone_age_contract_uuid = response.get("uuid")
+        current_user_updated = deepcopy(current_user)
+        current_user_updated.update(
+            {"stone_age_contract_uuid": stone_age_contract_uuid}
+        )
+
+        current_user_updated.update({"register_analyses": output.get("decision")})
+
+        if (
+            user_repository.update_one(old=current_user, new=current_user_updated)
+            is False
+        ):
+            raise InternalServerError("common.process_issue")
+
+        return {"status_code": status.HTTP_200_OK, "payload": output}
+
+    @staticmethod
     def send_quiz_responses(
         payload: dict,
         user_repository=UserRepository(),
@@ -686,7 +748,7 @@ class UserService(IUser):
             .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
             .user_quiz_step(current_user=current_user)
-            .user_user_electronic_signature(current_user=current_user)
+            .user_electronic_signature(current_user=current_user)
             .build()
         )
 
@@ -891,3 +953,107 @@ class UserService(IUser):
         )
         if current_onboarding_step != on_board_step:
             raise BadRequestError("user.invalid_on_boarding_step")
+
+    @staticmethod
+    def get_customer_registration_data(
+        payload: dict,
+        user_repository=UserRepository(),
+    ):
+        thebes_answer = payload.get("x-thebes-answer")
+        email = thebes_answer.get("email")
+        customer_registration_data = user_repository.find_one({"_id": email})
+        if customer_registration_data is None:
+            raise BadRequestError("common.register_not_exists")
+
+        customer_registration_data_built = (
+            CustomerRegistrationBuilder(customer_registration_data)
+            .personal_name()
+            .personal_birth_date()
+            .personal_parentage()
+            .personal_gender()
+            .personal_email()
+            .personal_phone()
+            .personal_patrimony()
+            .personal_us_tin()
+            .personal_occupation_activity()
+            .personal_company_name()
+            .marital_status()
+            .marital_spouse_name()
+            .marital_spouse_cpf()
+            .marital_cpf()
+            .marital_nationality()
+            .documents_cpf()
+            .documents_identity_number()
+            .documents_expedition_date()
+            .documents_issuer()
+            .documents_state()
+            .address_country()
+            .address_number()
+            .address_street_name()
+            .address_city()
+            .address_neighborhood()
+            .address_zip_code()
+            .address_state()
+        ).build()
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": customer_registration_data_built,
+        }
+
+    @staticmethod
+    def update_customer_registration_data(
+        payload: dict,
+        user_repository=UserRepository(),
+    ):
+        email: str = payload.get("x-thebes-answer", {}).get("email")
+        update_customer_registration_data: dict = payload.get(
+            "customer_registration_data"
+        )
+        update_customer_registration_data = {
+            k: v for k, v in update_customer_registration_data.items() if v is not None
+        }
+        old_customer_registration_data = user_repository.find_one({"_id": email})
+        if old_customer_registration_data is None:
+            raise BadRequestError("common.register_not_exists")
+
+        new_customer_registration_data, modified_register_data = (
+            UpdateCustomerRegistrationBuilder(
+                old_personal_data=old_customer_registration_data,
+                new_personal_data=update_customer_registration_data,
+                email=email,
+            )
+            .personal_name()
+            .person_us_tin()
+            .personal_phone()
+            .personal_patrimony()
+            .personal_occupation_activity()
+            .personal_occupation_cnpj()
+            .personal_company_name()
+            .marital_status()
+            .marital_cpf()
+            .marital_nationality()
+            .marital_spouse_name()
+            .documents_cpf()
+            .documents_identity_number()
+            .documents_expedition_date()
+            .documents_issuer()
+            .documents_state()
+            .address_country()
+            .address_street_name()
+            .address_city()
+            .address_number()
+            .address_id_city()
+            .address_zip_code()
+            .address_neighborhood()
+            .address_state()
+        ).build()
+
+        SinacorService.save_or_update_client_data(
+            user_data=new_customer_registration_data
+        )
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }

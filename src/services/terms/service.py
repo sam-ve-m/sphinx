@@ -36,10 +36,10 @@ class TermsService(ITerm):
         }
 
     @staticmethod
-    def get_terms(
-        payload: dict
-    ):
+    def get_terms(payload: dict):
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {"terms": [term_enum.value for term_enum in list(TermsFileType)]},
+            "payload": {
+                "terms": [term_enum.value for term_enum in list(TermsFileType)]
+            },
         }

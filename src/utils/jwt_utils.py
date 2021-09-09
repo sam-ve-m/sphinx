@@ -14,6 +14,7 @@ from fastapi import Request, Response, status
 from jwt import JWT, jwk_from_dict, jwk_from_pem
 from jwt.utils import get_int_from_datetime
 from heimdall_client.bifrost import Heimdall
+from mist_client.asgard import Mist
 
 # SPHINX
 from src.i18n.i18n_resolver import i18nResolver as i18n
@@ -27,6 +28,7 @@ class JWTHandler:
     instance = JWT()
     logger = logging.getLogger(config("LOG_NAME"))
     heimdall = Heimdall(logger=logging.getLogger(config("LOG_NAME")))
+    mist = Mist(logger=logging.getLogger(config("LOG_NAME")))
 
     @staticmethod
     def generate_token(payload: dict, args: dict = None, ttl: int = 5) -> Optional[str]:
@@ -121,7 +123,13 @@ class JWTHandler:
         sincad = payload.get("sincad")
         is_active_client = payload.get("is_active_client")
 
-        client_has_trade_allowed = solutiontech == SolutiontechClientImportStatus.SYNC.value and sincad and is_active_client and suitability_months_past < 24 and last_modified_date_months_past < 24
+        client_has_trade_allowed = (
+            solutiontech == SolutiontechClientImportStatus.SYNC.value
+            and sincad
+            and is_active_client
+            and suitability_months_past < 24
+            and last_modified_date_months_past < 24
+        )
         new_payload.update({"client_has_trade_allowed": client_has_trade_allowed})
 
         return new_payload
@@ -169,3 +177,12 @@ class JWTHandler:
                 status_code=status.HTTP_401_UNAUTHORIZED,
             )
         return payload
+
+    @staticmethod
+    def generate_session_jwt(electronic_signature: dict, email: str):
+        session_dict = {
+            "email": email,
+            "password": electronic_signature.get("signature"),
+            "signatureExpireTime": electronic_signature.get("signature_expire_time"),
+        }
+        return JWTHandler.mist.generate_jwt(session_dict)

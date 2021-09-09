@@ -90,7 +90,7 @@ class ChangeElectronicSignature(ElectronicSignature, NewElectronicSignature):
 
 
 class Name(BaseModel):
-    name: constr(min_length=1, max_length=50)
+    name: constr(min_length=1, max_length=100)
 
 
 class NickName(BaseModel):
@@ -103,6 +103,32 @@ class DisplayName(BaseModel):
 
 class Version(BaseModel):
     version: int
+
+
+class DeviceInformation(BaseModel):
+    device_name: str
+    device_model: str
+    is_emulator: bool
+    device_operating_system_name: str
+    os_sdk_version: int
+    device_is_in_root_mode: bool
+    device_network_interfaces: str
+    public_ip: str
+    public_wifi_ip: str = None
+    geolocation: str = None
+
+
+class DeviceInformationOptional(BaseModel):
+    device_name: str = None
+    device_model: str = None
+    is_emulator: bool = None
+    device_operating_system_name: str = None
+    os_sdk_version: int = None
+    device_is_in_root_mode: bool = None
+    device_network_interfaces: str = None
+    public_ip: str = None
+    public_wifi_ip: str = None
+    geolocation: str = None
 
 
 class Date(BaseModel):
@@ -123,6 +149,11 @@ class Weight(BaseModel):
 
 class Order(BaseModel):
     order: int
+
+
+class SignatureCheck(BaseModel):
+    signature: constr(regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$")
+    signature_expire_time: int = None
 
 
 class ValueText(BaseModel):
@@ -157,6 +188,13 @@ class MaritalStatus(BaseModel):
 
 class Nationality(BaseModel):
     nationality: str
+
+    @validator("nationality", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_nationality(value=e):
+            return e
+        raise ValueError("nationality not exists")
 
 
 class QuizQuestionOption(BaseModel):
@@ -235,6 +273,21 @@ class BirthDateSource(Source):
             raise ValueError("Wrong timestamp supplied")
 
 
+class CelPhoneSource(Source):
+    value: constr(min_length=11, max_length=11)
+
+
+class MaritalRegime(BaseModel):
+    marital_status: int
+
+    @validator("marital_status", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_marital_regime(value=e):
+            return e
+        raise ValueError("marital not exists")
+
+
 class CountrySource(Source):
     value: constr(min_length=3, max_length=3)
 
@@ -243,7 +296,7 @@ class CountrySource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_country(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("country not exists")
 
 
 class StateSource(Source):
@@ -263,6 +316,14 @@ class MotherNameSource(Source):
 
 class DocumentTypeSource(Source):
     value: DocumentTypes
+
+
+class DocumentNumber(Source):
+    value: str
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        return e.replace(".", "").replace("-", "").replace("/", "")
 
 
 class CpfOrCnpjSource(Source):
@@ -503,6 +564,10 @@ class MaritalRegimeSource(Source):
         raise ValueError("nationality not exists")
 
 
+class MaritalStatusSource(BaseModel):
+    value: MaritalStatusEnum
+
+
 class NeighborhoodSource(Source):
     value: str
 
@@ -570,6 +635,10 @@ class PersonRelatedToMarketInfluencerSource(Source):
 
 class CourtOrdersSource(Source):
     value: bool
+
+
+class IdentityDocumentNumber(Source):
+    value: int
 
 
 class LawsuitsSource(Source):

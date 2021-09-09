@@ -68,6 +68,10 @@ class UserController:
         return UserService.user_quiz(payload=payload)
 
     @staticmethod
+    def user_quiz_put(payload: dict):
+        return UserService.user_quiz_put(payload=payload)
+
+    @staticmethod
     def send_quiz_responses(payload: dict):
         return UserService.send_quiz_responses(payload=payload)
 
@@ -90,3 +94,11 @@ class UserController:
     @staticmethod
     def change_electronic_signature(payload: dict):
         return UserService.change_electronic_signature(payload=payload)
+
+    @staticmethod
+    def get_customer_registration_data(payload: dict):
+        return UserService.get_customer_registration_data(payload=payload)
+
+    @staticmethod
+    def update_customer_registration_data(payload: dict):
+        return UserService.update_customer_registration_data(payload=payload)
