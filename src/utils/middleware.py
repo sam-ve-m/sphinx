@@ -58,7 +58,10 @@ def need_electronic_signature(url_request: str, method: str) -> bool:
     must_have_electronic_signature = False
     if url_request in PATH_WITH_ELECTRONIC_SIGNATURE_REQUIRED:
         must_have_electronic_signature = True
-    if method == "DELETE" and url_request in PATH_WITH_ELECTRONIC_SIGNATURE_REQUIRED_DELETE:
+    if (
+        method == "DELETE"
+        and url_request in PATH_WITH_ELECTRONIC_SIGNATURE_REQUIRED_DELETE
+    ):
         must_have_electronic_signature = True
     return must_have_electronic_signature
 
@@ -103,7 +106,9 @@ def check_if_is_user_not_allowed_to_access_route(
         token_is_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
         is_admin_route = need_be_admin(url_request=request.url.path)
         is_admin = user_data.get("is_admin")
-        is_signed_route = need_electronic_signature(url_request=request.url.path, method=request.method)
+        is_signed_route = need_electronic_signature(
+            url_request=request.url.path, method=request.method
+        )
         is_electronic_signature_valid = validate_electronic_signature(
             request=request, user_data=user_data
         )
