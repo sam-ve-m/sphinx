@@ -26,6 +26,7 @@ en:
     electronic_signature_is_blocked: Your electronic signature is blocked.
     wrong_electronic_signature: Wrong electronic signature.
     creating_account: We will create your bank account, await a email.
+    cant_delete_account: You have pending issues on your account, please check it and try again.
     files:
       term_not_signed: You did not sign this term yet.
     quiz:

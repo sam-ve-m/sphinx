@@ -19,6 +19,7 @@ from src.services.builders.user.customer_registration_update import (
 )
 from src.services.persephone.service import PersephoneService
 from src.services.builders.user.onboarding_steps_builder import OnboardingStepBuilder
+from src.repositories.client_register.repository import ClientRegisterRepository
 
 from src.repositories.file.enum.user_file import UserFileType
 from src.repositories.file.repository import FileRepository
@@ -94,11 +95,23 @@ class UserService(IUser):
 
     @staticmethod
     def delete(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict,
+        user_repository=UserRepository(),
+        token_handler=JWTHandler,
+        client_register=ClientRegisterRepository(),
     ) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
+
+        if (
+            client_register.client_is_allowed_to_cancel_registration(
+                user_cpf=int(old.get("cpf")), bmf_account=int(old.get("bmf_account"))
+            )
+            is False
+        ):
+            raise BadRequestError("user.cant_delete_account")
+
         new = deepcopy(old)
         new.update({"is_active_client": False})
         if user_repository.update_one(old=old, new=new) is False:
