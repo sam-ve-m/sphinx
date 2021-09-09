@@ -21,6 +21,7 @@ from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import InternalServerError
 from src.services.builders.thebes_hall.thebes_hall import ThebesHall
+from src.repositories.user.repository import UserRepository
 
 
 class JWTHandler:
@@ -88,6 +89,8 @@ class JWTHandler:
         if last_modified_date:
             last_modified_date_months_past = last_modified_date.get("months_past")
 
+        user_repository = UserRepository()
+
         new_payload = {
             "nick_name": payload.get("nick_name"),
             "email": payload.get("email"),
@@ -102,6 +105,9 @@ class JWTHandler:
             "client_has_trade_allowed": False,
             "created_at": payload.get("created_at"),
             "exp": payload.get("exp"),
+            "using_suitability_or_refuse_term": user_repository.is_user_using_suitability_or_refuse_term(
+                user_email=payload.get("email")
+            ),
         }
 
         if args is not None:
