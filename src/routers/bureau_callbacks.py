@@ -66,7 +66,7 @@ from src.routers.validators.base import (
     UsTinSource,
     IrsSharingSource,
     FatherNameSource,
-    DocumentNumber
+    DocumentNumber,
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController

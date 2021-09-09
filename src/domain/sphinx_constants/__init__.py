@@ -43,3 +43,7 @@ PATH_WITH_ELECTRONIC_SIGNATURE_REQUIRED = {
     "/user/profile_data",
     "/user/customer_registration_data",
 }
+
+PATH_WITH_ELECTRONIC_SIGNATURE_REQUIRED_DELETE = {
+    "/user",
+}

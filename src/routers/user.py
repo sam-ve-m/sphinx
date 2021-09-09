@@ -37,7 +37,6 @@ from src.routers.validators.base import (
     StreetNameSource,
     ZipCodeSource,
     UsTinSource,
-    IsUsPersonSource,
     NameSource,
     CountrySource,
     StateSource,
@@ -45,18 +44,15 @@ from src.routers.validators.base import (
     IdentityDocumentNumber,
     DateSource,
     AddressNumberSource,
-    AddressIdCitySource,
-    PhoneNumberSource,
+    IdCitySource,
     NeighborhoodSource,
     CnpjSource,
     DocumentTypeSource,
-    MaritalRegimeSource,
     ActivitySource,
-    MaritalRegime,
     MaritalStatusSource,
-    DocumentNumber
+    DocumentNumber,
     DeviceInformation,
-    DeviceInformationOptional
+    DeviceInformationOptional,
 )
 
 from src.utils.jwt_utils import JWTHandler
@@ -116,7 +112,7 @@ class UpdateCustomerRegistrationData(BaseModel):
     address_zip_code: Optional[ZipCodeSource]
     address_state: Optional[StateSource]
     address_number: Optional[AddressNumberSource]
-    address_id_city: Optional[AddressIdCitySource]
+    address_id_city: Optional[IdCitySource]
     address_neighborhood: Optional[NeighborhoodSource]
 
     us_tin: Optional[UsTinSource]
@@ -183,7 +179,7 @@ def user_quiz(device_information: DeviceInformation, request: Request):
 
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
-        "device_information": device_information
+        "device_information": device_information,
     }
     return BaseController.run(UserController.user_quiz_put, payload, request)
 
@@ -197,8 +193,8 @@ def send_quiz_responses(quiz_response: QuizResponses, request: Request):
     quiz_response_dict = quiz_response.dict()
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
-        "quiz": quiz_response_dict.get('responses'),
-        "device_information": quiz_response_dict.get('device_information')
+        "quiz": quiz_response_dict.get("responses"),
+        "device_information": quiz_response_dict.get("device_information"),
     }
     return BaseController.run(UserController.send_quiz_responses, payload, request)
 

@@ -45,7 +45,7 @@ class SinacorService:
             user_data=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
             user_repository=user_repository,
-            persephone_client=persephone_client
+            persephone_client=persephone_client,
         )
 
         return {
@@ -55,19 +55,21 @@ class SinacorService:
 
     @staticmethod
     def save_or_update_client_data(
-            user_data: dict,
-            client_register_repository=ClientRegisterRepository(),
-            user_repository=UserRepository(),
-            persephone_client=PersephoneService.get_client(),
+        user_data: dict,
+        client_register_repository=ClientRegisterRepository(),
+        user_repository=UserRepository(),
+        persephone_client=PersephoneService.get_client(),
     ):
         SinacorService._send_dtvm_client_data_to_persephone(
             persephone_client=persephone_client,
             dtvm_client_data=user_data,
         )
 
-        database_and_bureau_dtvm_client_data_merged = SinacorService._create_client_into_sinacor(
-            client_register_repository=client_register_repository,
-            database_and_bureau_dtvm_client_data_merged=user_data,
+        database_and_bureau_dtvm_client_data_merged = (
+            SinacorService._create_client_into_sinacor(
+                client_register_repository=client_register_repository,
+                database_and_bureau_dtvm_client_data_merged=user_data,
+            )
         )
 
         database_and_bureau_dtvm_client_data_merged = SinacorService._add_dtvm_client_trade_metadata(
