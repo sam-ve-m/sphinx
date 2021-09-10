@@ -7,7 +7,7 @@ import logging
 # OUTSIDE LIBRARIES
 from fastapi import Form
 from validate_email import validate_email
-from pydantic import BaseModel, constr, validator, UUID1
+from pydantic import BaseModel, constr, validator, UUID1, root_validator
 from src.utils.env_config import config
 
 # SPHIX
@@ -191,7 +191,6 @@ class MaritalStatus(BaseModel):
             return e
         raise ValueError("Marital status not exists in our marital regime enum")
 
-
 class Nationality(BaseModel):
     nationality: str
 
@@ -290,7 +289,7 @@ class CountrySource(Source):
 class StateSource(Source):
     value: constr(min_length=2, max_length=2)
 
-    @validator("value", always=True, allow_reuse=True)
+    @root_validator()
     def validate_value(cls, e):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_state(value=e):
@@ -365,23 +364,9 @@ class NationalitySource(Source):
 class CitySource(Source):
     value: str
 
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_city(value=e):
-            return e
-        raise ValueError("City not exists in our City enum")
-
 
 class IdCitySource(Source):
     value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_city_id(value=e):
-            return e
-        raise ValueError("IdCity not exists in our IdCity enum")
 
 
 class ZipCodeSource(Source):
@@ -501,17 +486,6 @@ class CosifTaxClassificationSource(Source):
         raise ValueError("CosifTaxClassificationSource not exists in our contry enum")
 
 
-class CountySource(Source):
-    value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_county(value=e):
-            return e
-        raise ValueError("Contry not exists in our contry enum")
-
-
 class MaritalStatusSource(Source):
     value: int
 
@@ -628,3 +602,8 @@ class RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
     Source
 ):
     value: bool
+
+def validate_contry_state_city_and_id_city(country: str, state: str, city: str, id_city: int) -> bool:
+    sinacor_types_repository = SinaCorTypesRepository()
+    is_valid = sinacor_types_repository.validate_contry_state_city_and_id_city(country, state, city, id_city)
+    return is_valid

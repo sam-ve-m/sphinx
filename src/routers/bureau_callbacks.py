@@ -1,9 +1,9 @@
 # STANDARD LIBS
-from typing import Union, List, Optional
+from typing import Optional, Dict, Any
 
 # OUTSIDE LIBRARIES
-from fastapi import APIRouter, Request, Response
-from pydantic import BaseModel
+from fastapi import APIRouter, Request
+from pydantic import BaseModel, root_validator
 
 # SPHINX
 from src.routers.validators.base import (
@@ -61,7 +61,7 @@ from src.routers.validators.base import (
     UsTinSource,
     IrsSharingSource,
     FatherNameSource,
-    DocumentNumber, MaritalStatusSource
+    DocumentNumber, MaritalStatusSource, validate_contry_state_city_and_id_city
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
@@ -91,6 +91,19 @@ class Address(BaseModel):
     id_city: IdCitySource
     zip_code: ZipCodeSource
     phone_number: PhoneNumberSource
+
+    @root_validator()
+    def validate(cls, values):
+        country = values.get('country').get('value')
+        state = values.get('state').get('value')
+        city = values.get('city').get('value')
+        id_city = values.get('id_city').get('value')
+        is_valid = validate_contry_state_city_and_id_city(country, state, city, id_city)
+
+        if not is_valid:
+            raise ValueError(f"The combination of values {country}, {state}, {city}, {id_city} does not match")
+
+        return values
 
 
 class Company(BaseModel):
@@ -136,6 +149,19 @@ class Birthplace(BaseModel):
     state: Optional[StateSource]
     city: Optional[CitySource]
     id_city: Optional[IdCitySource]
+
+    @root_validator()
+    def validate(cls, values):
+        country = values.get('country').get('value')
+        state = values.get('state').get('value')
+        city = values.get('city').get('value')
+        id_city = values.get('id_city').get('value')
+        is_valid = validate_contry_state_city_and_id_city(country, state, city, id_city)
+
+        if not is_valid:
+            raise ValueError(f"The combination of values {country}, {state}, {city}, {id_city} does not match")
+
+        return values
 
 
 class Data(Decision, Status):

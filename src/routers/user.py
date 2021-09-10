@@ -1,9 +1,9 @@
 # STANDARD LIBS
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 # OUTSIDE LIBRARIES
 from fastapi import APIRouter, Request, Response, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 
 # SPHINX
 from src.routers.validators.base import (
@@ -51,7 +51,7 @@ from src.routers.validators.base import (
     MaritalStatusSource,
     DocumentNumber,
     DeviceInformation,
-    DeviceInformationOptional
+    DeviceInformationOptional, validate_contry_state_city_and_id_city
 )
 
 from src.utils.jwt_utils import JWTHandler
@@ -115,6 +115,19 @@ class UpdateCustomerRegistrationData(BaseModel):
     address_neighborhood: Optional[NeighborhoodSource]
 
     us_tin: Optional[UsTinSource]
+
+    @root_validator()
+    def validate(cls, values):
+        country = values.get('address_country').get('value')
+        state = values.get('address_state').get('value')
+        city = values.get('address_city').get('value')
+        id_city = values.get('address_id_city').get('value')
+        is_valid = validate_contry_state_city_and_id_city(country, state, city, id_city)
+
+        if not is_valid:
+            raise ValueError(f"The combination of values {country}, {state}, {city}, {id_city} does not match")
+
+        return values
 
 
 @router.post("/user", tags=["user"])
