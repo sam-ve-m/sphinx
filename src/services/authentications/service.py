@@ -135,12 +135,14 @@ class AuthenticationService(IAuthentication):
 
         user_solutiontech_status_from_database = user.get("solutiontech")
         user_sincad_status_from_database = user.get("sincad")
+        user_sinacor_status_from_database = user.get("sinacor")
         user_bmf_account_from_database = user.get("bmf_account")
         user_cpf_from_database = user.get("cpf")
 
         client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             user_sincad_status_from_database=user_sincad_status_from_database,
+            user_sinacor_status_from_database=user_sinacor_status_from_database
         )
 
         user_has_valid_solutiontech_status_in_database = AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
@@ -176,12 +178,25 @@ class AuthenticationService(IAuthentication):
                 user_sincad_status_from_database=user_sincad_status_from_database,
             )
 
+        sinacor_status_from_sinacor = (
+            AuthenticationService.client_sinacor_is_blocked(
+                user_cpf=user_cpf_from_database
+            )
+        )
+
+        AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
+            client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
+            sinacor_status_from_sinacor=sinacor_status_from_sinacor,
+            user_sinacor_status_from_database=user_sinacor_status_from_database,
+        )
+
         return client_has_trade_allowed_status_with_database_user
 
     @staticmethod
     def _get_client_has_trade_allowed_status_with_database_user(
         user_solutiontech_status_from_database: str,
         user_sincad_status_from_database: str,
+        user_sinacor_status_from_database: str,
     ):
         client_has_trade_allowed_status_with_database_user = {
             "solutiontech": {
@@ -192,6 +207,10 @@ class AuthenticationService(IAuthentication):
                 "status": user_sincad_status_from_database,
                 "status_changed": False,
             },
+            "sinacor": {
+                "status": user_sinacor_status_from_database,
+                "status_changed": False,
+            }
         }
 
         return client_has_trade_allowed_status_with_database_user
@@ -237,6 +256,25 @@ class AuthenticationService(IAuthentication):
         return client_has_trade_allowed_status_with_database_user
 
     @staticmethod
+    def _update_client_has_trade_allowed_status_with_sinacor_status_response(
+        client_has_trade_allowed_status_with_database_user: dict,
+        sinacor_status_from_sinacor: bool,
+        user_sinacor_status_from_database: bool,
+    ):
+
+        sincad_status_changed = (
+            user_sinacor_status_from_database != sinacor_status_from_sinacor
+        )
+        client_has_trade_allowed_status_with_database_user["sincad"][
+            "status"
+        ] = sinacor_status_from_sinacor
+        client_has_trade_allowed_status_with_database_user["sincad"][
+            "status_changed"
+        ] = sincad_status_changed
+
+        return client_has_trade_allowed_status_with_database_user
+
+    @staticmethod
     def check_if_user_has_valid_solutiontech_status_in_database(
         user_solutiontech_status_from_database: str,
     ):
@@ -255,6 +293,13 @@ class AuthenticationService(IAuthentication):
     ) -> bool:
         sincad_status = client_register_repository.get_sincad_status(user_cpf=user_cpf)
         return sincad_status and sincad_status[0] in ["ACE", "ECM"]
+
+    @staticmethod
+    def client_sinacor_is_blocked(
+        user_cpf: int, client_register_repository=ClientRegisterRepository()
+    ) -> bool:
+        sincad_status = client_register_repository.get_sinacor_status(user_cpf=user_cpf)
+        return sincad_status and sincad_status[0] in ["A"]
 
     @staticmethod
     def create_electronic_signature_jwt(payload: dict):
