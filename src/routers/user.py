@@ -1,5 +1,5 @@
 # STANDARD LIBS
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 
 # OUTSIDE LIBRARIES
 from fastapi import APIRouter, Request, Response, Depends
@@ -117,14 +117,17 @@ class UpdateCustomerRegistrationData(BaseModel):
     us_tin: Optional[UsTinSource]
 
     @root_validator()
-    def validate(cls, values):
-        country = values.get('address_country').get('value')
-        state = values.get('address_state').get('value')
-        city = values.get('address_city').get('value')
-        id_city = values.get('address_id_city').get('value')
-        is_valid = validate_contry_state_city_and_id_city(country, state, city, id_city)
+    def validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        country = values.get('country')
+        state = values.get('state')
+        city = values.get('city')
+        id_city = values.get('id_city')
 
-        if not is_valid:
+        if all([country, state, city, id_city]):
+            is_valid = validate_contry_state_city_and_id_city(country.get('value'), state.get('value'), city.get('value'), id_city.get('value'))
+            if not is_valid:
+                raise ValueError(f"The combination of values {country}, {state}, {city}, {id_city} does not match")
+        else:
             raise ValueError(f"The combination of values {country}, {state}, {city}, {id_city} does not match")
 
         return values
