@@ -14,7 +14,7 @@ from src.utils.stone_age import StoneAge
 from src.utils.base_model_normalizer import normalize_enum_types
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.solutiontech import Solutiontech
-
+from src.domain.sincad.client_sync_status import SincadClientImportStatus
 
 class SinacorService:
     @staticmethod
@@ -163,10 +163,16 @@ class SinacorService:
 
         database_and_bureau_dtvm_client_data_merged.update(
             {
-                "sinacor": SinacorClientStatus.CREATED.value,
-                "sincad": SinacorClientStatus.NOT_CREATED.value,
+                "sinacor": SinacorClientStatus.CREATED.value
             }
         )
+
+        if database_and_bureau_dtvm_client_data_merged.get("sincad") is None:
+            database_and_bureau_dtvm_client_data_merged.update(
+                {
+                    "sincad": SincadClientImportStatus.NOT_SYNCED.value,
+                }
+            )
 
         sinacor_user_control_data = (
             client_register_repository.get_user_control_data_if_user_already_exists(
