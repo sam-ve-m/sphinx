@@ -88,6 +88,13 @@ class ClientRegisterRepository(OracleInfrastructure):
             return result[0]
         return None
 
+    def get_sinacor_status(self, user_cpf: int):
+        sql = f"SELECT IN_SITUAC FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+        result = self.query(sql=sql)
+        if len(result) > 0:
+            return result[0]
+        return None
+
     def get_builder(
         self,
         user_data: dict,

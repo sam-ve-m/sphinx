@@ -33,7 +33,7 @@ class UserRepository(MongoDBInfrastructure):
         }
 
         user_trade_profile_callback = user_trade_match.get((has_suitability, has_term_refusal))
-        user_trade_profile = user_trade_profile_callback(has_suitability, has_term_refusal)
+        user_trade_profile = user_trade_profile_callback(suitability, term_refusal)
 
         return user_trade_profile
 
