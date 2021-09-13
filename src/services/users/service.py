@@ -80,6 +80,9 @@ class UserService(IUser):
         )
         return {
             "status_code": status.HTTP_201_CREATED,
+            "payload": {
+                "jwt": payload_jwt
+            },
             "message_key": "user.created",
         }
 

@@ -138,7 +138,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
 
     def get_county(self, country: str, state: str):
         sql = f"""
-            SELECT COD_MUNI as code, NOME_MUNI as description
+            SELECT NUM_SEQ_MUNI as code, NOME_MUNI as description
             FROM TSCDXMUNICIPIO
             WHERE SIGL_PAIS='{country}'
             AND SIGL_ESTADO='{state}'
@@ -385,7 +385,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
 
     def validate_contry_state_city_and_id_city(self, contry: str, state: str, city: str, id_city: int) -> bool:
         sql = f"""SELECT 1 FROM TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
-        AND SIGL_ESTADO = '{state}' AND NOME_MUNI = '{city}' AND COD_MUNI = {id_city}"""
+        AND SIGL_ESTADO = '{state}' AND NOME_MUNI = '{city}' AND NUM_SEQ_MUNI = {id_city}"""
         return self.base_validator(sql=sql)
 
 
