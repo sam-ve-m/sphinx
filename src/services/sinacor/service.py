@@ -32,6 +32,11 @@ class SinacorService:
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
         )
 
+        user_from_database_exists = user_database_document
+
+        if user_from_database_exists is None:
+            raise BadRequestError("common.register_exists")
+
         fake_stone_age = SinacorService._get_fake_stone_age_callback(email=user_database_document.get("_id"), cpf=user_database_document.get("cpf"))
         dtvm_client_data_provided_by_bureau = SinacorService._merge_fake_object_with_stone_age_data(fake_object=fake_stone_age.get("data"), stone_age_data=dtvm_client_data_provided_by_bureau)
 
@@ -92,7 +97,7 @@ class SinacorService:
         for fake_object_key in fake_object_keys:
             message = f"root-key: {fake_object_key}"
             logging.info(msg=message)
-            stone_age_data[fake_object_key] = SinacorService.chupeta(fake_object=fake_object[fake_object_key], stone_age_data=stone_age_data[fake_object_key])
+            stone_age_data[fake_object_key] = SinacorService.chupeta(fake_object=fake_object.get(fake_object_key), stone_age_data=stone_age_data.get(fake_object_key))
 
         return stone_age_data
 
@@ -106,8 +111,8 @@ class SinacorService:
             for inside_key in inside_keys:
                 logging.info(msg=inside_key)
                 updated_value = SinacorService.chupeta(
-                    fake_object=fake_object[inside_key],
-                    stone_age_data=stone_age_data[inside_key],
+                    fake_object=fake_object.get(inside_key),
+                    stone_age_data=stone_age_data.get(inside_key),
                 )
                 stone_age_data[inside_key] = updated_value
         else:
