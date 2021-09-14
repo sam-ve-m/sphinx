@@ -37,8 +37,8 @@ class SinacorService:
         if user_from_database_exists is None:
             raise BadRequestError("common.register_exists")
 
-        fake_stone_age = SinacorService._get_fake_stone_age_callback(email=user_database_document.get("_id"), cpf=user_database_document.get("cpf"))
-        dtvm_client_data_provided_by_bureau = SinacorService._merge_fake_object_with_stone_age_data(fake_object=fake_stone_age.get("data"), stone_age_data=dtvm_client_data_provided_by_bureau)
+        # fake_stone_age = SinacorService._get_fake_stone_age_callback(email=user_database_document.get("_id"), cpf=user_database_document.get("cpf"))
+        # dtvm_client_data_provided_by_bureau = SinacorService._merge_fake_object_with_stone_age_data(fake_object=fake_stone_age.get("data"), stone_age_data=dtvm_client_data_provided_by_bureau)
 
         database_and_bureau_dtvm_client_data_merged = (
             SinacorService._merge_bureau_client_data_with_user_database(
@@ -89,38 +89,38 @@ class SinacorService:
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
 
-    @staticmethod
-    def _merge_fake_object_with_stone_age_data(fake_object: dict, stone_age_data: dict) -> dict:
-        message = f"stone_age_data: {stone_age_data} - fake_object: {fake_object}"
-        logging.info(msg=message)
-        fake_object_keys = fake_object.keys()
-        for fake_object_key in fake_object_keys:
-            message = f"root-key: {fake_object_key}"
-            logging.info(msg=message)
-            stone_age_data[fake_object_key] = SinacorService.chupeta(fake_object=fake_object.get(fake_object_key), stone_age_data=stone_age_data.get(fake_object_key))
+    # @staticmethod
+    # def _merge_fake_object_with_stone_age_data(fake_object: dict, stone_age_data: dict) -> dict:
+    #     message = f"stone_age_data: {stone_age_data} - fake_object: {fake_object}"
+    #     logging.info(msg=message)
+    #     fake_object_keys = fake_object.keys()
+    #     for fake_object_key in fake_object_keys:
+    #         message = f"root-key: {fake_object_key}"
+    #         logging.info(msg=message)
+    #         stone_age_data[fake_object_key] = SinacorService.chupeta(fake_object=fake_object.get(fake_object_key), stone_age_data=stone_age_data.get(fake_object_key))
+    #
+    #     return stone_age_data
 
-        return stone_age_data
-
-    @staticmethod
-    def chupeta(fake_object: dict, stone_age_data: dict):
-        if stone_age_data is None:
-            logging.info(msg=fake_object)
-            stone_age_data = fake_object
-        elif type(fake_object) is dict:
-            inside_keys = fake_object.keys()
-            for inside_key in inside_keys:
-                logging.info(msg=inside_key)
-                updated_value = SinacorService.chupeta(
-                    fake_object=fake_object.get(inside_key),
-                    stone_age_data=stone_age_data.get(inside_key),
-                )
-                stone_age_data[inside_key] = updated_value
-        else:
-            if stone_age_data is None:
-                logging.info(msg=fake_object)
-                stone_age_data = fake_object
-
-        return stone_age_data
+    # @staticmethod
+    # def chupeta(fake_object: dict, stone_age_data: dict):
+    #     if stone_age_data is None:
+    #         logging.info(msg=fake_object)
+    #         stone_age_data = fake_object
+    #     elif type(fake_object) is dict:
+    #         inside_keys = fake_object.keys()
+    #         for inside_key in inside_keys:
+    #             logging.info(msg=inside_key)
+    #             updated_value = SinacorService.chupeta(
+    #                 fake_object=fake_object.get(inside_key),
+    #                 stone_age_data=stone_age_data.get(inside_key),
+    #             )
+    #             stone_age_data[inside_key] = updated_value
+    #     else:
+    #         if stone_age_data is None:
+    #             logging.info(msg=fake_object)
+    #             stone_age_data = fake_object
+    #
+    #     return stone_age_data
 
     @staticmethod
     def _create_client_into_sinacor(

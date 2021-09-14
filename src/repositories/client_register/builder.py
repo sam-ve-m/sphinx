@@ -389,10 +389,6 @@ class ClientRegisterBuilder:
         self._fields_added.update({"IND_PCTA": IndicatorByAccount.YES.value})
         return self
 
-    def add_cod_tipo_colt(self, value=None):
-        self._fields_added.update({"COD_TIPO_COLT": value})
-        return self
-
     def add_in_emite_nota_cs(self):
         self._fields_added.update(
             {"IN_EMITE_NOTA_CS": HomeExecutionBrokerageNoteIssuanceIndicator.NO.value}

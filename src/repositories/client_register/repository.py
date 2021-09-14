@@ -229,9 +229,9 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_uf_estr1()
             .add_num_class_risc_cmtt()
             .add_desc_risc_cmtt()
-            .add_num_us_person()
-            .add_val_cfin()
-            .add_data_cfin()
+            .add_num_us_person(user_data=user_data)
+            .add_val_cfin(user_data=user_data)
+            .add_data_cfin(user_data=user_data)
         )
         return builder
 

@@ -113,15 +113,15 @@ class Company(BaseModel):
 
 
 class Occupation(BaseModel):
-    activity: Optional[ActivitySource]
+    activity: ActivitySource
     company: Optional[Company]
 
 
 class Assets(BaseModel):
-    patrimony: Optional[PatrimonySource]
-    income: Optional[IncomeSource]
-    income_tax_type: Optional[IncomeTaxTypeSource]
-    date: Optional[AssetsDateSource]
+    patrimony: PatrimonySource
+    income: IncomeSource
+    income_tax_type: IncomeTaxTypeSource
+    date: AssetsDateSource
 
 
 class Education(BaseModel):
@@ -130,7 +130,7 @@ class Education(BaseModel):
 
 
 class PoliticallyExposedPerson(BaseModel):
-    is_politically_exposed_person: Optional[IsPoliticallyExposedPerson]
+    is_politically_exposed_person: IsPoliticallyExposedPerson
 
 
 class Spouse(BaseModel):
@@ -140,12 +140,12 @@ class Spouse(BaseModel):
 
 
 class Marital(BaseModel):
-    status: Optional[MaritalStatusSource]
+    status: MaritalStatusSource
     spouse: Optional[Spouse]
 
 
 class Birthplace(BaseModel):
-    nationality: Optional[NationalitySource]
+    nationality: NationalitySource
     country: Optional[CountrySource]
     state: Optional[StateSource]
     city: Optional[CitySource]
@@ -167,42 +167,42 @@ class Birthplace(BaseModel):
 
 
 class Data(Decision, Status):
-    email: Optional[EmailSource]
-    name: Optional[NameSource]
-    cpf: Optional[CpfSource]
-    self_link: Optional[SelfLinkSource]
-    connected_person: Optional[ConnectedPersonSource]
-    person_type: Optional[PersonTypeSource]
-    client_type: Optional[ClientTypeSource]
-    investor_type: Optional[InvestorTypeSource]
-    cosif_tax_classification: Optional[CosifTaxClassificationSource]
-    gender: Optional[GenderSource]
-    is_us_person: Optional[IsUsPersonSource]
+    email: EmailSource
+    name: NameSource
+    cpf: CpfSource
+    self_link: SelfLinkSource
+    person_type: PersonTypeSource
+    client_type: ClientTypeSource
+    investor_type: InvestorTypeSource
+    cosif_tax_classification: CosifTaxClassificationSource
+    gender: GenderSource
+    is_us_person: IsUsPersonSource
+    birth_date: BirthDateSource
+    birthplace: Birthplace
+    mother_name: MotherNameSource
+    marital: Marital
+    address: Address
+    occupation: Occupation
+    assets: Assets
+    education: Education
+    politically_exposed_person: PoliticallyExposedPerson
+    connected_person: ConnectedPersonSource
+    midia_person: MidiaPersonSource
+    person_related_to_market_influencer: PersonRelatedToMarketInfluencerSource
+    court_orders: CourtOrdersSource
+    lawsuits: LawsuitsSource
+    fund_admin_registration: FundAdminRegistrationSource
+    investment_fund_administrators_registration: InvestmentFundAdministratorsRegistrationSource
+    register_auditors_securities_commission: RegisterAuditorsSecuritiesCommissionSource
+    registration_of_other_market_participants_securities_commission: RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource
+    foreign_investors_register_of_annex_iv_not_registered: ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource
+    registration_of_foreign_investors_securities_commission: RegistrationOfForeignInvestorsSecuritiesCommissionSource
+    registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
+    date_of_acquisition: DateOfAcquisition
     us_tin: Optional[UsTinSource]
     irs_sharing: Optional[IrsSharingSource]
-    birth_date: Optional[BirthDateSource]
-    birthplace: Optional[Birthplace]
-    mother_name: Optional[MotherNameSource]
     father_name: Optional[FatherNameSource]
     identifier_document: Optional[IdentifierDocument]
-    marital: Optional[Marital]
-    address: Optional[Address]
-    occupation: Optional[Occupation]
-    assets: Optional[Assets]
-    education: Optional[Education]
-    politically_exposed_person: Optional[PoliticallyExposedPerson]
-    midia_person: Optional[MidiaPersonSource]
-    person_related_to_market_influencer: Optional[PersonRelatedToMarketInfluencerSource]
-    court_orders: Optional[CourtOrdersSource]
-    lawsuits: Optional[LawsuitsSource]
-    fund_admin_registration: Optional[FundAdminRegistrationSource]
-    investment_fund_administrators_registration: Optional[InvestmentFundAdministratorsRegistrationSource]
-    register_auditors_securities_commission: Optional[RegisterAuditorsSecuritiesCommissionSource]
-    registration_of_other_market_participants_securities_commission: Optional[RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource]
-    foreign_investors_register_of_annex_iv_not_registered: Optional[ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource]
-    registration_of_foreign_investors_securities_commission: Optional[RegistrationOfForeignInvestorsSecuritiesCommissionSource]
-    registration_representative_of_nonresident_investors_securities_commission: Optional[RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource]
-    date_of_acquisition: Optional[DateOfAcquisition]
 
 
 class BureauCallback(Uuid):
