@@ -40,6 +40,9 @@ class SinacorService:
         # fake_stone_age = SinacorService._get_fake_stone_age_callback(email=user_database_document.get("_id"), cpf=user_database_document.get("cpf"))
         # dtvm_client_data_provided_by_bureau = SinacorService._merge_fake_object_with_stone_age_data(fake_object=fake_stone_age.get("data"), stone_age_data=dtvm_client_data_provided_by_bureau)
 
+        fake_identifier_document = SinacorService._get_fake_identifier_document()
+        dtvm_client_data_provided_by_bureau = SinacorService._fill_not_exists_data_identifier_document(fake_identifier_document=fake_identifier_document, stone_age_data=dtvm_client_data_provided_by_bureau)
+
         database_and_bureau_dtvm_client_data_merged = (
             SinacorService._merge_bureau_client_data_with_user_database(
                 output=dtvm_client_data_provided_by_bureau,
@@ -89,6 +92,42 @@ class SinacorService:
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
 
+    @staticmethod
+    def _fill_not_exists_data_identifier_document(fake_identifier_document: dict, stone_age_data: dict) -> dict:
+        stone_age_identifier_document = stone_age_data.get("identifier_document") if stone_age_data.get("identifier_document") is not None else {}
+        message = f"stone_age_data: {stone_age_identifier_document} - fake_identifier_document: {fake_identifier_document}"
+        logging.info(msg=message)
+
+        fake_object_keys = fake_identifier_document.keys()
+        for fake_object_key in fake_object_keys:
+            message = f"root-key: {fake_object_key}"
+            logging.info(msg=message)
+            stone_age_identifier_document[fake_object_key] = SinacorService.chupeta(fake_object=fake_identifier_document.get(fake_object_key), stone_age_data=stone_age_identifier_document.get(fake_object_key))
+
+        stone_age_data.update({"identifier_document": stone_age_identifier_document})
+        return stone_age_data
+
+    @staticmethod
+    def chupeta(fake_object: dict, stone_age_data: dict):
+        if stone_age_data is None:
+            logging.info(msg=fake_object)
+            stone_age_data = fake_object
+        elif type(fake_object) is dict:
+            inside_keys = fake_object.keys()
+            for inside_key in inside_keys:
+                logging.info(msg=inside_key)
+                updated_value = SinacorService.chupeta(
+                    fake_object=fake_object.get(inside_key),
+                    stone_age_data=stone_age_data.get(inside_key),
+                )
+                stone_age_data[inside_key] = updated_value
+        else:
+            if stone_age_data is None:
+                logging.info(msg=fake_object)
+                stone_age_data = fake_object
+
+        return stone_age_data
+
     # @staticmethod
     # def _merge_fake_object_with_stone_age_data(fake_object: dict, stone_age_data: dict) -> dict:
     #     message = f"stone_age_data: {stone_age_data} - fake_object: {fake_object}"
@@ -98,27 +137,6 @@ class SinacorService:
     #         message = f"root-key: {fake_object_key}"
     #         logging.info(msg=message)
     #         stone_age_data[fake_object_key] = SinacorService.chupeta(fake_object=fake_object.get(fake_object_key), stone_age_data=stone_age_data.get(fake_object_key))
-    #
-    #     return stone_age_data
-
-    # @staticmethod
-    # def chupeta(fake_object: dict, stone_age_data: dict):
-    #     if stone_age_data is None:
-    #         logging.info(msg=fake_object)
-    #         stone_age_data = fake_object
-    #     elif type(fake_object) is dict:
-    #         inside_keys = fake_object.keys()
-    #         for inside_key in inside_keys:
-    #             logging.info(msg=inside_key)
-    #             updated_value = SinacorService.chupeta(
-    #                 fake_object=fake_object.get(inside_key),
-    #                 stone_age_data=stone_age_data.get(inside_key),
-    #             )
-    #             stone_age_data[inside_key] = updated_value
-    #     else:
-    #         if stone_age_data is None:
-    #             logging.info(msg=fake_object)
-    #             stone_age_data = fake_object
     #
     #     return stone_age_data
 
@@ -427,3 +445,24 @@ class SinacorService:
         }
 
         return fake_response
+
+    @staticmethod
+    def _get_fake_identifier_document():
+        fake_identifier_document = {
+            "type": {"source": "LIONX", "value": "RG"},
+            "document_data": {
+                # GENERATE
+                "number": {
+                    "source": "LIONX",
+                    "value": int("37.059.072-7".replace(".", "").replace("-", "")),
+                },
+                "date": {
+                    "source": "LIONX",
+                    "value": datetime.datetime(2018, 7, 12, 16, 31, 31),
+                },
+                "state": {"source": "LIONX", "value": "SP"},
+                "issuer": {"source": "LIONX", "value": "SSP"},
+            },
+        }
+
+        return fake_identifier_document

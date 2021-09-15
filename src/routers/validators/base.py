@@ -289,7 +289,7 @@ class CountrySource(Source):
 class StateSource(Source):
     value: constr(min_length=2, max_length=2)
 
-    @root_validator()
+    @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_state(value=e):
