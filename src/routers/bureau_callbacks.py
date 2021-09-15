@@ -129,10 +129,6 @@ class Education(BaseModel):
     course: Optional[EducationCourseSource]
 
 
-class PoliticallyExposedPerson(BaseModel):
-    is_politically_exposed_person: IsPoliticallyExposedPerson
-
-
 class Spouse(BaseModel):
     cpf: Optional[CpfSource]
     name: Optional[NameSource]
@@ -185,7 +181,7 @@ class Data(Decision, Status):
     occupation: Occupation
     assets: Assets
     education: Education
-    politically_exposed_person: PoliticallyExposedPerson
+    is_politically_exposed_person: IsPoliticallyExposedPerson
     connected_person: ConnectedPersonSource
     midia_person: MidiaPersonSource
     person_related_to_market_influencer: PersonRelatedToMarketInfluencerSource
