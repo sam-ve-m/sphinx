@@ -74,6 +74,7 @@ class SuitabilityService(ISuitability):
             score,
             suitability_version,
         ) = SuitabilityService.__get_last_suitability_answers_metadata()
+        # TODO: Persephone
         sent_to_persephone = persephone_client.run(
             topic="thebes.sphinx_persephone.topic",
             partition=2,

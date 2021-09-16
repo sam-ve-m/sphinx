@@ -18,6 +18,7 @@ from src.exceptions.exceptions import (
     UnauthorizedError,
     InternalServerError,
 )
+from src.services.persephone.service import PersephoneService
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
 from src.utils.genarate_id import hash_field
@@ -107,7 +108,7 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def thebes_hall(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler, persephone_client=PersephoneService.get_client(),
     ) -> dict:
         user_old = user_repository.find_one({"_id": payload.get("email")})
         if user_old is None:
@@ -122,7 +123,7 @@ class AuthenticationService(IAuthentication):
             if value["status_changed"]:
                 must_update = True
                 user_new.update({key: value["status"]})
-
+        # TODO: Persephone
         if must_update:
             if user_repository.update_one(old=user_old, new=user_new) is False:
                 raise InternalServerError("common.process_issue")
@@ -302,10 +303,11 @@ class AuthenticationService(IAuthentication):
         return sincad_status and sincad_status[0] in ["A"]
 
     @staticmethod
-    def create_electronic_signature_jwt(payload: dict):
+    def create_electronic_signature_jwt(payload: dict, persephone_client=PersephoneService.get_client()):
         jwt_mist_session = JWTHandler.generate_session_jwt(
             payload.get("electronic_signature"), payload.get("email")
         )
+        # TODO: Persephone
         return {
             "status_code": status.HTTP_200_OK,
             "payload": jwt_mist_session[0],

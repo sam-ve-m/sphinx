@@ -61,6 +61,7 @@ class UserService(IUser):
         payload.update({"created_at": datetime.now()})
         UserService.add_user_control_metadata(payload=payload)
 
+        # TODO: Persephone
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC"),
             partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
@@ -140,7 +141,7 @@ class UserService(IUser):
 
     @staticmethod
     def reset_electronic_signature(
-        payload: dict, user_repository=UserRepository()
+        payload: dict, user_repository=UserRepository(), persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         forgot_electronic_signature = thebes_answer.get("forgot_electronic_signature")
@@ -159,7 +160,7 @@ class UserService(IUser):
         encrypted_electronic_signature = PasswordEncrypt.encrypt_password(
             new_electronic_signature
         )
-
+        # TODO: Persephone
         user_from_database_to_update = deepcopy(user_from_database)
         user_from_database_to_update[
             "electronic_signature"
@@ -187,7 +188,7 @@ class UserService(IUser):
 
     @staticmethod
     def change_electronic_signature(
-        payload: dict, user_repository=UserRepository()
+        payload: dict, user_repository=UserRepository(), persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         current_electronic_signature = payload.get("current_electronic_signature")
@@ -205,7 +206,7 @@ class UserService(IUser):
         user_has_electronic_signature_blocked = is_blocked_electronic_signature is True
         if user_has_electronic_signature_blocked:
             raise UnauthorizedError("user.electronic_signature_is_blocked")
-
+        # TODO: Persephone
         encrypted_current_electronic_signature = PasswordEncrypt.encrypt_password(
             current_electronic_signature
         )
@@ -344,11 +345,13 @@ class UserService(IUser):
     def save_user_selfie(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_selfie_step"
         )
+        # TODO: Persephone
         file_repository.save_user_file(
             file_type=UserFileType.SELF,
             content=payload.get("file_or_base64"),
@@ -461,6 +464,7 @@ class UserService(IUser):
     def user_identifier_data(
         payload: dict,
         user_repository=UserRepository(),
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         user_identifier_data = payload.get("user_identifier")
@@ -480,6 +484,7 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
 
         current_user_with_identifier_data = dict(current_user)
+        # TODO: Persephone
         UserService.add_user_identifier_data_on_current_user(
             payload=current_user_with_identifier_data,
             user_identifier_data=user_identifier_data,
@@ -507,6 +512,7 @@ class UserService(IUser):
     def user_complementary_data(
         payload: dict,
         user_repository=UserRepository(),
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_complementary_step"
@@ -522,7 +528,7 @@ class UserService(IUser):
             payload=current_user_with_complementary_data,
             user_complementary_data=user_complementary_data,
         )
-
+        # TODO: Persephone
         if (
             user_repository.update_one(
                 old=current_user, new=current_user_with_complementary_data
@@ -627,7 +633,10 @@ class UserService(IUser):
 
     @staticmethod
     def user_quiz_put(
-        payload: dict, stone_age=StoneAge, user_repository=UserRepository()
+        payload: dict,
+        stone_age=StoneAge,
+        user_repository=UserRepository(),
+        persephone_client=PersephoneService.get_client()
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_quiz_step"
@@ -647,7 +656,7 @@ class UserService(IUser):
 
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         current_user_marital = current_user.get("marital")
-
+        # TODO: Persephone
         user_identifier_data = {
             "email": current_user.get("email"),
             "cpf": current_user.get("cpf"),
@@ -706,7 +715,7 @@ class UserService(IUser):
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.not_modified",
             }
-
+        # TODO: Persephone
         # NAO SABEMOS O QUE A STONE AGE IRA RETORNAR AO ENVIARMOS AS RESPOSTAS DO QUIZ, VERIFICAR O QUE FAZER COM ESSE RETORNO
         stone_age_response = stone_age.send_user_quiz_responses(
             quiz=payload.get("quiz")
@@ -769,7 +778,7 @@ class UserService(IUser):
 
     @staticmethod
     def set_user_electronic_signature(
-        payload: dict, user_repository=UserRepository()
+        payload: dict, user_repository=UserRepository(), persephone_client=PersephoneService.get_client(),
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_electronic_signature"
@@ -796,7 +805,7 @@ class UserService(IUser):
         payload = UserService.fake_stone_age_callback(
             email=thebes_answer.get("email"), cpf=new.get("cpf")
         )
-
+        # TODO: Persephone
         SinacorService.process_callback(payload=payload)
 
         return {
@@ -1018,6 +1027,7 @@ class UserService(IUser):
     def update_customer_registration_data(
         payload: dict,
         user_repository=UserRepository(),
+        persephone_client=PersephoneService.get_client(),
     ):
         email: str = payload.get("x-thebes-answer", {}).get("email")
         update_customer_registration_data: dict = payload.get(
@@ -1061,7 +1071,7 @@ class UserService(IUser):
             .address_neighborhood()
             .address_state()
         ).build()
-
+        # TODO: Persephone
         SinacorService.save_or_update_client_data(
             user_data=new_customer_registration_data
         )
