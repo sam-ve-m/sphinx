@@ -15,6 +15,10 @@ from src.utils.base_model_normalizer import normalize_enum_types
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.solutiontech import Solutiontech
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
+from src.domain.persephone_queue import PersephoneQueue
+from src.utils.env_config import config
+from src.utils.persephone_templates import get_user_account_template_with_data
+
 
 class SinacorService:
     @staticmethod
@@ -115,16 +119,15 @@ class SinacorService:
 
     @staticmethod
     def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict):
-        # Send to Persephone
-        # table_result = persephone_client.run(
-        #     topic="thebes.sphinx_persephone.topic",
-        #     partition=5,
-        #     payload=get_user_account_template_with_data(payload=dtvm_client_data),
-        #     schema_key="table_schema",
-        # )
-        # if table_result is False:
-        #     raise InternalServerError("common.process_issue")
-        pass
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
+            payload=get_user_account_template_with_data(payload=dtvm_client_data),
+            schema_key="user_bureau_callback",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
 
     @staticmethod
     def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
@@ -162,9 +165,7 @@ class SinacorService:
         client_cpf = database_and_bureau_dtvm_client_data_merged.get("cpf")
 
         database_and_bureau_dtvm_client_data_merged.update(
-            {
-                "sinacor": SinacorClientStatus.CREATED.value
-            }
+            {"sinacor": SinacorClientStatus.CREATED.value}
         )
 
         if database_and_bureau_dtvm_client_data_merged.get("sincad") is None:

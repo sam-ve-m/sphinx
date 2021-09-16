@@ -34,6 +34,13 @@ from src.utils.stone_age import StoneAge
 from src.utils.persephone_templates import (
     get_prospect_user_template_with_data,
     get_user_signed_term_template_with_data,
+    get_user_identifier_data_schema_template_with_data,
+    get_user_selfie_schema_template_with_data,
+    get_user_complementary_data_schema_template_with_data,
+    get_user_quiz_from_stoneage_schema_template_with_data,
+    get_user_quiz_response_from_stoneage_schema_template_with_data,
+get_user_set_electronic_signature_schema_template_with_data,
+get_user_change_or_reset_electronic_signature_schema_template_with_data
 )
 from src.utils.env_config import config
 from src.utils.encrypt.password.util import PasswordEncrypt
@@ -141,7 +148,9 @@ class UserService(IUser):
 
     @staticmethod
     def reset_electronic_signature(
-        payload: dict, user_repository=UserRepository(), persephone_client=PersephoneService.get_client(),
+        payload: dict,
+        user_repository=UserRepository(),
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         forgot_electronic_signature = thebes_answer.get("forgot_electronic_signature")
@@ -160,13 +169,24 @@ class UserService(IUser):
         encrypted_electronic_signature = PasswordEncrypt.encrypt_password(
             new_electronic_signature
         )
-        # TODO: Persephone
         user_from_database_to_update = deepcopy(user_from_database)
         user_from_database_to_update[
             "electronic_signature"
         ] = encrypted_electronic_signature
         user_from_database_to_update["is_blocked_electronic_signature"] = False
         user_from_database_to_update["electronic_signature_wrong_attempts"] = 0
+
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
+            payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
+                previous_state=user_from_database,
+                new_state=user_from_database_to_update
+            ),
+            schema_key="user_change_or_reset_electronic_signature",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         if (
             user_repository.update_one(
@@ -188,7 +208,9 @@ class UserService(IUser):
 
     @staticmethod
     def change_electronic_signature(
-        payload: dict, user_repository=UserRepository(), persephone_client=PersephoneService.get_client(),
+        payload: dict,
+        user_repository=UserRepository(),
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         current_electronic_signature = payload.get("current_electronic_signature")
@@ -206,7 +228,6 @@ class UserService(IUser):
         user_has_electronic_signature_blocked = is_blocked_electronic_signature is True
         if user_has_electronic_signature_blocked:
             raise UnauthorizedError("user.electronic_signature_is_blocked")
-        # TODO: Persephone
         encrypted_current_electronic_signature = PasswordEncrypt.encrypt_password(
             current_electronic_signature
         )
@@ -230,12 +251,23 @@ class UserService(IUser):
             "electronic_signature"
         ] = encrypted_new_electronic_signature
 
-        if (
-            user_repository.update_one(
-                old=user_from_database, new=user_from_database_to_update
-            )
-            is False
-        ):
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
+            payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
+                previous_state=user_from_database,
+                new_state=user_from_database_to_update
+            ),
+            schema_key="user_change_or_reset_electronic_signature",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
+        user_was_updated = user_repository.update_one(
+            old=user_from_database, new=user_from_database_to_update
+        )
+
+        if user_was_updated is False:
             raise InternalServerError("common.process_issue")
 
         return {
@@ -351,12 +383,24 @@ class UserService(IUser):
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_selfie_step"
         )
-        # TODO: Persephone
-        file_repository.save_user_file(
+
+        file_path = file_repository.save_user_file(
             file_type=UserFileType.SELF,
             content=payload.get("file_or_base64"),
             user_email=thebes_answer.get("email"),
         )
+
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_SELFIE.value,
+            payload=get_user_selfie_schema_template_with_data(
+                file_path=file_path, email=thebes_answer.get("email")
+            ),
+            schema_key="user_selfie_schema",
+        )
+
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "files.uploaded",
@@ -484,18 +528,27 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
 
         current_user_with_identifier_data = dict(current_user)
-        # TODO: Persephone
+
         UserService.add_user_identifier_data_on_current_user(
             payload=current_user_with_identifier_data,
             user_identifier_data=user_identifier_data,
         )
-        if (
-            user_repository.update_one(
-                old=current_user, new=current_user_with_identifier_data
-            )
-            is False
-        ):
+
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
+            payload=get_user_identifier_data_schema_template_with_data(payload=payload),
+            schema_key="user_identifier_data_schema",
+        )
+        if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
+
+        user_updated = user_repository.update_one(
+            old=current_user, new=current_user_with_identifier_data
+        )
+        if user_updated is False:
+            raise InternalServerError("common.process_issue")
+
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "requests.updated",
@@ -528,14 +581,24 @@ class UserService(IUser):
             payload=current_user_with_complementary_data,
             user_complementary_data=user_complementary_data,
         )
-        # TODO: Persephone
-        if (
-            user_repository.update_one(
-                old=current_user, new=current_user_with_complementary_data
-            )
-            is False
-        ):
+
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_COMPLEMENTARY_DATA.value,
+            payload=get_user_complementary_data_schema_template_with_data(
+                payload=current_user_with_complementary_data
+            ),
+            schema_key="user_complementary_data_schema",
+        )
+        if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
+
+        user_was_updated = user_repository.update_one(
+            old=current_user, new=current_user_with_complementary_data
+        )
+        if user_was_updated is False:
+            raise InternalServerError("common.process_issue")
+
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "requests.updated",
@@ -636,7 +699,7 @@ class UserService(IUser):
         payload: dict,
         stone_age=StoneAge,
         user_repository=UserRepository(),
-        persephone_client=PersephoneService.get_client()
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_quiz_step"
@@ -656,7 +719,7 @@ class UserService(IUser):
 
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         current_user_marital = current_user.get("marital")
-        # TODO: Persephone
+
         user_identifier_data = {
             "email": current_user.get("email"),
             "cpf": current_user.get("cpf"),
@@ -686,10 +749,21 @@ class UserService(IUser):
 
         current_user_updated.update({"register_analyses": output.get("decision")})
 
-        if (
-            user_repository.update_one(old=current_user, new=current_user_updated)
-            is False
-        ):
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_GET_QUIZ_FROM_STONEAGE.value,
+            payload=get_user_quiz_from_stoneage_schema_template_with_data(
+                output=output, email=thebes_answer.get("email")
+            ),
+            schema_key="user_get_quiz_from_stoneage",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
+        user_was_updated = user_repository.update_one(
+            old=current_user, new=current_user_updated
+        )
+        if user_was_updated is False:
             raise InternalServerError("common.process_issue")
 
         return {"status_code": status.HTTP_200_OK, "payload": output}
@@ -715,11 +789,23 @@ class UserService(IUser):
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.not_modified",
             }
-        # TODO: Persephone
         # NAO SABEMOS O QUE A STONE AGE IRA RETORNAR AO ENVIARMOS AS RESPOSTAS DO QUIZ, VERIFICAR O QUE FAZER COM ESSE RETORNO
         stone_age_response = stone_age.send_user_quiz_responses(
             quiz=payload.get("quiz")
         )
+
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
+            payload=get_user_quiz_response_from_stoneage_schema_template_with_data(
+                quiz=payload.get("quiz"),
+                response=stone_age_response,
+                email=thebes_answer.get("email"),
+            ),
+            schema_key="user_send_quiz_from_stoneage",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         if must_send_quiz:
             current_user_updated.update({"register_analyses": "PENDING"})
@@ -778,7 +864,9 @@ class UserService(IUser):
 
     @staticmethod
     def set_user_electronic_signature(
-        payload: dict, user_repository=UserRepository(), persephone_client=PersephoneService.get_client(),
+        payload: dict,
+        user_repository=UserRepository(),
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         UserService.onboarding_step_validator(
             payload=payload, on_board_step="user_electronic_signature"
@@ -798,6 +886,15 @@ class UserService(IUser):
         new["is_blocked_electronic_signature"] = False
         new["electronic_signature_wrong_attempts"] = 0
 
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
+            payload=get_user_set_electronic_signature_schema_template_with_data(payload=new),
+            schema_key="user_set_electronic_signature",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
@@ -805,7 +902,6 @@ class UserService(IUser):
         payload = UserService.fake_stone_age_callback(
             email=thebes_answer.get("email"), cpf=new.get("cpf")
         )
-        # TODO: Persephone
         SinacorService.process_callback(payload=payload)
 
         return {

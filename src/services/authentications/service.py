@@ -18,6 +18,7 @@ from src.exceptions.exceptions import (
     UnauthorizedError,
     InternalServerError,
 )
+from src.domain.persephone_queue import PersephoneQueue
 from src.services.persephone.service import PersephoneService
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
@@ -25,6 +26,10 @@ from src.utils.genarate_id import hash_field
 from src.interfaces.services.authentication.interface import IAuthentication
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.utils.solutiontech import Solutiontech
+from src.utils.persephone_templates import (
+    get_user_thebes_hall_schema_template_with_data,
+    get_create_electronic_signature_session_schema_template_with_data
+)
 
 
 class AuthenticationService(IAuthentication):
@@ -108,7 +113,10 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def thebes_hall(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler, persephone_client=PersephoneService.get_client(),
+        payload: dict,
+        user_repository=UserRepository(),
+        token_handler=JWTHandler,
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         user_old = user_repository.find_one({"_id": payload.get("email")})
         if user_old is None:
@@ -123,12 +131,26 @@ class AuthenticationService(IAuthentication):
             if value["status_changed"]:
                 must_update = True
                 user_new.update({key: value["status"]})
-        # TODO: Persephone
+
         if must_update:
             if user_repository.update_one(old=user_old, new=user_new) is False:
                 raise InternalServerError("common.process_issue")
 
         jwt = token_handler.generate_token(payload=user_new, ttl=525600)
+
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_THEBES_HALL.value,
+            payload=get_user_thebes_hall_schema_template_with_data(
+                email=payload.get("email"),
+                jwt=jwt,
+                has_trade_allowed=client_has_trade_allowed
+            ),
+            schema_key="user_thebes_hall_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -143,7 +165,7 @@ class AuthenticationService(IAuthentication):
         client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             user_sincad_status_from_database=user_sincad_status_from_database,
-            user_sinacor_status_from_database=user_sinacor_status_from_database
+            user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
         user_has_valid_solutiontech_status_in_database = AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
@@ -179,10 +201,8 @@ class AuthenticationService(IAuthentication):
                 user_sincad_status_from_database=user_sincad_status_from_database,
             )
 
-        sinacor_status_from_sinacor = (
-            AuthenticationService.client_sinacor_is_blocked(
-                user_cpf=user_cpf_from_database
-            )
+        sinacor_status_from_sinacor = AuthenticationService.client_sinacor_is_blocked(
+            user_cpf=user_cpf_from_database
         )
 
         AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
@@ -211,7 +231,7 @@ class AuthenticationService(IAuthentication):
             "sinacor": {
                 "status": user_sinacor_status_from_database,
                 "status_changed": False,
-            }
+            },
         }
 
         return client_has_trade_allowed_status_with_database_user
@@ -303,11 +323,33 @@ class AuthenticationService(IAuthentication):
         return sincad_status and sincad_status[0] in ["A"]
 
     @staticmethod
-    def create_electronic_signature_jwt(payload: dict, persephone_client=PersephoneService.get_client()):
-        jwt_mist_session = JWTHandler.generate_session_jwt(
-            payload.get("electronic_signature"), payload.get("email")
-        )
-        # TODO: Persephone
+    def create_electronic_signature_jwt(
+        payload: dict, persephone_client=PersephoneService.get_client()
+    ):
+        jwt_mist_session = None
+        allowed = None
+        try:
+            jwt_mist_session = JWTHandler.generate_session_jwt(
+                payload.get("electronic_signature"), payload.get("email")
+            )
+            allowed = True
+        except BaseException as e:
+            allowed = False
+            raise e
+        finally:
+            sent_to_persephone = persephone_client.run(
+                topic=config("PERSEPHONE_TOPIC"),
+                partition=PersephoneQueue.USER_ELECTRONIC_SIGNATURE_SESSION.value,
+                payload=get_create_electronic_signature_session_schema_template_with_data(
+                    email=payload.get("email"),
+                    mist_session=jwt_mist_session,
+                    allowed=allowed
+                ),
+                schema_key="create_electronic_signature_session",
+            )
+            if sent_to_persephone is False:
+                raise InternalServerError("common.process_issue")
+
         return {
             "status_code": status.HTTP_200_OK,
             "payload": jwt_mist_session[0],
