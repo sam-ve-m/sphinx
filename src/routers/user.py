@@ -89,15 +89,13 @@ class UpdateCustomerRegistrationData(BaseModel):
     cel_phone: Optional[CelPhoneSource]
     patrimony: Optional[PatrimonySource]
 
-    document_number: Optional[DocumentNumber]
     document_issuer: Optional[IssuerSource]
     document_state: Optional[StateSource]
     document_expedition_date: Optional[DateSource]
     document_identity_number: Optional[IdentityDocumentNumber]
-    document_type: Optional[DocumentTypeSource]
 
-    marital_spouse_name: Optional[NameSource]
     marital_status: Optional[MaritalStatusSource]
+    marital_spouse_name: Optional[NameSource]
     marital_nationality: Optional[NationalitySource]
     marital_cpf: Optional[CpfSource]
 
@@ -105,14 +103,13 @@ class UpdateCustomerRegistrationData(BaseModel):
     occupation_activity: Optional[ActivitySource]
     occupation_cnpj: Optional[CnpjSource]
 
-    address_city: Optional[CitySource]
-    address_nationality: Optional[NationalitySource]
-    address_street_name: Optional[StreetNameSource]
     address_country: Optional[CountrySource]
-    address_zip_code: Optional[ZipCodeSource]
     address_state: Optional[StateSource]
-    address_number: Optional[AddressNumberSource]
     address_id_city: Optional[IdCitySource]
+    address_city: Optional[CitySource]
+    address_number: Optional[AddressNumberSource]
+    address_street_name: Optional[StreetNameSource]
+    address_zip_code: Optional[ZipCodeSource]
     address_neighborhood: Optional[NeighborhoodSource]
 
     us_tin: Optional[UsTinSource]
