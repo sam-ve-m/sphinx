@@ -1033,9 +1033,6 @@ class UserService(IUser):
         update_customer_registration_data: dict = payload.get(
             "customer_registration_data"
         )
-        update_customer_registration_data = {
-            k: v for k, v in update_customer_registration_data.items() if v is not None
-        }
         old_customer_registration_data = user_repository.find_one({"_id": email})
         if old_customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
