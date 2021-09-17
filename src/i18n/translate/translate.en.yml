@@ -38,6 +38,7 @@ en:
       already_set: Your alredy have a electronic signature
   email:
     login: We sent an email to the registered account, to conclude login
+    logout: Logout saved.
     forgot_password: We sent an email to login and change your PIN
     forgot_electronic_signature: We sent an email to login and change your electrionic signature
     subject:

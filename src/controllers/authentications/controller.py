@@ -17,3 +17,7 @@ class AuthenticationController:
     @staticmethod
     def validate_electronic_signature(payload: dict):
         return AuthenticationService.create_electronic_signature_jwt(payload=payload)
+
+    @staticmethod
+    def logout(payload: dict):
+        return AuthenticationService.logout(payload=payload)

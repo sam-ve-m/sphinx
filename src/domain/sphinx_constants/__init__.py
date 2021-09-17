@@ -29,6 +29,7 @@ PUBLIC_PATHS_GET = {
     "/openapi.json",
     "/thebes_gate",
     "/user/forgot_password",
+    "/logout",
 }
 
 PUBLIC_PATHS_POST = {

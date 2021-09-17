@@ -53,17 +53,19 @@ class FileRepository(IFile):
         file_type: UserFileType,
         content: Union[str, bytes],
         user_email: str,
-    ) -> None:
+    ) -> str:
         path = self.resolve_user_path(user_email=user_email, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
+        fully_qualified_path = f"{path}{file_name}{file_extension}"
         self.s3_client.put_object(
             Bucket=self.bucket_name,
             Body=self.resolve_content(content=content),
-            Key=f"{path}{file_name}{file_extension}",
+            Key=fully_qualified_path,
         )
+        return fully_qualified_path
 
     def get_user_file(self, file_type: UserFileType, user_email: str):
         exists_self = False
