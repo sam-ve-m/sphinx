@@ -121,7 +121,7 @@ class SinacorService:
     @staticmethod
     def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict, user_email: str):
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
             payload=get_user_account_template_with_data(payload=dtvm_client_data, email=user_email),
             schema_key="user_bureau_callback",

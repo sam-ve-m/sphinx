@@ -56,7 +56,7 @@ class AuthenticationService(IAuthentication):
                 }
             )
             sent_to_persephone = persephone_client.run(
-                topic=config("PERSEPHONE_TOPIC"),
+                topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
                 partition=PersephoneQueue.USER_AUTHENTICATION.value,
                 payload=get_user_authentication_template_with_data(
                     payload=new
@@ -152,7 +152,7 @@ class AuthenticationService(IAuthentication):
         jwt = token_handler.generate_token(payload=user_new, ttl=525600)
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_THEBES_HALL.value,
             payload=get_user_thebes_hall_schema_template_with_data(
                 email=payload.get("email"),
@@ -351,7 +351,7 @@ class AuthenticationService(IAuthentication):
             raise e
         finally:
             sent_to_persephone = persephone_client.run(
-                topic=config("PERSEPHONE_TOPIC"),
+                topic=config("PERSEPHONE_TOPIC_USER"),
                 partition=PersephoneQueue.USER_ELECTRONIC_SIGNATURE_SESSION.value,
                 payload=get_create_electronic_signature_session_schema_template_with_data(
                     email=payload.get("email"),
@@ -374,7 +374,7 @@ class AuthenticationService(IAuthentication):
         persephone_client=PersephoneService.get_client()
     ) -> dict:
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_LOGOUT.value,
             payload=get_user_logout_template_with_data(
                 jwt=payload.get('jwt'),

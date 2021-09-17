@@ -69,7 +69,7 @@ class UserService(IUser):
         UserService.add_user_control_metadata(payload=payload)
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
             payload=get_prospect_user_template_with_data(payload=payload),
             schema_key="prospect_user_schema",
@@ -176,7 +176,7 @@ class UserService(IUser):
         user_from_database_to_update["electronic_signature_wrong_attempts"] = 0
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
             payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
                 previous_state=user_from_database,
@@ -251,7 +251,7 @@ class UserService(IUser):
         ] = encrypted_new_electronic_signature
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
             payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
                 previous_state=user_from_database,
@@ -390,7 +390,7 @@ class UserService(IUser):
         )
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_SELFIE.value,
             payload=get_user_selfie_schema_template_with_data(
                 file_path=file_path, email=thebes_answer.get("email")
@@ -425,7 +425,7 @@ class UserService(IUser):
             version=file_repository.get_current_term_version(file_type=file_type),
         )
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.TERM_QUEUE.value,
             payload=get_user_signed_term_template_with_data(
                 payload=new, file_type=file_type.value
@@ -534,7 +534,7 @@ class UserService(IUser):
         )
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
             payload=get_user_identifier_data_schema_template_with_data(payload=current_user_with_identifier_data),
             schema_key="user_identifier_data_schema",
@@ -582,7 +582,7 @@ class UserService(IUser):
         )
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_COMPLEMENTARY_DATA.value,
             payload=get_user_complementary_data_schema_template_with_data(
                 payload=current_user_with_complementary_data
@@ -749,7 +749,7 @@ class UserService(IUser):
         current_user_updated.update({"register_analyses": output.get("decision")})
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_GET_QUIZ_FROM_STONEAGE.value,
             payload=get_user_quiz_from_stoneage_schema_template_with_data(
                 output=output, device_information=payload.get('device_information'), email=current_user.get('email')
@@ -794,8 +794,8 @@ class UserService(IUser):
         )
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
-            partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_SEND_QUIZ_FROM_STONEAGE.value,
             payload=get_user_quiz_response_from_stoneage_schema_template_with_data(
                 quiz=payload.get("quiz"),
                 response=stone_age_response,
@@ -887,7 +887,7 @@ class UserService(IUser):
         new["electronic_signature_wrong_attempts"] = 0
 
         sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC"),
+            topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
             payload=get_user_set_electronic_signature_schema_template_with_data(payload=new),
             schema_key="user_set_electronic_signature",

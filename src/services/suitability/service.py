@@ -19,7 +19,9 @@ from src.interfaces.services.suitability.interface import ISuitability
 from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
 from src.utils.persephone_templates import get_user_suitability_template_with_data
 from src.services.persephone.service import PersephoneService
+from src.domain.persephone_queue import PersephoneQueue
 from src.utils.jwt_utils import JWTHandler
+from src.utils.env_config import config
 
 
 class SuitabilityService(ISuitability):
@@ -74,10 +76,9 @@ class SuitabilityService(ISuitability):
             score,
             suitability_version,
         ) = SuitabilityService.__get_last_suitability_answers_metadata()
-        # TODO: Persephone
         sent_to_persephone = persephone_client.run(
-            topic="thebes.sphinx_persephone.topic",
-            partition=2,
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.SUITABILITY_QUEUE.value,
             payload=get_user_suitability_template_with_data(
                 payload={
                     "answers": answers,
