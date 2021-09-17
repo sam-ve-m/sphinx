@@ -68,7 +68,6 @@ class UserService(IUser):
         payload.update({"created_at": datetime.now()})
         UserService.add_user_control_metadata(payload=payload)
 
-        # TODO: Persephone
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC"),
             partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
@@ -537,7 +536,7 @@ class UserService(IUser):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC"),
             partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
-            payload=get_user_identifier_data_schema_template_with_data(payload=payload),
+            payload=get_user_identifier_data_schema_template_with_data(payload=current_user_with_identifier_data),
             schema_key="user_identifier_data_schema",
         )
         if sent_to_persephone is False:
@@ -753,7 +752,7 @@ class UserService(IUser):
             topic=config("PERSEPHONE_TOPIC"),
             partition=PersephoneQueue.USER_GET_QUIZ_FROM_STONEAGE.value,
             payload=get_user_quiz_from_stoneage_schema_template_with_data(
-                output=output, email=thebes_answer.get("email")
+                output=output, device_information=payload.get('device_information'), email=current_user.get('email')
             ),
             schema_key="user_get_quiz_from_stoneage",
         )
@@ -800,6 +799,7 @@ class UserService(IUser):
             payload=get_user_quiz_response_from_stoneage_schema_template_with_data(
                 quiz=payload.get("quiz"),
                 response=stone_age_response,
+                device_information=payload.get('device_information'),
                 email=thebes_answer.get("email"),
             ),
             schema_key="user_send_quiz_from_stoneage",

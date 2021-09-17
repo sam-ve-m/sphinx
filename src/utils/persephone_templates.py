@@ -25,7 +25,16 @@ def get_user_selfie_schema_template_with_data(file_path: str, email: str) -> dic
     }
 
 
+def get_user_authentication_template_with_data(payload: dict) -> dict:
+    return {
+        "user_email": payload.get('email'),
+        "is_active_user": payload.get('is_active_user'),
+        "scope": payload.get('scope'),
+    }
+
+
 def get_user_complementary_data_schema_template_with_data(payload: dict) -> dict:
+    payload['marital']['status'] = payload['marital']['status'].value
     return {
         "user_email": payload.get("email"),
         "is_us_person": payload.get("is_us_person"),
@@ -36,18 +45,19 @@ def get_user_complementary_data_schema_template_with_data(payload: dict) -> dict
 
 
 def get_user_quiz_from_stoneage_schema_template_with_data(
-    output: dict, email: str
+    output: dict, email: str, device_information: dict
 ) -> dict:
     return {
         "user_email": email,
         "output": output,
+        "device_information": device_information
     }
 
 
 def get_user_quiz_response_from_stoneage_schema_template_with_data(
-    quiz: dict, response: dict, email: str
+    quiz: dict, response: dict, email: str, device_information: dict
 ) -> dict:
-    return {"user_email": email, "quiz": quiz, "response": response}
+    return {"user_email": email, "quiz": quiz, "response": response, "device_information": device_information}
 
 
 def get_user_change_or_reset_electronic_signature_schema_template_with_data(
@@ -68,7 +78,7 @@ def get_user_set_electronic_signature_schema_template_with_data(
     payload: dict
 ) -> dict:
     return {
-        "user_email": payload.get('new'),
+        "user_email": payload.get('email'),
         "electronic_signature": payload.get('electronic_signature'),
         "is_blocked_electronic_signature": payload.get('is_blocked_electronic_signature'),
         "electronic_signature_wrong_attempts": payload.get('electronic_signature_wrong_attempts'),
@@ -139,8 +149,15 @@ def _normalize_form_helper(form: list) -> list:
     return new_list
 
 
-def get_user_account_template_with_data(payload: dict) -> dict:
-    user_data = payload.get("user_data")
+def get_user_account_template_with_data(payload: dict, email: str) -> dict:
     return {
-        "user_email": user_data.get("email"),
+        "user_email": email,
+        "bureau_data": payload
+    }
+
+
+def get_user_logout_template_with_data(jwt: dict, email: str) -> dict:
+    return {
+        "user_email": email,
+        "jwt": jwt
     }

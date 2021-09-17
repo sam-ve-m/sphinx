@@ -38,6 +38,7 @@ pt:
       already_set: Você já definiu um assinatura eletrônica
   email:
     login: Enviamos um email para a conta cadastrada, para concluir o login
+    logout: Registramos sua saída.
     forgot_password: Enviamos um email para efetuar login e mudança do PIN
     forgot_electronic_signature: Enviamos para você um e-mail de recuperação da sua assinatura eletrônica.
     subject:

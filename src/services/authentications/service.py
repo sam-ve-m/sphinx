@@ -28,14 +28,17 @@ from src.repositories.client_register.repository import ClientRegisterRepository
 from src.utils.solutiontech import Solutiontech
 from src.utils.persephone_templates import (
     get_user_thebes_hall_schema_template_with_data,
-    get_create_electronic_signature_session_schema_template_with_data
+    get_create_electronic_signature_session_schema_template_with_data,
+    get_user_authentication_template_with_data,
+    get_user_logout_template_with_data
 )
 
 
 class AuthenticationService(IAuthentication):
     @staticmethod
     def thebes_gate(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler,
+            persephone_client=PersephoneService.get_client()
     ) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
@@ -52,6 +55,16 @@ class AuthenticationService(IAuthentication):
                     "scope": {"view_type": "default", "features": ["default"]},
                 }
             )
+            sent_to_persephone = persephone_client.run(
+                topic=config("PERSEPHONE_TOPIC"),
+                partition=PersephoneQueue.USER_AUTHENTICATION.value,
+                payload=get_user_authentication_template_with_data(
+                    payload=new
+                ),
+                schema_key="user_authentication_schema",
+            )
+            if sent_to_persephone is False:
+                raise InternalServerError("common.process_issue")
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
 
@@ -353,4 +366,26 @@ class AuthenticationService(IAuthentication):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": jwt_mist_session[0],
+        }
+
+    @staticmethod
+    def logout(
+        payload: dict,
+        persephone_client=PersephoneService.get_client()
+    ) -> dict:
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC"),
+            partition=PersephoneQueue.USER_LOGOUT.value,
+            payload=get_user_logout_template_with_data(
+                jwt=payload.get('jwt'),
+                email=payload.get('email'),
+            ),
+            schema_key="user_logout",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "email.logout"
         }

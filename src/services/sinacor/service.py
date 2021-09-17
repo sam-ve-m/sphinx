@@ -38,6 +38,13 @@ class SinacorService:
         user_database_document = user_repository.find_one(
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
         )
+
+        SinacorService._send_dtvm_client_data_to_persephone(
+            persephone_client=persephone_client,
+            dtvm_client_data=dtvm_client_data_provided_by_bureau,
+            user_email=user_database_document.get('email')
+        )
+
         database_and_bureau_dtvm_client_data_merged = (
             SinacorService._merge_bureau_client_data_with_user_database(
                 output=dtvm_client_data_provided_by_bureau,
@@ -49,7 +56,6 @@ class SinacorService:
             user_data=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
             user_repository=user_repository,
-            persephone_client=persephone_client,
         )
 
         return {
@@ -62,12 +68,7 @@ class SinacorService:
         user_data: dict,
         client_register_repository=ClientRegisterRepository(),
         user_repository=UserRepository(),
-        persephone_client=PersephoneService.get_client(),
     ):
-        SinacorService._send_dtvm_client_data_to_persephone(
-            persephone_client=persephone_client,
-            dtvm_client_data=user_data,
-        )
 
         database_and_bureau_dtvm_client_data_merged = (
             SinacorService._create_client_into_sinacor(
@@ -118,11 +119,11 @@ class SinacorService:
         return database_and_bureau_dtvm_client_data_merged
 
     @staticmethod
-    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict):
+    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict, user_email: str):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC"),
             partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
-            payload=get_user_account_template_with_data(payload=dtvm_client_data),
+            payload=get_user_account_template_with_data(payload=dtvm_client_data, email=user_email),
             schema_key="user_bureau_callback",
         )
         if sent_to_persephone is False:
