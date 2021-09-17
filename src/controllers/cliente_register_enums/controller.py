@@ -110,3 +110,7 @@ class ClientRegisterEnumsController:
     @staticmethod
     def get_economic_activity_update(payload: dict):
         return SinaCorTypes.get_economic_activity_update()
+
+    @staticmethod
+    def get_activity_type_update(payload: dict):
+        return SinaCorTypes.get_activity_type_update()
