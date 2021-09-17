@@ -124,7 +124,7 @@ class SinacorService:
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
             payload=get_user_account_template_with_data(payload=dtvm_client_data, email=user_email),
-            schema_key="user_bureau_callback",
+            schema_key="user_bureau_callback_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")

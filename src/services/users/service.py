@@ -182,7 +182,7 @@ class UserService(IUser):
                 previous_state=user_from_database,
                 new_state=user_from_database_to_update
             ),
-            schema_key="user_change_or_reset_electronic_signature",
+            schema_key="user_change_or_reset_electronic_signature_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
@@ -257,7 +257,7 @@ class UserService(IUser):
                 previous_state=user_from_database,
                 new_state=user_from_database_to_update
             ),
-            schema_key="user_change_or_reset_electronic_signature",
+            schema_key="user_change_or_reset_electronic_signature_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
@@ -430,7 +430,7 @@ class UserService(IUser):
             payload=get_user_signed_term_template_with_data(
                 payload=new, file_type=file_type.value
             ),
-            schema_key="term_schema",
+            schema_key="signed_term_schema",
         )
         if (
             sent_to_persephone and user_repository.update_one(old=old, new=new)
@@ -754,7 +754,7 @@ class UserService(IUser):
             payload=get_user_quiz_from_stoneage_schema_template_with_data(
                 output=output, device_information=payload.get('device_information'), email=current_user.get('email')
             ),
-            schema_key="user_get_quiz_from_stoneage",
+            schema_key="user_get_quiz_from_stoneage_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
@@ -802,7 +802,7 @@ class UserService(IUser):
                 device_information=payload.get('device_information'),
                 email=thebes_answer.get("email"),
             ),
-            schema_key="user_send_quiz_from_stoneage",
+            schema_key="user_send_quiz_from_stoneage_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
@@ -890,7 +890,7 @@ class UserService(IUser):
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
             payload=get_user_set_electronic_signature_schema_template_with_data(payload=new),
-            schema_key="user_set_electronic_signature",
+            schema_key="user_set_electronic_signature_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")

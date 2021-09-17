@@ -358,7 +358,7 @@ class AuthenticationService(IAuthentication):
                     mist_session=jwt_mist_session,
                     allowed=allowed
                 ),
-                schema_key="create_electronic_signature_session",
+                schema_key="create_electronic_signature_session_schema",
             )
             if sent_to_persephone is False:
                 raise InternalServerError("common.process_issue")
@@ -380,7 +380,7 @@ class AuthenticationService(IAuthentication):
                 jwt=payload.get('jwt'),
                 email=payload.get('email'),
             ),
-            schema_key="user_logout",
+            schema_key="user_logout_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
