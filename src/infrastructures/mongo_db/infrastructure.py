@@ -101,7 +101,6 @@ class MongoDBInfrastructure(IRepository):
         try:
             normalize_enum_types(payload=new)
             self.collection.update_one(old, {"$set": new})
-            # TODO update cache when update user
             if new.get("email"):
                 self._save_cache(
                     query={"_id": new.get("email")}, cache=cache, ttl=ttl, data=new

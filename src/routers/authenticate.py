@@ -38,6 +38,20 @@ def thebes_hall(request: Request):
     )
 
 
+@router.get("/logout", tags=["authentication"])
+def logout(request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "jwt": JWTHandler.get_jwt_from_request(request=request),
+        "email": jwt_data_or_error_response.get("email"),
+    }
+    return BaseController.run(
+        AuthenticationController.logout, payload, request
+    )
+
+
 @router.post("/validate_electronic_signature", tags=["authentication"])
 def change_electronic_signature(electronic_signature: SignatureCheck, request: Request):
     electronic_signature = electronic_signature.dict()
