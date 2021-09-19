@@ -131,7 +131,8 @@ class AuthenticationService(IAuthentication):
         token_handler=JWTHandler,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        user_old = user_repository.find_one({"_id": payload.get("email")})
+        x_thebes_answer = payload.get('x-thebes-answer')
+        user_old = user_repository.find_one({"_id": x_thebes_answer.get("email")})
         if user_old is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -157,7 +158,8 @@ class AuthenticationService(IAuthentication):
             payload=get_user_thebes_hall_schema_template_with_data(
                 email=payload.get("email"),
                 jwt=jwt,
-                has_trade_allowed=client_has_trade_allowed
+                has_trade_allowed=client_has_trade_allowed,
+                device_information=payload.get('device_information')
             ),
             schema_key="user_thebes_hall_schema",
         )

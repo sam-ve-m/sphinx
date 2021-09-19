@@ -5,6 +5,8 @@ from src.routers.validators.base import OptionalPIN, Email
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.validators.base import SignatureCheck
 
+from src.routers.validators.base import DeviceInformation
+
 router = APIRouter()
 
 
@@ -28,13 +30,17 @@ def answer(request: Request):
     )
 
 
-@router.get("/thebes_hall", tags=["authentication"])
-def thebes_hall(request: Request):
+@router.put("/thebes_hall", tags=["authentication"])
+def thebes_hall(device_information: DeviceInformation, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
+    payload = {
+        "device_information": device_information.dict(),
+        "x-thebes-answer": jwt_data_or_error_response
+    }
     return BaseController.run(
-        AuthenticationController.thebes_hall, jwt_data_or_error_response, request
+        AuthenticationController.thebes_hall, payload, request
     )
 
 

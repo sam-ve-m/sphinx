@@ -47,10 +47,8 @@ from src.routers.validators.base import (
     IdCitySource,
     NeighborhoodSource,
     CnpjSource,
-    DocumentTypeSource,
     ActivitySource,
     MaritalStatusSource,
-    DocumentNumber,
     DeviceInformation,
     DeviceInformationOptional,
 )
