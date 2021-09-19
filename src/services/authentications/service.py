@@ -381,6 +381,7 @@ class AuthenticationService(IAuthentication):
             payload=get_user_logout_template_with_data(
                 jwt=payload.get('jwt'),
                 email=payload.get('email'),
+                device_information=payload.get('device_information')
             ),
             schema_key="user_logout_schema",
         )

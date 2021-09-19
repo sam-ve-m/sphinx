@@ -45,13 +45,14 @@ def thebes_hall(device_information: DeviceInformation, request: Request):
 
 
 @router.get("/logout", tags=["authentication"])
-def logout(request: Request):
+def logout(device_information: DeviceInformation, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
         "jwt": JWTHandler.get_jwt_from_request(request=request),
         "email": jwt_data_or_error_response.get("email"),
+        "device_information": device_information.dict(),
     }
     return BaseController.run(
         AuthenticationController.logout, payload, request

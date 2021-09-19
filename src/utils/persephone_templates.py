@@ -170,8 +170,9 @@ def get_user_account_template_with_data(payload: dict, email: str) -> dict:
     }
 
 
-def get_user_logout_template_with_data(jwt: dict, email: str) -> dict:
+def get_user_logout_template_with_data(jwt: dict, email: str, device_information: dict) -> dict:
     return {
         "user_email": email,
-        "jwt": jwt
+        "jwt": jwt,
+        "device_information": device_information
     }
