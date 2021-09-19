@@ -39,8 +39,9 @@ from src.utils.persephone_templates import (
     get_user_complementary_data_schema_template_with_data,
     get_user_quiz_from_stoneage_schema_template_with_data,
     get_user_quiz_response_from_stoneage_schema_template_with_data,
-get_user_set_electronic_signature_schema_template_with_data,
-get_user_change_or_reset_electronic_signature_schema_template_with_data
+    get_user_set_electronic_signature_schema_template_with_data,
+    get_user_change_or_reset_electronic_signature_schema_template_with_data,
+    get_user_update_register_schema_template_with_data
 )
 from src.utils.env_config import config
 from src.utils.encrypt.password.util import PasswordEncrypt
@@ -1164,7 +1165,20 @@ class UserService(IUser):
             .address_neighborhood()
             .address_state()
         ).build()
-        # TODO: Persephone
+        # TODO: review this
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_UPDATE_REGISTER.value,
+        #     payload=get_user_update_register_schema_template_with_data(
+        #         email=email,
+        #         modified_register_data=modified_register_data,
+        #         update_customer_registration_data=update_customer_registration_data
+        #     ),
+        #     schema_key="user_set_electronic_signature_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
+
         SinacorService.save_or_update_client_data(
             user_data=new_customer_registration_data
         )

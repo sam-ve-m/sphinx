@@ -64,7 +64,7 @@ def get_user_change_or_reset_electronic_signature_schema_template_with_data(
     previous_state: dict, new_state: dict
 ) -> dict:
     return {
-        "user_email": new_state.get('new'),
+        "user_email": new_state.get('email'),
         "previous_electronic_signature": previous_state.get('electronic_signature'),
         "previous_is_blocked_electronic_signature": previous_state.get('is_blocked_electronic_signature'),
         "previous_electronic_signature_wrong_attempts": previous_state.get('electronic_signature_wrong_attempts'),
@@ -84,6 +84,17 @@ def get_user_set_electronic_signature_schema_template_with_data(
         "electronic_signature_wrong_attempts": payload.get('electronic_signature_wrong_attempts'),
     }
 
+
+def get_user_update_register_schema_template_with_data(
+    email: str,
+    modified_register_data: dict,
+    update_customer_registration_data: dict
+) -> dict:
+    return {
+        "user_email": email,
+        "modified_register_data": modified_register_data,
+        "update_customer_registration_data": update_customer_registration_data
+    }
 
 def get_user_thebes_hall_schema_template_with_data(
     jwt: str,
