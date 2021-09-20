@@ -169,6 +169,34 @@ class AuthenticationService(IAuthentication):
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
+    def get_thebes_hall(
+        payload: dict,
+        user_repository=UserRepository(),
+        token_handler=JWTHandler
+    ) -> dict:
+        user_old = user_repository.find_one({"_id": payload.get("email")})
+        if user_old is None:
+            raise BadRequestError("common.register_not_exists")
+
+        user_new = deepcopy(user_old)
+        client_has_trade_allowed = AuthenticationService._dtvm_client_has_trade_allowed(
+            user=user_old
+        )
+        must_update = False
+        for key, value in client_has_trade_allowed.items():
+            if value["status_changed"]:
+                must_update = True
+                user_new.update({key: value["status"]})
+
+        if must_update:
+            if user_repository.update_one(old=user_old, new=user_new) is False:
+                raise InternalServerError("common.process_issue")
+
+        jwt = token_handler.generate_token(payload=user_new, ttl=525600)
+
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+
+    @staticmethod
     def _dtvm_client_has_trade_allowed(user: dict) -> dict:
 
         user_solutiontech_status_from_database = user.get("solutiontech")

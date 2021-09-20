@@ -174,7 +174,7 @@ def user_quiz(device_information: DeviceInformation, request: Request):
 
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
-        "device_information": device_information,
+        "device_information": device_information.dict(),
     }
     return BaseController.run(UserController.user_quiz_put, payload, request)
 
@@ -186,9 +186,14 @@ def send_quiz_responses(quiz_response: QuizResponses, request: Request):
         return jwt_data_or_error_response
 
     quiz_response_dict = quiz_response.dict()
+    responses = quiz_response_dict.get("responses")
+    for x in responses:
+        x['quiz_question_id'] = str(x['quiz_question_id'])
+        x['quiz_option_id'] = str(x['quiz_option_id'])
+
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
-        "quiz": quiz_response_dict.get("responses"),
+        "quiz": responses,
         "device_information": quiz_response_dict.get("device_information"),
     }
     return BaseController.run(UserController.send_quiz_responses, payload, request)

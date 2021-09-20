@@ -74,7 +74,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             verify_user_treasury,
         ]
         result = self.query(sql=" union ".join(all_validation_query))
-        if len(result) > 0:
+        if result and len(result) > 0:
             result = self.query(
                 sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
             )
@@ -84,14 +84,14 @@ class ClientRegisterRepository(OracleInfrastructure):
     def get_sincad_status(self, user_cpf: int):
         sql = f"SELECT COD_SITU_ENVIO FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
         result = self.query(sql=sql)
-        if len(result) > 0:
+        if result and len(result) > 0:
             return result[0]
         return None
 
     def get_sinacor_status(self, user_cpf: int):
         sql = f"SELECT IN_SITUAC FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
         result = self.query(sql=sql)
-        if len(result) > 0:
+        if result and len(result) > 0:
             return result[0]
         return None
 

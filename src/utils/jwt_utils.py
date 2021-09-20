@@ -198,4 +198,4 @@ class JWTHandler:
             "password": electronic_signature.get("signature"),
             "signatureExpireTime": electronic_signature.get("signature_expire_time"),
         }
-        return JWTHandler.mist.generate_jwt(session_dict)
+        return JWTHandler.mist.generate_jwt(jwt=session_dict)
