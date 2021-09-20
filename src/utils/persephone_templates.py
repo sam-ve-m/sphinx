@@ -96,15 +96,18 @@ def get_user_update_register_schema_template_with_data(
         "update_customer_registration_data": update_customer_registration_data
     }
 
+
 def get_user_thebes_hall_schema_template_with_data(
     jwt: str,
     email: str,
-    has_trade_allowed: dict
+    has_trade_allowed: dict,
+    device_information: dict
 ) -> dict:
     return {
         "user_email": email,
         "jwt": jwt,
         "has_trade_allowed": has_trade_allowed,
+        "device_information": device_information
     }
 
 
@@ -167,8 +170,9 @@ def get_user_account_template_with_data(payload: dict, email: str) -> dict:
     }
 
 
-def get_user_logout_template_with_data(jwt: dict, email: str) -> dict:
+def get_user_logout_template_with_data(jwt: dict, email: str, device_information: dict) -> dict:
     return {
         "user_email": email,
-        "jwt": jwt
+        "jwt": jwt,
+        "device_information": device_information
     }

@@ -1165,19 +1165,19 @@ class UserService(IUser):
             .address_neighborhood()
             .address_state()
         ).build()
-        # TODO: review this
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_UPDATE_REGISTER.value,
-        #     payload=get_user_update_register_schema_template_with_data(
-        #         email=email,
-        #         modified_register_data=modified_register_data,
-        #         update_customer_registration_data=update_customer_registration_data
-        #     ),
-        #     schema_key="user_set_electronic_signature_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
+            payload=get_user_update_register_schema_template_with_data(
+                email=email,
+                modified_register_data=modified_register_data,
+                update_customer_registration_data=update_customer_registration_data
+            ),
+            schema_key="user_update_register_data_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         SinacorService.save_or_update_client_data(
             user_data=new_customer_registration_data
