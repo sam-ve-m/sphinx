@@ -131,7 +131,8 @@ class AuthenticationService(IAuthentication):
         token_handler=JWTHandler,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        user_old = user_repository.find_one({"_id": payload.get("email")})
+        x_thebes_answer = payload.get('x-thebes-answer')
+        user_old = user_repository.find_one({"_id": x_thebes_answer.get("email")})
         if user_old is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -157,12 +158,41 @@ class AuthenticationService(IAuthentication):
             payload=get_user_thebes_hall_schema_template_with_data(
                 email=payload.get("email"),
                 jwt=jwt,
-                has_trade_allowed=client_has_trade_allowed
+                has_trade_allowed=client_has_trade_allowed,
+                device_information=payload.get('device_information')
             ),
             schema_key="user_thebes_hall_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
+
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+
+    @staticmethod
+    def get_thebes_hall(
+        payload: dict,
+        user_repository=UserRepository(),
+        token_handler=JWTHandler
+    ) -> dict:
+        user_old = user_repository.find_one({"_id": payload.get("email")})
+        if user_old is None:
+            raise BadRequestError("common.register_not_exists")
+
+        user_new = deepcopy(user_old)
+        client_has_trade_allowed = AuthenticationService._dtvm_client_has_trade_allowed(
+            user=user_old
+        )
+        must_update = False
+        for key, value in client_has_trade_allowed.items():
+            if value["status_changed"]:
+                must_update = True
+                user_new.update({key: value["status"]})
+
+        if must_update:
+            if user_repository.update_one(old=user_old, new=user_new) is False:
+                raise InternalServerError("common.process_issue")
+
+        jwt = token_handler.generate_token(payload=user_new, ttl=525600)
 
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
@@ -379,6 +409,7 @@ class AuthenticationService(IAuthentication):
             payload=get_user_logout_template_with_data(
                 jwt=payload.get('jwt'),
                 email=payload.get('email'),
+                device_information=payload.get('device_information')
             ),
             schema_key="user_logout_schema",
         )
