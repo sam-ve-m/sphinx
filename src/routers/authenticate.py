@@ -5,7 +5,7 @@ from src.routers.validators.base import OptionalPIN, Email
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.validators.base import SignatureCheck
 
-from src.routers.validators.base import DeviceInformation
+from src.routers.validators.base import DeviceInformationOptional
 
 router = APIRouter()
 
@@ -31,7 +31,7 @@ def answer(request: Request):
 
 
 @router.put("/thebes_hall", tags=["authentication"])
-def thebes_hall(device_information: DeviceInformation, request: Request):
+def thebes_hall(device_information: DeviceInformationOptional, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
@@ -55,7 +55,7 @@ def get_thebes_hall(request: Request):
 
 
 @router.put("/logout", tags=["authentication"])
-def logout(device_information: DeviceInformation, request: Request):
+def logout(device_information: DeviceInformationOptional, request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
