@@ -2,6 +2,7 @@
 from datetime import datetime
 import logging
 from copy import deepcopy
+import json
 
 # OUTSIDE LIBRARIES
 from fastapi import status
@@ -9,7 +10,7 @@ from fordev.generators import rg
 
 # SPHINX
 from src.controllers.jwts.controller import JwtController
-
+from src.utils.json_encoder.date_encoder import DateEncoder
 from src.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
@@ -27,6 +28,7 @@ from src.repositories.user.repository import UserRepository
 
 from src.domain.persephone_queue import PersephoneQueue
 from src.services.sinacor.service import SinacorService
+from src.utils.base_model_normalizer import normalize_enum_types
 
 from src.utils.genarate_id import generate_id, hash_field
 from src.utils.jwt_utils import JWTHandler
@@ -899,7 +901,6 @@ class UserService(IUser):
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
-        # MOCK FEIO DA STONE AGE
         payload = UserService.fake_stone_age_callback(
             email=thebes_answer.get("email"), cpf=new.get("cpf")
         )
@@ -1166,14 +1167,18 @@ class UserService(IUser):
             .address_state()
         ).build()
 
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
-            payload=get_user_update_register_schema_template_with_data(
+        user_update_register_schema = get_user_update_register_schema_template_with_data(
                 email=email,
                 modified_register_data=modified_register_data,
                 update_customer_registration_data=update_customer_registration_data
-            ),
+            )
+
+        normalize_enum_types(user_update_register_schema)
+
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
+            payload=json.loads(json.dumps(user_update_register_schema, cls=DateEncoder)),
             schema_key="user_update_register_data_schema",
         )
         if sent_to_persephone is False:
