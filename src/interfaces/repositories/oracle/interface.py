@@ -7,16 +7,15 @@ class IOracle(ABC):
 
     pool = None
 
-    @staticmethod
     @contextmanager
     @abstractmethod
-    def get_connection():
+    def get_connection(self):
         pass
 
     @abstractmethod
-    def query(self, sql):
+    def query(self, sql) -> list:
         pass
 
     @abstractmethod
-    def execute(self, name, values):
+    def execute(self, sql, values) -> None:
         pass

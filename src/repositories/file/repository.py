@@ -39,7 +39,7 @@ class FileRepository(IFile):
         self.bucket_name = FileRepository.validate_bucket_name(bucket_name)
 
     @staticmethod
-    def validate_bucket_name(bucket_name: str = ""):
+    def validate_bucket_name(bucket_name: str = "") -> str:
         response = FileRepository.s3_client.list_buckets()
         buckets = [bucket["Name"] for bucket in response["Buckets"]]
         if bucket_name not in buckets:
@@ -112,7 +112,7 @@ class FileRepository(IFile):
 
     def get_term_file(
         self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 3600
-    ) -> Optional[str]:
+    ) -> Optional[str, dict]:
         cache_key = f"get_term_file:{file_type.value}"
         cached_value = cache.get(key=cache_key)
         if cached_value:
@@ -187,7 +187,7 @@ class FileRepository(IFile):
         return files_metadata[0].get("Key")
 
     @staticmethod
-    def resolve_content(content: Union[str, bytes]):
+    def resolve_content(content: Union[str, bytes]) -> Union[str, bytes]:
         """str in this case is a base64 string"""
         if content is None:
             raise InternalServerError("files.content.empty")
