@@ -34,7 +34,7 @@ class IFile(ABC):
     @abstractmethod
     def get_term_file(
         self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 0
-    ) -> Optional[str, dict]:
+    ) -> Union[str, dict]:
         pass
 
     @staticmethod

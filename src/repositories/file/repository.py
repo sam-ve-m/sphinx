@@ -112,7 +112,7 @@ class FileRepository(IFile):
 
     def get_term_file(
         self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 3600
-    ) -> Optional[str, dict]:
+    ) -> Union[str, dict]:
         cache_key = f"get_term_file:{file_type.value}"
         cached_value = cache.get(key=cache_key)
         if cached_value:
