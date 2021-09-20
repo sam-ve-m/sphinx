@@ -110,7 +110,7 @@ class DeviceInformation(BaseModel):
     device_model: str
     is_emulator: bool
     device_operating_system_name: str
-    os_sdk_version: int
+    os_sdk_version: str
     device_is_in_root_mode: bool
     device_network_interfaces: str
     public_ip: str

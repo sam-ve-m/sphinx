@@ -899,7 +899,6 @@ class UserService(IUser):
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
-        # MOCK FEIO DA STONE AGE
         payload = UserService.fake_stone_age_callback(
             email=thebes_answer.get("email"), cpf=new.get("cpf")
         )
