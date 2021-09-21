@@ -5,6 +5,8 @@ from src.routers.validators.base import OptionalPIN, Email
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.validators.base import SignatureCheck
 
+from src.routers.validators.base import DeviceInformationOptional
+
 router = APIRouter()
 
 
@@ -28,14 +30,39 @@ def answer(request: Request):
     )
 
 
+@router.put("/thebes_hall", tags=["authentication"])
+def thebes_hall(device_information: DeviceInformationOptional, request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "device_information": device_information.dict(),
+        "x-thebes-answer": jwt_data_or_error_response,
+    }
+    return BaseController.run(AuthenticationController.thebes_hall, payload, request)
+
+
 @router.get("/thebes_hall", tags=["authentication"])
-def thebes_hall(request: Request):
+def get_thebes_hall(request: Request):
     jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     return BaseController.run(
-        AuthenticationController.thebes_hall, jwt_data_or_error_response, request
+        AuthenticationController.get_thebes_hall, jwt_data_or_error_response, request
     )
+
+
+@router.put("/logout", tags=["authentication"])
+def logout(device_information: DeviceInformationOptional, request: Request):
+    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    if isinstance(jwt_data_or_error_response, Response):
+        return jwt_data_or_error_response
+    payload = {
+        "jwt": JWTHandler.get_jwt_from_request(request=request),
+        "email": jwt_data_or_error_response.get("email"),
+        "device_information": device_information.dict(),
+    }
+    return BaseController.run(AuthenticationController.logout, payload, request)
 
 
 @router.post("/validate_electronic_signature", tags=["authentication"])

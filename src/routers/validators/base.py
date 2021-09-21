@@ -11,6 +11,7 @@ from pydantic import BaseModel, constr, validator, UUID1, root_validator
 from src.utils.env_config import config
 
 # SPHIX
+from src.routers.validators.marital_status_app_to_sphinx import MaritalStatusAppToSphinxEnum
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
@@ -74,13 +75,13 @@ class PIN(BaseModel):
 
 class ElectronicSignature(BaseModel):
     electronic_signature: constr(
-        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$"
+        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{8,}$"
     )
 
 
 class NewElectronicSignature(BaseModel):
     new_electronic_signature: constr(
-        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{6,8}$"
+        regex=r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{8,}$"
     )
 
 
@@ -109,11 +110,12 @@ class DeviceInformation(BaseModel):
     device_model: str
     is_emulator: bool
     device_operating_system_name: str
-    os_sdk_version: int
+    os_sdk_version: str
     device_is_in_root_mode: bool
     device_network_interfaces: str
+    access_ip: str
     public_ip: str
-    public_wifi_ip: str = None
+    phone_wifi_ip: str = None
     geolocation: str = None
 
 
@@ -122,11 +124,12 @@ class DeviceInformationOptional(BaseModel):
     device_model: str = None
     is_emulator: bool = None
     device_operating_system_name: str = None
-    os_sdk_version: int = None
+    os_sdk_version: str = None
     device_is_in_root_mode: bool = None
     device_network_interfaces: str = None
+    access_ip: str = None
     public_ip: str = None
-    public_wifi_ip: str = None
+    phone_wifi_ip: str = None
     geolocation: str = None
 
 
@@ -182,22 +185,23 @@ class CelPhone(BaseModel):
 
 
 class MaritalStatus(BaseModel):
-    value: int
+    marital_status: MaritalStatusAppToSphinxEnum
 
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_marital_status(value=e):
-            return e
-        raise ValueError("Marital status not exists in our marital regime enum")
 
 class Nationality(BaseModel):
     nationality: str
 
+    @validator("nationality", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_nationality(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
 
 class QuizQuestionOption(BaseModel):
-    quiz_question_id: UUID1
-    quiz_option_id: UUID1
+    quiz_question_id: int
+    quiz_option_id: str
 
 
 class IsCvmQualifiedInvestor(BaseModel):
@@ -275,17 +279,6 @@ class CelPhoneSource(Source):
     value: constr(min_length=11, max_length=11)
 
 
-class CountrySource(Source):
-    value: constr(min_length=3, max_length=3)
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_country(value=e):
-            return e
-        raise ValueError("Country not exists in our country enum")
-
-
 class StateSource(Source):
     value: constr(min_length=2, max_length=2)
 
@@ -334,6 +327,7 @@ class DateSource(Source):
         except:
             raise ValueError("Wrong timestamp supplied")
 
+
 class IssuerSource(Source):
     value: str
 
@@ -344,6 +338,17 @@ class StreetNameSource(Source):
 
 class AddressNumberSource(Source):
     value: str
+
+
+class CountrySource(Source):
+    value: constr(min_length=3, max_length=3)
+
+    @validator("value", always=True, allow_reuse=True)
+    def validate_value(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_country(value=e):
+            return e
+        raise ValueError("Country not exists in our country enum")
 
 
 class AddressIdCitySource(Source):
@@ -603,7 +608,12 @@ class RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
 ):
     value: bool
 
-def validate_contry_state_city_and_id_city(country: str, state: str, city: str, id_city: int) -> bool:
+
+def validate_contry_state_city_and_id_city(
+    country: str, state: str, city: str, id_city: int
+) -> bool:
     sinacor_types_repository = SinaCorTypesRepository()
-    is_valid = sinacor_types_repository.validate_contry_state_city_and_id_city(country, state, city, id_city)
+    is_valid = sinacor_types_repository.validate_contry_state_city_and_id_city(
+        country, state, city, id_city
+    )
     return is_valid

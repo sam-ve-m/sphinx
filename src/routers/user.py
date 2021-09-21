@@ -51,7 +51,8 @@ from src.routers.validators.base import (
     MaritalStatusSource,
     DocumentNumber,
     DeviceInformation,
-    DeviceInformationOptional, validate_contry_state_city_and_id_city
+    DeviceInformationOptional,
+    validate_contry_state_city_and_id_city,
 )
 
 from src.utils.jwt_utils import JWTHandler
@@ -88,15 +89,13 @@ class UpdateCustomerRegistrationData(BaseModel):
     cel_phone: Optional[CelPhoneSource]
     patrimony: Optional[PatrimonySource]
 
-    document_number: Optional[DocumentNumber]
     document_issuer: Optional[IssuerSource]
     document_state: Optional[StateSource]
     document_expedition_date: Optional[DateSource]
     document_identity_number: Optional[IdentityDocumentNumber]
-    document_type: Optional[DocumentTypeSource]
 
-    marital_spouse_name: Optional[NameSource]
     marital_status: Optional[MaritalStatusSource]
+    marital_spouse_name: Optional[NameSource]
     marital_nationality: Optional[NationalitySource]
     marital_cpf: Optional[CpfSource]
 
@@ -104,31 +103,39 @@ class UpdateCustomerRegistrationData(BaseModel):
     occupation_activity: Optional[ActivitySource]
     occupation_cnpj: Optional[CnpjSource]
 
-    address_city: Optional[CitySource]
-    address_nationality: Optional[NationalitySource]
-    address_street_name: Optional[StreetNameSource]
     address_country: Optional[CountrySource]
-    address_zip_code: Optional[ZipCodeSource]
     address_state: Optional[StateSource]
-    address_number: Optional[AddressNumberSource]
     address_id_city: Optional[AddressIdCitySource]
+    address_city: Optional[CitySource]
+    address_number: Optional[AddressNumberSource]
+    address_street_name: Optional[StreetNameSource]
+    address_zip_code: Optional[ZipCodeSource]
     address_neighborhood: Optional[NeighborhoodSource]
 
     us_tin: Optional[UsTinSource]
 
     @root_validator()
     def validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        country = values.get('country')
-        state = values.get('state')
-        city = values.get('city')
-        id_city = values.get('id_city')
+        country = values.get("country")
+        state = values.get("state")
+        city = values.get("city")
+        id_city = values.get("id_city")
 
         if all([country, state, city, id_city]):
-            is_valid = validate_contry_state_city_and_id_city(country.get('value'), state.get('value'), city.get('value'), id_city.get('value'))
+            is_valid = validate_contry_state_city_and_id_city(
+                country.get("value"),
+                state.get("value"),
+                city.get("value"),
+                id_city.get("value"),
+            )
             if not is_valid:
-                raise ValueError(f"The combination of values {country}, {state}, {city}, {id_city} does not match")
+                raise ValueError(
+                    f"The combination of values {country}, {state}, {city}, {id_city} does not match"
+                )
         else:
-            raise ValueError(f"The combination of values {country}, {state}, {city}, {id_city} does not match")
+            raise ValueError(
+                f"The combination of values {country}, {state}, {city}, {id_city} does not match"
+            )
 
         return values
 
@@ -194,7 +201,7 @@ def user_quiz(device_information: DeviceInformation, request: Request):
 
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
-        "device_information": device_information
+        "device_information": device_information.dict(),
     }
     return BaseController.run(UserController.user_quiz_put, payload, request)
 
@@ -206,10 +213,15 @@ def send_quiz_responses(quiz_response: QuizResponses, request: Request):
         return jwt_data_or_error_response
 
     quiz_response_dict = quiz_response.dict()
+    responses = quiz_response_dict.get("responses")
+    for x in responses:
+        x["quiz_question_id"] = str(x["quiz_question_id"])
+        x["quiz_option_id"] = str(x["quiz_option_id"])
+
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
-        "quiz": quiz_response_dict.get('responses'),
-        "device_information": quiz_response_dict.get('device_information')
+        "quiz": responses,
+        "device_information": quiz_response_dict.get("device_information"),
     }
     return BaseController.run(UserController.send_quiz_responses, payload, request)
 

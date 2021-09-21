@@ -35,7 +35,6 @@ def route_is_public(url_request: str, method: str = None) -> bool:
     if method == "POST":
         if url_request in PUBLIC_PATHS_POST:
             public_route = True
-
     else:
         if url_request in PUBLIC_PATHS_GET:
             public_route = True
@@ -52,11 +51,16 @@ def need_be_admin(url_request: str) -> bool:
     return must_be_admin
 
 
-def need_electronic_signature(url_request: str) -> bool:
+def need_electronic_signature(url_request: str, method: str) -> bool:
     if url_request is None:
         raise NoPath("No path found")
     must_have_electronic_signature = False
     if url_request in PATH_WITH_ELECTRONIC_SIGNATURE_REQUIRED:
+        must_have_electronic_signature = True
+    if (
+        method == "DELETE"
+        and url_request in PATH_WITH_ELECTRONIC_SIGNATURE_REQUIRED_DELETE
+    ):
         must_have_electronic_signature = True
     return must_have_electronic_signature
 
@@ -101,7 +105,9 @@ def check_if_is_user_not_allowed_to_access_route(
         token_is_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
         is_admin_route = need_be_admin(url_request=request.url.path)
         is_admin = user_data.get("is_admin")
-        is_signed_route = need_electronic_signature(url_request=request.url.path)
+        is_signed_route = need_electronic_signature(
+            url_request=request.url.path, method=request.method
+        )
         is_electronic_signature_valid = validate_electronic_signature(
             request=request, user_data=user_data
         )

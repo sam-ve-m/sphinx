@@ -273,7 +273,10 @@ class SinaCorTypesRepository(OracleInfrastructure):
         """
         return self.base_validator(sql=sql)
 
-    def validate_state(self, value: str, ) -> bool:
+    def validate_state(
+        self,
+        value: str,
+    ) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCESTADO
@@ -383,9 +386,9 @@ class SinaCorTypesRepository(OracleInfrastructure):
         sql = f""" SELECT 1 FROM TSCESTCIV where CD_EST_CIVIL = {value}"""
         return self.base_validator(sql=sql)
 
-    def validate_contry_state_city_and_id_city(self, contry: str, state: str, city: str, id_city: int) -> bool:
+    def validate_contry_state_city_and_id_city(
+        self, contry: str, state: str, city: str, id_city: int
+    ) -> bool:
         sql = f"""SELECT 1 FROM TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
         AND SIGL_ESTADO = '{state}' AND NOME_MUNI = '{city}' AND NUM_SEQ_MUNI = {id_city}"""
         return self.base_validator(sql=sql)
-
-

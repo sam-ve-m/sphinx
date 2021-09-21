@@ -13,7 +13,7 @@ class TermsService(ITerm):
     def save_term(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
-    ):
+    ) -> dict:
         file_type = payload.get("file_type")
         file_repository.save_term_file(
             file_type=file_type,
@@ -28,7 +28,7 @@ class TermsService(ITerm):
     def get_term(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
-    ):
+    ) -> dict:
         link = file_repository.get_term_file(file_type=payload.get("file_type"))
         return {
             "status_code": status.HTTP_200_OK,
@@ -36,7 +36,7 @@ class TermsService(ITerm):
         }
 
     @staticmethod
-    def get_terms(payload: dict):
+    def get_terms(payload: dict) -> dict:
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {

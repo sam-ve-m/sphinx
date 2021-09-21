@@ -1,4 +1,6 @@
 # OUTSIDE LIBRARIES
+from src.interfaces.repositories.file_repository.interface import IFile
+from src.repositories.file.enum.user_file import UserFileType
 from src.utils.env_config import config
 import requests
 import logging
@@ -12,72 +14,16 @@ class StoneAge:
     @staticmethod
     def get_user_quiz(user_identifier_data: dict) -> dict:
         """this functions will send the user_identifier_data and will return a quiz"""
-
-        # TODO: Get cpf from user identifier data
-        # response = StoneAge.run_sync_stone_age_app_entry_point(
-        #     entry_point="mock", body={"cpf": 123}
-        # )
-        response = {
-            "output": dict(),
-            "proposal_id": "6d6e2a04-00e4-11ec-9a03-0242ac130003",
-            "decision": None,
-        }
-        response["output"].update(
-            {
-                "quiz": [
-                    {
-                        "questionId": "6d6e2a04-00e4-11ec-9a03-0242ac130003",
-                        "question": "Qual desse números é seu?",
-                        "options": [
-                            {
-                                "value": "+5511952896753",
-                                "optionId": "81acd16e-00e4-11ec-9a03-0242ac130003",
-                            },
-                            {
-                                "value": "+5511952006753",
-                                "optionId": "891952f6-00e4-11ec-9a03-0242ac130003",
-                            },
-                            {
-                                "value": "+5511933896753",
-                                "optionId": "8dcdbb2a-00e4-11ec-9a03-0242ac130003",
-                            },
-                        ],
-                    },
-                    {
-                        "questionId": "7c4d1fa8-00e4-11ec-9a03-0242ac130003",
-                        "question": "Qual desses endereços é o seu?",
-                        "options": [
-                            {
-                                "value": "R.jagunça 999, Cabrobro",
-                                "optionId": "81acd16e-00e4-11ec-9a03-0242ac130003",
-                            },
-                            {
-                                "value": "R. jabuti aqueroso 43, Cabuti",
-                                "optionId": "891952f6-00e4-11ec-9a03-0242ac130003",
-                            },
-                            {
-                                "value": "R. antoni carlos 123, São Pedro",
-                                "optionId": "8dcdbb2a-00e4-11ec-9a03-0242ac130003",
-                            },
-                        ],
-                    },
-                ]
-            }
+        response = StoneAge.run_sync_stone_age_app_entry_point(
+            entry_point="onbPfP1Post", body=user_identifier_data
         )
-
         return response
 
     @staticmethod
-    def send_user_quiz_responses(quiz: dict) -> Optional[dict]:
-        # TODO: Change body to quiz
-        # response = StoneAge.run_sync_stone_age_app_entry_point(
-        #     entry_point="mock", body={"cpf": 123}
-        # )
-        response = {
-            "output": dict(),
-            "proposal_id": "94f3dc22-00e4-11ec-9a03-0242ac130003",
-            "decision": "MESA",
-        }
+    def send_user_quiz_responses(send_quiz_request: dict) -> Optional[dict]:
+        response = StoneAge.run_sync_stone_age_app_entry_point(
+             entry_point="onbPfP2Post", body=send_quiz_request
+        )
         return response
 
     @staticmethod
@@ -102,7 +48,7 @@ class StoneAge:
         api_version = config("STONE_AGE_MOTOR_VERSION")
 
         motor_app_entry_point_url = (
-            f"{motor_url}/api/{api_version}/RunSync/{app_name}/{entry_point}"
+            f"{motor_url}/api/{api_version}/RunSync/{app_name}/{entry_point}?dev=true"
         )
         response = StoneAge.get_stone_age_iam()
         cookies = StoneAge.get_stone_age_auth_cookie(response)
@@ -111,17 +57,21 @@ class StoneAge:
         request_session.headers.update({"Content-type": "application/json"})
         request_session.cookies["access_token"] = cookies["access_token"]
 
+        #TODO: REMOVER CAMPOS NULL DAS REQUISIÇOES NOS MÉTODOS DO SERVIÇO
+        # del body['spouse']
+
         body_dumps = json.dumps(body)
         response = request_session.post(url=motor_app_entry_point_url, data=body_dumps)
 
         if response.status_code == 200:
             data = response.json()
-            return data
-        else:
-            logger = logging.getLogger(config("LOG_NAME"))
-            response_error_stone_age = f"Stone age return status code: {response.status_code}, error response: {response}"
-            logger.info(msg=response_error_stone_age)
-            raise InternalServerError("common.process_issue")
+            if data['successful']:
+                return data
+
+        logger = logging.getLogger(config("LOG_NAME"))
+        response_error_stone_age = f"Stone age return status code: {response.status_code}, error response: {response}"
+        logger.info(msg=response_error_stone_age)
+        raise InternalServerError("common.process_issue")
 
     @staticmethod
     def list_stone_age_apps():
@@ -221,3 +171,43 @@ class StoneAge:
         }
 
         return headers
+
+    @staticmethod
+    def get_user_identifier_data(payload: dict, current_user: dict, current_user_marital: dict, file_repository: IFile):
+        user_identifier_data = {
+            "email": current_user.get("email"),
+            "cpf": current_user.get("cpf"),
+            "cel_phone": current_user.get("cel_phone"),
+            "marital_status": current_user_marital.get("status"),
+            "is_us_person": current_user.get("is_us_person"),
+            "spouse": current_user_marital.get("spouse"),
+            "uri_selfie": file_repository.get_user_selfie(
+                file_type=UserFileType.SELF, user_email=current_user.get("email")
+            ),
+            "device": payload.get("device_information"),
+        }
+
+        current_user_is_us_person = current_user.get("is_us_person")
+
+        if current_user_is_us_person:
+            user_identifier_data["us_tin"] = current_user.get("us_tin")
+
+        spouse = current_user_marital.get("spouse")
+
+        if spouse is not None:
+            user_identifier_data["spouse"] = spouse
+
+        return user_identifier_data
+
+    @staticmethod
+    def get_user_send_quiz_request(payload: dict, current_user: dict):
+        send_quiz_request = {
+            "proposalId": current_user.get("stone_age_proposal_id"),
+            "email": current_user.get("email"),
+            "cpf": current_user.get("cpf"),
+            "cel_phone": current_user.get("cel_phone"),
+            "responses": payload.get("quiz"),
+            "device": payload.get("device_information")
+        }
+
+        return send_quiz_request

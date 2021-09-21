@@ -16,6 +16,11 @@ from src.utils.stone_age import StoneAge
 from src.utils.base_model_normalizer import normalize_enum_types
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.solutiontech import Solutiontech
+from src.domain.sincad.client_sync_status import SincadClientImportStatus
+from src.domain.persephone_queue import PersephoneQueue
+from src.utils.env_config import config
+from src.utils.persephone_templates import get_user_account_template_with_data
+from src.utils.json_encoder.date_encoder import DateEncoder
 
 
 class SinacorService:
@@ -41,7 +46,18 @@ class SinacorService:
         # dtvm_client_data_provided_by_bureau = SinacorService._merge_fake_object_with_stone_age_data(fake_object=fake_stone_age.get("data"), stone_age_data=dtvm_client_data_provided_by_bureau)
 
         fake_identifier_document = SinacorService._get_fake_identifier_document()
-        dtvm_client_data_provided_by_bureau = SinacorService._fill_not_exists_data_identifier_document(fake_identifier_document=fake_identifier_document, stone_age_data=dtvm_client_data_provided_by_bureau)
+        dtvm_client_data_provided_by_bureau = (
+            SinacorService._fill_not_exists_data_identifier_document(
+                fake_identifier_document=fake_identifier_document,
+                stone_age_data=dtvm_client_data_provided_by_bureau,
+            )
+        )
+
+        SinacorService._send_dtvm_client_data_to_persephone(
+            persephone_client=persephone_client,
+            dtvm_client_data=dtvm_client_data_provided_by_bureau,
+            user_email=user_database_document.get("email"),
+        )
 
         database_and_bureau_dtvm_client_data_merged = (
             SinacorService._merge_bureau_client_data_with_user_database(
@@ -54,7 +70,6 @@ class SinacorService:
             user_data=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
             user_repository=user_repository,
-            persephone_client=persephone_client
         )
 
         return {
@@ -64,19 +79,16 @@ class SinacorService:
 
     @staticmethod
     def save_or_update_client_data(
-            user_data: dict,
-            client_register_repository=ClientRegisterRepository(),
-            user_repository=UserRepository(),
-            persephone_client=PersephoneService.get_client(),
+        user_data: dict,
+        client_register_repository=ClientRegisterRepository(),
+        user_repository=UserRepository(),
     ):
-        SinacorService._send_dtvm_client_data_to_persephone(
-            persephone_client=persephone_client,
-            dtvm_client_data=user_data,
-        )
 
-        database_and_bureau_dtvm_client_data_merged = SinacorService._create_client_into_sinacor(
-            client_register_repository=client_register_repository,
-            database_and_bureau_dtvm_client_data_merged=user_data,
+        database_and_bureau_dtvm_client_data_merged = (
+            SinacorService._create_client_into_sinacor(
+                client_register_repository=client_register_repository,
+                database_and_bureau_dtvm_client_data_merged=user_data,
+            )
         )
 
         database_and_bureau_dtvm_client_data_merged = SinacorService._add_dtvm_client_trade_metadata(
@@ -93,8 +105,14 @@ class SinacorService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def _fill_not_exists_data_identifier_document(fake_identifier_document: dict, stone_age_data: dict) -> dict:
-        stone_age_identifier_document = stone_age_data.get("identifier_document") if stone_age_data.get("identifier_document") is not None else {}
+    def _fill_not_exists_data_identifier_document(
+        fake_identifier_document: dict, stone_age_data: dict
+    ) -> dict:
+        stone_age_identifier_document = (
+            stone_age_data.get("identifier_document")
+            if stone_age_data.get("identifier_document") is not None
+            else {}
+        )
         message = f"stone_age_data: {stone_age_identifier_document} - fake_identifier_document: {fake_identifier_document}"
         logging.info(msg=message)
 
@@ -102,7 +120,10 @@ class SinacorService:
         for fake_object_key in fake_object_keys:
             message = f"root-key: {fake_object_key}"
             logging.info(msg=message)
-            stone_age_identifier_document[fake_object_key] = SinacorService.chupeta(fake_object=fake_identifier_document.get(fake_object_key), stone_age_data=stone_age_identifier_document.get(fake_object_key))
+            stone_age_identifier_document[fake_object_key] = SinacorService.chupeta(
+                fake_object=fake_identifier_document.get(fake_object_key),
+                stone_age_data=stone_age_identifier_document.get(fake_object_key),
+            )
 
         stone_age_data.update({"identifier_document": stone_age_identifier_document})
         return stone_age_data
@@ -169,17 +190,25 @@ class SinacorService:
         return database_and_bureau_dtvm_client_data_merged
 
     @staticmethod
-    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict):
-        # Send to Persephone
-        # table_result = persephone_client.run(
-        #     topic="thebes.sphinx_persephone.topic",
-        #     partition=5,
-        #     payload=get_user_account_template_with_data(payload=dtvm_client_data),
-        #     schema_key="table_schema",
-        # )
-        # if table_result is False:
-        #     raise InternalServerError("common.process_issue")
-        pass
+    def _send_dtvm_client_data_to_persephone(
+        persephone_client, dtvm_client_data: dict, user_email: str
+    ):
+        normalize_enum_types(dtvm_client_data)
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
+            payload=json.loads(
+                json.dumps(
+                    get_user_account_template_with_data(
+                        payload=dtvm_client_data, email=user_email
+                    ),
+                    cls=DateEncoder,
+                )
+            ),
+            schema_key="user_bureau_callback_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
     @staticmethod
     def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
@@ -217,11 +246,15 @@ class SinacorService:
         client_cpf = database_and_bureau_dtvm_client_data_merged.get("cpf")
 
         database_and_bureau_dtvm_client_data_merged.update(
-            {
-                "sinacor": SinacorClientStatus.CREATED.value,
-                "sincad": SinacorClientStatus.NOT_CREATED.value,
-            }
+            {"sinacor": SinacorClientStatus.CREATED.value}
         )
+
+        if database_and_bureau_dtvm_client_data_merged.get("sincad") is None:
+            database_and_bureau_dtvm_client_data_merged.update(
+                {
+                    "sincad": SincadClientImportStatus.NOT_SYNCED.value,
+                }
+            )
 
         sinacor_user_control_data = (
             client_register_repository.get_user_control_data_if_user_already_exists(
@@ -330,7 +363,10 @@ class SinacorService:
                 "gender": {"source": "PH3W", "value": "M"},
                 "email": {"source": "PH3W", "value": email},
                 "name": {"source": "PH3W", "value": "Antonio Armando Piaui"},
-                "birth_date": {"source": "PH3W", "value": datetime.datetime(1993, 7, 12, 0, 0)},
+                "birth_date": {
+                    "source": "PH3W",
+                    "value": datetime.datetime(1993, 7, 12, 0, 0),
+                },
                 "birthplace": {
                     "nationality": {"source": "PH3W", "value": 1},
                     "country": {"source": "PH3W", "value": "BRA"},
@@ -345,7 +381,9 @@ class SinacorService:
                         # GENERATE
                         "number": {
                             "source": "PH3W",
-                            "value": int("37.059.072-7".replace(".", "").replace("-", "")),
+                            "value": int(
+                                "37.059.072-7".replace(".", "").replace("-", "")
+                            ),
                         },
                         "date": {
                             "source": "PH3W",
@@ -377,7 +415,10 @@ class SinacorService:
                     "patrimony": {"source": "PH3W", "value": 5446456.44},
                     "income": {"source": "PH3W", "value": 5446456.44},
                     "income_tax_type": {"source": "PH3W", "value": 1},
-                    "date": {"source": "PH3W", "value": datetime.datetime(1993, 7, 12, 0, 0)},
+                    "date": {
+                        "source": "PH3W",
+                        "value": datetime.datetime(1993, 7, 12, 0, 0),
+                    },
                 },
                 "education": {
                     "level": {"source": "PH3W", "value": "Médio incompleto"},
@@ -399,9 +440,12 @@ class SinacorService:
                     "status": {"source": "PH3W", "value": 5},
                     "spouse": {
                         "cpf": {"value": "16746756076", "source": "REQUEST"},
-                        "name": {"value": "Flavio Antobio Felicio", "source": "REQUEST"},
-                        "nationality": {"value": 1, "source": "REQUEST"}
-                    }
+                        "name": {
+                            "value": "Flavio Antobio Felicio",
+                            "source": "REQUEST",
+                        },
+                        "nationality": {"value": 1, "source": "REQUEST"},
+                    },
                 },
                 "cpf": {"source": "PH3W", "value": cpf},
                 "self_link": {"source": "PH3W", "value": "http://self_user.jpg"},

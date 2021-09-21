@@ -1,8 +1,11 @@
 # STANDARD LIBS
 from abc import ABC, abstractmethod
+from typing import Type
+
 from persephone_client.main import Persephone
 
 # SPHINX
+from src.repositories.client_register.repository import ClientRegisterRepository
 from src.services.authentications.service import AuthenticationService
 from src.services.persephone.service import PersephoneService
 
@@ -26,17 +29,22 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def create_admin(payload: dict) -> dict:
+    def create_admin(payload: dict) -> None:
         pass
 
     @staticmethod
     @abstractmethod
-    def update(payload: dict, user_repository: UserRepository) -> dict:
+    def update(payload: dict, user_repository: UserRepository) -> None:
         pass
 
     @staticmethod
     @abstractmethod
-    def delete(payload: dict, user_repository: UserRepository) -> dict:
+    def delete(
+        payload: dict,
+        user_repository: UserRepository,
+        token_handler: Type[JWTHandler],
+        client_register: Type[ClientRegisterRepository],
+    ) -> dict:
         pass
 
     @staticmethod
@@ -81,7 +89,11 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def save_user_selfie(payload: dict, file_repository: FileRepository) -> dict:
+    def save_user_selfie(
+        payload: dict,
+        file_repository: FileRepository,
+        persephone_client: Type[PersephoneService],
+    ) -> dict:
         pass
 
     @staticmethod
@@ -91,17 +103,18 @@ class IUser(ABC):
         user_repository: UserRepository,
         token_handler: JWTHandler,
         file_repository: FileRepository,
+        persephone_client: Type[PersephoneService],
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def add_user_control_metadata(payload: dict):
+    def add_user_control_metadata(payload: dict) -> None:
         pass
 
     @staticmethod
     @abstractmethod
-    def fill_term_signed(payload: dict, file_type: str, version: int):
+    def fill_term_signed(payload: dict, file_type: str, version: int) -> None:
         pass
 
     @staticmethod
@@ -115,16 +128,14 @@ class IUser(ABC):
     @staticmethod
     @abstractmethod
     def user_identifier_data(
-        payload: dict,
-        user_repository,
+        payload: dict, user_repository, persephone_client: Type[PersephoneService]
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def user_complementary_data(
-        payload: dict,
-        user_repository,
+        payload: dict, user_repository, persephone_client: Type[PersephoneService]
     ) -> dict:
         pass
 
@@ -134,7 +145,7 @@ class IUser(ABC):
         payload: dict,
         user_repository,
         stone_age,
-        persephone_client,
+        persephone_client: Type[PersephoneService],
     ) -> dict:
         pass
 
@@ -145,7 +156,12 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def user_quiz_put(payload: dict, stone_age, user_repository) -> dict:
+    def user_quiz_put(
+        payload: dict,
+        stone_age,
+        user_repository,
+        persephone_client: Type[PersephoneService],
+    ) -> dict:
         pass
 
     @staticmethod
@@ -158,18 +174,22 @@ class IUser(ABC):
     @staticmethod
     @abstractmethod
     def forgot_electronic_signature(
-        payload: dict, user_repository, file_repository
+        payload: dict, user_repository, authentication_service
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def reset_electronic_signature(payload: dict, user_repository) -> dict:
+    def reset_electronic_signature(
+        payload: dict, user_repository, persephone_client
+    ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def change_electronic_signature(
-        payload: dict, user_repository=UserRepository()
+        payload: dict,
+        user_repository=UserRepository(),
+        persephone_client: Type[PersephoneService] = None,
     ) -> dict:
         pass

@@ -5,7 +5,7 @@ from typing import Type, Optional
 from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 from src.repositories.client_register.builder import ClientRegisterBuilder
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
-from src.routers.validators.enum_template import MaritalStatusEnum
+from src.routers.validators.marital_status_stone_age_to_sphinx import MaritalStatusStoneAgeToSphinxEnum
 from src.utils.env_config import config
 
 
@@ -74,7 +74,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             verify_user_treasury,
         ]
         result = self.query(sql=" union ".join(all_validation_query))
-        if len(result) > 0:
+        if result and len(result) > 0:
             result = self.query(
                 sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
             )
@@ -84,7 +84,14 @@ class ClientRegisterRepository(OracleInfrastructure):
     def get_sincad_status(self, user_cpf: int):
         sql = f"SELECT COD_SITU_ENVIO FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
         result = self.query(sql=sql)
-        if len(result) > 0:
+        if result and len(result) > 0:
+            return result[0]
+        return None
+
+    def get_sinacor_status(self, user_cpf: int):
+        sql = f"SELECT IN_SITUAC FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+        result = self.query(sql=sql)
+        if result and len(result) > 0:
             return result[0]
         return None
 
@@ -96,10 +103,10 @@ class ClientRegisterRepository(OracleInfrastructure):
     ) -> Type[ClientRegisterBuilder]:
         activity = user_data["occupation"]["activity"]
         is_married = user_data["marital"]["status"] in [
-            MaritalStatusEnum.MARRIED_TO_BRAZILIAN.value,
-            MaritalStatusEnum.MARRIED_TO_A_NATURALIZED_BRAZILIAN.value,
-            MaritalStatusEnum.MARRIED_TO_A_FOREIGN.value,
-            MaritalStatusEnum.STABLE_UNION.value,
+            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
+            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_NATURALIZED_BRAZILIAN.value,
+            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_FOREIGN.value,
+            MaritalStatusStoneAgeToSphinxEnum.STABLE_UNION.value,
         ]
         is_business_person = sinacor_types_repository.is_business_person(value=activity)
         is_not_employed_or_business_person = sinacor_types_repository.is_others(
@@ -148,6 +155,67 @@ class ClientRegisterRepository(OracleInfrastructure):
             return callback(
                 user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
             )
+
+    def client_is_allowed_to_cancel_registration(self, user_cpf: int, bmf_account: int):
+        is_client_blocked = self._is_client_blocked(user_cpf)
+        client_has_value_blocked = self._client_has_value_blocked(bmf_account)
+        client_has_receivables = self._client_has_receivables(bmf_account)
+        client_has_options_blocked = self._client_has_options_blocked(bmf_account)
+        client_has_options_receivables = self._client_has_options_receivables(
+            bmf_account
+        )
+        client_has_values_in_bank_account = self._client_has_values_in_bank_account(
+            bmf_account
+        )
+        return (
+            any(
+                [
+                    is_client_blocked,
+                    client_has_value_blocked,
+                    client_has_receivables,
+                    client_has_options_blocked,
+                    client_has_options_receivables,
+                    client_has_values_in_bank_account,
+                ]
+            )
+            is False
+        )
+
+    def _is_client_blocked(self, user_cpf: int):
+        result = self.query(
+            sql=f"SELECT 1 from TSCCLIGER WHERE CD_CPFCGC = {user_cpf} and IN_SITUAC = 'BL'"
+        )
+        return len(result) > 0
+
+    def _client_has_value_blocked(self, bmf_account: int):
+        result = self.query(
+            sql=f"SELECT 1 from TCCSALDO_BLOQ WHERE COD_CLI = {bmf_account} and VAL_BLOQ > 0"
+        )
+        return len(result) > 0
+
+    def _client_has_receivables(self, bmf_account: int):
+        result = self.query(
+            sql=f"SELECT 1 from TCCMOVTO WHERE CD_CLIENTE = {bmf_account} and DT_LIQUIDACAO >= SYSDATE"
+        )
+        return len(result) > 0
+
+    def _client_has_options_blocked(self, bmf_account: int):
+        result = self.query(
+            sql=f"SELECT 1 from VCFPOSICAO WHERE COD_CLI = {bmf_account} and QTDE_BLQD is not null and QTDE_BLQD > 0"
+        )
+        return len(result) > 0
+
+    def _client_has_options_receivables(self, bmf_account: int):
+        result = self.query(
+            sql=f"SELECT 1 from VCFPOSICAO where COD_CLI = {bmf_account} and tipo_merc in ('OPC','OPV') and data_venc >= SYSDATE"
+        )
+        return len(result) > 0
+
+    def _client_has_values_in_bank_account(self, bmf_account: int):
+        result = self.query(
+            sql=f"select 1 from tccsaldo WHERE CD_CLIENTE = {bmf_account} and VL_TOTAL > 0"
+        )
+        return len(result) > 0
 
     @staticmethod
     def _is_not_employed_or_business_and_not_married_person(

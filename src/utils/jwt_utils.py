@@ -21,6 +21,7 @@ from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import InternalServerError
 from src.services.builders.thebes_hall.thebes_hall import ThebesHall
+from src.repositories.user.repository import UserRepository
 
 
 class JWTHandler:
@@ -88,6 +89,8 @@ class JWTHandler:
         if last_modified_date:
             last_modified_date_months_past = last_modified_date.get("months_past")
 
+        user_repository = UserRepository()
+
         new_payload = {
             "nick_name": payload.get("nick_name"),
             "email": payload.get("email"),
@@ -102,6 +105,9 @@ class JWTHandler:
             "client_has_trade_allowed": False,
             "created_at": payload.get("created_at"),
             "exp": payload.get("exp"),
+            "using_suitability_or_refuse_term": user_repository.is_user_using_suitability_or_refuse_term(
+                user_email=payload.get("email")
+            ),
         }
 
         if args is not None:
@@ -121,11 +127,13 @@ class JWTHandler:
 
         solutiontech = payload.get("solutiontech")
         sincad = payload.get("sincad")
+        sinacor = payload.get("sinacor")
         is_active_client = payload.get("is_active_client")
 
         client_has_trade_allowed = (
             solutiontech == SolutiontechClientImportStatus.SYNC.value
             and sincad
+            and sinacor
             and is_active_client
             and suitability_months_past < 24
             and last_modified_date_months_past < 24
@@ -143,12 +151,17 @@ class JWTHandler:
                 payload[key] = str(payload[key])
 
     @staticmethod
-    def get_payload_from_request(request: Request) -> Union[dict, Response]:
+    def get_jwt_from_request(request: Request):
         thebes_answer = None
         for header_tuple in request.headers.raw:
             if b"x-thebes-answer" in header_tuple:
                 thebes_answer = header_tuple[1].decode()
                 break
+        return thebes_answer
+
+    @staticmethod
+    def get_payload_from_request(request: Request) -> Union[dict, Response]:
+        thebes_answer = JWTHandler.get_jwt_from_request(request=request)
         lang = get_language_from_request(request=request)
         if thebes_answer is None:
             return Response(
@@ -185,4 +198,4 @@ class JWTHandler:
             "password": electronic_signature.get("signature"),
             "signatureExpireTime": electronic_signature.get("signature_expire_time"),
         }
-        return JWTHandler.mist.generate_jwt(session_dict)
+        return JWTHandler.mist.generate_jwt(jwt=session_dict)

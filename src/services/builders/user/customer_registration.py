@@ -71,36 +71,28 @@ class CustomerRegistrationBuilder:
     def marital_spouse_name(self):
         spouse = self.__personal_data.get("marital", {}).get("spouse", {})
         if spouse:
-            spouse_name = (
-                spouse.get("name")
-            )
+            spouse_name = spouse.get("name")
             self.__buffer["marital"].update({"spouse_name": spouse_name})
         return self
 
     def marital_spouse_cpf(self):
         spouse = self.__personal_data.get("marital", {}).get("spouse", {})
         if spouse:
-            spouse_cpf = (
-                spouse.get("cpf")
-            )
+            spouse_cpf = spouse.get("cpf")
             self.__buffer["marital"].update({"spouse_cpf": spouse_cpf})
         return self
 
     def marital_cpf(self):
         spouse = self.__personal_data.get("marital", {}).get("spouse", {})
         if spouse:
-            marital_cpf = (
-                spouse.get("cpf")
-            )
+            marital_cpf = spouse.get("cpf")
             self.__buffer["marital"].update({"marital_cpf": marital_cpf})
         return self
 
     def marital_nationality(self):
         spouse = self.__personal_data.get("marital", {}).get("spouse", {})
         if spouse:
-            nationality = (
-                spouse.get("nationality")
-            )
+            nationality = spouse.get("nationality")
             self.__buffer["marital"].update({"nationality": nationality})
         return self
 

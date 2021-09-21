@@ -67,16 +67,16 @@ async def resolve_not_public_request(request: Request, call_next):
 
 
 async def http422_error_handler(
-    _: Request, exc: Union[RequestValidationError, ValidationError]) -> JSONResponse:
+    _: Request, exc: Union[RequestValidationError, ValidationError]
+) -> JSONResponse:
     """LOG HERE"""
     errors = exc.errors()
     body = exc.body
 
     message = f"Error: {errors} - Body: {body}"
     logging.error(msg=message)
-    return JSONResponse(
-        {"errors": errors}, status_code=HTTP_422_UNPROCESSABLE_ENTITY
-    )
+    return JSONResponse({"errors": errors}, status_code=HTTP_422_UNPROCESSABLE_ENTITY)
+
 
 app.add_exception_handler(ValidationError, http422_error_handler)
 app.add_exception_handler(RequestValidationError, http422_error_handler)

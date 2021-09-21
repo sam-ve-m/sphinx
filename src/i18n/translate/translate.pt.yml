@@ -26,6 +26,7 @@ pt:
     electronic_signature_is_blocked: Sua assinatura eletrônica está bloqueada.
     wrong_electronic_signature: Assinatura eletrônica  incorreta.
     creating_account: Iremos criar sua conta bancaria, espere o email.
+    cant_delete_account: Você tem pendencias em sua conta, verifique e tente novamente.
     files:
       term_not_signed: Você ainda não assinou estes termos.
     quiz:
@@ -37,6 +38,7 @@ pt:
       already_set: Você já definiu um assinatura eletrônica
   email:
     login: Enviamos um email para a conta cadastrada, para concluir o login
+    logout: Registramos sua saída.
     forgot_password: Enviamos um email para efetuar login e mudança do PIN
     forgot_electronic_signature: Enviamos para você um e-mail de recuperação da sua assinatura eletrônica.
     subject:
