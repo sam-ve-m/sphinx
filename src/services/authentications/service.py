@@ -329,10 +329,10 @@ class AuthenticationService(IAuthentication):
         sincad_status_changed = (
             user_sinacor_status_from_database != sinacor_status_from_sinacor
         )
-        client_has_trade_allowed_status_with_database_user["sincad"][
+        client_has_trade_allowed_status_with_database_user["sinacor"][
             "status"
         ] = sinacor_status_from_sinacor
-        client_has_trade_allowed_status_with_database_user["sincad"][
+        client_has_trade_allowed_status_with_database_user["sinacor"][
             "status_changed"
         ] = sincad_status_changed
 
