@@ -4,8 +4,8 @@ from src.services.users.service import UserService
 
 class UserController:
     @staticmethod
-    def create(payload: dict):
-        return UserService.create(payload=payload)
+    def create(user: dict):
+        return UserService.create(user=user)
 
     @staticmethod
     def create_admin(payload: dict):

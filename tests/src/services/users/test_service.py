@@ -55,7 +55,7 @@ def test_create_register_exists(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
     stub_repository.find_one = MagicMock(return_value={})
     with pytest.raises(BadRequestError, match="^common.register_exists"):
-        UserService.create(payload=payload, user_repository=stub_repository)
+        UserService.create(user=payload, user_repository=stub_repository)
 
 
 def test_create_process_issue(get_new_stubby_repository):
@@ -63,7 +63,7 @@ def test_create_process_issue(get_new_stubby_repository):
     stub_repository.find_one = MagicMock(return_value=None)
     stub_repository.insert = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
-        UserService.create(payload=payload, user_repository=stub_repository)
+        UserService.create(user=payload, user_repository=stub_repository)
 
 
 def test_created(get_new_stubby_repository):
@@ -75,7 +75,7 @@ def test_created(get_new_stubby_repository):
     stub_persephone_client = StubPersephoneClient()
     stub_persephone_client.run = MagicMock(return_value=True)
     response = UserService.create(
-        payload=payload,
+        user=payload,
         user_repository=stub_repository,
         authentication_service=stub_authentication_service,
         persephone_client=stub_persephone_client,

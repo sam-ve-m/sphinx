@@ -160,7 +160,7 @@ class JWTHandler:
         return thebes_answer
 
     @staticmethod
-    def get_payload_from_request(request: Request) -> Union[dict, Response]:
+    def get_thebes_answer_from_request(request: Request) -> Union[dict, Response]:
         thebes_answer = JWTHandler.get_jwt_from_request(request=request)
         lang = get_language_from_request(request=request)
         if thebes_answer is None:
