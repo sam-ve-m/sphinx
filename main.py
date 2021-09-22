@@ -47,7 +47,7 @@ async def resolve_third_part_request(request: Request, call_next):
 
 
 async def resolve_not_public_request(request: Request, call_next):
-    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
     if type(jwt_data_or_error_response) == Response:
         return jwt_data_or_error_response
     response = check_if_is_user_not_allowed_to_access_route(

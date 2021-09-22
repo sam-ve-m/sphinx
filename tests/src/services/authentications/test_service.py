@@ -33,7 +33,7 @@ def test_answer_register_exists():
     stub_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         AuthenticationService.thebes_gate(
-            payload=payload,
+            thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
             token_handler=StubTokenHandler,
         )
@@ -45,7 +45,7 @@ def test_answer_process_issue():
     stub_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         AuthenticationService.thebes_gate(
-            payload=payload,
+            thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
             token_handler=StubTokenHandler,
         )
@@ -60,7 +60,7 @@ def test_answer_is_active():
     stub_repository.update_one = MagicMock(return_value=True)
     StubTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
     response = AuthenticationService.thebes_gate(
-        payload=payload,
+        thebes_answer_from_request_or_error=payload,
         user_repository=stub_repository,
         token_handler=StubTokenHandler,
     )
@@ -76,7 +76,7 @@ def test_answer_is_not_active():
     stub_repository.update_one = MagicMock(return_value=True)
     StubTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
     response = AuthenticationService.thebes_gate(
-        payload=payload,
+        thebes_answer_from_request_or_error=payload,
         user_repository=stub_repository,
         token_handler=StubTokenHandler,
     )
@@ -88,7 +88,7 @@ def test_login_not_register_exists():
     stub_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         AuthenticationService.login(
-            payload=payload,
+            user_credentials=payload,
             user_repository=stub_repository,
             token_handler=StubTokenHandler,
         )
@@ -99,7 +99,7 @@ def test_login_use_magic_link():
     stub_repository.find_one = MagicMock(return_value={"use_magic_link": True})
     AuthenticationService.send_authentication_email = MagicMock(return_value=True)
     response = AuthenticationService.login(
-        payload=payload,
+        user_credentials=payload,
         user_repository=stub_repository,
         token_handler=StubTokenHandler,
     )
@@ -111,7 +111,7 @@ def test_login_without_pin():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"use_magic_link": False})
     response = AuthenticationService.login(
-        payload=payload,
+        user_credentials=payload,
         user_repository=stub_repository,
         token_handler=StubTokenHandler,
     )
@@ -129,7 +129,7 @@ def test_login_pin_error():
     )
     with pytest.raises(UnauthorizedError, match="^user.pin_error"):
         AuthenticationService.login(
-            payload={"pin": "1234", "email": "lala"},
+            user_credentials={"pin": "1234", "email": "lala"},
             user_repository=stub_repository,
             token_handler=StubTokenHandler,
         )
@@ -144,7 +144,7 @@ def test_login_with_pin():
         }
     )
     response = AuthenticationService.login(
-        payload={"pin": "1234", "email": "lala"},
+        user_credentials={"pin": "1234", "email": "lala"},
         user_repository=stub_repository,
         token_handler=StubTokenHandler,
     )
@@ -161,7 +161,7 @@ def test_thebes_hall_not_register_exists():
     stub_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
         AuthenticationService.thebes_hall(
-            payload=payload,
+            device_and_user_identification_data=payload,
             user_repository=stub_repository,
             token_handler=StubTokenHandler,
         )
@@ -174,7 +174,7 @@ def test_thebes_hall():
     StubTokenHandler.generate_token = MagicMock(return_value="lallalala")
     AuthenticationService.send_authentication_email = MagicMock(return_value=True)
     response = AuthenticationService.thebes_hall(
-        payload=payload,
+        device_and_user_identification_data=payload,
         user_repository=stub_repository,
         token_handler=StubTokenHandler,
     )
