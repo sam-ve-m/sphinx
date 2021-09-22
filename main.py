@@ -25,12 +25,6 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 origins = ["*"]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 @app.middleware("http")
@@ -76,6 +70,13 @@ app.include_router(suitability_router)
 app.include_router(term_router)
 app.include_router(client_register_enums_router)
 app.include_router(bureau_callbacks_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 if __name__ == "__main__":
