@@ -386,7 +386,7 @@ class AuthenticationService(IAuthentication):
                 partition=PersephoneQueue.USER_ELECTRONIC_SIGNATURE_SESSION.value,
                 payload=get_create_electronic_signature_session_schema_template_with_data(
                     email=change_electronic_signature_request.get("email"),
-                    mist_session=jwt_mist_session,
+                    mist_session=jwt_mist_session[0],
                     allowed=allowed
                 ),
                 schema_key="create_electronic_signature_session_schema",

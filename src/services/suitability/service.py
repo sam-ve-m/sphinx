@@ -31,7 +31,7 @@ class SuitabilityService(ISuitability):
         suitability_repository: MongoDBInfrastructure = SuitabilityRepository(),
         suitability_answers_repository: MongoDBInfrastructure = SuitabilityAnswersRepository(),
         suitability_answers_profile_builder=SuitabilityAnswersProfileBuilder(),
-    ) -> Union[dict, Exception]:
+    ) -> dict:
 
         if payload is None:
             raise InternalServerError("suitability.error.not_found")
@@ -67,7 +67,7 @@ class SuitabilityService(ISuitability):
         suitability_user_profile_repository=SuitabilityUserProfileRepository(),
         persephone_client=PersephoneService.get_client(),
         token_handler=JWTHandler,
-    ) -> Union[dict, Exception]:
+    ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
         user_email: str = thebes_answer.get("email")
         suitability_submission_date = datetime.utcnow()
@@ -121,7 +121,7 @@ class SuitabilityService(ISuitability):
     def get_user_profile(
         payload: dict,
         suitability_user_profile_repository=SuitabilityUserProfileRepository(),
-    ) -> Union[dict, Exception]:
+    ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
         user_email: str = thebes_answer.get("email")
         user_profile = SuitabilityService.__get_last_user_profile(
@@ -139,7 +139,7 @@ class SuitabilityService(ISuitability):
     @staticmethod
     def __get_suitability_version(
         suitability_repository=SuitabilityRepository(),
-    ) -> Union[int, Exception]:
+    ) -> int:
         try:
             last_suitability = list(
                 suitability_repository.find_all().sort("_id", -1).limit(1)
@@ -170,7 +170,7 @@ class SuitabilityService(ISuitability):
     @staticmethod
     def __insert_new_suitability(
         suitability_repository: MongoDBInfrastructure, suitability: dict
-    ) -> Optional[Exception]:
+    ) -> None:
         if type(suitability) is not dict:
             raise InternalServerError("common.invalid_params")
         try:
@@ -187,7 +187,7 @@ class SuitabilityService(ISuitability):
     def __insert_new_answers_suitability(
         suitability_answers_repository: MongoDBInfrastructure,
         answers: dict,
-    ) -> Optional[Exception]:
+    ) -> None:
         if type(answers) is not dict:
             raise InternalServerError("common.invalid_params")
         try:
@@ -236,7 +236,7 @@ class SuitabilityService(ISuitability):
         score: int,
         suitability_version: int,
         submission_date: datetime,
-    ) -> Optional[Exception]:
+    ) -> None:
         try:
             old = user_repository.find_one({"_id": user_email})
         except AttributeError:
@@ -282,7 +282,7 @@ class SuitabilityService(ISuitability):
         user_email: str,
         user_score: int,
         submission_date: datetime,
-    ) -> Optional[Exception]:
+    ) -> None:
         if not all(
             [
                 answers,
@@ -313,7 +313,7 @@ class SuitabilityService(ISuitability):
     @staticmethod
     def __get_last_user_profile(
         suitability_user_profile_repository: MongoDBInfrastructure, email: str
-    ) -> Union[dict, Exception]:
+    ) -> dict:
         if not email:
             raise InternalServerError("common.process_issue")
 

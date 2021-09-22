@@ -5,7 +5,7 @@ from src.routers.validators.base import OptionalPIN, Email
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.validators.base import SignatureCheck
 
-from src.routers.validators.base import DeviceInformation
+from src.routers.validators.base import DeviceInformationOptional
 
 router = APIRouter()
 

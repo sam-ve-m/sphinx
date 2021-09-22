@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 
 
 # SPHINX
+from typing import Type
+
+from src.services.persephone.service import PersephoneService
 from src.utils.jwt_utils import JWTHandler
 from src.repositories.user.repository import UserRepository
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
