@@ -10,9 +10,11 @@ from pydantic import BaseModel, constr, validator, UUID1
 
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
-from src.routers.validators.base import signature_regex
 from src.routers.validators.enum_template import MaritalStatusEnum
 from src.utils.brazil_register_number_validator import is_cpf_valid
+
+
+signature_regex = r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{8,}$"
 
 
 class Name(BaseModel):
