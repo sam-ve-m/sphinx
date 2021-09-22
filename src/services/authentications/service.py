@@ -37,10 +37,10 @@ from src.utils.persephone_templates import (
 class AuthenticationService(IAuthentication):
     @staticmethod
     def thebes_gate(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler,
+        thebes_answer_from_request_or_error: dict, user_repository=UserRepository(), token_handler=JWTHandler,
             persephone_client=PersephoneService.get_client()
     ) -> dict:
-        old = user_repository.find_one({"_id": payload.get("email")})
+        old = user_repository.find_one({"_id": thebes_answer_from_request_or_error.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
@@ -76,11 +76,12 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def login(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        user_credentials: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
-        entity = user_repository.find_one({"_id": payload.get("email")})
+        entity = user_repository.find_one({"_id": user_credentials.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
+
         ########################################################################### ADICIONAR ESSA VERIFICAÇAO QUANDO DELETAR USUARIO/CLIENTE ####################################################################
         # if entity.get("is_active_client") is False:
         #     raise UnauthorizedError("invalid_credential")
@@ -96,7 +97,7 @@ class AuthenticationService(IAuthentication):
                 "message_key": "email.login",
             }
         else:
-            pin = payload.get("pin")
+            pin = user_credentials.get("pin")
             if pin is None:
                 return {
                     "status_code": status.HTTP_200_OK,
@@ -126,12 +127,12 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def thebes_hall(
-        payload: dict,
+        device_and_thebes_answer_from_request: dict,
         user_repository=UserRepository(),
         token_handler=JWTHandler,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        x_thebes_answer = payload.get('x-thebes-answer')
+        x_thebes_answer = device_and_thebes_answer_from_request.get('x-thebes-answer')
         user_old = user_repository.find_one({"_id": x_thebes_answer.get("email")})
         if user_old is None:
             raise BadRequestError("common.register_not_exists")
@@ -156,10 +157,10 @@ class AuthenticationService(IAuthentication):
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_THEBES_HALL.value,
             payload=get_user_thebes_hall_schema_template_with_data(
-                email=payload.get("email"),
+                email=device_and_thebes_answer_from_request.get("email"),
                 jwt=jwt,
                 has_trade_allowed=client_has_trade_allowed,
-                device_information=payload.get('device_information')
+                device_information=device_and_thebes_answer_from_request.get('device_information')
             ),
             schema_key="user_thebes_hall_schema",
         )
@@ -170,11 +171,11 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def get_thebes_hall(
-        payload: dict,
+        thebes_answer_from_request_or_error: dict,
         user_repository=UserRepository(),
         token_handler=JWTHandler
     ) -> dict:
-        user_old = user_repository.find_one({"_id": payload.get("email")})
+        user_old = user_repository.find_one({"_id": thebes_answer_from_request_or_error.get("email")})
         if user_old is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -367,13 +368,13 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def create_electronic_signature_jwt(
-        payload: dict, persephone_client=PersephoneService.get_client()
+        change_electronic_signature_request: dict, persephone_client=PersephoneService.get_client()
     ):
         jwt_mist_session = None
         allowed = None
         try:
             jwt_mist_session = JWTHandler.generate_session_jwt(
-                payload.get("electronic_signature"), payload.get("email")
+                change_electronic_signature_request.get("electronic_signature"), change_electronic_signature_request.get("email")
             )
             allowed = True
         except BaseException as e:
@@ -384,8 +385,8 @@ class AuthenticationService(IAuthentication):
                 topic=config("PERSEPHONE_TOPIC_USER"),
                 partition=PersephoneQueue.USER_ELECTRONIC_SIGNATURE_SESSION.value,
                 payload=get_create_electronic_signature_session_schema_template_with_data(
-                    email=payload.get("email"),
-                    mist_session=jwt_mist_session,
+                    email=change_electronic_signature_request.get("email"),
+                    mist_session=jwt_mist_session[0],
                     allowed=allowed
                 ),
                 schema_key="create_electronic_signature_session_schema",
@@ -400,16 +401,16 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def logout(
-        payload: dict,
+        device_jwt_and_thebes_answer_from_request: dict,
         persephone_client=PersephoneService.get_client()
     ) -> dict:
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_LOGOUT.value,
             payload=get_user_logout_template_with_data(
-                jwt=payload.get('jwt'),
-                email=payload.get('email'),
-                device_information=payload.get('device_information')
+                jwt=device_jwt_and_thebes_answer_from_request.get('jwt'),
+                email=device_jwt_and_thebes_answer_from_request.get('email'),
+                device_information=device_jwt_and_thebes_answer_from_request.get('device_information')
             ),
             schema_key="user_logout_schema",
         )

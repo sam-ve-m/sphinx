@@ -57,35 +57,35 @@ from src.exceptions.exceptions import (
 class UserService(IUser):
     @staticmethod
     def create(
-        payload: dict,
+        user: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        payload = generate_id("email", payload, must_remove=False)
-        has_pin = payload.get("pin")
+        user = generate_id("email", user, must_remove=False)
+        has_pin = user.get("pin")
         if has_pin:
-            payload = hash_field(key="pin", payload=payload)
-        if user_repository.find_one({"_id": payload.get("_id")}) is not None:
+            user = hash_field(key="pin", payload=user)
+        if user_repository.find_one({"_id": user.get("_id")}) is not None:
             raise BadRequestError("common.register_exists")
-        payload.update({"created_at": datetime.now()})
-        UserService.add_user_control_metadata(payload=payload)
+        user.update({"created_at": datetime.now()})
+        UserService.add_user_control_metadata(payload=user)
 
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
-            payload=get_prospect_user_template_with_data(payload=payload),
+            payload=get_prospect_user_template_with_data(payload=user),
             schema_key="prospect_user_schema",
         )
 
-        was_user_inserted = user_repository.insert(payload)
+        was_user_inserted = user_repository.insert(user)
 
         if (sent_to_persephone and was_user_inserted) is False:
             raise InternalServerError("common.process_issue")
 
-        payload_jwt = JWTHandler.generate_token(payload=payload, ttl=10)
+        payload_jwt = JWTHandler.generate_token(payload=user, ttl=10)
         authentication_service.send_authentication_email(
-            email=payload.get("email"),
+            email=user.get("email"),
             payload_jwt=payload_jwt,
             body="email.body.created",
         )
@@ -95,9 +95,9 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def create_admin(payload: dict) -> dict:
+    def create_admin(payload: dict) -> None:
         payload.update({"is_admin": True})
-        UserService.create(payload=payload)
+        UserService.create(user=payload)
 
     @staticmethod
     def update(payload: dict, user_repository=UserRepository()) -> None:
@@ -299,7 +299,7 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
-    ):
+    ) -> dict:
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
@@ -318,7 +318,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def logout_all(payload: dict, user_repository=UserRepository()):
+    def logout_all(payload: dict, user_repository=UserRepository()) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
@@ -443,7 +443,7 @@ class UserService(IUser):
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
-    def add_user_control_metadata(payload: dict):
+    def add_user_control_metadata(payload: dict) -> None:
         payload.update(
             {
                 "scope": {"view_type": "default", "features": ["default", "realtime"]},
@@ -469,7 +469,7 @@ class UserService(IUser):
         )
 
     @staticmethod
-    def fill_term_signed(payload: dict, file_type: str, version: int):
+    def fill_term_signed(payload: dict, file_type: str, version: int) -> None:
         if payload.get("terms") is None:
             payload["terms"] = dict()
         payload["terms"][file_type] = {
@@ -559,7 +559,7 @@ class UserService(IUser):
     @staticmethod
     def add_user_identifier_data_on_current_user(
         payload: dict, user_identifier_data: dict
-    ):
+    ) -> None:
         payload["cpf"] = user_identifier_data.get("cpf")
         payload["cel_phone"] = user_identifier_data.get("cel_phone")
 
@@ -916,7 +916,7 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
-    ):
+    ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         entity = user_repository.find_one({"_id": thebes_answer.get("email")})
         if entity is None:

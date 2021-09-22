@@ -22,7 +22,7 @@ class IFile(ABC):
         file_type: UserFileType,
         content: Union[str, bytes],
         user_email: str,
-    ) -> None:
+    ) -> str:
         pass
 
     @abstractmethod
@@ -33,13 +33,13 @@ class IFile(ABC):
 
     @abstractmethod
     def get_term_file(
-        self, file_type: TermsFileType, cache=RepositoryRedis
-    ) -> Optional[str]:
+        self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 0
+    ) -> Union[str, dict]:
         pass
 
     @staticmethod
     @abstractmethod
-    def resolve_content(content: Union[str, bytes]):
+    def resolve_content(content: Union[str, bytes]) -> Union[str, bytes]:
         pass
 
     @staticmethod

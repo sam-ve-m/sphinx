@@ -20,8 +20,11 @@ from src.utils.middleware import (
 from src.utils.jwt_utils import JWTHandler
 
 from src.domain.sphinx_constants import *
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+origins = ["*"]
+
 
 
 @app.middleware("http")
@@ -47,7 +50,7 @@ async def resolve_third_part_request(request: Request, call_next):
 
 
 async def resolve_not_public_request(request: Request, call_next):
-    jwt_data_or_error_response = JWTHandler.get_payload_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
     if type(jwt_data_or_error_response) == Response:
         return jwt_data_or_error_response
     response = check_if_is_user_not_allowed_to_access_route(
@@ -67,6 +70,13 @@ app.include_router(suitability_router)
 app.include_router(term_router)
 app.include_router(client_register_enums_router)
 app.include_router(bureau_callbacks_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 if __name__ == "__main__":

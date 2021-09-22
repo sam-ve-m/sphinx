@@ -6,7 +6,7 @@ from typing import Optional
 class IRedis(ABC):
     @staticmethod
     @abstractmethod
-    def set(key: str, value: dict, redis: any, ttl: int = 0) -> bool:
+    def set(key: str, value: dict, redis: any, ttl: int = 0) -> None:
         pass
 
     @staticmethod
