@@ -157,10 +157,10 @@ class AuthenticationService(IAuthentication):
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_THEBES_HALL.value,
             payload=get_user_thebes_hall_schema_template_with_data(
-                email=device_and_user_identification_data.get("email"),
+                email=device_and_thebes_answer_from_request.get("email"),
                 jwt=jwt,
                 has_trade_allowed=client_has_trade_allowed,
-                device_information=device_and_user_identification_data.get('device_information')
+                device_information=device_and_thebes_answer_from_request.get('device_information')
             ),
             schema_key="user_thebes_hall_schema",
         )
