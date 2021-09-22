@@ -1,17 +1,13 @@
 from fastapi import APIRouter, Request, Response, status
 
+from src.routers.validators.authenticate_validators import Login
 from src.routers.validators.onboarding_validators import DeviceInformation
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
-from src.routers.validators.base import OptionalPIN, Email
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.validators.base import SignatureCheck
 
 router = APIRouter()
-
-
-class Login(Email, OptionalPIN):
-    pass
 
 
 @router.post("/login", tags=["authentication"])

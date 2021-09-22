@@ -1,13 +1,10 @@
 from fastapi import APIRouter, Request
 from src.controllers.base_controller import BaseController
 from src.controllers.views.controller import ViewController
-from src.routers.validators.base import Name, DisplayName
+from src.routers.validators.onboarding_validators import DisplayName
+from src.routers.validators.views_validators import View
 
 router = APIRouter()
-
-
-class View(Name, DisplayName):
-    pass
 
 
 @router.post("/views", tags=["views"])
