@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Response, status
 
 from src.routers.validators.authenticate_validators import Login
-from src.routers.validators.onboarding_validators import DeviceInformation
+from src.routers.validators.onboarding_validators import DeviceInformationOptional
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.authentications.controller import AuthenticationController
@@ -27,7 +27,7 @@ def answer(request: Request):
 
 
 @router.put("/thebes_hall", tags=["authentication"])
-def thebes_hall(device_information: DeviceInformation, request: Request):
+def thebes_hall(device_information: DeviceInformationOptional, request: Request):
     thebes_answer_from_request_or_error = JWTHandler.get_thebes_answer_from_request(request=request)
     if isinstance(thebes_answer_from_request_or_error, Response):
         return thebes_answer_from_request_or_error
@@ -51,7 +51,7 @@ def get_thebes_hall(request: Request):
 
 
 @router.put("/logout", tags=["authentication"])
-def logout(device_information: DeviceInformation, request: Request):
+def logout(device_information: DeviceInformationOptional, request: Request):
     thebes_answer_from_request_or_error = JWTHandler.get_thebes_answer_from_request(request=request)
     if isinstance(thebes_answer_from_request_or_error, Response):
         return thebes_answer_from_request_or_error
