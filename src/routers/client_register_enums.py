@@ -204,7 +204,7 @@ def get_nationality_update(request: Request):
 
 @router.get("/client_update_enums/county", tags=["client_update_enums"])
 def get_county_update(
-    request: Request, country_state: CountryState = Depends(CountryState)
+        request: Request, country_state: CountryState = Depends(CountryState)
 ):
     payload = dict()
     payload.update(country_state.dict())
@@ -238,6 +238,7 @@ def get_economic_activity(request: Request):
         payload={},
         request=request,
     )
+
 
 @router.get("/client_update_enums/activity_type", tags=["client_register_enums"])
 def get_economic_activity(request: Request):

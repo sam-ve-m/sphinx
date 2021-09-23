@@ -26,7 +26,6 @@ app = FastAPI()
 origins = ["*"]
 
 
-
 @app.middleware("http")
 async def process_thebes_answer(request: Request, call_next):
     is_third_part_access = route_is_third_part_access(
@@ -77,7 +76,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 if __name__ == "__main__":
     uvicorn.run(
