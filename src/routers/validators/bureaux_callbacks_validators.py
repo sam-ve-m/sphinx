@@ -2,68 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from src.routers.validators.base import (
-    Uuid,
-    AppName,
-    Successful,
-    Error,
-    Decision,
-    Status,
-    GenderSource,
-    BirthDateSource,
-    MotherNameSource,
-    DocumentTypeSource,
-    CpfOrCnpjSource,
-    DateSource,
-    StateSource,
-    IssuerSource,
-    StreetNameSource,
-    AddressNumberSource,
-    CountrySource,
-    CitySource,
-    IdCitySource,
-    ZipCodeSource,
-    PhoneNumberSource,
-    ActivitySource,
-    CnpjSource,
-    CompanyNameSource,
-    PatrimonySource,
-    IncomeSource,
-    EducationLevelSource,
-    EducationCourseSource,
-    IsPoliticallyExposedPerson,
-    DateOfAcquisition,
-    IncomeTaxTypeSource,
-    ConnectedPersonSource,
-    ClientTypeSource,
-    PersonTypeSource,
-    InvestorTypeTypeSource,
-    CosifTaxClassificationSource,
-    MaritalRegimeSource,
-    NeighborhoodSource,
-    AssetsDateSource,
-    NationalitySource,
-    EmailSource,
-    NameSource,
-    CpfSource,
-    MidiaPersonSource,
-    PersonRelatedToMarketInfluencerSource,
-    CourtOrdersSource,
-    LawsuitsSource,
-    FundAdminRegistrationSource,
-    InvestmentFundAdministratorsRegistrationSource,
-    RegisterAuditorsSecuritiesCommissionSource,
-    RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource,
-    ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource,
-    RegistrationOfForeignInvestorsSecuritiesCommissionSource,
-    #RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource,
-    SelfLinkSource,
-    IsUsPersonSource,
-    UsTinSource,
-    IrsSharingSource,
-    FatherNameSource,
-    DocumentNumber,
-)
+from src.routers.validators.base import *
 
 
 class DocumentData(BaseModel):
@@ -166,7 +105,9 @@ class Output(Decision, Status):
     registration_of_other_market_participants_securities_commission: RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource
     foreign_investors_register_of_annex_iv_not_reregistered: ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource
     registration_of_foreign_investors_securities_commission: RegistrationOfForeignInvestorsSecuritiesCommissionSource
-   # registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
+
+
+# registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
 
 
 class BureauCallback(Uuid, AppName, Successful, Error):

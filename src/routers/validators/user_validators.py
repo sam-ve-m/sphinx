@@ -2,51 +2,7 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
-from src.routers.validators.base import (
-    Email,
-    PIN,
-    Name,
-    View,
-    OptionalPIN,
-    Feature,
-    TermFile,
-    Cpf,
-    CelPhone,
-    MaritalStatus,
-    Nationality,
-    QuizQuestionOption,
-    IsUsPerson,
-    UsTin,
-    NickName,
-    IsCvmQualifiedInvestor,
-    FileBase64,
-    ElectronicSignature,
-    ChangeElectronicSignature,
-    GenderSource,
-    PatrimonySource,
-    CompanyNameSource,
-    CelPhoneSource,
-    NationalitySource,
-    CpfSource,
-    CitySource,
-    StreetNameSource,
-    ZipCodeSource,
-    UsTinSource,
-    NameSource,
-    CountrySource,
-    StateSource,
-    IssuerSource,
-    IdentityDocumentNumber,
-    DateSource,
-    AddressNumberSource,
-    IdCitySource,
-    NeighborhoodSource,
-    CnpjSource,
-    ActivitySource,
-    MaritalStatusSource,
-    DeviceInformation,
-    DeviceInformationOptional,
-)
+from src.routers.validators.base import *
 
 
 class UserSimple(Email, NickName, OptionalPIN):
