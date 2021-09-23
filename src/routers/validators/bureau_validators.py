@@ -1,6 +1,8 @@
+import logging
 from datetime import datetime
 from typing import Optional
 
+from email_validator import validate_email
 from pydantic import BaseModel, validator, constr
 
 from src.repositories.sinacor_types.enum.connected_person import ConnectedPerson
@@ -12,6 +14,7 @@ from src.repositories.sinacor_types.enum.status import OutputStatus
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.routers.validators.enum_template import MaritalStatusEnum
 from src.utils.brazil_register_number_validator import is_cpf_valid, is_cnpj_valid
+from src.utils.env_config import config
 
 
 class Uuid(BaseModel):
@@ -364,7 +367,7 @@ class EmailSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, value):
-        return value
+        #return value
         try:
             is_valid = validate_email(value)
             if is_valid:
