@@ -10,7 +10,7 @@ import cx_Oracle
 
 # SPHINX
 from src.exceptions.exceptions import InternalServerError
-from src.core.interfaces.repositories.oracle import IOracle
+from src.core.interfaces.repositories.oracle.interface import IOracle
 from src.utils.env_config import config
 
 

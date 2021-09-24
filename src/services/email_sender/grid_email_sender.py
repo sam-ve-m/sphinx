@@ -4,7 +4,7 @@ from src.utils.env_config import config
 import logging
 
 from src.exceptions.exceptions import InternalServerError
-from src.core.interfaces import IEmailSender
+from src.core.interfaces.email_sender.interface import IEmailSender
 
 
 class EmailSender(IEmailSender):

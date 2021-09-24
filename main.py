@@ -4,7 +4,6 @@ from fastapi import FastAPI
 
 # SPHINX
 from fastapi.middleware.cors import CORSMiddleware
-
 from src.routers.routes_registers import (
     UserRouter,
     ThirdPartRouter,
@@ -12,6 +11,9 @@ from src.routers.routes_registers import (
     ClientRouter,
     PublicRouter,
 )
+
+# This import is extremely important for load all routes
+from src.routers import *
 
 app = FastAPI()
 

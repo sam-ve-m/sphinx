@@ -34,8 +34,9 @@ from src.routers.validators.base import (
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
+from src.routers.routes_registers.user import UserRouter
 
-router = APIRouter()
+router = UserRouter.instance()
 
 
 class UserSimple(Email, NickName, OptionalPIN):
