@@ -27,28 +27,6 @@ from src.routers.validators.base import (
     FileBase64,
     ElectronicSignature,
     ChangeElectronicSignature,
-    GenderSource,
-    PatrimonySource,
-    CompanyNameSource,
-    CelPhoneSource,
-    NationalitySource,
-    CpfSource,
-    CitySource,
-    StreetNameSource,
-    ZipCodeSource,
-    UsTinSource,
-    NameSource,
-    CountrySource,
-    StateSource,
-    IssuerSource,
-    IdentityDocumentNumber,
-    DateSource,
-    AddressNumberSource,
-    IdCitySource,
-    NeighborhoodSource,
-    CnpjSource,
-    ActivitySource,
-    MaritalStatusSource,
     DeviceInformation,
     DeviceInformationOptional,
 )
@@ -79,53 +57,6 @@ class UserComplementaryData(MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedInve
 class QuizResponses(BaseModel):
     device_information: Optional[DeviceInformationOptional]
     responses: List[QuizQuestionOption]
-
-
-class UpdateCustomerRegistrationData(BaseModel):
-    name: Optional[NameSource]
-    gender: Optional[GenderSource]
-    cel_phone: Optional[CelPhoneSource]
-    patrimony: Optional[PatrimonySource]
-
-    document_issuer: Optional[IssuerSource]
-    document_state: Optional[StateSource]
-    document_expedition_date: Optional[DateSource]
-    document_identity_number: Optional[IdentityDocumentNumber]
-
-    marital_status: Optional[MaritalStatusSource]
-    marital_spouse_name: Optional[NameSource]
-    marital_nationality: Optional[NationalitySource]
-    marital_cpf: Optional[CpfSource]
-
-    company_name: Optional[CompanyNameSource]
-    occupation_activity: Optional[ActivitySource]
-    occupation_cnpj: Optional[CnpjSource]
-
-    address_country: Optional[CountrySource]
-    address_state: Optional[StateSource]
-    address_id_city: Optional[IdCitySource]
-    address_city: Optional[CitySource]
-    address_number: Optional[AddressNumberSource]
-    address_street_name: Optional[StreetNameSource]
-    address_zip_code: Optional[ZipCodeSource]
-    address_neighborhood: Optional[NeighborhoodSource]
-
-    us_tin: Optional[UsTinSource]
-
-
-@router.post("/user", tags=["user"])
-def create_user(user: UserSimple, request: Request):
-    return BaseController.run(UserController.create, dict(user), request)
-
-
-@router.post("/user_admin", tags=["user"])
-def create_admin(user: UserSimple, request: Request):
-    return BaseController.run(UserController.create_admin, dict(user), request)
-
-
-@router.get("/user/forgot_password", tags=["user"])
-def forgot_password(request: Request, user: Email = Depends(Email)):
-    return BaseController.run(UserController.forgot_password, user.dict(), request)
 
 
 @router.put("/user/identifier_data", tags=["user"])
@@ -391,37 +322,4 @@ def change_electronic_signature(
 
     return BaseController.run(
         UserController.change_electronic_signature, payload, request
-    )
-
-
-@router.get("/user/customer_registration_data", tags=["user"])
-def get_customer_registration_data(request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
-    if isinstance(jwt_data_or_error_response, Response):
-        return jwt_data_or_error_response
-
-    payload = {
-        "x-thebes-answer": jwt_data_or_error_response,
-    }
-
-    return BaseController.run(
-        UserController.get_customer_registration_data, payload, request
-    )
-
-
-@router.put("/user/customer_registration_data", tags=["user"])
-def update_customer_registration_data(
-    customer_registration_data: UpdateCustomerRegistrationData, request: Request
-):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
-    if isinstance(jwt_data_or_error_response, Response):
-        return jwt_data_or_error_response
-
-    payload = {
-        "x-thebes-answer": jwt_data_or_error_response,
-        "customer_registration_data": customer_registration_data.dict(),
-    }
-
-    return BaseController.run(
-        UserController.update_customer_registration_data, payload, request
     )

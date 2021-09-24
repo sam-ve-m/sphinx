@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Response, status
+from fastapi import Request, Response
 
 from src.routers.validators.onboarding_validators import DeviceInformationOptional
 from src.utils.jwt_utils import JWTHandler
@@ -6,17 +6,13 @@ from src.controllers.base_controller import BaseController
 from src.routers.validators.base import OptionalPIN, Email
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.validators.base import SignatureCheck
+from src.routers.router_registers.user import UserRouter
 
-router = APIRouter()
+router = UserRouter.instance()
 
 
 class Login(Email, OptionalPIN):
     pass
-
-
-@router.post("/login", tags=["authentication"])
-def login(user_credentials: Login, request: Request):
-    return BaseController.run(AuthenticationController.login, dict(user_credentials), request)
 
 
 @router.get("/thebes_gate", tags=["authentication"])

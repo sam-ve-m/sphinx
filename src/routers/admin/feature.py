@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Request
-from pydantic import BaseModel
 from src.routers.validators.base import Name, DisplayName
 from src.controllers.base_controller import BaseController
 from src.controllers.features.controller import FeatureController
+from src.routers.router_registers.admin import AdminRouter
 
-router = APIRouter()
+router = AdminRouter.instance()
 
 
 class Feature(Name, DisplayName):

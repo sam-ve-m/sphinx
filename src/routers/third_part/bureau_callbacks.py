@@ -1,11 +1,12 @@
 # STANDARD LIBS
-from typing import Union, List, Optional
+from typing import Optional
 
 # OUTSIDE LIBRARIES
-from fastapi import APIRouter, Request, Response
+from fastapi import Request
 from pydantic import BaseModel
 
 # SPHINX
+from src.routers.router_registers.third_part import ThirdPartRouter
 from src.routers.validators.base import (
     Uuid,
     AppName,
@@ -71,7 +72,7 @@ from src.routers.validators.base import (
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
 
-router = APIRouter()
+router = ThirdPartRouter.instance()
 
 
 class DocumentData(BaseModel):

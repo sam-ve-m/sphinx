@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Request
+from fastapi import Request
 from src.controllers.base_controller import BaseController
 from src.controllers.views.controller import ViewController
 from src.routers.validators.base import Name, DisplayName
+from src.routers.router_registers.admin import AdminRouter
 
-router = APIRouter()
+
+router = AdminRouter.instance()
 
 
 class View(Name, DisplayName):
