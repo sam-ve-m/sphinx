@@ -7,7 +7,7 @@ from src.routers.validators.base import ClientType, Country, State
 from src.controllers.cliente_register_enums.controller import (
     ClientRegisterEnumsController,
 )
-from src.routers.router_registers.third_part import ThirdPartRouter
+from src.routers.routes_registers.third_part import ThirdPartRouter
 
 router = ThirdPartRouter.instance()
 

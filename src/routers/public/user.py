@@ -9,7 +9,7 @@ from src.routers.validators.base import (
 )
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
-from src.routers.router_registers.public import PublicRouter
+from src.routers.routes_registers.public import PublicRouter
 
 router = PublicRouter.instance()
 
@@ -28,4 +28,3 @@ def create_user(user: UserSimple, request: Request):
 @router.get("/user/forgot_password", tags=["user"])
 def forgot_password(request: Request, user: Email = Depends(Email)):
     return BaseController.run(UserController.forgot_password, user.dict(), request)
-

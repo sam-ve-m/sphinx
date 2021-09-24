@@ -61,7 +61,9 @@ class QuizResponses(BaseModel):
 
 @router.put("/user/identifier_data", tags=["user"])
 def update_user_identifier_data(user_identifier: UserIdentifierData, request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -75,7 +77,9 @@ def update_user_identifier_data(user_identifier: UserIdentifierData, request: Re
 def update_user_complementary_data(
     user_identifier: UserComplementaryData, request: Request
 ):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -87,7 +91,9 @@ def update_user_complementary_data(
 
 @router.get("/user/quiz", tags=["user"])
 def user_quiz(request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 
@@ -99,7 +105,9 @@ def user_quiz(request: Request):
 
 @router.put("/user/quiz", tags=["user"])
 def user_quiz(device_information: DeviceInformation, request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 
@@ -112,15 +120,17 @@ def user_quiz(device_information: DeviceInformation, request: Request):
 
 @router.put("/user/send_quiz_responses", tags=["user"])
 def send_quiz_responses(quiz_response: QuizResponses, request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 
     quiz_response_dict = quiz_response.dict()
     responses = quiz_response_dict.get("responses")
     for x in responses:
-        x['quiz_question_id'] = str(x['quiz_question_id'])
-        x['quiz_option_id'] = str(x['quiz_option_id'])
+        x["quiz_question_id"] = str(x["quiz_question_id"])
+        x["quiz_option_id"] = str(x["quiz_option_id"])
 
     payload = {
         "x-thebes-answer": jwt_data_or_error_response,
@@ -132,7 +142,9 @@ def send_quiz_responses(quiz_response: QuizResponses, request: Request):
 
 @router.delete("/user", tags=["user"])
 def delete_user(request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     return BaseController.run(
@@ -142,7 +154,9 @@ def delete_user(request: Request):
 
 @router.put("/user/change_password", tags=["user"])
 def change_user_password(pin: PIN, request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -154,7 +168,9 @@ def change_user_password(pin: PIN, request: Request):
 
 @router.put("/user/logout_all", tags=["user"])
 def logout_all(request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     return BaseController.run(
@@ -164,7 +180,9 @@ def logout_all(request: Request):
 
 @router.put("/user/views", tags=["user"])
 def change_user_view(view: View, request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -176,7 +194,9 @@ def change_user_view(view: View, request: Request):
 
 @router.put("/user/purchase", tags=["user"])
 def add_features_to_user(feature: Feature, request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -188,7 +208,9 @@ def add_features_to_user(feature: Feature, request: Request):
 
 @router.delete("/user/purchase", tags=["user"])
 def remove_features_to_user(feature: Feature, request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -200,7 +222,9 @@ def remove_features_to_user(feature: Feature, request: Request):
 
 @router.post("/user/selfie", tags=["user"], include_in_schema=True)
 async def save_user_selfie(request: Request, file_or_base64: FileBase64):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -215,7 +239,9 @@ async def sign_term(
     request: Request,
     file_type: TermFile,
 ):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = file_type.dict()
@@ -228,7 +254,9 @@ async def get_assigned_term(
     request: Request,
     file_type: TermFile = Depends(TermFile),
 ):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = file_type.dict()
@@ -240,7 +268,9 @@ async def get_assigned_term(
 async def get_onboarding_user_current_step(
     request: Request,
 ):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 
@@ -256,7 +286,9 @@ async def get_onboarding_user_current_step(
 def set_user_electronic_signature(
     electronic_signature: ElectronicSignature, request: Request
 ):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -270,7 +302,9 @@ def set_user_electronic_signature(
 
 @router.get("/user/forgot_electronic_signature", tags=["user"])
 def forgot_electronic_signature(request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -286,7 +320,9 @@ def forgot_electronic_signature(request: Request):
 def reset_electronic_signature(
     electronic_signature: ElectronicSignature, request: Request
 ):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     payload = {
@@ -305,7 +341,9 @@ def reset_electronic_signature(
 def change_electronic_signature(
     electronic_signatures: ChangeElectronicSignature, request: Request
 ):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 

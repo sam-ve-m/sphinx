@@ -14,8 +14,10 @@ class ISuitability(ABC):
     @staticmethod
     @abstractmethod
     def create_quiz(
-        payload: dict, suitability_repository: SuitabilityRepository, suitability_answers_repository: Type[MongoDBInfrastructure] = None,
-        suitability_answers_profile_builder= None
+        payload: dict,
+        suitability_repository: SuitabilityRepository,
+        suitability_answers_repository: Type[MongoDBInfrastructure] = None,
+        suitability_answers_profile_builder=None,
     ) -> dict:
         pass
 
@@ -27,7 +29,7 @@ class ISuitability(ABC):
         suitability_repository: MongoDBInfrastructure,
         suitability_user_profile_repository: MongoDBInfrastructure,
         persephone_client: Type[PersephoneService] = None,
-        token_handler: Type[JWTHandler] = None
+        token_handler: Type[JWTHandler] = None,
     ) -> dict:
         pass
 

@@ -1,6 +1,6 @@
 # STANDARD LIBS
 from datetime import datetime
-from typing import List, Tuple, Union, Optional
+from typing import List, Tuple, Union
 from copy import deepcopy
 
 # OUTSIDE LIBRARIES
@@ -15,7 +15,7 @@ from src.repositories.suitability.repository import (
     SuitabilityAnswersRepository,
 )
 from src.repositories.user.repository import UserRepository
-from src.interfaces.services.suitability.interface import ISuitability
+from src.core.interfaces.services.suitability import ISuitability
 from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
 from src.utils.persephone_templates import get_user_suitability_template_with_data
 from src.services.persephone.service import PersephoneService

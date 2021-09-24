@@ -8,7 +8,7 @@ from fastapi import status
 from src.repositories.view.repository import ViewRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.genarate_id import generate_id, generate_list
-from src.interfaces.services.view.interface import IView
+from src.core.interfaces.services.view.interface import IView
 
 
 class ViewService(IView):

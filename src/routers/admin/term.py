@@ -4,7 +4,7 @@ from typing import Union
 from src.controllers.base_controller import BaseController
 from src.controllers.terms.controller import TermsController
 from src.routers.validators.base import TermFile
-from src.routers.router_registers.admin import AdminRouter
+from src.routers.routes_registers.admin import AdminRouter
 
 
 router = AdminRouter.instance()
@@ -26,4 +26,3 @@ async def save_term(
         }
     )
     return BaseController.run(TermsController.save_term, payload, request)
-

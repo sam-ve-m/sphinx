@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from src.routers.validators.base import Name, DisplayName
 from src.controllers.base_controller import BaseController
 from src.controllers.features.controller import FeatureController
-from src.routers.router_registers.admin import AdminRouter
+from src.routers.routes_registers.admin import AdminRouter
 
 router = AdminRouter.instance()
 

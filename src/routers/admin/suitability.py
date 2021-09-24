@@ -10,12 +10,12 @@ from src.routers.validators.base import Weight, Score, ValueText, Order
 from src.controllers.suitabilities.controller import SuitabilityController
 from src.controllers.base_controller import BaseController
 from src.utils.jwt_utils import JWTHandler
-from src.routers.router_registers.admin import AdminRouter
+from src.routers.routes_registers.admin import AdminRouter
 
 router = AdminRouter.instance()
 
 
-#TODO: remove from herer the validators
+# TODO: remove from herer the validators
 
 
 class Answer(Weight, ValueText):
@@ -32,7 +32,9 @@ class Suitability(BaseModel):
 
 @router.post("/suitability/quiz", tags=["suitability"])
 async def create_quiz_suitability(suitability: Suitability, request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 

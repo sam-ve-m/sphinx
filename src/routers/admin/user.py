@@ -6,17 +6,16 @@ from src.routers.validators.base import (
     Email,
     OptionalPIN,
     NickName,
-
 )
 
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
-from src.routers.router_registers.admin import AdminRouter
+from src.routers.routes_registers.admin import AdminRouter
 
 router = AdminRouter.instance()
 
 
-#TODO: remove validatro from herer
+# TODO: remove validatro from herer
 class UserSimple(Email, NickName, OptionalPIN):
     pass
 

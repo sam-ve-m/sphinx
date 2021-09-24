@@ -62,15 +62,11 @@ class PIN(BaseModel):
 
 
 class ElectronicSignature(BaseModel):
-    electronic_signature: constr(
-        regex=signature_regex
-    )
+    electronic_signature: constr(regex=signature_regex)
 
 
 class NewElectronicSignature(BaseModel):
-    new_electronic_signature: constr(
-        regex=signature_regex
-    )
+    new_electronic_signature: constr(regex=signature_regex)
 
 
 class ChangeElectronicSignature(ElectronicSignature, NewElectronicSignature):

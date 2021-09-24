@@ -11,7 +11,7 @@ from src.utils.env_config import config
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError
 from src.repositories.cache.redis import RepositoryRedis
-from src.interfaces.repositories.file_repository.interface import IFile
+from src.core.interfaces.repositories.file_repository.interface import IFile
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.file.enum.user_file import UserFileType
 

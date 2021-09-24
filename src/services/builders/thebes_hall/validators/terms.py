@@ -2,7 +2,9 @@
 from src.utils.env_config import config
 
 # SPHINX
-from src.interfaces.services.builders.thebes_hall.validators.interface import IValidator
+from src.core.interfaces.services.builders.thebes_hall.validators.interface import (
+    IValidator,
+)
 from src.repositories.file.repository import FileRepository
 
 

@@ -1,7 +1,6 @@
 # STANDARD LIBS
 from typing import Optional
 import logging
-from enum import Enum
 
 # OUTSIDE LIBRARIES
 from src.utils.env_config import config
@@ -11,7 +10,7 @@ from pymongo import MongoClient
 # SPHINX
 from src.repositories.cache.redis import RepositoryRedis
 from src.utils.genarate_id import hash_field
-from src.interfaces.repositories.base_repository.interface import IRepository
+from src.core.interfaces.repositories.base_repository import IRepository
 from nidavellir.src.uru import Sindri
 
 

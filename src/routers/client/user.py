@@ -35,7 +35,7 @@ from src.routers.validators.base import (
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
-from src.routers.router_registers.client import ClientRouter
+from src.routers.routes_registers.client import ClientRouter
 
 router = ClientRouter.instance()
 
@@ -74,7 +74,9 @@ class UpdateCustomerRegistrationData(BaseModel):
 
 @router.delete("/user", tags=["user"])
 def delete_user(request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
     return BaseController.run(
@@ -84,7 +86,9 @@ def delete_user(request: Request):
 
 @router.get("/user/customer_registration_data", tags=["user"])
 def get_customer_registration_data(request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 
@@ -101,7 +105,9 @@ def get_customer_registration_data(request: Request):
 def update_customer_registration_data(
     customer_registration_data: UpdateCustomerRegistrationData, request: Request
 ):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(request=request)
+    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
+        request=request
+    )
     if isinstance(jwt_data_or_error_response, Response):
         return jwt_data_or_error_response
 
