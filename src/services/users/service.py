@@ -28,7 +28,7 @@ from src.repositories.user.repository import UserRepository
 
 from src.domain.persephone_queue import PersephoneQueue
 from src.services.sinacor.service import SinacorService
-from src.utils.base_model_normalizer import normalize_enum_types
+from nidavellir.src.uru import Sindri
 
 from src.utils.genarate_id import generate_id, hash_field
 from src.utils.jwt_utils import JWTHandler
@@ -1173,12 +1173,12 @@ class UserService(IUser):
                 update_customer_registration_data=update_customer_registration_data
             )
 
-        normalize_enum_types(user_update_register_schema)
+        Sindri.dict_to_primitive_types(user_update_register_schema)
 
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
-            payload=json.loads(json.dumps(user_update_register_schema, cls=DateEncoder)),
+            payload=user_update_register_schema,
             schema_key="user_update_register_data_schema",
         )
         if sent_to_persephone is False:

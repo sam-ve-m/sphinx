@@ -11,7 +11,7 @@ from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
 from src.services.persephone.service import PersephoneService
 from src.utils.stone_age import StoneAge
-from src.utils.base_model_normalizer import normalize_enum_types
+from nidavellir.src.uru import Sindri
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.solutiontech import Solutiontech
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
@@ -264,7 +264,7 @@ class SinacorService:
     ) -> dict:
         new = deepcopy(user_database_document)
         output_normalized = StoneAge.get_only_values_from_user_data(user_data=output)
-        normalize_enum_types(output_normalized)
+        Sindri.dict_to_primitive_types(output_normalized)
         new.update({"register_analyses": output_normalized["decision"]})
         del output_normalized["decision"]
         del output_normalized["status"]
