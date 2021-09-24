@@ -11,10 +11,15 @@ from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
 from src.services.persephone.service import PersephoneService
 from src.utils.stone_age import StoneAge
-from src.utils.base_model_normalizer import normalize_enum_types
+from nidavellir.src.uru import Sindri
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.solutiontech import Solutiontech
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
+from src.domain.persephone_queue import PersephoneQueue
+from src.utils.env_config import config
+from src.utils.persephone_templates import get_user_account_template_with_data
+from src.utils.json_encoder.date_encoder import DateEncoder
+
 
 class SinacorService:
     @staticmethod
@@ -34,6 +39,13 @@ class SinacorService:
         user_database_document = user_repository.find_one(
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
         )
+
+        SinacorService._send_dtvm_client_data_to_persephone(
+            persephone_client=persephone_client,
+            dtvm_client_data=dtvm_client_data_provided_by_bureau,
+            user_email=user_database_document.get('email')
+        )
+
         database_and_bureau_dtvm_client_data_merged = (
             SinacorService._merge_bureau_client_data_with_user_database(
                 output=dtvm_client_data_provided_by_bureau,
@@ -45,7 +57,6 @@ class SinacorService:
             user_data=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
             user_repository=user_repository,
-            persephone_client=persephone_client,
         )
 
         return {
@@ -58,12 +69,7 @@ class SinacorService:
         user_data: dict,
         client_register_repository=ClientRegisterRepository(),
         user_repository=UserRepository(),
-        persephone_client=PersephoneService.get_client(),
     ):
-        SinacorService._send_dtvm_client_data_to_persephone(
-            persephone_client=persephone_client,
-            dtvm_client_data=user_data,
-        )
 
         database_and_bureau_dtvm_client_data_merged = (
             SinacorService._create_client_into_sinacor(
@@ -114,17 +120,16 @@ class SinacorService:
         return database_and_bureau_dtvm_client_data_merged
 
     @staticmethod
-    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict):
-        # Send to Persephone
-        # table_result = persephone_client.run(
-        #     topic="thebes.sphinx_persephone.topic",
-        #     partition=5,
-        #     payload=get_user_account_template_with_data(payload=dtvm_client_data),
-        #     schema_key="table_schema",
-        # )
-        # if table_result is False:
-        #     raise InternalServerError("common.process_issue")
-        pass
+    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict, user_email: str):
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
+            payload=json.loads(json.dumps(get_user_account_template_with_data(payload=dtvm_client_data, email=user_email), cls=DateEncoder)),
+            schema_key="user_bureau_callback_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
 
     @staticmethod
     def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
@@ -162,9 +167,7 @@ class SinacorService:
         client_cpf = database_and_bureau_dtvm_client_data_merged.get("cpf")
 
         database_and_bureau_dtvm_client_data_merged.update(
-            {
-                "sinacor": SinacorClientStatus.CREATED.value
-            }
+            {"sinacor": SinacorClientStatus.CREATED.value}
         )
 
         if database_and_bureau_dtvm_client_data_merged.get("sincad") is None:
@@ -261,7 +264,7 @@ class SinacorService:
     ) -> dict:
         new = deepcopy(user_database_document)
         output_normalized = StoneAge.get_only_values_from_user_data(user_data=output)
-        normalize_enum_types(output_normalized)
+        Sindri.dict_to_primitive_types(output_normalized)
         new.update({"register_analyses": output_normalized["decision"]})
         del output_normalized["decision"]
         del output_normalized["status"]

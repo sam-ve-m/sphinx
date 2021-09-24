@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 
 
 # SPHINX
+from typing import Type
+
+from src.services.persephone.service import PersephoneService
 from src.utils.jwt_utils import JWTHandler
 from src.repositories.user.repository import UserRepository
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
@@ -12,14 +15,14 @@ class IAuthentication(ABC):
     @staticmethod
     @abstractmethod
     def thebes_gate(
-        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+        thebes_answer_from_request_or_error: dict, user_repository: UserRepository, token_handler: JWTHandler
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def login(
-        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+        user_credentials: dict, user_repository: UserRepository, token_handler: JWTHandler
     ) -> dict:
         pass
 
@@ -33,6 +36,6 @@ class IAuthentication(ABC):
     @staticmethod
     @abstractmethod
     def thebes_hall(
-        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+        device_and_thebes_answer_from_request: dict, user_repository: UserRepository, token_handler: JWTHandler
     ) -> dict:
         pass

@@ -39,7 +39,7 @@ class FileRepository(IFile):
         self.bucket_name = FileRepository.validate_bucket_name(bucket_name)
 
     @staticmethod
-    def validate_bucket_name(bucket_name: str = ""):
+    def validate_bucket_name(bucket_name: str = "") -> str:
         response = FileRepository.s3_client.list_buckets()
         buckets = [bucket["Name"] for bucket in response["Buckets"]]
         if bucket_name not in buckets:
@@ -53,17 +53,19 @@ class FileRepository(IFile):
         file_type: UserFileType,
         content: Union[str, bytes],
         user_email: str,
-    ) -> None:
+    ) -> str:
         path = self.resolve_user_path(user_email=user_email, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
+        fully_qualified_path = f"{path}{file_name}{file_extension}"
         self.s3_client.put_object(
             Bucket=self.bucket_name,
             Body=self.resolve_content(content=content),
-            Key=f"{path}{file_name}{file_extension}",
+            Key=fully_qualified_path,
         )
+        return fully_qualified_path
 
     def get_user_file(self, file_type: UserFileType, user_email: str):
         exists_self = False
@@ -110,7 +112,7 @@ class FileRepository(IFile):
 
     def get_term_file(
         self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 3600
-    ) -> Optional[str]:
+    ) -> Union[str, dict]:
         cache_key = f"get_term_file:{file_type.value}"
         cached_value = cache.get(key=cache_key)
         if cached_value:
@@ -185,7 +187,7 @@ class FileRepository(IFile):
         return files_metadata[0].get("Key")
 
     @staticmethod
-    def resolve_content(content: Union[str, bytes]):
+    def resolve_content(content: Union[str, bytes]) -> Union[str, bytes]:
         """str in this case is a base64 string"""
         if content is None:
             raise InternalServerError("files.content.empty")

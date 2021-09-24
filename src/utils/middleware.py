@@ -35,7 +35,6 @@ def route_is_public(url_request: str, method: str = None) -> bool:
     if method == "POST":
         if url_request in PUBLIC_PATHS_POST:
             public_route = True
-
     else:
         if url_request in PUBLIC_PATHS_GET:
             public_route = True

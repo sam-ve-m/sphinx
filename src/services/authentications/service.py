@@ -18,20 +18,29 @@ from src.exceptions.exceptions import (
     UnauthorizedError,
     InternalServerError,
 )
+from src.domain.persephone_queue import PersephoneQueue
+from src.services.persephone.service import PersephoneService
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
 from src.utils.genarate_id import hash_field
 from src.interfaces.services.authentication.interface import IAuthentication
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.utils.solutiontech import Solutiontech
+from src.utils.persephone_templates import (
+    get_user_thebes_hall_schema_template_with_data,
+    get_create_electronic_signature_session_schema_template_with_data,
+    get_user_authentication_template_with_data,
+    get_user_logout_template_with_data
+)
 
 
 class AuthenticationService(IAuthentication):
     @staticmethod
     def thebes_gate(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        thebes_answer_from_request_or_error: dict, user_repository=UserRepository(), token_handler=JWTHandler,
+            persephone_client=PersephoneService.get_client()
     ) -> dict:
-        old = user_repository.find_one({"_id": payload.get("email")})
+        old = user_repository.find_one({"_id": thebes_answer_from_request_or_error.get("email")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
@@ -46,6 +55,16 @@ class AuthenticationService(IAuthentication):
                     "scope": {"view_type": "default", "features": ["default"]},
                 }
             )
+            sent_to_persephone = persephone_client.run(
+                topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+                partition=PersephoneQueue.USER_AUTHENTICATION.value,
+                payload=get_user_authentication_template_with_data(
+                    payload=new
+                ),
+                schema_key="user_authentication_schema",
+            )
+            if sent_to_persephone is False:
+                raise InternalServerError("common.process_issue")
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
 
@@ -57,11 +76,12 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def login(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        user_credentials: dict, user_repository=UserRepository(), token_handler=JWTHandler
     ) -> dict:
-        entity = user_repository.find_one({"_id": payload.get("email")})
+        entity = user_repository.find_one({"_id": user_credentials.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
+
         ########################################################################### ADICIONAR ESSA VERIFICAÇAO QUANDO DELETAR USUARIO/CLIENTE ####################################################################
         # if entity.get("is_active_client") is False:
         #     raise UnauthorizedError("invalid_credential")
@@ -77,7 +97,7 @@ class AuthenticationService(IAuthentication):
                 "message_key": "email.login",
             }
         else:
-            pin = payload.get("pin")
+            pin = user_credentials.get("pin")
             if pin is None:
                 return {
                     "status_code": status.HTTP_200_OK,
@@ -107,9 +127,13 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def thebes_hall(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        device_and_thebes_answer_from_request: dict,
+        user_repository=UserRepository(),
+        token_handler=JWTHandler,
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        user_old = user_repository.find_one({"_id": payload.get("email")})
+        x_thebes_answer = device_and_thebes_answer_from_request.get('x-thebes-answer')
+        user_old = user_repository.find_one({"_id": x_thebes_answer.get("email")})
         if user_old is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -128,6 +152,49 @@ class AuthenticationService(IAuthentication):
                 raise InternalServerError("common.process_issue")
 
         jwt = token_handler.generate_token(payload=user_new, ttl=525600)
+
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+            partition=PersephoneQueue.USER_THEBES_HALL.value,
+            payload=get_user_thebes_hall_schema_template_with_data(
+                email=device_and_thebes_answer_from_request.get("email"),
+                jwt=jwt,
+                has_trade_allowed=client_has_trade_allowed,
+                device_information=device_and_thebes_answer_from_request.get('device_information')
+            ),
+            schema_key="user_thebes_hall_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+
+    @staticmethod
+    def get_thebes_hall(
+        thebes_answer_from_request_or_error: dict,
+        user_repository=UserRepository(),
+        token_handler=JWTHandler
+    ) -> dict:
+        user_old = user_repository.find_one({"_id": thebes_answer_from_request_or_error.get("email")})
+        if user_old is None:
+            raise BadRequestError("common.register_not_exists")
+
+        user_new = deepcopy(user_old)
+        client_has_trade_allowed = AuthenticationService._dtvm_client_has_trade_allowed(
+            user=user_old
+        )
+        must_update = False
+        for key, value in client_has_trade_allowed.items():
+            if value["status_changed"]:
+                must_update = True
+                user_new.update({key: value["status"]})
+
+        if must_update:
+            if user_repository.update_one(old=user_old, new=user_new) is False:
+                raise InternalServerError("common.process_issue")
+
+        jwt = token_handler.generate_token(payload=user_new, ttl=525600)
+
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -142,7 +209,7 @@ class AuthenticationService(IAuthentication):
         client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             user_sincad_status_from_database=user_sincad_status_from_database,
-            user_sinacor_status_from_database=user_sinacor_status_from_database
+            user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
         user_has_valid_solutiontech_status_in_database = AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
@@ -178,10 +245,8 @@ class AuthenticationService(IAuthentication):
                 user_sincad_status_from_database=user_sincad_status_from_database,
             )
 
-        sinacor_status_from_sinacor = (
-            AuthenticationService.client_sinacor_is_blocked(
-                user_cpf=user_cpf_from_database
-            )
+        sinacor_status_from_sinacor = AuthenticationService.client_sinacor_is_blocked(
+            user_cpf=user_cpf_from_database
         )
 
         AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
@@ -210,7 +275,7 @@ class AuthenticationService(IAuthentication):
             "sinacor": {
                 "status": user_sinacor_status_from_database,
                 "status_changed": False,
-            }
+            },
         }
 
         return client_has_trade_allowed_status_with_database_user
@@ -265,10 +330,10 @@ class AuthenticationService(IAuthentication):
         sincad_status_changed = (
             user_sinacor_status_from_database != sinacor_status_from_sinacor
         )
-        client_has_trade_allowed_status_with_database_user["sincad"][
+        client_has_trade_allowed_status_with_database_user["sinacor"][
             "status"
         ] = sinacor_status_from_sinacor
-        client_has_trade_allowed_status_with_database_user["sincad"][
+        client_has_trade_allowed_status_with_database_user["sinacor"][
             "status_changed"
         ] = sincad_status_changed
 
@@ -302,11 +367,57 @@ class AuthenticationService(IAuthentication):
         return sincad_status and sincad_status[0] in ["A"]
 
     @staticmethod
-    def create_electronic_signature_jwt(payload: dict):
-        jwt_mist_session = JWTHandler.generate_session_jwt(
-            payload.get("electronic_signature"), payload.get("email")
-        )
+    def create_electronic_signature_jwt(
+        change_electronic_signature_request: dict, persephone_client=PersephoneService.get_client()
+    ):
+        jwt_mist_session = None
+        allowed = None
+        try:
+            jwt_mist_session = JWTHandler.generate_session_jwt(
+                change_electronic_signature_request.get("electronic_signature"), change_electronic_signature_request.get("email")
+            )
+            allowed = True
+        except BaseException as e:
+            allowed = False
+            raise e
+        finally:
+            sent_to_persephone = persephone_client.run(
+                topic=config("PERSEPHONE_TOPIC_USER"),
+                partition=PersephoneQueue.USER_ELECTRONIC_SIGNATURE_SESSION.value,
+                payload=get_create_electronic_signature_session_schema_template_with_data(
+                    email=change_electronic_signature_request.get("email"),
+                    mist_session=jwt_mist_session[0],
+                    allowed=allowed
+                ),
+                schema_key="create_electronic_signature_session_schema",
+            )
+            if sent_to_persephone is False:
+                raise InternalServerError("common.process_issue")
+
         return {
             "status_code": status.HTTP_200_OK,
             "payload": jwt_mist_session[0],
+        }
+
+    @staticmethod
+    def logout(
+        device_jwt_and_thebes_answer_from_request: dict,
+        persephone_client=PersephoneService.get_client()
+    ) -> dict:
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+            partition=PersephoneQueue.USER_LOGOUT.value,
+            payload=get_user_logout_template_with_data(
+                jwt=device_jwt_and_thebes_answer_from_request.get('jwt'),
+                email=device_jwt_and_thebes_answer_from_request.get('email'),
+                device_information=device_jwt_and_thebes_answer_from_request.get('device_information')
+            ),
+            schema_key="user_logout_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "email.logout"
         }

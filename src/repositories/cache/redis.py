@@ -17,7 +17,7 @@ class RepositoryRedis(IRedis):
     redis = RedisInfrastructure.get_redis()
 
     @staticmethod
-    def set(key: str, value: dict, redis=redis, ttl: int = 0):
+    def set(key: str, value: dict, redis=redis, ttl: int = 0) -> None:
         """ttl in secounds"""
         if ttl > 0:
             redis.set(name=key, value=pickle.dumps(value), ex=ttl)
@@ -41,10 +41,10 @@ class RepositoryRedis(IRedis):
         return redis.keys(pattern=pattern)
 
     @staticmethod
-    def add_to_queue(key: str, value: tuple, redis=redis):
+    def add_to_queue(key: str, value: tuple, redis=redis) -> bool:
         return redis.rpush(key, pickle.dumps(value))
 
     @staticmethod
-    def get_from_queue(key: str, redis=redis):
+    def get_from_queue(key: str, redis=redis) -> Optional[dict]:
         value = redis.lpop(name=key)
         return value and pickle.loads(value) or value

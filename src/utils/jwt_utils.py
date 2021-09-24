@@ -151,12 +151,17 @@ class JWTHandler:
                 payload[key] = str(payload[key])
 
     @staticmethod
-    def get_payload_from_request(request: Request) -> Union[dict, Response]:
+    def get_jwt_from_request(request: Request):
         thebes_answer = None
         for header_tuple in request.headers.raw:
             if b"x-thebes-answer" in header_tuple:
                 thebes_answer = header_tuple[1].decode()
                 break
+        return thebes_answer
+
+    @staticmethod
+    def get_thebes_answer_from_request(request: Request) -> Union[dict, Response]:
+        thebes_answer = JWTHandler.get_jwt_from_request(request=request)
         lang = get_language_from_request(request=request)
         if thebes_answer is None:
             return Response(
@@ -193,4 +198,4 @@ class JWTHandler:
             "password": electronic_signature.get("signature"),
             "signatureExpireTime": electronic_signature.get("signature_expire_time"),
         }
-        return JWTHandler.mist.generate_jwt(session_dict)
+        return JWTHandler.mist.generate_jwt(jwt=session_dict)

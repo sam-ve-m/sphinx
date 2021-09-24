@@ -27,17 +27,21 @@ class UserRepository(MongoDBInfrastructure):
 
         user_trade_match = {
             suitability_and_refusal_term: UserRepository.suitability_and_refusal_term_callback,
-            only_suitability: lambda _suitability, _term_refusal: 'suitability',
-            only_refusal_term: lambda _suitability, _term_refusal: 'term_refusal',
+            only_suitability: lambda _suitability, _term_refusal: "suitability",
+            only_refusal_term: lambda _suitability, _term_refusal: "term_refusal",
             nothing: lambda _suitability, _term_refusal: None,
         }
 
-        user_trade_profile_callback = user_trade_match.get((has_suitability, has_term_refusal))
+        user_trade_profile_callback = user_trade_match.get(
+            (has_suitability, has_term_refusal)
+        )
         user_trade_profile = user_trade_profile_callback(suitability, term_refusal)
 
         return user_trade_profile
 
     @staticmethod
     def suitability_and_refusal_term_callback(_suitability, _term_refusal):
-        last_trade_profile_signed = _suitability["submission_date"] > _term_refusal["date"]
-        return 'suitability' if last_trade_profile_signed else 'term_refusal'
+        last_trade_profile_signed = (
+            _suitability["submission_date"] > _term_refusal["date"]
+        )
+        return "suitability" if last_trade_profile_signed else "term_refusal"

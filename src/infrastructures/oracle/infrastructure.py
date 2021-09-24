@@ -112,7 +112,7 @@ class OracleInfrastructure(IOracle):
             new_rows.append(tuple(new_row))
         return new_rows
 
-    def execute(self, sql, values):
+    def execute(self, sql, values) -> None:
         try:
             with self.get_connection() as connection:
                 with connection.cursor() as cursor:

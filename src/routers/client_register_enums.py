@@ -241,3 +241,11 @@ def get_economic_activity(request: Request):
         payload={},
         request=request,
     )
+
+@router.get("/client_update_enums/activity_type", tags=["client_register_enums"])
+def get_economic_activity(request: Request):
+    return BaseController.run(
+        ClientRegisterEnumsController.get_activity_type_update,
+        payload={},
+        request=request,
+    )

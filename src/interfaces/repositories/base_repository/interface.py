@@ -1,6 +1,6 @@
 # STANDARD LIBS
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Type
 
 # OUTSIDE LIBRARIES
 from pymongo.cursor import Cursor
@@ -19,7 +19,7 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def find_one(self, query: dict, ttl: int = 0) -> Optional[dict]:
+    def find_one(self, query: dict, ttl: int = 0, cache: Type[RepositoryRedis] = None) -> Optional[dict]:
         pass
 
     @abstractmethod
@@ -33,13 +33,13 @@ class IRepository(ABC):
     @abstractmethod
     def find_one_with_specific_columns(
         self, query: dict, query_limit: dict
-    ) -> Optional[Cursor]:
+    ) -> Optional[dict]:
         pass
 
     @abstractmethod
-    def update_one(self, old, new) -> bool:
+    def update_one(self, old, new, ttl: int = 0, cache: Type[RepositoryRedis] = None) -> bool:
         pass
 
     @abstractmethod
-    def delete_one(self, entity) -> bool:
+    def delete_one(self, entity, ttl: int = 0, cache: Type[RepositoryRedis] = None) -> bool:
         pass
