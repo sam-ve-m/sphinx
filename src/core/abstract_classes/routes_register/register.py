@@ -45,6 +45,7 @@ class RoutesRegister(ABC):
     @staticmethod
     def router_middleware(app: FastAPI, router: APIRouter):
         """Decorator to add a router-specific middleware."""
+
         def deco(func: Callable) -> Callable:
             async def _middleware(request: Request, call_next):
                 # Check if scopes match

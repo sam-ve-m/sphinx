@@ -19,7 +19,7 @@ from mist_client.asgard import Mist
 # SPHINX
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
-from src.exceptions.exceptions import InternalServerError
+from src.exceptions.exceptions import InternalServerError, UnauthorizedError
 from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 from src.repositories.user.repository import UserRepository
 
@@ -160,35 +160,11 @@ class JWTHandler:
         return thebes_answer
 
     @staticmethod
-    def get_thebes_answer_from_request(request: Request) -> Union[dict, Response]:
+    def get_thebes_answer_from_request(request: Request) -> dict:
         thebes_answer = JWTHandler.get_jwt_from_request(request=request)
-        lang = get_language_from_request(request=request)
         if thebes_answer is None:
-            return Response(
-                content=json.dumps(
-                    {
-                        "detail": [
-                            {"msg": i18n.get_translate("token_not_find", locale=lang)}
-                        ]
-                    }
-                ),
-                status_code=status.HTTP_401_UNAUTHORIZED,
-            )
-        try:
-            payload = dict(JWTHandler.decrypt_payload(thebes_answer))
-        except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-            return Response(
-                content=json.dumps(
-                    {
-                        "detail": [
-                            {"msg": i18n.get_translate("invalid_token", locale=lang)}
-                        ]
-                    }
-                ),
-                status_code=status.HTTP_401_UNAUTHORIZED,
-            )
+            raise UnauthorizedError("Token not supplied")
+        payload = dict(JWTHandler.decrypt_payload(thebes_answer))
         return payload
 
     @staticmethod

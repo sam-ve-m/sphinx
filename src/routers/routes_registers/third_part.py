@@ -2,6 +2,7 @@ from starlette.requests import Request
 
 # Sphinx
 from src.core.abstract_classes.routes_register.register import RoutesRegister
+from src.utils.middleware import get_token_if_token_is_valid
 
 
 class ThirdPartRouter(RoutesRegister):
@@ -10,5 +11,7 @@ class ThirdPartRouter(RoutesRegister):
 
     @staticmethod
     def is_allow(request: Request) -> bool:
-        print('ThirdPartRouter')
-        return True
+        token = get_token_if_token_is_valid(request=request)
+        if token:
+            return True
+        return False

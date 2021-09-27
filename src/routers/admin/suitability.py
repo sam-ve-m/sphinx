@@ -32,14 +32,10 @@ class Suitability(BaseModel):
 
 @router.post("/suitability/quiz", tags=["suitability"])
 async def create_quiz_suitability(suitability: Suitability, request: Request):
-    jwt_data_or_error_response = JWTHandler.get_thebes_answer_from_request(
-        request=request
-    )
-    if isinstance(jwt_data_or_error_response, Response):
-        return jwt_data_or_error_response
+    jwt_data = JWTHandler.get_thebes_answer_from_request(request=request)
 
     payload = {
-        "x-thebes-answer": jwt_data_or_error_response,
+        "x-thebes-answer": jwt_data,
         "suitability": suitability.dict(),
     }
 

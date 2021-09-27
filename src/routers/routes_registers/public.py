@@ -10,5 +10,4 @@ class PublicRouter(RoutesRegister):
 
     @staticmethod
     def is_allow(request: Request) -> bool:
-        print('PublicRouter')
         return True
