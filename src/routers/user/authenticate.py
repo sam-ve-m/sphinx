@@ -1,4 +1,4 @@
-from fastapi import Request, Response
+from fastapi import Request
 
 from src.routers.validators.onboarding_validators import DeviceInformationOptional
 from src.utils.jwt_utils import JWTHandler
@@ -13,18 +13,6 @@ router = UserRouter.instance()
 
 class Login(Email, OptionalPIN):
     pass
-
-
-@router.get("/thebes_gate", tags=["authentication"])
-def answer(request: Request):
-    # This will be called from the frontend after open TARGET_LINK (.env) received on the email confirmation
-    jwt_data = JWTHandler.get_thebes_answer_from_request(request=request)
-
-    return BaseController.run(
-        AuthenticationController.thebes_gate,
-        jwt_data,
-        request,
-    )
 
 
 @router.put("/thebes_hall", tags=["authentication"])

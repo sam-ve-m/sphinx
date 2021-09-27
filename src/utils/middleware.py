@@ -38,7 +38,7 @@ def get_valid_admin_from_database(
     token: dict, user_repository=UserRepository()
 ) -> Optional[dict]:
     user_data = user_repository.find_one(query={"_id": token["email"]})
-    if user_data and user_data.get("is_active_user") and user_data.get("is_admin"):
+    if user_data and user_data["is_active_user"] and user_data["is_admin"]:
         return user_data
 
 

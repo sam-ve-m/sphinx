@@ -3,8 +3,8 @@ from enum import Enum
 from typing import Union, List, Optional
 
 # OUTSIDE LIBRARIES
-from fastapi import APIRouter, Request, Response, UploadFile, File, Depends
-from pydantic import BaseModel, constr, ValidationError
+from fastapi import Request, Depends
+from pydantic import BaseModel
 
 # SPHINX
 from src.routers.validators.base import (
@@ -35,6 +35,7 @@ from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
 from src.routers.routes_registers.user import UserRouter
+from nidavellir.src.uru import Sindri
 
 router = UserRouter.instance()
 
@@ -111,9 +112,8 @@ def send_quiz_responses(quiz_response: QuizResponses, request: Request):
 
     quiz_response_dict = quiz_response.dict()
     responses = quiz_response_dict.get("responses")
-    for x in responses:
-        x["quiz_question_id"] = str(x["quiz_question_id"])
-        x["quiz_option_id"] = str(x["quiz_option_id"])
+
+    Sindri.dict_to_primitive_types(values=responses)
 
     payload = {
         "x-thebes-answer": jwt_data,

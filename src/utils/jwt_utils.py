@@ -1,31 +1,25 @@
 # STANDARD LIBS
-import os.path
-from typing import Union, Optional
-from datetime import datetime, timezone, timedelta
+from typing import Optional
+from datetime import datetime, timedelta
 import logging
 
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 from src.utils.env_config import config
-import json
-from pathlib import Path
 
 # OUTSIDE LIBRARIES
-from fastapi import Request, Response, status
+from fastapi import Request
 from jwt import JWT, jwk_from_dict, jwk_from_pem
 from jwt.utils import get_int_from_datetime
 from heimdall_client.bifrost import Heimdall
 from mist_client.asgard import Mist
 
 # SPHINX
-from src.i18n.i18n_resolver import i18nResolver as i18n
-from src.utils.language_identifier import get_language_from_request
 from src.exceptions.exceptions import InternalServerError, UnauthorizedError
 from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 from src.repositories.user.repository import UserRepository
 
 
 class JWTHandler:
-    # TODO change this method to use heimdall to validate the given jwt and this to generate the jwt only
     instance = JWT()
     logger = logging.getLogger(config("LOG_NAME"))
     heimdall = Heimdall(logger=logging.getLogger(config("LOG_NAME")))
