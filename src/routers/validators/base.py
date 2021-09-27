@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 # OUTSIDE LIBRARIES
+from email_validator import validate_email
+
 from src.utils.env_config import config
 
 from src.routers.validators.onboarding_validators import *
@@ -19,7 +21,7 @@ class Email(BaseModel):
 
     @validator("email", always=True, allow_reuse=True)
     def validate_email(cls, value):
-        return value
+        # return value
         try:
             is_valid = validate_email(value)
             if is_valid:

@@ -1,64 +1,31 @@
-# STANDARD LIBS
-from enum import Enum
-from typing import Union, List, Optional
-
 # OUTSIDE LIBRARIES
 from fastapi import Request, Depends
-from pydantic import BaseModel
 
 # SPHINX
 from src.routers.validators.base import (
-    Email,
     PIN,
-    Name,
-    View,
-    OptionalPIN,
-    Feature,
-    TermFile,
-    Cpf,
-    CelPhone,
-    MaritalStatus,
-    Nationality,
-    QuizQuestionOption,
-    IsUsPerson,
-    UsTin,
-    NickName,
-    IsCvmQualifiedInvestor,
-    FileBase64,
     ElectronicSignature,
     ChangeElectronicSignature,
-    DeviceInformation,
-    DeviceInformationOptional,
 )
-
+from src.routers.validators.views_validators import View
+from src.routers.validators.feature_validators import Feature
+from src.routers.validators.onboarding_validators import (
+    TermFile,
+    FileBase64,
+    DeviceInformation,
+)
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
 from src.routers.routes_registers.user import UserRouter
 from nidavellir.src.uru import Sindri
+from src.routers.validators.user_validators import (
+    UserIdentifierData,
+    UserComplementaryData,
+    QuizResponses,
+)
 
 router = UserRouter.instance()
-
-
-class UserSimple(Email, NickName, OptionalPIN):
-    pass
-
-
-class Spouse(Name, Cpf, Nationality):
-    pass
-
-
-class UserIdentifierData(Cpf, CelPhone):
-    pass
-
-
-class UserComplementaryData(MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedInvestor):
-    spouse: Optional[Spouse]
-
-
-class QuizResponses(BaseModel):
-    device_information: Optional[DeviceInformationOptional]
-    responses: List[QuizQuestionOption]
 
 
 @router.put("/user/identifier_data", tags=["user"])

@@ -1,14 +1,10 @@
-from fastapi import APIRouter, Request
-from src.routers.validators.base import Name, DisplayName
+from fastapi import Request
+from src.routers.validators.feature_validators import Feature
 from src.controllers.base_controller import BaseController
 from src.controllers.features.controller import FeatureController
 from src.routers.routes_registers.admin import AdminRouter
 
 router = AdminRouter.instance()
-
-
-class Feature(Name, DisplayName):
-    pass
 
 
 @router.post("/feature", tags=["feature"])

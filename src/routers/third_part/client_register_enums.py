@@ -3,17 +3,14 @@ from fastapi import Request, Depends
 
 # SPHINX
 from src.controllers.base_controller import BaseController
-from src.routers.validators.base import ClientType, Country, State
+from src.routers.validators.client_register_validators import CountryState
+from src.routers.validators.bureau_validators import ClientType, Country
 from src.controllers.cliente_register_enums.controller import (
     ClientRegisterEnumsController,
 )
 from src.routers.routes_registers.third_part import ThirdPartRouter
 
 router = ThirdPartRouter.instance()
-
-
-class CountryState(Country, State):
-    pass
 
 
 @router.get("/client_register_enums/type_of_income_tax", tags=["client_register_enums"])
