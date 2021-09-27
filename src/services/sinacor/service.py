@@ -11,7 +11,7 @@ from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
 from src.services.persephone.service import PersephoneService
 from src.utils.stone_age import StoneAge
-from src.utils.base_model_normalizer import normalize_enum_types
+from nidavellir.src.uru import Sindri
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.utils.solutiontech import Solutiontech
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
@@ -43,7 +43,7 @@ class SinacorService:
         SinacorService._send_dtvm_client_data_to_persephone(
             persephone_client=persephone_client,
             dtvm_client_data=dtvm_client_data_provided_by_bureau,
-            user_email=user_database_document.get('email')
+            user_email=user_database_document.get("email"),
         )
 
         database_and_bureau_dtvm_client_data_merged = (
@@ -120,16 +120,24 @@ class SinacorService:
         return database_and_bureau_dtvm_client_data_merged
 
     @staticmethod
-    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict, user_email: str):
+    def _send_dtvm_client_data_to_persephone(
+        persephone_client, dtvm_client_data: dict, user_email: str
+    ):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
-            payload=json.loads(json.dumps(get_user_account_template_with_data(payload=dtvm_client_data, email=user_email), cls=DateEncoder)),
+            payload=json.loads(
+                json.dumps(
+                    get_user_account_template_with_data(
+                        payload=dtvm_client_data, email=user_email
+                    ),
+                    cls=DateEncoder,
+                )
+            ),
             schema_key="user_bureau_callback_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
-
 
     @staticmethod
     def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
@@ -264,7 +272,7 @@ class SinacorService:
     ) -> dict:
         new = deepcopy(user_database_document)
         output_normalized = StoneAge.get_only_values_from_user_data(user_data=output)
-        normalize_enum_types(output_normalized)
+        Sindri.dict_to_primitive_types(output_normalized)
         new.update({"register_analyses": output_normalized["decision"]})
         del output_normalized["decision"]
         del output_normalized["status"]

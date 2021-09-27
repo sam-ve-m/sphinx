@@ -1,7 +1,6 @@
 # STANDARD LIBS
 from typing import Optional
 import logging
-from enum import Enum
 
 # OUTSIDE LIBRARIES
 from src.utils.env_config import config
@@ -11,8 +10,8 @@ from pymongo import MongoClient
 # SPHINX
 from src.repositories.cache.redis import RepositoryRedis
 from src.utils.genarate_id import hash_field
-from src.interfaces.repositories.base_repository.interface import IRepository
-from src.utils.base_model_normalizer import normalize_enum_types
+from src.core.interfaces.repositories.base_repository.interface import IRepository
+from nidavellir.src.uru import Sindri
 
 
 class MongoDBInfrastructure(IRepository):
@@ -99,7 +98,7 @@ class MongoDBInfrastructure(IRepository):
         if not new or len(new) == 0:
             return False
         try:
-            normalize_enum_types(payload=new)
+            Sindri.dict_to_primitive_types(new)
             self.collection.update_one(old, {"$set": new})
             if new.get("email"):
                 self._save_cache(

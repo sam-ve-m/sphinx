@@ -2,7 +2,6 @@
 from datetime import datetime
 import logging
 from copy import deepcopy
-import json
 
 # OUTSIDE LIBRARIES
 from fastapi import status
@@ -10,8 +9,7 @@ from fordev.generators import rg
 
 # SPHINX
 from src.controllers.jwts.controller import JwtController
-from src.utils.json_encoder.date_encoder import DateEncoder
-from src.interfaces.services.user.interface import IUser
+from src.core.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
 from src.services.builders.user.customer_registration import CustomerRegistrationBuilder
@@ -28,7 +26,7 @@ from src.repositories.user.repository import UserRepository
 
 from src.domain.persephone_queue import PersephoneQueue
 from src.services.sinacor.service import SinacorService
-from src.utils.base_model_normalizer import normalize_enum_types
+from nidavellir.src.uru import Sindri
 
 from src.utils.genarate_id import generate_id, hash_field
 from src.utils.jwt_utils import JWTHandler
@@ -43,7 +41,7 @@ from src.utils.persephone_templates import (
     get_user_quiz_response_from_stoneage_schema_template_with_data,
     get_user_set_electronic_signature_schema_template_with_data,
     get_user_change_or_reset_electronic_signature_schema_template_with_data,
-    get_user_update_register_schema_template_with_data
+    get_user_update_register_schema_template_with_data,
 )
 from src.utils.env_config import config
 from src.utils.encrypt.password.util import PasswordEncrypt
@@ -183,7 +181,7 @@ class UserService(IUser):
             partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
             payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
                 previous_state=user_from_database,
-                new_state=user_from_database_to_update
+                new_state=user_from_database_to_update,
             ),
             schema_key="user_change_or_reset_electronic_signature_schema",
         )
@@ -258,7 +256,7 @@ class UserService(IUser):
             partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
             payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
                 previous_state=user_from_database,
-                new_state=user_from_database_to_update
+                new_state=user_from_database_to_update,
             ),
             schema_key="user_change_or_reset_electronic_signature_schema",
         )
@@ -539,7 +537,9 @@ class UserService(IUser):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
-            payload=get_user_identifier_data_schema_template_with_data(payload=current_user_with_identifier_data),
+            payload=get_user_identifier_data_schema_template_with_data(
+                payload=current_user_with_identifier_data
+            ),
             schema_key="user_identifier_data_schema",
         )
         if sent_to_persephone is False:
@@ -755,7 +755,9 @@ class UserService(IUser):
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_GET_QUIZ_FROM_STONEAGE.value,
             payload=get_user_quiz_from_stoneage_schema_template_with_data(
-                output=output, device_information=payload.get('device_information'), email=current_user.get('email')
+                output=output,
+                device_information=payload.get("device_information"),
+                email=current_user.get("email"),
             ),
             schema_key="user_get_quiz_from_stoneage_schema",
         )
@@ -802,7 +804,7 @@ class UserService(IUser):
             payload=get_user_quiz_response_from_stoneage_schema_template_with_data(
                 quiz=payload.get("quiz"),
                 response=stone_age_response,
-                device_information=payload.get('device_information'),
+                device_information=payload.get("device_information"),
                 email=thebes_answer.get("email"),
             ),
             schema_key="user_send_quiz_from_stoneage_schema",
@@ -892,7 +894,9 @@ class UserService(IUser):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
-            payload=get_user_set_electronic_signature_schema_template_with_data(payload=new),
+            payload=get_user_set_electronic_signature_schema_template_with_data(
+                payload=new
+            ),
             schema_key="user_set_electronic_signature_schema",
         )
         if sent_to_persephone is False:
@@ -1167,18 +1171,20 @@ class UserService(IUser):
             .address_state()
         ).build()
 
-        user_update_register_schema = get_user_update_register_schema_template_with_data(
+        user_update_register_schema = (
+            get_user_update_register_schema_template_with_data(
                 email=email,
                 modified_register_data=modified_register_data,
-                update_customer_registration_data=update_customer_registration_data
+                update_customer_registration_data=update_customer_registration_data,
             )
+        )
 
-        normalize_enum_types(user_update_register_schema)
+        Sindri.dict_to_primitive_types(user_update_register_schema)
 
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
-            payload=json.loads(json.dumps(user_update_register_schema, cls=DateEncoder)),
+            payload=user_update_register_schema,
             schema_key="user_update_register_data_schema",
         )
         if sent_to_persephone is False:

@@ -19,7 +19,9 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def find_one(self, query: dict, ttl: int = 0, cache: Type[RepositoryRedis] = None) -> Optional[dict]:
+    def find_one(
+        self, query: dict, ttl: int = 0, cache: Type[RepositoryRedis] = None
+    ) -> Optional[dict]:
         pass
 
     @abstractmethod
@@ -37,9 +39,13 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def update_one(self, old, new, ttl: int = 0, cache: Type[RepositoryRedis] = None) -> bool:
+    def update_one(
+        self, old, new, ttl: int = 0, cache: Type[RepositoryRedis] = None
+    ) -> bool:
         pass
 
     @abstractmethod
-    def delete_one(self, entity, ttl: int = 0, cache: Type[RepositoryRedis] = None) -> bool:
+    def delete_one(
+        self, entity, ttl: int = 0, cache: Type[RepositoryRedis] = None
+    ) -> bool:
         pass

@@ -1,31 +1,25 @@
 # STANDARD LIBS
-import os.path
-from typing import Union, Optional
-from datetime import datetime, timezone, timedelta
+from typing import Optional
+from datetime import datetime, timedelta
 import logging
 
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 from src.utils.env_config import config
-import json
-from pathlib import Path
 
 # OUTSIDE LIBRARIES
-from fastapi import Request, Response, status
+from fastapi import Request
 from jwt import JWT, jwk_from_dict, jwk_from_pem
 from jwt.utils import get_int_from_datetime
 from heimdall_client.bifrost import Heimdall
 from mist_client.asgard import Mist
 
 # SPHINX
-from src.i18n.i18n_resolver import i18nResolver as i18n
-from src.utils.language_identifier import get_language_from_request
-from src.exceptions.exceptions import InternalServerError
+from src.exceptions.exceptions import InternalServerError, UnauthorizedError
 from src.services.builders.thebes_hall.thebes_hall import ThebesHall
 from src.repositories.user.repository import UserRepository
 
 
 class JWTHandler:
-    # TODO change this method to use heimdall to validate the given jwt and this to generate the jwt only
     instance = JWT()
     logger = logging.getLogger(config("LOG_NAME"))
     heimdall = Heimdall(logger=logging.getLogger(config("LOG_NAME")))
@@ -160,35 +154,11 @@ class JWTHandler:
         return thebes_answer
 
     @staticmethod
-    def get_thebes_answer_from_request(request: Request) -> Union[dict, Response]:
+    def get_thebes_answer_from_request(request: Request) -> dict:
         thebes_answer = JWTHandler.get_jwt_from_request(request=request)
-        lang = get_language_from_request(request=request)
         if thebes_answer is None:
-            return Response(
-                content=json.dumps(
-                    {
-                        "detail": [
-                            {"msg": i18n.get_translate("token_not_find", locale=lang)}
-                        ]
-                    }
-                ),
-                status_code=status.HTTP_401_UNAUTHORIZED,
-            )
-        try:
-            payload = dict(JWTHandler.decrypt_payload(thebes_answer))
-        except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-            return Response(
-                content=json.dumps(
-                    {
-                        "detail": [
-                            {"msg": i18n.get_translate("invalid_token", locale=lang)}
-                        ]
-                    }
-                ),
-                status_code=status.HTTP_401_UNAUTHORIZED,
-            )
+            raise UnauthorizedError("Token not supplied")
+        payload = dict(JWTHandler.decrypt_payload(thebes_answer))
         return payload
 
     @staticmethod

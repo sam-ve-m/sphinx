@@ -1,4 +1,4 @@
-from src.interfaces.utils.encrypt.password.interface import IPasswordEncrypt
+from src.core.interfaces.utils.encrypt.password.interface import IPasswordEncrypt
 from mist_client.asgard import Mist
 from src.utils.env_config import config
 import logging
