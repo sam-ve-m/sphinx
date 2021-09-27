@@ -140,4 +140,3 @@ class IsUsPerson(BaseModel):
 
 class UsTin(BaseModel):
     us_tin: Optional[int]
-

@@ -43,7 +43,7 @@ class SinacorService:
         SinacorService._send_dtvm_client_data_to_persephone(
             persephone_client=persephone_client,
             dtvm_client_data=dtvm_client_data_provided_by_bureau,
-            user_email=user_database_document.get('email')
+            user_email=user_database_document.get("email"),
         )
 
         database_and_bureau_dtvm_client_data_merged = (
@@ -120,16 +120,24 @@ class SinacorService:
         return database_and_bureau_dtvm_client_data_merged
 
     @staticmethod
-    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict, user_email: str):
+    def _send_dtvm_client_data_to_persephone(
+        persephone_client, dtvm_client_data: dict, user_email: str
+    ):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
-            payload=json.loads(json.dumps(get_user_account_template_with_data(payload=dtvm_client_data, email=user_email), cls=DateEncoder)),
+            payload=json.loads(
+                json.dumps(
+                    get_user_account_template_with_data(
+                        payload=dtvm_client_data, email=user_email
+                    ),
+                    cls=DateEncoder,
+                )
+            ),
             schema_key="user_bureau_callback_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
-
 
     @staticmethod
     def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(

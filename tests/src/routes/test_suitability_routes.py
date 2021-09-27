@@ -1,9 +1,9 @@
 import json
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.routers.suitability import router as suitability_router
+from src.routers.user.suitability import router as suitability_router
 
 app = FastAPI()
 app.include_router(suitability_router)

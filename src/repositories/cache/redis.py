@@ -4,8 +4,7 @@ from typing import Optional
 
 
 # SPHINX
-from src.utils.env_config import config
-from src.interfaces.repositories.redis.interface import IRedis
+from src.core.interfaces.repositories.redis.interface import IRedis
 from src.exceptions.exceptions import InternalServerError
 from src.infrastructures.redis.infrastructure import RedisInfrastructure
 

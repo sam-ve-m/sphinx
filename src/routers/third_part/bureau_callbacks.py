@@ -1,11 +1,12 @@
 # STANDARD LIBS
-from typing import Union, List, Optional
+from typing import Optional
 
 # OUTSIDE LIBRARIES
-from fastapi import APIRouter, Request, Response
+from fastapi import Request
 from pydantic import BaseModel
 
 # SPHINX
+from src.routers.routes_registers.third_part import ThirdPartRouter
 from src.routers.validators.base import (
     Uuid,
     AppName,
@@ -60,7 +61,7 @@ from src.routers.validators.base import (
     RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource,
     ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource,
     RegistrationOfForeignInvestorsSecuritiesCommissionSource,
-    #RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource,
+    # RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource,
     SelfLinkSource,
     IsUsPersonSource,
     UsTinSource,
@@ -71,7 +72,7 @@ from src.routers.validators.base import (
 from src.controllers.base_controller import BaseController
 from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
 
-router = APIRouter()
+router = ThirdPartRouter.instance()
 
 
 class DocumentData(BaseModel):
@@ -174,7 +175,9 @@ class Output(Decision, Status):
     registration_of_other_market_participants_securities_commission: RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource
     foreign_investors_register_of_annex_iv_not_reregistered: ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource
     registration_of_foreign_investors_securities_commission: RegistrationOfForeignInvestorsSecuritiesCommissionSource
-   # registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
+
+
+# registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
 
 
 class BureauCallback(Uuid, AppName, Successful, Error):

@@ -2,7 +2,9 @@
 from datetime import datetime
 
 # SPHINX
-from src.interfaces.services.builders.thebes_hall.validators.interface import IValidator
+from src.core.interfaces.services.builders.thebes_hall.validators.interface import (
+    IValidator,
+)
 
 
 class Suitability(IValidator):

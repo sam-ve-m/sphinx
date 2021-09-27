@@ -1,10 +1,9 @@
-import pytest
 import json
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.routers.user import router as UserRouter
-from src.routers.authenticate import router as AuthenticateRouter
+from src.routers.user.authenticate import router as AuthenticateRouter
 
 app = FastAPI()
 
