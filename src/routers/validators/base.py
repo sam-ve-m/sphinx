@@ -21,7 +21,7 @@ class Email(BaseModel):
 
     @validator("email", always=True, allow_reuse=True)
     def validate_email(cls, value):
-        #return value
+        # return value
         try:
             is_valid = validate_email(value)
             if is_valid:

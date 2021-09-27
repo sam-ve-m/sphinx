@@ -367,7 +367,7 @@ class EmailSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, value):
-        #return value
+        # return value
         try:
             is_valid = validate_email(value)
             if is_valid:

@@ -6,7 +6,7 @@ import json
 # Sphinx
 from src.utils.env_config import config
 from src.controllers.base_controller import BaseController
-from src.routers.validators.base import OptionalPIN, Email
+from src.routers.validators.authenticate_validators import Login
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.routes_registers.public import PublicRouter
 from src.utils.jwt_utils import JWTHandler
@@ -14,10 +14,6 @@ from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.utils.language_identifier import get_language_from_request
 
 router = PublicRouter.instance()
-
-
-class Login(Email, OptionalPIN):
-    pass
 
 
 @router.post("/login", tags=["authentication"])

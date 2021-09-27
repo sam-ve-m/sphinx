@@ -1,15 +1,11 @@
 from fastapi import Request
 from src.controllers.base_controller import BaseController
 from src.controllers.views.controller import ViewController
-from src.routers.validators.base import Name, DisplayName
+from src.routers.validators.views_validators import View, DisplayName
 from src.routers.routes_registers.admin import AdminRouter
 
 
 router = AdminRouter.instance()
-
-
-class View(Name, DisplayName):
-    pass
 
 
 @router.post("/views", tags=["views"])

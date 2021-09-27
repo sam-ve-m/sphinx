@@ -14,9 +14,6 @@ from src.routers.validators.enum_template import MaritalStatusEnum
 from src.utils.brazil_register_number_validator import is_cpf_valid
 
 
-signature_regex = r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{8,}$"
-
-
 class Name(BaseModel):
     name: constr(min_length=1, max_length=100)
 
@@ -77,11 +74,6 @@ class Weight(BaseModel):
 
 class Order(BaseModel):
     order: int
-
-
-class SignatureCheck(BaseModel):
-    signature: constr(regex=signature_regex)
-    signature_expire_time: int = None
 
 
 class ValueText(BaseModel):

@@ -1,30 +1,13 @@
-# STANDARD LIBS
-from typing import List
-
 # OUTSIDE LIBRARIES
-from fastapi import APIRouter, Request, Response
-from pydantic import BaseModel
+from fastapi import Request
 
 # SPHINX
-from src.routers.validators.base import Weight, Score, ValueText, Order
 from src.controllers.suitabilities.controller import SuitabilityController
 from src.controllers.base_controller import BaseController
 from src.utils.jwt_utils import JWTHandler
 from src.routers.routes_registers.user import UserRouter
 
 router = UserRouter.instance()
-
-
-class Answer(Weight, ValueText):
-    pass
-
-
-class Question(Score, ValueText, Order):
-    answers: List[Answer]
-
-
-class Suitability(BaseModel):
-    questions: List[Question]
 
 
 @router.post("/suitability/profile", tags=["suitability"])

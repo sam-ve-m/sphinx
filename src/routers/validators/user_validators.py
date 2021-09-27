@@ -56,4 +56,3 @@ class UpdateCustomerRegistrationData(BaseModel):
     address_neighborhood: Optional[NeighborhoodSource]
 
     us_tin: Optional[UsTinSource]
-

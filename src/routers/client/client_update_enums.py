@@ -1,19 +1,15 @@
 # OUTSIDE LIBRARIES
-from fastapi import APIRouter, Request, Depends
+from fastapi import Request, Depends
 
 # SPHINX
 from src.controllers.base_controller import BaseController
-from src.routers.validators.base import Country, State
+from src.routers.validators.client_register_validators import CountryState, Country
 from src.controllers.cliente_register_enums.controller import (
     ClientRegisterEnumsController,
 )
 from src.routers.routes_registers.client import ClientRouter
 
 router = ClientRouter.instance()
-
-
-class CountryState(Country, State):
-    pass
 
 
 @router.get("/client_update_enums/gender", tags=["client_update_enums"])
