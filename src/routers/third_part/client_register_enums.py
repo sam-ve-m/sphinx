@@ -176,3 +176,12 @@ def get_account_type(request: Request):
     return BaseController.run(
         ClientRegisterEnumsController.get_account_type, payload={}, request=request
     )
+
+
+@router.get("/client_register_enums/issuing_body", tags=["client_register_enums"])
+def get_economic_activity(request: Request):
+    return BaseController.run(
+        ClientRegisterEnumsController.get_issuing_body_update,
+        payload={},
+        request=request,
+    )

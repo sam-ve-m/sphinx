@@ -274,3 +274,15 @@ class SinaCorTypes:
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": activities_enum},
         }
+
+    @staticmethod
+    def get_issuing_body_update(sinacor_types_repository=SinaCorTypesRepository()):
+        activities = sinacor_types_repository.get_issuing_body()
+        activities_enum = [
+            {"code": activity["code"], "value": activity["description"].title()}
+            for activity in activities
+        ]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"enums": activities_enum},
+        }
