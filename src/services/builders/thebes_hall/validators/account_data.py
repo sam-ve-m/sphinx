@@ -9,14 +9,14 @@ from src.core.interfaces.services.builders.thebes_hall.validators.interface impo
 
 class AccountData(IValidator):
     @staticmethod
-    def run(payload: dict) -> dict:
-        last_modified_date = payload.get("last_modified_date")
+    def run(user_data: dict) -> dict:
+        last_modified_date = user_data.get("last_modified_date")
         if last_modified_date:
             concluded_at = last_modified_date.get("concluded_at")
             if concluded_at:
                 months_past = AccountData.months_past(concluded_at=concluded_at)
                 last_modified_date["months_past"] = months_past
-        return payload
+        return user_data
 
     @staticmethod
     def months_past(concluded_at: datetime):

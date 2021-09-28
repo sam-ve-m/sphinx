@@ -81,7 +81,7 @@ class UserService(IUser):
         if (sent_to_persephone and was_user_inserted) is False:
             raise InternalServerError("common.process_issue")
 
-        payload_jwt = JWTHandler.generate_token(payload=user, ttl=10)
+        payload_jwt = JWTHandler.generate_token(user_data=user, ttl=10)
         authentication_service.send_authentication_email(
             email=user.get("email"),
             payload_jwt=payload_jwt,
@@ -125,7 +125,7 @@ class UserService(IUser):
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
-        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        jwt = token_handler.generate_token(user_data=new, ttl=525600)
         JwtController.insert_one(jwt, new.get("email"))
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
@@ -197,7 +197,7 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
 
         jwt = JWTHandler.generate_token(
-            payload=user_from_database_to_update, ttl=525600
+            user_data=user_from_database_to_update, ttl=525600
         )
 
         return {
@@ -289,7 +289,7 @@ class UserService(IUser):
         new["scope"]["view_type"] = new_view
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.unable_to_process")
-        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        jwt = token_handler.generate_token(user_data=new, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -303,7 +303,7 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
         to_add_into_jwt = {"forgot_password": True}
         payload_jwt = JWTHandler.generate_token(
-            payload=entity, args=to_add_into_jwt, ttl=10
+            user_data=entity, kwargs_to_add_on_jwt=to_add_into_jwt, ttl=10
         )
         authentication_service.send_authentication_email(
             email=entity.get("email"),
@@ -342,9 +342,9 @@ class UserService(IUser):
             new.update({"scope": new_scope})
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
-            jwt = token_handler.generate_token(payload=new, ttl=525600)
+            jwt = token_handler.generate_token(user_data=new, ttl=525600)
             return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        jwt = token_handler.generate_token(user_data=new, ttl=525600)
         return {
             "status_code": status.HTTP_304_NOT_MODIFIED,
             "payload": {"jwt": jwt},
@@ -367,7 +367,7 @@ class UserService(IUser):
         else:
             response.update({"status_code": status.HTTP_304_NOT_MODIFIED})
 
-        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        jwt = token_handler.generate_token(user_data=new, ttl=525600)
 
         response.update({"jwt": jwt})
 
@@ -437,7 +437,7 @@ class UserService(IUser):
             sent_to_persephone and user_repository.update_one(old=old, new=new)
         ) is False:
             raise InternalServerError("common.unable_to_process")
-        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        jwt = token_handler.generate_token(user_data=new, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -927,7 +927,7 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
         to_add_into_jwt = {"forgot_electronic_signature": True}
         payload_jwt = JWTHandler.generate_token(
-            payload=entity, args=to_add_into_jwt, ttl=10
+            user_data=entity, kwargs_to_add_on_jwt=to_add_into_jwt, ttl=10
         )
         authentication_service.send_authentication_email(
             email=entity.get("email"),

@@ -1,22 +1,17 @@
 # STANDARD LIBS
 from typing import Optional
-from datetime import datetime, timedelta
 import logging
-
-from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 from src.utils.env_config import config
 
 # OUTSIDE LIBRARIES
 from fastapi import Request
 from jwt import JWT, jwk_from_dict, jwk_from_pem
-from jwt.utils import get_int_from_datetime
 from heimdall_client.bifrost import Heimdall
 from mist_client.asgard import Mist
 
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, UnauthorizedError
-from src.services.builders.thebes_hall.thebes_hall import ThebesHall
-from src.repositories.user.repository import UserRepository
+from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 
 
 class JWTHandler:
@@ -26,24 +21,20 @@ class JWTHandler:
     mist = Mist(logger=logging.getLogger(config("LOG_NAME")))
 
     @staticmethod
-    def generate_token(payload: dict, args: dict = None, ttl: int = 5) -> Optional[str]:
+    def generate_token(
+        user_data: dict, kwargs_to_add_on_jwt: dict = None, ttl: int = 5
+    ) -> Optional[str]:
         """The ttl value in minutes"""
-        payload.update(
-            {
-                "exp": get_int_from_datetime(
-                    datetime.utcnow() + timedelta(minutes=ttl)
-                ),
-                "created_at": datetime.utcnow(),
-            }
-        )
         try:
             with open("src/keys/id_rsa", "rb") as fh:
                 signing_key = jwk_from_pem(fh.read())
-            user_metadata_to_add_into_jwt = JWTHandler.filter_payload_to_jwt(
-                payload, args=args
+
+            thebes_hall_builder = ThebesHallBuilder(
+                user_data=user_data, kwargs_to_add_on_jwt=kwargs_to_add_on_jwt, ttl=ttl
             )
+            payload_to_jwt = thebes_hall_builder.build()
             compact_jws = JWTHandler.instance.encode(
-                user_metadata_to_add_into_jwt, signing_key, alg="RS256"
+                payload_to_jwt, signing_key, alg="RS256"
             )
             return compact_jws
         except Exception as e:
@@ -60,89 +51,6 @@ class JWTHandler:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
             raise InternalServerError("common.process_issue")
-
-    @staticmethod
-    def filter_payload_to_jwt(payload: dict, args: dict) -> dict:
-        new_payload = JWTHandler.filter_payload_helper(payload=payload, args=args)
-        JWTHandler.convert_datetime_field_in_str(payload=new_payload)
-        if payload.get("is_admin"):
-            new_payload.update({"is_admin": payload.get("is_admin")})
-        return new_payload
-
-    @staticmethod
-    def filter_payload_helper(payload: dict, args: dict) -> dict:
-        ThebesHall.validate(payload=payload)
-        suitability_months_past = 0
-        last_modified_date_months_past = 0
-        suitability = payload.get("suitability")
-        last_modified_date = payload.get("last_modified_date")
-
-        if suitability:
-            suitability_months_past = suitability.get("months_past")
-
-        if last_modified_date:
-            last_modified_date_months_past = last_modified_date.get("months_past")
-
-        user_repository = UserRepository()
-
-        new_payload = {
-            "nick_name": payload.get("nick_name"),
-            "email": payload.get("email"),
-            "scope": payload.get("scope"),
-            "is_active_user": payload.get("is_active_user"),
-            "is_blocked_electronic_signature": payload.get(
-                "is_blocked_electronic_signature"
-            ),
-            "terms": payload.get("terms"),
-            "suitability_months_past": suitability_months_past,
-            "last_modified_date_months_past": last_modified_date_months_past,
-            "client_has_trade_allowed": False,
-            "created_at": payload.get("created_at"),
-            "exp": payload.get("exp"),
-            "using_suitability_or_refuse_term": user_repository.is_user_using_suitability_or_refuse_term(
-                user_email=payload.get("email")
-            ),
-        }
-
-        if args is not None:
-            new_payload.update(args)
-
-        register_analyses = payload.get("register_analyses")
-        bovespa_account = payload.get("bovespa_account")
-        bmf_account = payload.get("bmf_account")
-
-        if bmf_account and bovespa_account:
-            new_payload.update(
-                {"bovespa_account": bovespa_account, "bmf_account": bmf_account}
-            )
-
-        if register_analyses:
-            new_payload.update({"register_analyses": register_analyses})
-
-        solutiontech = payload.get("solutiontech")
-        sincad = payload.get("sincad")
-        sinacor = payload.get("sinacor")
-        is_active_client = payload.get("is_active_client")
-
-        client_has_trade_allowed = (
-            solutiontech == SolutiontechClientImportStatus.SYNC.value
-            and sincad
-            and sinacor
-            and is_active_client
-            and suitability_months_past < 24
-            and last_modified_date_months_past < 24
-        )
-        new_payload.update({"client_has_trade_allowed": client_has_trade_allowed})
-
-        return new_payload
-
-    @staticmethod
-    def convert_datetime_field_in_str(payload: dict) -> None:
-        for key in payload:
-            if isinstance(payload[key], dict):
-                JWTHandler.convert_datetime_field_in_str(payload[key])
-            elif isinstance(payload[key], datetime):
-                payload[key] = str(payload[key])
 
     @staticmethod
     def get_jwt_from_request(request: Request):
