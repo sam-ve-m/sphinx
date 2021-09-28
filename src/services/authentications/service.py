@@ -70,7 +70,7 @@ class AuthenticationService(IAuthentication):
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
 
-        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        jwt = token_handler.generate_token(user_data=new, ttl=525600)
 
         response.update({"payload": {"jwt": jwt}})
 
@@ -90,7 +90,7 @@ class AuthenticationService(IAuthentication):
         # if entity.get("is_active_client") is False:
         #     raise UnauthorizedError("invalid_credential")
         if entity.get("use_magic_link") is True:
-            payload_jwt = JWTHandler.generate_token(payload=entity, ttl=10)
+            payload_jwt = JWTHandler.generate_token(user_data=entity, ttl=10)
             AuthenticationService.send_authentication_email(
                 email=entity.get("email"),
                 payload_jwt=payload_jwt,
@@ -110,7 +110,7 @@ class AuthenticationService(IAuthentication):
             if hash_field(payload=pin) != entity.get("pin"):
                 raise UnauthorizedError("user.pin_error")
 
-            jwt = token_handler.generate_token(payload=entity, ttl=525600)
+            jwt = token_handler.generate_token(user_data=entity, ttl=525600)
             JwtController.insert_one(jwt, entity.get("email"))
             return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
@@ -142,9 +142,11 @@ class AuthenticationService(IAuthentication):
             raise BadRequestError("common.register_not_exists")
 
         user_new = deepcopy(user_old)
+
         client_has_trade_allowed = AuthenticationService._dtvm_client_has_trade_allowed(
             user=user_old
         )
+
         must_update = False
         for key, value in client_has_trade_allowed.items():
             if value["status_changed"]:
@@ -155,7 +157,7 @@ class AuthenticationService(IAuthentication):
             if user_repository.update_one(old=user_old, new=user_new) is False:
                 raise InternalServerError("common.process_issue")
 
-        jwt = token_handler.generate_token(payload=user_new, ttl=525600)
+        jwt = token_handler.generate_token(user_data=user_new, ttl=525600)
 
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
@@ -201,7 +203,7 @@ class AuthenticationService(IAuthentication):
             if user_repository.update_one(old=user_old, new=user_new) is False:
                 raise InternalServerError("common.process_issue")
 
-        jwt = token_handler.generate_token(payload=user_new, ttl=525600)
+        jwt = token_handler.generate_token(user_data=user_new, ttl=525600)
 
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
