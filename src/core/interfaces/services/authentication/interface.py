@@ -7,7 +7,6 @@ from src.repositories.user.repository import UserRepository
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
 
 
-
 class IAuthentication(ABC):
     @staticmethod
     @abstractmethod

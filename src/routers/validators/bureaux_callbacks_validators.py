@@ -61,7 +61,8 @@ from src.routers.validators.base import (
     UsTinSource,
     IrsSharingSource,
     FatherNameSource,
-    DocumentNumber, MaritalStatusSource
+    DocumentNumber,
+    MaritalStatusSource,
 )
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 
@@ -93,15 +94,22 @@ class Address(BaseModel):
 
     @root_validator()
     def validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        country = values.get('country')
-        state = values.get('state')
-        city = values.get('city')
-        id_city = values.get('id_city')
+        country = values.get("country")
+        state = values.get("state")
+        city = values.get("city")
+        id_city = values.get("id_city")
 
         if all([country, state, city, id_city]):
-            is_valid = validate_contry_state_city_and_id_city(country.get('value'), state.get('value'), city.get('value'), id_city.get('value'))
+            is_valid = validate_contry_state_city_and_id_city(
+                country.get("value"),
+                state.get("value"),
+                city.get("value"),
+                id_city.get("value"),
+            )
             if not is_valid:
-                raise ValueError(f"The combination of values {country}, {state}, {city}, {id_city} does not match")
+                raise ValueError(
+                    f"The combination of values {country}, {state}, {city}, {id_city} does not match"
+                )
 
         return values
 
@@ -152,15 +160,22 @@ class Birthplace(BaseModel):
 
     @root_validator()
     def validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        country = values.get('country')
-        state = values.get('state')
-        city = values.get('city')
-        id_city = values.get('id_city')
+        country = values.get("country")
+        state = values.get("state")
+        city = values.get("city")
+        id_city = values.get("id_city")
 
         if all([country, state, city, id_city]):
-            is_valid = validate_contry_state_city_and_id_city(country.get('value'), state.get('value'), city.get('value'), id_city.get('value'))
+            is_valid = validate_contry_state_city_and_id_city(
+                country.get("value"),
+                state.get("value"),
+                city.get("value"),
+                id_city.get("value"),
+            )
             if not is_valid:
-                raise ValueError(f"The combination of values {country}, {state}, {city}, {id_city} does not match")
+                raise ValueError(
+                    f"The combination of values {country}, {state}, {city}, {id_city} does not match"
+                )
 
         return values
 

@@ -66,5 +66,7 @@ class IFile(ABC):
         pass
 
     @abstractmethod
-    def get_user_selfie(self, file_type: UserFileType, user_email: str) -> Union[str, dict]:
+    def get_user_selfie(
+        self, file_type: UserFileType, user_email: str
+    ) -> Union[str, dict]:
         pass
