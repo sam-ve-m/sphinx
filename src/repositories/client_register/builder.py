@@ -139,18 +139,18 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_est_civil(self, user_data: dict):
-        key_values = {
-            "not_married": 1,
-            "married": 5,
-            "divorced": 4,
-            "widower": 3,
-        }
-        value = key_values.get(user_data["marital"]["status"])
-        self._fields_added.update({"CD_EST_CIVIL": value})
+        status = user_data["marital"]["status"]
+        self._fields_added.update({"CD_EST_CIVIL": status})
         return self
 
     def add_cd_nacion(self, user_data: dict):
-        self._fields_added.update({"CD_NACION": user_data["birthplace"]["nationality"]})
+        birthplace = (
+            user_data.get("birthplace")
+            if user_data.get("birthplace") is not None
+            else {}
+        )
+        nationality = birthplace.get("nationality")
+        self._fields_added.update({"CD_NACION": nationality})
         return self
 
     def add_cd_tipo_doc(self, user_data: dict):
@@ -225,8 +225,9 @@ class ClientRegisterBuilder:
         return self
 
     def add_nm_conjuge(self, user_data: dict):
+        spouse = user_data["marital"].get('spouse', {})
         self._fields_added.update(
-            {"NM_CONJUGE": user_data["marital"]["spouse"]["name"]}
+            {"NM_CONJUGE": spouse.get("name")}
         )
         return self
 
@@ -235,7 +236,13 @@ class ClientRegisterBuilder:
         return self
 
     def add_nm_loc_nasc(self, user_data: dict):
-        self._fields_added.update({"NM_LOC_NASC": user_data["birthplace"]["city"]})
+        birthplace = (
+            user_data.get("birthplace")
+            if user_data.get("birthplace") is not None
+            else {}
+        )
+        city = birthplace.get("city")
+        self._fields_added.update({"NM_LOC_NASC": city})
         return self
 
     def add_nm_mae(self, user_data: dict):
@@ -243,18 +250,30 @@ class ClientRegisterBuilder:
         return self
 
     def add_sg_estado_nasc(self, user_data: dict):
-        self._fields_added.update({"SG_ESTADO_NASC": user_data["birthplace"]["state"]})
+        birthplace = (
+            user_data.get("birthplace")
+            if user_data.get("birthplace") is not None
+            else {}
+        )
+        state = birthplace.get("state")
+        self._fields_added.update({"SG_ESTADO_NASC": state})
         return self
 
     def add_sg_pais(self, user_data: dict):
-        self._fields_added.update({"SG_PAIS": user_data["birthplace"]["country"]})
+        birthplace = (
+            user_data.get("birthplace")
+            if user_data.get("birthplace") is not None
+            else {}
+        )
+        country = birthplace.get("country")
+        self._fields_added.update({"SG_PAIS": country})
         return self
 
-    def add_tp_regcas(self, user_data: dict):
-        self._fields_added.update(
-            {"TP_REGCAS": user_data["marital_update"]["marital_regime"]}
-        )
-        return self
+    # def add_tp_regcas(self, user_data: dict):
+    #     self._fields_added.update(
+    #         {"TP_REGCAS": user_data["marital"]["marital_regime"]}
+    #     )
+    #     return self
 
     def add_cd_cep(self, user_data: dict):
         self._fields_added.update({"CD_CEP": int(user_data["address"]["zip_code"])})
@@ -395,10 +414,6 @@ class ClientRegisterBuilder:
         self._fields_added.update({"IND_PCTA": IndicatorByAccount.YES.value})
         return self
 
-    def add_cod_tipo_colt(self, value=None):
-        self._fields_added.update({"COD_TIPO_COLT": value})
-        return self
-
     def add_in_emite_nota_cs(self):
         self._fields_added.update(
             {"IN_EMITE_NOTA_CS": HomeExecutionBrokerageNoteIssuanceIndicator.NO.value}
@@ -434,9 +449,14 @@ class ClientRegisterBuilder:
         return self
 
     def add_cod_cidade_nasc(self, user_data: dict):
-        self._fields_added.update(
-            {"COD_CIDADE_NASC": user_data["birthplace"]["id_city"]}
+        birthplace = (
+            user_data.get("birthplace")
+            if user_data.get("birthplace") is not None
+            else {}
         )
+        id_city = birthplace.get("id_city")
+
+        self._fields_added.update({"COD_CIDADE_NASC": id_city})
         return self
 
     def add_sigl_pais_resid(self, user_data: dict):
@@ -503,16 +523,17 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cpf_conjuge(self, user_data: dict):
+        spouse = user_data["marital"].get('spouse', {})
         self._fields_added.update(
-            {"CD_CPF_CONJUGE": user_data["marital"]["spouse"]["cpf"]}
+            {"CD_CPF_CONJUGE": spouse.get("cpf")}
         )
         return self
 
-    def add_dt_nasc_conjuge(self, user_data: dict):
-        self._fields_added.update(
-            {"DT_NASC_CONJUGE": user_data["marital_update"]["spouse_birth_date"]}
-        )
-        return self
+    # def add_dt_nasc_conjuge(self, user_data: dict):
+    #     self._fields_added.update(
+    #         {"DT_NASC_CONJUGE": user_data["marital"]["spouse"]["birth_date"]}
+    #     )
+    #     return self
 
     def add_cd_cnpj_empresa(self, user_data: dict):
         self._fields_added.update(

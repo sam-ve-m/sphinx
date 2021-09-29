@@ -65,7 +65,7 @@ class CustomerRegistrationBuilder:
 
     def marital_status(self):
         marital_status = self.__personal_data.get("marital", {}).get("status")
-        self.__buffer["marital"].update({"marital_status": marital_status})
+        self.__buffer["marital"].update({"status": marital_status})
         return self
 
     def marital_spouse_name(self):

@@ -4,7 +4,7 @@ from fastapi import status
 # PERSEPHONE
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.repositories.sinacor_types.enum.person_gender import PersonGender
-from src.routers.validators.enum_template import MaritalStatusEnum
+from src.routers.validators.marital_status_app_to_sphinx import MaritalStatusAppToSphinxEnum
 
 
 class SinaCorTypes:
@@ -181,20 +181,32 @@ class SinaCorTypes:
 
     @staticmethod
     def get_marital_status_update():
-        titles = {
-            "married": "Casado",
-            "divorced": "Divorciado",
-            "not_married": "Solteiro",
-            "stable_union": "União estável",
-            "widower": "Viúvo",
-        }
-        marital_status = [
-            {"code": gender.value, "value": titles.get(gender.value)}
-            for gender in list(MaritalStatusEnum)
+        marital_status_to_app = [
+            {
+                "code": MaritalStatusAppToSphinxEnum.SINGLE.value,
+                "description": "Solteiro (a)"
+            },
+            {
+                "code": MaritalStatusAppToSphinxEnum.WIDOWER.value,
+                "description": "Viuvo(a)"
+            },
+            {
+                "code": MaritalStatusAppToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
+                "description": "Casado(a)"
+            },
+            {
+                "code": MaritalStatusAppToSphinxEnum.DIVORCED.value,
+                "description": "Divorciado(a)"
+            },
+            {
+                "code": MaritalStatusAppToSphinxEnum.STABLE_UNION.value,
+                "description": "União Estável"
+            }
         ]
+
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {"enums": marital_status},
+            "payload": {"enums": marital_status_to_app},
         }
 
     @staticmethod

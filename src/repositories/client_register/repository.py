@@ -5,7 +5,7 @@ from typing import Type, Optional
 from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 from src.repositories.client_register.builder import ClientRegisterBuilder
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
-from src.routers.validators.enum_template import MaritalStatusEnum
+from src.routers.validators.marital_status_stone_age_to_sphinx import MaritalStatusStoneAgeToSphinxEnum
 from src.utils.env_config import config
 
 
@@ -103,8 +103,10 @@ class ClientRegisterRepository(OracleInfrastructure):
     ) -> Type[ClientRegisterBuilder]:
         activity = user_data["occupation"]["activity"]
         is_married = user_data["marital"]["status"] in [
-            MaritalStatusEnum.MARRIED.value,
-            MaritalStatusEnum.STABLE_UNION.value,
+            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
+            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_NATURALIZED_BRAZILIAN.value,
+            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_FOREIGN.value,
+            MaritalStatusStoneAgeToSphinxEnum.STABLE_UNION.value,
         ]
         is_business_person = sinacor_types_repository.is_business_person(value=activity)
         is_not_employed_or_business_person = sinacor_types_repository.is_others(
@@ -295,9 +297,9 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_uf_estr1()
             .add_num_class_risc_cmtt()
             .add_desc_risc_cmtt()
-            .add_num_us_person()
-            .add_val_cfin()
-            .add_data_cfin()
+            .add_num_us_person(user_data=user_data)
+            .add_val_cfin(user_data=user_data)
+            .add_data_cfin(user_data=user_data)
         )
         return builder
 
@@ -524,7 +526,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_nm_mae(user_data=user_data)
             .add_sg_estado_nasc(user_data=user_data)
             .add_sg_pais(user_data=user_data)
-            .add_tp_regcas(user_data=user_data)
+            # .add_tp_regcas(user_data=user_data)
             .add_cd_cep(user_data=user_data)
             .add_cd_ddd_tel(user_data=user_data)
             .add_in_ende()
@@ -562,7 +564,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_val_cfin(user_data=user_data)
             .add_data_cfin(user_data=user_data)
             .add_cd_cpf_conjuge(user_data=user_data)
-            .add_dt_nasc_conjuge(user_data=user_data)
+            # .add_dt_nasc_conjuge(user_data=user_data)
         )
         return builder
 
@@ -614,7 +616,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_nm_mae(user_data=user_data)
             .add_sg_estado_nasc(user_data=user_data)
             .add_sg_pais(user_data=user_data)
-            .add_tp_regcas(user_data=user_data)
+            # .add_tp_regcas(user_data=user_data)
             .add_cd_cep(user_data=user_data)
             .add_cd_ddd_tel(user_data=user_data)
             .add_in_ende()
@@ -653,7 +655,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_val_cfin(user_data=user_data)
             .add_data_cfin(user_data=user_data)
             .add_cd_cpf_conjuge(user_data=user_data)
-            .add_dt_nasc_conjuge(user_data=user_data)
+            # .add_dt_nasc_conjuge(user_data=user_data)
             .add_cd_cnpj_empresa(user_data=user_data)
         )
         return builder
@@ -706,7 +708,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_nm_mae(user_data=user_data)
             .add_sg_estado_nasc(user_data=user_data)
             .add_sg_pais(user_data=user_data)
-            .add_tp_regcas(user_data=user_data)
+            # .add_tp_regcas(user_data=user_data)
             .add_cd_cep(user_data=user_data)
             .add_cd_ddd_tel(user_data=user_data)
             .add_in_ende()
@@ -744,6 +746,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_val_cfin(user_data=user_data)
             .add_data_cfin(user_data=user_data)
             .add_cd_cpf_conjuge(user_data=user_data)
-            .add_dt_nasc_conjuge(user_data=user_data)
+            # .add_dt_nasc_conjuge(user_data=user_data)
         )
         return builder
