@@ -184,23 +184,9 @@ class NationalitySource(Source):
 class CitySource(Source):
     value: str
 
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_city(value=e):
-            return e
-        raise ValueError("City not exists")
-
 
 class IdCitySource(Source):
     value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_city_id(value=e):
-            return e
-        raise ValueError("City id not exists")
 
 
 class ZipCodeSource(Source):
@@ -322,13 +308,6 @@ class CosifTaxClassificationSource(Source):
 
 class CountySource(Source):
     value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_county(value=e):
-            return e
-        raise ValueError("County not exists")
 
 
 class MaritalRegimeSource(Source):

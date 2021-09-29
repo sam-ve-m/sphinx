@@ -473,11 +473,11 @@ class ClientRegisterBuilder:
         self._fields_added.update({"NUM_TIPO_CON": value})
         return self
 
-    def add_cod_tipo_colt(self):
-        self._fields_added.update(
-            {"COD_TIPO_COLT": CollateralizationTypeCode.INVESTOR.value}
-        )
-        return self
+    # def add_cod_tipo_colt(self):
+    #     self._fields_added.update(
+    #         {"COD_TIPO_COLT": CollateralizationTypeCode.INVESTOR.value}
+    #     )
+    #     return self
 
     def add_cod_cep_estr1(self):
         self._fields_added.update({"COD_CEP_ESTR1": ForeignZipCode.DEFAULT.value})

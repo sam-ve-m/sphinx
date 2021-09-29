@@ -813,7 +813,6 @@ class UserService(IUser):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
 
         if current_user.get('register_analyses') == StoneAgeRegisterAnalyses.POINTS.value:
