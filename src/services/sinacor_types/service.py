@@ -4,7 +4,9 @@ from fastapi import status
 # PERSEPHONE
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.repositories.sinacor_types.enum.person_gender import PersonGender
-from src.routers.validators.marital_status_app_to_sphinx import MaritalStatusAppToSphinxEnum
+from src.routers.validators.marital_status_app_to_sphinx import (
+    MaritalStatusAppToSphinxEnum,
+)
 
 
 class SinaCorTypes:
@@ -184,24 +186,24 @@ class SinaCorTypes:
         marital_status_to_app = [
             {
                 "code": MaritalStatusAppToSphinxEnum.SINGLE.value,
-                "description": "Solteiro (a)"
+                "description": "Solteiro (a)",
             },
             {
                 "code": MaritalStatusAppToSphinxEnum.WIDOWER.value,
-                "description": "Viuvo(a)"
+                "description": "Viuvo(a)",
             },
             {
                 "code": MaritalStatusAppToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
-                "description": "Casado(a)"
+                "description": "Casado(a)",
             },
             {
                 "code": MaritalStatusAppToSphinxEnum.DIVORCED.value,
-                "description": "Divorciado(a)"
+                "description": "Divorciado(a)",
             },
             {
                 "code": MaritalStatusAppToSphinxEnum.STABLE_UNION.value,
-                "description": "União Estável"
-            }
+                "description": "União Estável",
+            },
         ]
 
         return {

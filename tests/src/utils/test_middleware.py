@@ -1,5 +1,5 @@
 # NATIVE LIBRARIES
-from typing import Type
+from typing import Type, List
 from datetime import datetime
 
 # OUTSIDE LIBRARIES
@@ -8,15 +8,13 @@ from unittest.mock import MagicMock
 
 # SPHINX
 from src.utils.middleware import (
-    route_is_public,
-    need_be_admin,
-    is_user_deleted,
-    is_user_token_valid,
-    invalidate_user,
-    check_if_is_user_not_allowed_to_access_route,
+    get_valid_user_from_database,
+    is_user_token_life_time_valid,
+    get_valid_admin_from_database,
+    validate_electronic_signature,
+    get_token_if_token_is_valid,
 )
 from tests.stub_classes.stub_base_repository import StubBaseRepository
-from src.exceptions.exceptions import NoPath
 
 
 class StubURL:
@@ -24,7 +22,11 @@ class StubURL:
 
 
 class StubHeaders:
-    raw = []
+    def __init__(self):
+        self.raw = list()
+
+    def set_headers(self, raw: List[tuple]):
+        self.raw = raw
 
 
 class StubRequest:
@@ -33,10 +35,26 @@ class StubRequest:
 
     def __init__(self, url: Type[StubURL]):
         self.url = url
+        self.headers = StubHeaders()
 
 
 class StubRepository(StubBaseRepository):
     pass
+
+
+class StubMist:
+    def validate_jwt(self, jwt):
+        pass
+
+    def decrypt_payload(self, jwt):
+        pass
+
+
+class StubJWTHandler:
+    mist = StubMist()
+
+    def get_thebes_answer_from_request(self, request):
+        pass
 
 
 @pytest.fixture
@@ -45,163 +63,33 @@ def get_new_stubby_repository():
 
 
 @pytest.fixture
-def get_new_stubby_request_user():
+def get_new_stub_jwt_handler():
+    stub_jwt_handler = StubJWTHandler()
+    return stub_jwt_handler
+
+
+@pytest.fixture
+def get_new_stub_request_user_with_mist_header():
     stub_url = StubURL
     stub_url.path = "/user"
-    return StubRequest(url=stub_url)
+    stub_request = StubRequest(url=stub_url)
+    stub_request.headers.set_headers([(b"x-mist", b"lala")])
+    return stub_request
 
 
 @pytest.fixture
-def get_new_stubby_request_forgot_password():
+def get_new_stub_request_user_with_mist_header_wrong():
     stub_url = StubURL
-    stub_url.path = "/user/forgot_password"
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_login():
-    stub_url = StubURL
-    stub_url.path = "/login"
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_login_admin():
-    stub_url = StubURL
-    stub_url.path = "/login/admin"
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_none_path():
-    stub_url = StubURL
-    stub_url.path = None
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_none_path_admin():
-    stub_url = StubURL
-    stub_url.path = None
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_none_path_public():
-    stub_url = StubURL()
-    stub_url.path = None
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_random_path():
-    stub_url = StubURL
-    stub_url.path = "/xx"
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_feature():
-    stub_url = StubURL
-    stub_url.path = "/feature"
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_term():
-    stub_url = StubURL
-    stub_url.path = "/term"
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_views():
-    stub_url = StubURL
-    stub_url.path = "/views"
-    return StubRequest(url=stub_url)
-
-
-@pytest.fixture
-def get_new_stubby_request_user_admin():
-    stub_url = StubURL
-    stub_url.path = "/user/admin"
-    return StubRequest(url=stub_url)
-
-
-def test_is_public_true_user():
-    route_public = route_is_public(url_request="/user", method="POST")
-    assert route_public is True
-
-
-def test_is_public_false():
-    route_public = route_is_public(url_request="/oppai", method="GET")
-    assert route_public is False
-
-
-def test_forgot_password_post_is_public():
-    route_public = route_is_public(url_request="/user/forgot_password", method="GET")
-    assert route_public is True
-
-
-def test_login_is_public():
-    route_public = route_is_public(url_request="/login", method="POST")
-    assert route_public is True
-
-
-def test_login_admin_is_public():
-    route_public = route_is_public(url_request="/login/admin", method="POST")
-    assert route_public is True
-
-
-def test_none_url_path_admin_raises():
-    with pytest.raises(NoPath, match="No path found"):
-        need_be_admin(url_request=None)
-
-
-def test_none_url_path_is_public_raises():
-    with pytest.raises(NoPath, match="No path found"):
-        route_is_public(url_request=None)
-
-
-def test_need_be_admin_false():
-    is_admin_route = need_be_admin(url_request="/user")
-    assert is_admin_route is False
-
-
-def test_feature_need_be_admin_true():
-    is_admin_route = need_be_admin(url_request="/feature")
-    assert is_admin_route is True
-
-
-def test_term_need_be_admin_true():
-    is_admin_route = need_be_admin(url_request="/term")
-    assert is_admin_route is True
-
-
-def test_views_need_be_admin_true():
-    is_admin_route = need_be_admin(url_request="/views")
-    assert is_admin_route is True
-
-
-def test_user_admin_need_be_admin():
-    is_admin_route = need_be_admin(url_request="/user/admin")
-    assert is_admin_route is True
-
-
-def test_is_user_deleted_true():
-    user_data = {"is_active_client": True}
-    assert is_user_deleted(user_data=user_data)
-
-
-def test_is_user_deleted_false():
-    user_data = {"is_active_client": False}
-    assert is_user_deleted(user_data=user_data) is False
+    stub_url.path = "/user"
+    stub_request = StubRequest(url=stub_url)
+    stub_request.headers.set_headers([(b"x-mist", "lala")])
+    return stub_request
 
 
 def test_is_user_token_valid_error():
     user_data = {"token_valid_after": datetime.now().strftime("%Y-%m-%d")}
     jwt_data = {"created_at": "2020-12-01"}
-    token_valid = is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
+    token_valid = is_user_token_life_time_valid(user_data=user_data, token=jwt_data)
     assert token_valid is False
 
 
@@ -210,7 +98,7 @@ def test_is_user_token_valid_false_because_created_at_date_is_invalid():
         "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d")
     }
     jwt_data = {"created_at": "2020-01-01"}
-    token_valid = is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
+    token_valid = is_user_token_life_time_valid(user_data=user_data, token=jwt_data)
     assert token_valid is False
 
 
@@ -219,7 +107,7 @@ def test_is_user_token_valid_false_because_token_is_expired():
         "token_valid_after": datetime(year=2020, month=10, day=11).strftime("%Y-%m-%d")
     }
     jwt_data = {"created_at": "2020-10-10"}
-    token_valid = is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
+    token_valid = is_user_token_life_time_valid(user_data=user_data, token=jwt_data)
     assert token_valid is False
 
 
@@ -228,97 +116,187 @@ def test_is_user_token_valid_true():
         "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d")
     }
     jwt_data = {"created_at": "2020-11-01"}
-    token_valid = is_user_token_valid(user_data=user_data, jwt_data=jwt_data)
+    token_valid = is_user_token_life_time_valid(user_data=user_data, token=jwt_data)
     assert token_valid
 
 
-def test_invalidate_user_false():
-    user_data = {
-        "token_valid_after": datetime(year=2020, month=10, day=10),
-        "is_active_client": False,
-    }
-    jwt_data = {"created_at": "2020-11-01"}
-    is_invalidate_user = invalidate_user(user_data=user_data, jwt_data=jwt_data)
-    assert is_invalidate_user is False
-
-
-def test_invalidate_user_is_deleted():
-    user_data = {
-        "token_valid_after": datetime(year=2020, month=11, day=10),
-        "is_active_client": True,
-    }
-    jwt_data = {"created_at": "2020-11-01"}
-    is_user_valid = invalidate_user(user_data=user_data, jwt_data=jwt_data)
-    assert is_user_valid is False
-
-
-def test_check_if_user_is_allowed_to_access_route_user_is_admin(
-    get_new_stubby_request_random_path, get_new_stubby_repository
+def test_get_valid_user_from_database_repository_does_not_fid_user(
+    get_new_stubby_repository,
 ):
-    request = get_new_stubby_request_random_path
-    user_data = {
-        "token_valid_after": "2020-07-01",
-        "is_active_client": False,
-        "is_admin": True,
-    }
     user_repository = get_new_stubby_repository
-    user_repository.find_one = MagicMock(return_value=user_data)
-    jwt_data = {"created_at": "2020-07-02", "email": "test@test.com"}
-    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
-        request=request, jwt_data=jwt_data, user_repository=user_repository
+    user_repository.find_one = MagicMock(return_value=None)
+    token = {"email": ""}
+    assert (
+        get_valid_user_from_database(token=token, user_repository=user_repository)
+        is None
     )
-    assert is_user_not_allowed_value
 
 
-def test_check_if_is_user_not_allowed_to_access_route_user_not_admin(
-    get_new_stubby_request_views, get_new_stubby_repository
+def test_get_valid_user_from_database_user_is_not_active():
+    user_repository = get_new_stubby_repository
+    user_repository.find_one = MagicMock(return_value={"is_active_user": False})
+    token = {"email": ""}
+    assert (
+        get_valid_user_from_database(token=token, user_repository=user_repository)
+        is None
+    )
+
+
+def test_get_valid_user_from_database():
+    user_repository = get_new_stubby_repository
+    user_stub_data = {"is_active_user": True}
+    user_repository.find_one = MagicMock(return_value=user_stub_data)
+    token = {"email": ""}
+    assert (
+        get_valid_user_from_database(token=token, user_repository=user_repository)
+        == user_stub_data
+    )
+
+
+def test_get_valid_admin_from_database_repository_does_not_fid_user(
+    get_new_stubby_repository,
 ):
-    request = get_new_stubby_request_views
-    user_data = {
-        "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d"),
-        "is_active_client": False,
-        "is_admin": False,
-    }
     user_repository = get_new_stubby_repository
-    user_repository.find_one = MagicMock(return_value=user_data)
-    jwt_data = {"created_at": "2020-11-01", "email": "test@test.com"}
-    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
-        request=request, jwt_data=jwt_data, user_repository=user_repository
+    user_repository.find_one = MagicMock(return_value=None)
+    token = {"email": ""}
+    assert (
+        get_valid_admin_from_database(token=token, user_repository=user_repository)
+        is None
     )
-    assert is_user_not_allowed_value.status_code == 401
 
 
-def test_check_if_is_user_not_allowed_to_access_route_user_not_admin_and_user_is_deleted(
-    get_new_stubby_request_views, get_new_stubby_repository
+def test_get_valid_admin_from_database_user_is_not_active(get_new_stubby_repository):
+    user_repository = get_new_stubby_repository
+    user_repository.find_one = MagicMock(return_value={"is_active_user": False})
+    token = {"email": ""}
+    assert (
+        get_valid_admin_from_database(token=token, user_repository=user_repository)
+        is None
+    )
+
+
+def test_get_valid_admin_from_database_dont_have_admin_key(get_new_stubby_repository):
+    user_repository = get_new_stubby_repository
+    user_stub_data = {"is_active_user": True}
+    user_repository.find_one = MagicMock(return_value=user_stub_data)
+    token = {"email": ""}
+    assert (
+        get_valid_admin_from_database(token=token, user_repository=user_repository)
+        is None
+    )
+
+
+def test_get_valid_admin_from_database_is_not_admin(get_new_stubby_repository):
+    user_repository = get_new_stubby_repository
+    user_stub_data = {"is_active_user": True, "is_admin": False}
+    user_repository.find_one = MagicMock(return_value=user_stub_data)
+    token = {"email": ""}
+    assert (
+        get_valid_admin_from_database(token=token, user_repository=user_repository)
+        is None
+    )
+
+
+def test_get_valid_admin_from_database(get_new_stubby_repository):
+    user_repository = get_new_stubby_repository
+    user_stub_data = {"is_active_user": True, "is_admin": True}
+    user_repository.find_one = MagicMock(return_value=user_stub_data)
+    token = {"email": ""}
+    assert (
+        get_valid_admin_from_database(token=token, user_repository=user_repository)
+        == user_stub_data
+    )
+
+
+def test_validate_electronic_signature_with_token(
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
 ):
-    request = get_new_stubby_request_views
-    user_data = {
-        "token_valid_after": datetime(year=2020, month=11, day=10).strftime("%Y-%m-%d"),
-        "is_active_client": True,
-        "is_admin": False,
-    }
-    user_repository = get_new_stubby_repository
-    user_repository.find_one = MagicMock(return_value=user_data)
-    jwt_data = {"created_at": "2020-11-01", "email": "test@test.com"}
-    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
-        request=request, jwt_data=jwt_data, user_repository=user_repository
+    stub_request = get_new_stub_request_user_with_mist_header
+    stub_jwt_handler = get_new_stub_jwt_handler
+
+    stub_jwt_handler.mist.validate_jwt = MagicMock(return_value=False)
+
+    assert (
+        validate_electronic_signature(
+            request=stub_request, user_data={}, jwt_handler=stub_jwt_handler
+        )
+        is False
     )
-    assert is_user_not_allowed_value.status_code == 401
 
 
-def test_check_if_is_user_not_allowed_to_access_route_user_is_admin_and_user_is_deleted(
-    get_new_stubby_request_views, get_new_stubby_repository
+def test_validate_electronic_signature_with_token_not_encoded(
+    get_new_stub_request_user_with_mist_header_wrong, get_new_stub_jwt_handler
 ):
-    request = get_new_stubby_request_views
-    user_data = {
-        "token_valid_after": datetime(year=2020, month=11, day=10).strftime("%Y-%m-%d"),
-        "is_active_client": True,
-        "is_admin": True,
-    }
-    user_repository = get_new_stubby_repository
-    user_repository.find_one = MagicMock(return_value=user_data)
-    jwt_data = {"created_at": "2020-11-01", "email": "test@test.com"}
-    is_user_not_allowed_value = check_if_is_user_not_allowed_to_access_route(
-        request=request, jwt_data=jwt_data, user_repository=user_repository
+    stub_request = get_new_stub_request_user_with_mist_header_wrong
+    stub_jwt_handler = get_new_stub_jwt_handler
+
+    stub_jwt_handler.mist.validate_jwt = MagicMock(return_value=False)
+    with pytest.raises(AttributeError):
+        validate_electronic_signature(
+            request=stub_request, user_data={}, jwt_handler=stub_jwt_handler
+        )
+
+
+def test_validate_electronic_signature_with_token_and_is_valid_but_email_does_not_match(
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
+):
+    stub_request = get_new_stub_request_user_with_mist_header
+    stub_jwt_handler = get_new_stub_jwt_handler
+
+    stub_jwt_handler.mist.validate_jwt = MagicMock(return_value=False)
+    stub_jwt_handler.mist.decrypt_payload = MagicMock(return_value={"email": "lalala"})
+
+    assert (
+        validate_electronic_signature(
+            request=stub_request,
+            user_data={"email": "lala"},
+            jwt_handler=stub_jwt_handler,
+        )
+        is False
     )
-    assert is_user_not_allowed_value.status_code == 401
+
+
+def test_validate_electronic_signature_with_token_and_is_valid_but_email_does_match(
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
+):
+    stub_request = get_new_stub_request_user_with_mist_header
+    stub_jwt_handler = get_new_stub_jwt_handler
+
+    stub_jwt_handler.mist.validate_jwt = MagicMock(return_value=False)
+    stub_jwt_handler.mist.decrypt_payload = MagicMock(return_value={"email": "lala"})
+
+    assert (
+        validate_electronic_signature(
+            request=stub_request,
+            user_data={"email": "lala"},
+            jwt_handler=stub_jwt_handler,
+        )
+        is False
+    )
+
+
+def test_get_token_if_token_is_valid(
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
+):
+    value = "lala"
+    stub_jwt_handler = get_new_stub_jwt_handler
+    stub_request = get_new_stub_request_user_with_mist_header
+    stub_jwt_handler.get_thebes_answer_from_request = MagicMock(return_value=value)
+    assert value == get_token_if_token_is_valid(
+        request=stub_request, jwt_handler=stub_jwt_handler
+    )
+
+
+def test_get_token_if_token_is_valid_raise_error(
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
+):
+    stub_jwt_handler = get_new_stub_jwt_handler
+    stub_request = get_new_stub_request_user_with_mist_header
+    stub_jwt_handler.get_thebes_answer_from_request = MagicMock(
+        name="get_thebes_answer_from_request", side_effect=BaseException()
+    )
+
+    assert (
+        get_token_if_token_is_valid(request=stub_request, jwt_handler=stub_jwt_handler)
+        is None
+    )

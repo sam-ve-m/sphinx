@@ -22,7 +22,7 @@ class StoneAge:
     @staticmethod
     def send_user_quiz_responses(send_quiz_request: dict) -> Optional[dict]:
         response = StoneAge.run_sync_stone_age_app_entry_point(
-             entry_point="onbPfP2Post", body=send_quiz_request
+            entry_point="onbPfP2Post", body=send_quiz_request
         )
         return response
 
@@ -66,7 +66,7 @@ class StoneAge:
 
         if response.status_code == 200:
             data = response.json()
-            if data['successful']:
+            if data["successful"]:
                 return data
 
         logger = logging.getLogger(config("LOG_NAME"))
@@ -174,7 +174,12 @@ class StoneAge:
         return headers
 
     @staticmethod
-    def get_user_identifier_data(payload: dict, current_user: dict, current_user_marital: dict, file_repository: IFile):
+    def get_user_identifier_data(
+        payload: dict,
+        current_user: dict,
+        current_user_marital: dict,
+        file_repository: IFile,
+    ):
         user_identifier_data = {
             "email": current_user.get("email"),
             "cpf": current_user.get("cpf"),
@@ -207,7 +212,7 @@ class StoneAge:
             "cpf": current_user.get("cpf"),
             "cel_phone": current_user.get("cel_phone"),
             "responses": payload.get("quiz"),
-            "device": payload.get("device_information")
+            "device": payload.get("device_information"),
         }
 
         return send_quiz_request

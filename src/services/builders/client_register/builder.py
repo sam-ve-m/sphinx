@@ -225,10 +225,8 @@ class ClientRegisterBuilder:
         return self
 
     def add_nm_conjuge(self, user_data: dict):
-        spouse = user_data["marital"].get('spouse', {})
-        self._fields_added.update(
-            {"NM_CONJUGE": spouse.get("name")}
-        )
+        spouse = user_data["marital"].get("spouse", {})
+        self._fields_added.update({"NM_CONJUGE": spouse.get("name")})
         return self
 
     def add_nm_e_mail(self, user_data: dict):
@@ -523,10 +521,8 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cpf_conjuge(self, user_data: dict):
-        spouse = user_data["marital"].get('spouse', {})
-        self._fields_added.update(
-            {"CD_CPF_CONJUGE": spouse.get("cpf")}
-        )
+        spouse = user_data["marital"].get("spouse", {})
+        self._fields_added.update({"CD_CPF_CONJUGE": spouse.get("cpf")})
         return self
 
     # def add_dt_nasc_conjuge(self, user_data: dict):
