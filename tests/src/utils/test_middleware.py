@@ -1,5 +1,4 @@
 # NATIVE LIBRARIES
-from typing import Type, List
 from datetime import datetime
 
 # OUTSIDE LIBRARIES
@@ -15,46 +14,15 @@ from src.utils.middleware import (
     get_token_if_token_is_valid,
 )
 from tests.stub_classes.stub_base_repository import StubBaseRepository
-
-
-class StubURL:
-    path = "/"
-
-
-class StubHeaders:
-    def __init__(self):
-        self.raw = list()
-
-    def set_headers(self, raw: List[tuple]):
-        self.raw = raw
-
-
-class StubRequest:
-    method = "POST"
-    headers = StubHeaders()
-
-    def __init__(self, url: Type[StubURL]):
-        self.url = url
-        self.headers = StubHeaders()
+from tests.stub_classes.stub_request import (
+    StubURL,
+    StubRequest
+)
+from tests.stub_classes.stub_jwt_handler_composition import StubJWTHandler
 
 
 class StubRepository(StubBaseRepository):
     pass
-
-
-class StubMist:
-    def validate_jwt(self, jwt):
-        pass
-
-    def decrypt_payload(self, jwt):
-        pass
-
-
-class StubJWTHandler:
-    mist = StubMist()
-
-    def get_thebes_answer_from_request(self, request):
-        pass
 
 
 @pytest.fixture
