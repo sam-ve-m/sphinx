@@ -1,5 +1,5 @@
 # OUTSIDE LIBRARIES
-from src.interfaces.repositories.file_repository.interface import IFile
+from src.core.interfaces.repositories.file_repository.interface import IFile
 from src.repositories.file.enum.user_file import UserFileType
 from src.utils.env_config import config
 import requests
@@ -57,8 +57,9 @@ class StoneAge:
         request_session.headers.update({"Content-type": "application/json"})
         request_session.cookies["access_token"] = cookies["access_token"]
 
-        #TODO: REMOVER CAMPOS NULL DAS REQUISIÇOES NOS MÉTODOS DO SERVIÇO
-        # del body['spouse']
+        # TODO: remove this
+        # if body.get('marital_status'):
+        #     body['marital_status'] = 1
 
         body_dumps = json.dumps(body)
         response = request_session.post(url=motor_app_entry_point_url, data=body_dumps)
@@ -180,7 +181,6 @@ class StoneAge:
             "cel_phone": current_user.get("cel_phone"),
             "marital_status": current_user_marital.get("status"),
             "is_us_person": current_user.get("is_us_person"),
-            "spouse": current_user_marital.get("spouse"),
             "uri_selfie": file_repository.get_user_selfie(
                 file_type=UserFileType.SELF, user_email=current_user.get("email")
             ),
