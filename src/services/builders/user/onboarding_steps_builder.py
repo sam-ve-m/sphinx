@@ -1,3 +1,6 @@
+from src.domain.stone_age.stone_age_register_analyses import StoneAgeRegisterAnalyses
+
+
 class OnboardingStepBuilder:
     def __init__(self):
         self.__onboarding_steps: dict = {
@@ -76,8 +79,16 @@ class OnboardingStepBuilder:
 
     def user_quiz_step(self, current_user):
         register_analyses = current_user.get("register_analyses")
+
+        register_analyses_allowed_to_next_step = [
+            StoneAgeRegisterAnalyses.TABLE.value,
+            StoneAgeRegisterAnalyses.APPROVED.value,
+            StoneAgeRegisterAnalyses.REJECTED.value,
+            StoneAgeRegisterAnalyses.SEND_RESPONSES.value,
+        ]
+
         if (
-            register_analyses is not None
+            register_analyses in register_analyses_allowed_to_next_step
             and self.__onboarding_steps["current_onboarding_step"] == "user_quiz_step"
         ):
             self.__onboarding_steps["user_quiz_step"] = True

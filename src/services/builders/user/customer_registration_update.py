@@ -111,7 +111,7 @@ class UpdateCustomerRegistrationBuilder:
     def marital_status(self):
         old_marital_status = self.__old_personal_data.get("marital", {}).get("status")
 
-        if new_marital_status := self._get_new_value("marital_status"):
+        if new_marital_status := self._get_new_value("status"):
             self._update_modified_data(
                 levels=("marital", "status"),
                 old_field=old_marital_status,

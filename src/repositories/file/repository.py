@@ -67,6 +67,25 @@ class FileRepository(IFile):
         )
         return fully_qualified_path
 
+    def get_user_selfie(
+        self,
+        file_type: UserFileType,
+        user_email: str,
+    ) -> Union[str, dict]:
+        path = self.resolve_user_path(user_email=user_email, file_type=file_type)
+        file_name = file_type.value
+        file_extension = self.get_file_extension_by_type(file_type=file_type)
+        if not path or not file_name or not file_extension:
+            raise InternalServerError("files.error")
+        fully_qualified_path = f"{path}{file_name}{file_extension}"
+        value = self.s3_client.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": self.bucket_name, "Key": fully_qualified_path},
+            ExpiresIn=604800,
+        )
+        # week link validation
+        return value
+
     def get_user_file(self, file_type: UserFileType, user_email: str):
         exists_self = False
         prefix = self.resolve_user_path(user_email=user_email, file_type=file_type)

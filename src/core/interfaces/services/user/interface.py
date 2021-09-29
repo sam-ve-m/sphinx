@@ -151,12 +151,7 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def user_quiz(payload: dict, stone_age, user_repository) -> dict:
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def user_quiz_put(
+    def user_quiz(
         payload: dict,
         stone_age,
         user_repository,

@@ -138,7 +138,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
 
     def get_county(self, country: str, state: str):
         sql = f"""
-            SELECT COD_MUNI as code, NOME_MUNI as description
+            SELECT NUM_SEQ_MUNI as code, NOME_MUNI as description
             FROM TSCDXMUNICIPIO
             WHERE SIGL_PAIS='{country}'
             AND SIGL_ESTADO='{state}'
@@ -260,7 +260,9 @@ class SinaCorTypesRepository(OracleInfrastructure):
             partial_value = self.query(sql=sql)
             value = {"value": partial_value}
             cache.set(key=key, value=value, ttl=86400)
-        return value.get("value")
+
+        value = value.get("value")
+        return value
 
     def base_validator(self, sql: str) -> bool:
         value = self.query_with_cache(sql=sql)
@@ -282,7 +284,10 @@ class SinaCorTypesRepository(OracleInfrastructure):
         """
         return self.base_validator(sql=sql)
 
-    def validate_state(self, value: str) -> bool:
+    def validate_state(
+        self,
+        value: str,
+    ) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCESTADO
@@ -310,7 +315,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
         sql = f"""
             SELECT 1
             FROM TSCATIV
-            WHERE CD_ATIV = '{value}'
+            WHERE CD_ATIV = {value}
         """
         return self.base_validator(sql=sql)
 
@@ -386,4 +391,15 @@ class SinaCorTypesRepository(OracleInfrastructure):
             FROM TSCREGCAS
             WHERE TP_REGCAS = {value}
         """
+        return self.base_validator(sql=sql)
+
+    def validate_marital_status(self, value: str) -> bool:
+        sql = f""" SELECT 1 FROM TSCESTCIV where CD_EST_CIVIL = {value}"""
+        return self.base_validator(sql=sql)
+
+    def validate_contry_state_city_and_id_city(
+        self, contry: str, state: str, city: str, id_city: int
+    ) -> bool:
+        sql = f"""SELECT 1 FROM TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
+        AND SIGL_ESTADO = '{state}' AND NOME_MUNI = '{city}' AND NUM_SEQ_MUNI = {id_city}"""
         return self.base_validator(sql=sql)

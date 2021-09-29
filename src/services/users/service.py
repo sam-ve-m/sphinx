@@ -9,6 +9,8 @@ from fordev.generators import rg
 
 # SPHINX
 from src.controllers.jwts.controller import JwtController
+from src.domain.stone_age.stone_age_register_analyses import StoneAgeRegisterAnalyses
+from src.utils.json_encoder.date_encoder import DateEncoder
 from src.core.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
@@ -578,7 +580,7 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
         user_complementary_data = payload.get("user_complementary")
 
-        current_user_with_complementary_data = dict(current_user)
+        current_user_with_complementary_data = deepcopy(current_user)
         UserService.add_user_complementary_data_on_current_user(
             payload=current_user_with_complementary_data,
             user_complementary_data=user_complementary_data,
@@ -638,115 +640,48 @@ class UserService(IUser):
 
     @staticmethod
     def user_quiz(
-        payload: dict, stone_age=StoneAge, user_repository=UserRepository()
-    ) -> dict:
-        UserService.onboarding_step_validator(
-            payload=payload, on_board_step="user_quiz_step"
-        )
-        thebes_answer = payload.get("x-thebes-answer")
-
-        user_onboarding_current_step = UserService.get_onboarding_user_current_step(
-            payload=payload
-        )
-        if UserService.can_send_quiz(
-            user_onboarding_current_step=user_onboarding_current_step
-        ):
-            return {
-                "status_code": status.HTTP_400_BAD_REQUEST,
-                "message_key": "user.quiz.missing_steps",
-            }
-
-        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
-        current_user_marital = current_user.get("marital")
-
-        user_identifier_data = {
-            "email": current_user.get("email"),
-            "cpf": current_user.get("cpf"),
-            "cel_phone": current_user.get("cel_phone"),
-            "marital_status": current_user_marital.get("marital_status"),
-            "is_us_person": current_user.get("is_us_person"),
-        }
-
-        current_user_is_us_person = current_user.get("is_us_person")
-
-        if current_user_is_us_person:
-            user_identifier_data["us_tin"] = current_user.get("us_tin")
-
-        spouse = current_user_marital.get("spouse")
-
-        if spouse is not None:
-            user_identifier_data["spouse"] = spouse
-
-        response = stone_age.get_user_quiz(user_identifier_data)
-
-        output = response.get("output")
-        stone_age_contract_uuid = response.get("uuid")
-        current_user_updated = deepcopy(current_user)
-        current_user_updated.update(
-            {"stone_age_contract_uuid": stone_age_contract_uuid}
-        )
-
-        current_user_updated.update({"register_analyses": output.get("decision")})
-
-        if (
-            user_repository.update_one(old=current_user, new=current_user_updated)
-            is False
-        ):
-            raise InternalServerError("common.process_issue")
-
-        return {"status_code": status.HTTP_200_OK, "payload": output}
-
-    @staticmethod
-    def user_quiz_put(
         payload: dict,
         stone_age=StoneAge,
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
+        file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
     ) -> dict:
-        UserService.onboarding_step_validator(
-            payload=payload, on_board_step="user_quiz_step"
-        )
+        # UserService.onboarding_step_validator(
+        #     payload=payload, on_board_step="user_quiz_step"
+        # )
         thebes_answer = payload.get("x-thebes-answer")
-
-        user_onboarding_current_step = UserService.get_onboarding_user_current_step(
-            payload=payload
-        )
-        if UserService.can_send_quiz(
-            user_onboarding_current_step=user_onboarding_current_step
-        ):
-            return {
-                "status_code": status.HTTP_400_BAD_REQUEST,
-                "message_key": "user.quiz.missing_steps",
-            }
+        # user_onboarding_current_step = UserService.get_onboarding_user_current_step(
+        #     payload=payload
+        # )
+        # if UserService.can_send_quiz(
+        #     user_onboarding_current_step=user_onboarding_current_step
+        # ):
+        #     return {
+        #         "status_code": status.HTTP_400_BAD_REQUEST,
+        #         "message_key": "user.quiz.missing_steps",
+        #     }
 
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         current_user_marital = current_user.get("marital")
 
-        user_identifier_data = {
-            "email": current_user.get("email"),
-            "cpf": current_user.get("cpf"),
-            "cel_phone": current_user.get("cel_phone"),
-            "marital_status": current_user_marital.get("marital_status"),
-            "is_us_person": current_user.get("is_us_person"),
-        }
-
-        current_user_is_us_person = current_user.get("is_us_person")
-
-        if current_user_is_us_person:
-            user_identifier_data["us_tin"] = current_user.get("us_tin")
-
-        spouse = current_user_marital.get("spouse")
-
-        if spouse is not None:
-            user_identifier_data["spouse"] = spouse
+        user_identifier_data = stone_age.get_user_identifier_data(
+            payload=payload,
+            current_user=current_user,
+            current_user_marital=current_user_marital,
+            file_repository=file_repository
+        )
 
         response = stone_age.get_user_quiz(user_identifier_data)
 
         output = response.get("output")
         stone_age_contract_uuid = response.get("uuid")
+        stone_age_proposal_id = output.get("proposalId")
         current_user_updated = deepcopy(current_user)
         current_user_updated.update(
-            {"stone_age_contract_uuid": stone_age_contract_uuid}
+            {
+                "stone_age_contract_uuid": stone_age_contract_uuid,
+                "stone_age_proposal_id": stone_age_proposal_id
+            }
         )
 
         current_user_updated.update({"register_analyses": output.get("decision")})
@@ -770,6 +705,9 @@ class UserService(IUser):
         if user_was_updated is False:
             raise InternalServerError("common.process_issue")
 
+        del output['decision']
+        del output['proposalId']
+
         return {"status_code": status.HTTP_200_OK, "payload": output}
 
     @staticmethod
@@ -784,18 +722,21 @@ class UserService(IUser):
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         if type(current_user) is not dict:
             raise BadRequestError("common.register_not_exists")
-
-        current_user_updated = deepcopy(current_user)
-        must_send_quiz = current_user_updated.get("register_analyses") is None
+        must_send_quiz = current_user.get("register_analyses") == StoneAgeRegisterAnalyses.POINTS.value
 
         if must_send_quiz is False:
             return {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.not_modified",
             }
-        # NAO SABEMOS O QUE A STONE AGE IRA RETORNAR AO ENVIARMOS AS RESPOSTAS DO QUIZ, VERIFICAR O QUE FAZER COM ESSE RETORNO
+
+        send_quiz_request = stone_age.get_user_send_quiz_request(
+            payload=payload,
+            current_user=current_user
+        )
+
         stone_age_response = stone_age.send_user_quiz_responses(
-            quiz=payload.get("quiz")
+            send_quiz_request=send_quiz_request
         )
 
         sent_to_persephone = persephone_client.run(
@@ -812,8 +753,11 @@ class UserService(IUser):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-        if must_send_quiz:
-            current_user_updated.update({"register_analyses": "PENDING"})
+        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+
+        if current_user.get('register_analyses') == StoneAgeRegisterAnalyses.POINTS.value:
+            current_user_updated = deepcopy(current_user)
+            current_user_updated.update({"register_analyses": StoneAgeRegisterAnalyses.SEND_RESPONSES.value})
             if (
                 user_repository.update_one(old=current_user, new=current_user_updated)
                 is False
@@ -905,11 +849,6 @@ class UserService(IUser):
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
-        payload = UserService.fake_stone_age_callback(
-            email=thebes_answer.get("email"), cpf=new.get("cpf")
-        )
-        SinacorService.process_callback(payload=payload)
-
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "requests.updated",
@@ -946,7 +885,7 @@ class UserService(IUser):
             "error": None,
             "successful": True,
             "appName": "lionx",
-            "uuid": "21b00324-d240-4c61-a79c-9a0bd7ff6e45",
+            "proposal_id": "21b00324-d240-4c61-a79c-9a0bd7ff6e45",
             "output": {
                 "status": "OK",
                 "decision": "APROVADO",
@@ -1018,12 +957,8 @@ class UserService(IUser):
                 "client_type": {"source": "PH3W", "value": 1},
                 "investor_type": {"source": "PH3W", "value": 101},
                 "cosif_tax_classification": {"source": "PH3W", "value": 21},
-                "marital_update": {
-                    "marital_regime": {"source": "PH3W", "value": 1},
-                    "spouse_birth_date": {
-                        "source": "PH3W",
-                        "value": datetime(1993, 7, 12, 0, 0),
-                    },
+                "marital": {
+                    "status": {"source": "PH3W", "value": 3},
                 },
                 "cpf": {"source": "PH3W", "value": cpf},
                 "self_link": {"source": "PH3W", "value": "http://self_user.jpg"},
@@ -1184,7 +1119,9 @@ class UserService(IUser):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
-            payload=user_update_register_schema,
+            payload=json.loads(
+                json.dumps(user_update_register_schema, cls=DateEncoder)
+            ),
             schema_key="user_update_register_data_schema",
         )
         if sent_to_persephone is False:

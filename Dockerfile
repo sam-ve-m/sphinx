@@ -8,11 +8,10 @@ EXPOSE 8000
 RUN mkdir -p /opt/envs/sphinx.lionx.com.br
 RUN mkdir -p /opt/envs/sphinx.lionx.com.br/
 RUN mkdir -p /opt/envs/heimdall.lionx.com.br/
-
+RUN mkdir -p /opt/envs/mist.lionx.com.br/
 RUN touch /opt/envs/sphinx.lionx.com.br/.env
 RUN touch /opt/envs/heimdall.lionx.com.br/.env
-RUN touch /opt/envs/sphinx.lionx.com.br/.env
-
+RUN touch /opt/envs/mist.lionx.com.br/.env
 WORKDIR /app/sphinx
 COPY . /app/sphinx/
 

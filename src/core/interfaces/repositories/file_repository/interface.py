@@ -64,3 +64,7 @@ class IFile(ABC):
     @abstractmethod
     def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
         pass
+
+    @abstractmethod
+    def get_user_selfie(self, file_type: UserFileType, user_email: str) -> Union[str, dict]:
+        pass

@@ -52,16 +52,6 @@ def update_user_complementary_data(
     return BaseController.run(UserController.user_complementary_data, payload, request)
 
 
-@router.get("/user/quiz", tags=["user"])
-def user_quiz(request: Request):
-    jwt_data = JWTHandler.get_thebes_answer_from_request(request=request)
-
-    payload = {
-        "x-thebes-answer": jwt_data,
-    }
-    return BaseController.run(UserController.user_quiz, payload, request)
-
-
 @router.put("/user/quiz", tags=["user"])
 def user_quiz(device_information: DeviceInformation, request: Request):
     jwt_data = JWTHandler.get_thebes_answer_from_request(request=request)
@@ -70,7 +60,7 @@ def user_quiz(device_information: DeviceInformation, request: Request):
         "x-thebes-answer": jwt_data,
         "device_information": device_information.dict(),
     }
-    return BaseController.run(UserController.user_quiz_put, payload, request)
+    return BaseController.run(UserController.user_quiz, payload, request)
 
 
 @router.put("/user/send_quiz_responses", tags=["user"])
