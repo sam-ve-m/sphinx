@@ -20,9 +20,9 @@ class JWTHandler:
     heimdall = Heimdall(logger=logging.getLogger(config("LOG_NAME")))
     mist = Mist(logger=logging.getLogger(config("LOG_NAME")))
 
-    @staticmethod
+    @classmethod
     def generate_token(
-        user_data: dict, kwargs_to_add_on_jwt: dict = None, ttl: int = 5
+        cls, user_data: dict, kwargs_to_add_on_jwt: dict = None, ttl: int = 5
     ) -> Optional[str]:
         """The ttl value in minutes"""
         try:
@@ -33,7 +33,7 @@ class JWTHandler:
                 user_data=user_data, kwargs_to_add_on_jwt=kwargs_to_add_on_jwt, ttl=ttl
             )
             payload_to_jwt = thebes_hall_builder.build()
-            compact_jws = JWTHandler.instance.encode(
+            compact_jws = cls.instance.encode(
                 payload_to_jwt, signing_key, alg="RS256"
             )
             return compact_jws
@@ -42,10 +42,10 @@ class JWTHandler:
             logger.error(e, exc_info=True)
             raise InternalServerError("common.process_issue")
 
-    @staticmethod
-    def decrypt_payload(encrypted_payload: str) -> Optional[dict]:
+    @classmethod
+    def decrypt_payload(cls, encrypted_payload: str) -> Optional[dict]:
         try:
-            payload = JWTHandler.heimdall.decrypt_payload(jwt=encrypted_payload)
+            payload = cls.heimdall.decrypt_payload(jwt=encrypted_payload)
             return payload
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
@@ -63,17 +63,17 @@ class JWTHandler:
 
     @staticmethod
     def get_thebes_answer_from_request(request: Request) -> dict:
-        thebes_answer = JWTHandler.get_jwt_from_request(request=request)
-        if thebes_answer is None:
+        jwt = JWTHandler.get_jwt_from_request(request=request)
+        if jwt is None:
             raise UnauthorizedError("Token not supplied")
-        payload = dict(JWTHandler.decrypt_payload(thebes_answer))
+        payload = dict(JWTHandler.decrypt_payload(jwt))
         return payload
 
-    @staticmethod
-    def generate_session_jwt(electronic_signature: dict, email: str):
+    @classmethod
+    def generate_session_jwt(cls, electronic_signature: dict, email: str):
         session_dict = {
             "email": email,
             "password": electronic_signature.get("signature"),
             "signatureExpireTime": electronic_signature.get("signature_expire_time"),
         }
-        return JWTHandler.mist.generate_jwt(jwt=session_dict)
+        return cls.mist.generate_jwt(jwt=session_dict)

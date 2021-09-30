@@ -76,25 +76,25 @@ def is_cnpj_valid(cnpj: Union[int, str]) -> bool:
 
     # Check if type is int and convert to str
     if not isinstance(cnpj, str) and isinstance(cnpj, int):
-        cpf = str(cnpj)
+        cnpj = str(cnpj)
 
     # Check if type is str
     if not isinstance(cnpj, str):
         return False
 
     # Remove some unwanted characters
-    cpf = re.sub("[^0-9]", "", cnpj)
+    cnpj = re.sub("[^0-9]", "", cnpj)
 
     # Checks if string has 11 characters
-    if len(cpf) != 14:
+    if len(cnpj) != 14:
         return False
 
     sum = 0
     weight = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 
-    """ Calculating the first cpf check digit. """
+    """ Calculating the first cnpj check digit. """
     for n in range(12):
-        value = int(cpf[n]) * weight[n]
+        value = int(cnpj[n]) * weight[n]
         sum = sum + value
 
     verifying_digit = sum % 11
@@ -104,11 +104,11 @@ def is_cnpj_valid(cnpj: Union[int, str]) -> bool:
     else:
         first_verifying_digit = 11 - verifying_digit
 
-    """ Calculating the second check digit of cpf. """
+    """ Calculating the second check digit of cnpj. """
     sum = 0
     weight = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
     for n in range(13):
-        sum = sum + int(cpf[n]) * weight[n]
+        sum = sum + int(cnpj[n]) * weight[n]
 
     verifying_digit = sum % 11
 
@@ -117,6 +117,6 @@ def is_cnpj_valid(cnpj: Union[int, str]) -> bool:
     else:
         second_verifying_digit = 11 - verifying_digit
 
-    if cpf[-2:] == "%s%s" % (first_verifying_digit, second_verifying_digit):
+    if cnpj[-2:] == "%s%s" % (first_verifying_digit, second_verifying_digit):
         return True
     return False
