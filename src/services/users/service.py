@@ -60,6 +60,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
         persephone_client=PersephoneService.get_client(),
+        jwt_handler=JWTHandler
     ) -> dict:
         user = generate_id("email", user, must_remove=False)
         has_pin = user.get("pin")
@@ -82,7 +83,7 @@ class UserService(IUser):
         if (sent_to_persephone and was_user_inserted) is False:
             raise InternalServerError("common.process_issue")
 
-        payload_jwt = JWTHandler.generate_token(user_data=user, ttl=10)
+        payload_jwt = jwt_handler.generate_token(user_data=user, ttl=10)
         authentication_service.send_authentication_email(
             email=user.get("email"),
             payload_jwt=payload_jwt,
@@ -298,12 +299,13 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
+        jwt_handler=JWTHandler
     ) -> dict:
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
         to_add_into_jwt = {"forgot_password": True}
-        payload_jwt = JWTHandler.generate_token(
+        payload_jwt = jwt_handler.generate_token(
             user_data=entity, kwargs_to_add_on_jwt=to_add_into_jwt, ttl=10
         )
         authentication_service.send_authentication_email(

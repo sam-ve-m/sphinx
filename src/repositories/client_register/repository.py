@@ -5,7 +5,7 @@ from typing import Type, Optional
 from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 from src.services.builders.client_register.builder import ClientRegisterBuilder
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
-from src.routers.validators.marital_status_stone_age_to_sphinx import (
+from src.services.validators.marital_status_stone_age_to_sphinx import (
     MaritalStatusStoneAgeToSphinxEnum,
 )
 from src.utils.env_config import config

@@ -2,8 +2,8 @@
 from fastapi import Depends, Request
 
 # SPHINX
-from src.routers.validators.user_validators import UserSimple
-from src.routers.validators.base import Email
+from src.services.validators.user_validators import UserSimple
+from src.services.validators.base import Email
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
 from src.routers.routes_registers.public import PublicRouter

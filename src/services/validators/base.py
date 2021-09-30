@@ -4,12 +4,12 @@ from __future__ import annotations
 # OUTSIDE LIBRARIES
 from email_validator import validate_email
 
-from src.utils.env_config import config
 
-from src.routers.validators.onboarding_validators import *
-from src.routers.validators.bureau_validators import *
 
 # SPHIX
+from src.services.validators.onboarding_validators import *
+from src.services.validators.bureau_validators import Source
+from src.utils.env_config import config
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
 

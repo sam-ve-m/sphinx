@@ -2,11 +2,15 @@
 from typing import Optional, Dict, Any
 
 # OUTSIDE LIBRARIES
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from pydantic import BaseModel, root_validator
 
 # SPHINX
-from src.routers.validators.base import (
+from src.services.validators.base import (
+    InvestorTypeSource,
+    RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
+)
+from src.services.validators.bureau_validators import (
     Uuid,
     Decision,
     Status,
@@ -37,7 +41,6 @@ from src.routers.validators.base import (
     ConnectedPersonSource,
     ClientTypeSource,
     PersonTypeSource,
-    InvestorTypeSource,
     CosifTaxClassificationSource,
     NeighborhoodSource,
     AssetsDateSource,
@@ -55,7 +58,6 @@ from src.routers.validators.base import (
     RegistrationOfOtherMarketParticipantsSecuritiesCommissionSource,
     ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource,
     RegistrationOfForeignInvestorsSecuritiesCommissionSource,
-    RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource,
     SelfLinkSource,
     IsUsPersonSource,
     UsTinSource,

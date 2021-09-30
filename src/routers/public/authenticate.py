@@ -6,7 +6,7 @@ import json
 # Sphinx
 from src.utils.env_config import config
 from src.controllers.base_controller import BaseController
-from src.routers.validators.authenticate_validators import Login
+from src.services.validators.authenticate_validators import Login
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.routes_registers.public import PublicRouter
 from src.utils.jwt_utils import JWTHandler

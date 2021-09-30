@@ -4,11 +4,12 @@ from copy import deepcopy
 # OUTSIDE LIBRARIES
 from fastapi import status
 
+
+
+# SPHINX
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 from src.utils.env_config import config
-
-# SPHINX
 from src.utils.email import HtmlModifier
 from src.repositories.user.repository import UserRepository
 from src.controllers.jwts.controller import JwtController
@@ -80,7 +81,7 @@ class AuthenticationService(IAuthentication):
     def login(
         user_credentials: dict,
         user_repository=UserRepository(),
-        token_handler=JWTHandler,
+        token_handler=JWTHandler
     ) -> dict:
         entity = user_repository.find_one({"_id": user_credentials.get("email")})
         if entity is None:
@@ -90,7 +91,7 @@ class AuthenticationService(IAuthentication):
         # if entity.get("is_active_client") is False:
         #     raise UnauthorizedError("invalid_credential")
         if entity.get("use_magic_link") is True:
-            payload_jwt = JWTHandler.generate_token(user_data=entity, ttl=10)
+            payload_jwt = token_handler.generate_token(user_data=entity, ttl=10)
             AuthenticationService.send_authentication_email(
                 email=entity.get("email"),
                 payload_jwt=payload_jwt,
@@ -134,7 +135,7 @@ class AuthenticationService(IAuthentication):
         device_and_thebes_answer_from_request: dict,
         user_repository=UserRepository(),
         token_handler=JWTHandler,
-        persephone_client=PersephoneService.get_client(),
+        persephone_client=PersephoneService.get_client()
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request.get("x-thebes-answer")
         user_old = user_repository.find_one({"_id": x_thebes_answer.get("email")})

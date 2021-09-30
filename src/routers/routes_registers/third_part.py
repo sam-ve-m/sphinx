@@ -12,6 +12,6 @@ class ThirdPartRouter(RoutesRegister):
     @staticmethod
     def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
         token = middleware_utils.get_token_if_token_is_valid(request=request)
-        if token and token["is_third_part"]:
+        if token and token.get("is_third_part"):
             return True
         return False

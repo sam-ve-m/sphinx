@@ -1,12 +1,10 @@
 # STANDARD LIBS
-from typing import List
 
 # OUTSIDE LIBRARIES
 from fastapi import Request
-from pydantic import BaseModel
 
 # SPHINX
-from src.routers.validators.suitability_validators import Suitability
+from src.services.validators.suitability_validators import Suitability
 from src.controllers.suitabilities.controller import SuitabilityController
 from src.controllers.base_controller import BaseController
 from src.utils.jwt_utils import JWTHandler

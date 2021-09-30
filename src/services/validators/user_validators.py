@@ -1,8 +1,7 @@
-from typing import Optional, List
+from typing import List
 
-from pydantic import BaseModel
-
-from src.routers.validators.base import *
+from src.services.validators.base import *
+from src.services.validators.bureau_validators import *
 
 
 class UserSimple(Email, NickName, OptionalPIN):
