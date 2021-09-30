@@ -10,7 +10,6 @@ from fordev.generators import rg
 # SPHINX
 from src.controllers.jwts.controller import JwtController
 from src.domain.stone_age.stone_age_register_analyses import StoneAgeRegisterAnalyses
-from src.utils.json_encoder.date_encoder import DateEncoder
 from src.core.interfaces.services.user.interface import IUser
 
 from src.services.authentications.service import AuthenticationService
@@ -1126,9 +1125,7 @@ class UserService(IUser):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
-            payload=json.loads(
-                json.dumps(user_update_register_schema, cls=DateEncoder)
-            ),
+            payload=user_update_register_schema,
             schema_key="user_update_register_data_schema",
         )
         if sent_to_persephone is False:

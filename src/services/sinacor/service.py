@@ -19,8 +19,6 @@ from src.utils.solutiontech import Solutiontech
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
 from src.domain.persephone_queue import PersephoneQueue
 from src.utils.env_config import config
-from src.utils.persephone_templates import get_user_account_template_with_data
-from src.utils.json_encoder.date_encoder import DateEncoder
 
 
 class SinacorService:
@@ -193,18 +191,10 @@ class SinacorService:
     def _send_dtvm_client_data_to_persephone(
         persephone_client, dtvm_client_data: dict, user_email: str
     ):
-        normalize_enum_types(dtvm_client_data)
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
-            payload=json.loads(
-                json.dumps(
-                    get_user_account_template_with_data(
-                        payload=dtvm_client_data, email=user_email
-                    ),
-                    cls=DateEncoder,
-                )
-            ),
+            payload=dtvm_client_data,
             schema_key="user_bureau_callback_schema",
         )
         if sent_to_persephone is False:
