@@ -2,7 +2,7 @@
 from fastapi import Request
 
 # SPHINX
-from src.domain.validators import UpdateCustomerRegistrationData
+from src.domain.validators.user_validators import UpdateCustomerRegistrationData
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController

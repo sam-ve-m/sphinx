@@ -1,5 +1,5 @@
 from fastapi import Request
-from src.domain.validators import Feature
+from src.domain.validators.base import Feature
 from src.controllers.base_controller import BaseController
 from src.controllers.features.controller import FeatureController
 from src.routers.routes_registers.admin import AdminRouter

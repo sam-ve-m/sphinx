@@ -1,7 +1,7 @@
 from fastapi import Request
 
-from src.domain.validators import DeviceInformationOptional
-from src.domain.validators import SignatureCheck
+from src.domain.validators.onboarding_validators import DeviceInformationOptional
+from src.domain.validators.authenticate_validators import SignatureCheck
 from src.utils.jwt_utils import JWTHandler
 from src.controllers.base_controller import BaseController
 from src.controllers.authentications.controller import AuthenticationController

@@ -2,7 +2,7 @@
 from fastapi import Request
 
 # SPHINX
-from src.domain.validators import UserSimple
+from src.domain.validators.user_validators import UserSimple
 
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController

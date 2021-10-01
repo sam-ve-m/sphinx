@@ -45,7 +45,7 @@ from src.services.persephone.templates.persephone_templates import (
     get_user_update_register_schema_template_with_data,
 )
 from src.infrastructures.env_config import config
-from src.domain.encrypt.password import PasswordEncrypt
+from src.domain.encrypt.password.util import PasswordEncrypt
 from src.exceptions.exceptions import (
     BadRequestError,
     InternalServerError,

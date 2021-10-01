@@ -3,7 +3,7 @@ from fastapi import Request, Depends
 
 # SPHINX
 from src.controllers.base_controller import BaseController
-from src.domain.validators import CountryState, Country
+from src.domain.validators.client_register_validators import CountryState, Country
 from src.controllers.cliente_register_enums.controller import (
     ClientRegisterEnumsController,
 )

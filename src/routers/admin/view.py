@@ -1,8 +1,8 @@
 from fastapi import Request
 from src.controllers.base_controller import BaseController
 from src.controllers.views.controller import ViewController
-from src.domain.validators import DisplayName
-from src.domain.validators import View
+from src.domain.validators.onboarding_validators import DisplayName
+from src.domain.validators.base import View
 from src.routers.routes_registers.admin import AdminRouter
 
 
