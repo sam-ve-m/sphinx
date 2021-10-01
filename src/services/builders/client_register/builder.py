@@ -267,9 +267,9 @@ class ClientRegisterBuilder:
         self._fields_added.update({"SG_PAIS": country})
         return self
 
-    # def add_tp_regcas(self, user_data: dict):
+    # def add_tp_regcas(self, valid_user_data: dict):
     #     self._fields_added.update(
-    #         {"TP_REGCAS": user_data["marital"]["marital_regime"]}
+    #         {"TP_REGCAS": valid_user_data["marital"]["marital_regime"]}
     #     )
     #     return self
 
@@ -525,9 +525,9 @@ class ClientRegisterBuilder:
         self._fields_added.update({"CD_CPF_CONJUGE": spouse.get("cpf")})
         return self
 
-    # def add_dt_nasc_conjuge(self, user_data: dict):
+    # def add_dt_nasc_conjuge(self, valid_user_data: dict):
     #     self._fields_added.update(
-    #         {"DT_NASC_CONJUGE": user_data["marital"]["spouse"]["birth_date"]}
+    #         {"DT_NASC_CONJUGE": valid_user_data["marital"]["spouse"]["birth_date"]}
     #     )
     #     return self
 
