@@ -7,7 +7,7 @@ from typing import Type
 from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
 from src.repositories.suitability.repository import SuitabilityRepository
 from src.services.persephone.service import PersephoneService
-from src.utils.jwt_utils import JWTHandler
+from src.services.jwts.service import JwtService
 
 
 class ISuitability(ABC):
@@ -29,7 +29,7 @@ class ISuitability(ABC):
         suitability_repository: MongoDBInfrastructure,
         suitability_user_profile_repository: MongoDBInfrastructure,
         persephone_client: Type[PersephoneService] = None,
-        token_handler: Type[JWTHandler] = None,
+        token_service: Type[JwtService] = None,
     ) -> dict:
         pass
 

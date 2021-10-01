@@ -12,7 +12,7 @@ from tests.stub_classes.stub_request import (
     StubURL,
     StubRequest
 )
-from tests.stub_classes.stub_jwt_handler_composition import StubJWTHandler
+from tests.stub_classes.stub_jwt_service_composition import StubJwtService
 
 
 class StubRepository(StubBaseRepository):
@@ -25,9 +25,9 @@ def get_new_stubby_repository():
 
 
 @pytest.fixture
-def get_new_stub_jwt_handler():
-    stub_jwt_handler = StubJWTHandler()
-    return stub_jwt_handler
+def get_new_stub_jwt_service():
+    stub_jwt_service = StubJwtService()
+    return stub_jwt_service
 
 
 @pytest.fixture
@@ -171,94 +171,94 @@ def test_get_valid_admin_from_database(get_new_stubby_repository):
 
 
 def test_validate_electronic_signature_with_token(
-    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_service
 ):
     stub_request = get_new_stub_request_user_with_mist_header
-    stub_jwt_handler = get_new_stub_jwt_handler
+    stub_jwt_service = get_new_stub_jwt_service
 
-    stub_jwt_handler.mist.validate_jwt = MagicMock(return_value=False)
+    stub_jwt_service.mist.validate_jwt = MagicMock(return_value=False)
 
     assert (
         MiddlewareUtils.validate_electronic_signature(
-            request=stub_request, user_data={}, jwt_handler=stub_jwt_handler
+            request=stub_request, user_data={}, jwt_handler=stub_jwt_service
         )
         is False
     )
 
 
 def test_validate_electronic_signature_with_token_not_encoded(
-    get_new_stub_request_user_with_mist_header_wrong, get_new_stub_jwt_handler
+    get_new_stub_request_user_with_mist_header_wrong, get_new_stub_jwt_service
 ):
     stub_request = get_new_stub_request_user_with_mist_header_wrong
-    stub_jwt_handler = get_new_stub_jwt_handler
+    stub_jwt_service = get_new_stub_jwt_service
 
-    stub_jwt_handler.mist.validate_jwt = MagicMock(return_value=False)
+    stub_jwt_service.mist.validate_jwt = MagicMock(return_value=False)
     with pytest.raises(AttributeError):
         MiddlewareUtils.validate_electronic_signature(
-            request=stub_request, user_data={}, jwt_handler=stub_jwt_handler
+            request=stub_request, user_data={}, jwt_handler=stub_jwt_service
         )
 
 
 def test_validate_electronic_signature_with_token_and_is_valid_but_email_does_not_match(
-    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_service
 ):
     stub_request = get_new_stub_request_user_with_mist_header
-    stub_jwt_handler = get_new_stub_jwt_handler
+    stub_jwt_service = get_new_stub_jwt_service
 
-    stub_jwt_handler.mist.validate_jwt = MagicMock(return_value=False)
-    stub_jwt_handler.mist.decrypt_payload = MagicMock(return_value={"email": "lalala"})
+    stub_jwt_service.mist.validate_jwt = MagicMock(return_value=False)
+    stub_jwt_service.mist.decrypt_payload = MagicMock(return_value={"email": "lalala"})
 
     assert (
         MiddlewareUtils.validate_electronic_signature(
             request=stub_request,
             user_data={"email": "lala"},
-            jwt_handler=stub_jwt_handler,
+            jwt_handler=stub_jwt_service,
         )
         is False
     )
 
 
 def test_validate_electronic_signature_with_token_and_is_valid_but_email_does_match(
-    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_service
 ):
     stub_request = get_new_stub_request_user_with_mist_header
-    stub_jwt_handler = get_new_stub_jwt_handler
+    stub_jwt_service = get_new_stub_jwt_service
 
-    stub_jwt_handler.mist.validate_jwt = MagicMock(return_value=False)
-    stub_jwt_handler.mist.decrypt_payload = MagicMock(return_value={"email": "lala"})
+    stub_jwt_service.mist.validate_jwt = MagicMock(return_value=False)
+    stub_jwt_service.mist.decrypt_payload = MagicMock(return_value={"email": "lala"})
 
     assert (
         MiddlewareUtils.validate_electronic_signature(
             request=stub_request,
             user_data={"email": "lala"},
-            jwt_handler=stub_jwt_handler,
+            jwt_handler=stub_jwt_service,
         )
         is False
     )
 
 
 def test_get_token_if_token_is_valid(
-    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_service
 ):
     value = "lala"
-    stub_jwt_handler = get_new_stub_jwt_handler
+    stub_jwt_service = get_new_stub_jwt_service
     stub_request = get_new_stub_request_user_with_mist_header
-    stub_jwt_handler.get_thebes_answer_from_request = MagicMock(return_value=value)
+    stub_jwt_service.get_thebes_answer_from_request = MagicMock(return_value=value)
     assert value == MiddlewareUtils.get_token_if_token_is_valid(
-        request=stub_request, jwt_handler=stub_jwt_handler
+        request=stub_request, jwt_handler=stub_jwt_service
     )
 
 
 def test_get_token_if_token_is_valid_raise_error(
-    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_handler
+    get_new_stub_request_user_with_mist_header, get_new_stub_jwt_service
 ):
-    stub_jwt_handler = get_new_stub_jwt_handler
+    stub_jwt_service = get_new_stub_jwt_service
     stub_request = get_new_stub_request_user_with_mist_header
-    stub_jwt_handler.get_thebes_answer_from_request = MagicMock(
+    stub_jwt_service.get_thebes_answer_from_request = MagicMock(
         name="get_thebes_answer_from_request", side_effect=BaseException()
     )
 
     assert (
-        MiddlewareUtils.get_token_if_token_is_valid(request=stub_request, jwt_handler=stub_jwt_handler)
+        MiddlewareUtils.get_token_if_token_is_valid(request=stub_request, jwt_handler=stub_jwt_service)
         is None
     )

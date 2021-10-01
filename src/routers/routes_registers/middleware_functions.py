@@ -9,7 +9,7 @@ from fastapi import Request
 # SPHINX
 from src.infrastructures.env_config import config
 from src.repositories.user.repository import UserRepository
-from src.utils.jwt_utils import JWTHandler
+from src.services.jwts.service import JwtService
 
 
 class MiddlewareUtils:
@@ -46,7 +46,7 @@ class MiddlewareUtils:
 
     @staticmethod
     def validate_electronic_signature(
-        request: Request, user_data: dict, jwt_handler=JWTHandler
+        request: Request, user_data: dict, jwt_handler=JwtService
     ) -> bool:
         mist_token = None
         for header_tuple in request.headers.raw:
@@ -62,7 +62,7 @@ class MiddlewareUtils:
 
     @staticmethod
     def get_token_if_token_is_valid(
-        request: Request, jwt_handler=JWTHandler
+        request: Request, jwt_handler=JwtService
     ) -> Optional[dict]:
         try:
             return jwt_handler.get_thebes_answer_from_request(request=request)

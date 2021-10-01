@@ -7,7 +7,7 @@ from fastapi import status
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.services.users.service import UserService
 from src.repositories.file.repository import TermsFileType
-from tests.stub_classes.stub_jwt_handler_composition import StubJWTHandler
+from tests.stub_classes.stub_jwt_service_composition import StubJwtService
 from tests.stub_classes.stub_base_repository import StubBaseRepository
 from tests.stub_classes.stub_persephone_service import StubPersephoneService
 from tests.stub_classes.stub_client_register_repository import StubClientRegisterRepository
@@ -34,7 +34,7 @@ class StubPersephoneClient:
     pass
 
 
-class StubJWTHandler:
+class StubJwtService:
     pass
 
 
@@ -82,14 +82,14 @@ def test_created(get_new_stubby_repository):
     stub_authentication_service.send_authentication_email = MagicMock(return_value=True)
     stub_persephone_client = StubPersephoneClient()
     stub_persephone_client.run = MagicMock(return_value=True)
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value={})
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(return_value={})
     response = UserService.create(
         user=payload,
         user_repository=stub_repository,
         authentication_service=stub_authentication_service,
         persephone_client=stub_persephone_client,
-        jwt_handler=stub_jwt_handler
+        jwt_handler=stub_jwt_service
     )
     assert response.get("status_code") == status.HTTP_201_CREATED
     assert response.get("message_key") == "user.created"
@@ -154,12 +154,12 @@ def test_change_view(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
     stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
     stub_repository.update_one = MagicMock(return_value=True)
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value="toaskjdg1.233213.123123")
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(return_value="toaskjdg1.233213.123123")
     response = UserService.change_view(
         payload=payload_change_view,
         user_repository=stub_repository,
-        token_handler=stub_jwt_handler,
+        token_service=stub_jwt_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert "jwt" in response.get("payload")
@@ -226,13 +226,13 @@ def test_forgot_password(get_new_stubby_repository):
     stub_repository.find_one = MagicMock(return_value={})
     stub_repository.update_one = MagicMock(return_value=True)
     StubAuthenticationService.send_authentication_email = MagicMock(return_value=True)
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=get_user_data)
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     response = UserService.forgot_password(
         payload=payload_change_password,
         user_repository=stub_repository,
         authentication_service=StubAuthenticationService,
-        jwt_handler=stub_jwt_handler
+        jwt_handler=stub_jwt_service
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "email.forgot_password"
@@ -273,12 +273,12 @@ def test_add_feature_already_exists(get_user_data, get_new_stubby_repository):
         "x-thebes-answer": get_user_data,
         "feature": "real_time_data",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=get_user_data)
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.add_feature(
-        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        payload=payload, user_repository=stub_repository, token_service=stub_jwt_service
     )
     assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
 
@@ -292,15 +292,15 @@ def test_add_feature_process_issue(get_user_data, get_new_stubby_repository):
         "x-thebes-answer": copy,
         "feature": "real_time_data",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=get_user_data)
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.add_feature(
             payload=payload,
             user_repository=stub_repository,
-            token_handler=stub_jwt_handler,
+            token_service=stub_jwt_service,
         )
 
 
@@ -309,14 +309,14 @@ def test_add_feature(get_user_data, get_new_stubby_repository):
         "x-thebes-answer": get_user_data,
         "feature": "test_feature",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(
         return_value="jkasdh71283.12938712.1029873912"
     )
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.add_feature(
-        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        payload=payload, user_repository=stub_repository, token_service=stub_jwt_service
     )
     assert result.get("status_code") == status.HTTP_200_OK
     assert type(result.get("payload").get("jwt")) == str
@@ -329,8 +329,8 @@ def test_delete_feature_that_not_exists_raises(
         "x-thebes-answer": get_user_data,
         "feature": "real_time_data",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(
         return_value="asdkjash761.asd98y7139.123y7129h"
     )
     stub_repository = get_new_stubby_repository
@@ -339,7 +339,7 @@ def test_delete_feature_that_not_exists_raises(
         UserService.delete_feature(
             payload=payload,
             user_repository=stub_repository,
-            token_handler=stub_jwt_handler,
+            token_service=stub_jwt_service,
         )
 
 
@@ -350,10 +350,10 @@ def test_delete_feature_not_exists(get_user_data, get_new_stubby_repository):
     }
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=False)
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=get_user_data)
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     result = UserService.delete_feature(
-        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        payload=payload, user_repository=stub_repository, token_service=stub_jwt_service
     )
     assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
 
@@ -363,14 +363,14 @@ def test_delete_feature_that_exists(get_user_data, get_new_stubby_repository):
         "x-thebes-answer": get_user_data,
         "feature": "real_time_data",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(
         return_value="asdkjash761.asd98y7139.123y7129h"
     )
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.delete_feature(
-        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        payload=payload, user_repository=stub_repository, token_service=stub_jwt_service
     )
     assert result.get("status_code") == status.HTTP_200_OK
 
@@ -446,8 +446,8 @@ def test_sign_term(get_user_data, get_new_stubby_repository):
     stub_file_repository.get_current_term_version = MagicMock(return_value=1)
 
     StubPersephoneClient.run = MagicMock(return_value=True)
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=get_user_data)
+    stub_jwt_service = StubJwtService()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     response = UserService.sign_term(
         payload={
             "x-thebes-answer": {"email": "lala"},
@@ -455,7 +455,7 @@ def test_sign_term(get_user_data, get_new_stubby_repository):
         },
         file_repository=stub_file_repository,
         user_repository=stub_user_repository,
-        token_handler=stub_jwt_handler,
+        token_service=stub_jwt_service,
         persephone_client=StubPersephoneClient,
     )
     assert response.get("status_code") == status.HTTP_200_OK

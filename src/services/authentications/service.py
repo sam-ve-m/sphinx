@@ -13,7 +13,7 @@ from src.infrastructures.env_config import config
 from src.services.email_builder.email import HtmlModifier
 from src.repositories.user.repository import UserRepository
 from src.controllers.jwts.controller import JwtController
-from src.utils.jwt_utils import JWTHandler
+from src.services.jwts.service import JwtService
 from src.exceptions.exceptions import (
     BadRequestError,
     UnauthorizedError,
@@ -40,7 +40,7 @@ class AuthenticationService(IAuthentication):
     def thebes_gate(
         thebes_answer_from_request_or_error: dict,
         user_repository=UserRepository(),
-        token_handler=JWTHandler,
+        token_service=JwtService,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         old = user_repository.find_one(
@@ -71,7 +71,7 @@ class AuthenticationService(IAuthentication):
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
 
-        jwt = token_handler.generate_token(user_data=new, ttl=525600)
+        jwt = token_service.generate_token(user_data=new, ttl=525600)
 
         response.update({"payload": {"jwt": jwt}})
 
@@ -81,7 +81,7 @@ class AuthenticationService(IAuthentication):
     def login(
         user_credentials: dict,
         user_repository=UserRepository(),
-        token_handler=JWTHandler
+        token_service=JwtService
     ) -> dict:
         entity = user_repository.find_one({"_id": user_credentials.get("email")})
         if entity is None:
@@ -91,7 +91,7 @@ class AuthenticationService(IAuthentication):
         # if entity.get("is_active_client") is False:
         #     raise UnauthorizedError("invalid_credential")
         if entity.get("use_magic_link") is True:
-            payload_jwt = token_handler.generate_token(user_data=entity, ttl=10)
+            payload_jwt = token_service.generate_token(user_data=entity, ttl=10)
             AuthenticationService.send_authentication_email(
                 email=entity.get("email"),
                 payload_jwt=payload_jwt,
@@ -111,7 +111,7 @@ class AuthenticationService(IAuthentication):
             if hash_field(payload=pin) != entity.get("pin"):
                 raise UnauthorizedError("user.pin_error")
 
-            jwt = token_handler.generate_token(user_data=entity, ttl=525600)
+            jwt = token_service.generate_token(user_data=entity, ttl=525600)
             JwtController.insert_one(jwt, entity.get("email"))
             return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
@@ -134,7 +134,7 @@ class AuthenticationService(IAuthentication):
     def thebes_hall(
         device_and_thebes_answer_from_request: dict,
         user_repository=UserRepository(),
-        token_handler=JWTHandler,
+        token_service=JwtService,
         persephone_client=PersephoneService.get_client()
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request.get("x-thebes-answer")
@@ -158,7 +158,7 @@ class AuthenticationService(IAuthentication):
             if user_repository.update_one(old=user_old, new=user_new) is False:
                 raise InternalServerError("common.process_issue")
 
-        jwt = token_handler.generate_token(user_data=user_new, ttl=525600)
+        jwt = token_service.generate_token(user_data=user_new, ttl=525600)
 
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
@@ -182,7 +182,7 @@ class AuthenticationService(IAuthentication):
     def get_thebes_hall(
         thebes_answer_from_request_or_error: dict,
         user_repository=UserRepository(),
-        token_handler=JWTHandler,
+        token_service=JwtService,
     ) -> dict:
         user_old = user_repository.find_one(
             {"_id": thebes_answer_from_request_or_error.get("email")}
@@ -204,7 +204,7 @@ class AuthenticationService(IAuthentication):
             if user_repository.update_one(old=user_old, new=user_new) is False:
                 raise InternalServerError("common.process_issue")
 
-        jwt = token_handler.generate_token(user_data=user_new, ttl=525600)
+        jwt = token_service.generate_token(user_data=user_new, ttl=525600)
 
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
@@ -385,7 +385,7 @@ class AuthenticationService(IAuthentication):
         jwt_mist_session = None
         allowed = None
         try:
-            jwt_mist_session = JWTHandler.generate_session_jwt(
+            jwt_mist_session = JwtService.generate_session_jwt(
                 change_electronic_signature_request.get("electronic_signature"),
                 change_electronic_signature_request.get("email"),
             )

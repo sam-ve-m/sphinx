@@ -20,7 +20,7 @@ from src.services.builders.suitability.builder import SuitabilityAnswersProfileB
 from src.services.persephone.templates.persephone_templates import get_user_suitability_template_with_data
 from src.services.persephone.service import PersephoneService
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
-from src.utils.jwt_utils import JWTHandler
+from src.services.jwts.service import JwtService
 from src.infrastructures.env_config import config
 
 
@@ -66,7 +66,7 @@ class SuitabilityService(ISuitability):
         suitability_repository=SuitabilityRepository(),
         suitability_user_profile_repository=SuitabilityUserProfileRepository(),
         persephone_client=PersephoneService.get_client(),
-        token_handler=JWTHandler,
+        token_service=JwtService,
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
         user_email: str = thebes_answer.get("email")
@@ -114,7 +114,7 @@ class SuitabilityService(ISuitability):
             )
         )
         new = user_repository.find_one({"_id": user_email})
-        jwt = token_handler.generate_token(user_data=new, ttl=525600)
+        jwt = token_service.generate_token(user_data=new, ttl=525600)
         return {"status_code": status.HTTP_201_CREATED, "payload": {"jwt": jwt}}
 
     @staticmethod

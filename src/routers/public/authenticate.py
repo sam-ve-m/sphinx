@@ -9,7 +9,7 @@ from src.controllers.base_controller import BaseController
 from src.domain.validators.authenticate_validators import Login
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.routes_registers.public import PublicRouter
-from src.utils.jwt_utils import JWTHandler
+from src.services.jwts.service import JwtService
 from src.i18n.i18n_resolver import i18nResolver as i18n
 
 router = PublicRouter.instance()
@@ -26,7 +26,7 @@ def login(user_credentials: Login, request: Request):
 def answer(request: Request):
     # This will be called from the frontend after open TARGET_LINK (.env) received on the email confirmation
     try:
-        jwt_data = JWTHandler.get_thebes_answer_from_request(request=request)
+        jwt_data = JwtService.get_thebes_answer_from_request(request=request)
     except Exception as e:
         logger = logging.getLogger(config("LOG_NAME"))
         logger.error(e, exc_info=True)

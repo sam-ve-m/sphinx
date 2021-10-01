@@ -43,7 +43,7 @@ def test_answer_register_exists():
         AuthenticationService.thebes_gate(
             thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
-            token_handler=StubTokenHandler,
+            token_service=StubTokenHandler,
         )
 
 
@@ -55,7 +55,7 @@ def test_answer_process_issue():
         AuthenticationService.thebes_gate(
             thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
-            token_handler=StubTokenHandler,
+            token_service=StubTokenHandler,
         )
 
 
@@ -72,7 +72,7 @@ def test_answer_is_active_was_sent_to_persephone(get_new_stub_persephone_service
     response = AuthenticationService.thebes_gate(
         thebes_answer_from_request_or_error=payload,
         user_repository=stub_repository,
-        token_handler=StubTokenHandler,
+        token_service=StubTokenHandler,
         persephone_client=stub_persephone_service
     )
     assert response.get("status_code") == status.HTTP_200_OK
@@ -91,7 +91,7 @@ def test_answer_is_active_was_sent_to_persephone(get_new_stub_persephone_service
     response = AuthenticationService.thebes_gate(
         thebes_answer_from_request_or_error=payload,
         user_repository=stub_repository,
-        token_handler=StubTokenHandler,
+        token_service=StubTokenHandler,
         persephone_client=stub_persephone_service
     )
     assert response.get("status_code") == status.HTTP_200_OK
@@ -110,7 +110,7 @@ def test_answer_is_not_active_and_was_sent_to_persephone(get_new_stub_persephone
     response= AuthenticationService.thebes_gate(
         thebes_answer_from_request_or_error=payload,
         user_repository=stub_repository,
-        token_handler=StubTokenHandler,
+        token_service=StubTokenHandler,
         persephone_client=stub_persephone_service
     )
     assert response.get("status_code") == status.HTTP_200_OK
@@ -130,7 +130,7 @@ def test_answer_is_not_active_and_was_not_sent_to_persephone(get_new_stub_persep
         AuthenticationService.thebes_gate(
             thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
-            token_handler=StubTokenHandler,
+            token_service=StubTokenHandler,
             persephone_client=stub_persephone_service
         )
 
@@ -142,7 +142,7 @@ def test_login_not_register_exists():
         AuthenticationService.login(
             user_credentials=payload,
             user_repository=stub_repository,
-            token_handler=StubTokenHandler,
+            token_service=StubTokenHandler,
         )
 
 
@@ -153,7 +153,7 @@ def test_login_use_magic_link():
     response = AuthenticationService.login(
         user_credentials=payload,
         user_repository=stub_repository,
-        token_handler=StubTokenHandler,
+        token_service=StubTokenHandler,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "email.login"
@@ -165,7 +165,7 @@ def test_login_without_pin():
     response = AuthenticationService.login(
         user_credentials=payload,
         user_repository=stub_repository,
-        token_handler=StubTokenHandler,
+        token_service=StubTokenHandler,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "user.need_pin"
@@ -183,7 +183,7 @@ def test_login_pin_error():
         AuthenticationService.login(
             user_credentials={"pin": "1234", "email": "lala"},
             user_repository=stub_repository,
-            token_handler=StubTokenHandler,
+            token_service=StubTokenHandler,
         )
 
 
@@ -198,7 +198,7 @@ def test_login_with_pin():
     response = AuthenticationService.login(
         user_credentials={"pin": "1234", "email": "lala"},
         user_repository=stub_repository,
-        token_handler=StubTokenHandler,
+        token_service=StubTokenHandler,
     )
 
     assert response.get("status_code") == status.HTTP_200_OK
@@ -217,7 +217,7 @@ def test_thebes_hall_not_register_exists_was_sent_to_persephone(get_new_stub_per
         AuthenticationService.thebes_hall(
             device_and_thebes_answer_from_request=payload_rec,
             user_repository=stub_repository,
-            token_handler=StubTokenHandler,
+            token_service=StubTokenHandler,
             persephone_client=stub_persephone_service
         )
 
@@ -231,7 +231,7 @@ def test_thebes_hall_not_register_exists_was_not_sent_to_persephone(get_new_stub
         AuthenticationService.thebes_hall(
             device_and_thebes_answer_from_request=payload_rec,
             user_repository=stub_repository,
-            token_handler=StubTokenHandler,
+            token_service=StubTokenHandler,
             persephone_client=stub_persephone_service
         )
 
@@ -248,7 +248,7 @@ def test_thebes_hall_was_sent_to_persephone(get_new_stub_persephone_service):
     response = AuthenticationService.thebes_hall(
         device_and_thebes_answer_from_request=payload_rec,
         user_repository=stub_repository,
-        token_handler=StubTokenHandler,
+        token_service=StubTokenHandler,
         persephone_client=stub_persephone_service
     )
     assert response.get("status_code") == status.HTTP_200_OK
@@ -267,7 +267,7 @@ def test_thebes_hall_was_not_sent_to_persephone(get_new_stub_persephone_service)
         AuthenticationService.thebes_hall(
             device_and_thebes_answer_from_request=payload_rec,
             user_repository=stub_repository,
-            token_handler=StubTokenHandler,
+            token_service=StubTokenHandler,
             persephone_client=stub_persephone_service
         )
 

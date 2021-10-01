@@ -1,4 +1,4 @@
-from src.utils.jwt_utils import JWTHandler
+from src.services.jwts.service import JwtService
 
 
 class StubMist:
@@ -19,7 +19,7 @@ class StubJWT:
         pass
 
 
-class StubJWTHandler(JWTHandler):
+class StubJwtService(JwtService):
     instance = StubJWT()
     mist = StubMist()
     heimdall = StubHeimdall()

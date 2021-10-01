@@ -12,7 +12,7 @@ from src.services.persephone.service import PersephoneService
 from src.repositories.user.repository import UserRepository
 from src.repositories.file.repository import FileRepository
 
-from src.utils.jwt_utils import JWTHandler
+from src.services.jwts.service import JwtService
 
 
 class IUser(ABC):
@@ -41,7 +41,7 @@ class IUser(ABC):
     def delete(
         payload: dict,
         user_repository: UserRepository,
-        token_handler: Type[JWTHandler],
+        token_service: Type[JwtService],
         client_register: Type[ClientRegisterRepository],
     ) -> dict:
         pass
@@ -54,7 +54,7 @@ class IUser(ABC):
     @staticmethod
     @abstractmethod
     def change_view(
-        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+        payload: dict, user_repository: UserRepository, token_service: JwtService
     ) -> dict:
         pass
 
@@ -75,14 +75,14 @@ class IUser(ABC):
     @staticmethod
     @abstractmethod
     def add_feature(
-        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+        payload: dict, user_repository: UserRepository, token_service: JwtService
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def delete_feature(
-        payload: dict, user_repository: UserRepository, token_handler: JWTHandler
+        payload: dict, user_repository: UserRepository, token_service: JwtService
     ) -> dict:
         pass
 
@@ -100,7 +100,7 @@ class IUser(ABC):
     def sign_term(
         payload: dict,
         user_repository: UserRepository,
-        token_handler: JWTHandler,
+        token_service: JwtService,
         file_repository: FileRepository,
         persephone_client: Type[PersephoneService],
     ) -> dict:

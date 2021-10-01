@@ -30,7 +30,7 @@ from src.services.sinacor.service import SinacorService
 from nidavellir.src.uru import Sindri
 
 from src.domain.model_decorator.genarate_id import generate_id, hash_field
-from src.utils.jwt_utils import JWTHandler
+from src.services.jwts.service import JwtService
 from src.services.third_part_integration.stone_age import StoneAge
 from src.services.persephone.templates.persephone_templates import (
     get_prospect_user_template_with_data,
@@ -60,7 +60,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
         persephone_client=PersephoneService.get_client(),
-        jwt_handler=JWTHandler
+        jwt_handler=JwtService
     ) -> dict:
         user = generate_id("email", user, must_remove=False)
         has_pin = user.get("pin")
@@ -107,7 +107,7 @@ class UserService(IUser):
     def delete(
         payload: dict,
         user_repository=UserRepository(),
-        token_handler=JWTHandler,
+        token_service=JwtService,
         client_register=ClientRegisterRepository(),
     ) -> dict:
         old = user_repository.find_one({"_id": payload.get("email")})
@@ -127,7 +127,7 @@ class UserService(IUser):
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
-        jwt = token_handler.generate_token(user_data=new, ttl=525600)
+        jwt = token_service.generate_token(user_data=new, ttl=525600)
         JwtController.insert_one(jwt, new.get("email"))
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
@@ -198,7 +198,7 @@ class UserService(IUser):
         ):
             raise InternalServerError("common.process_issue")
 
-        jwt = JWTHandler.generate_token(
+        jwt = JwtService.generate_token(
             user_data=user_from_database_to_update, ttl=525600
         )
 
@@ -279,7 +279,7 @@ class UserService(IUser):
 
     @staticmethod
     def change_view(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_service=JwtService
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         new_view = payload.get("new_view")
@@ -291,7 +291,7 @@ class UserService(IUser):
         new["scope"]["view_type"] = new_view
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.unable_to_process")
-        jwt = token_handler.generate_token(user_data=new, ttl=525600)
+        jwt = token_service.generate_token(user_data=new, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -299,7 +299,7 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
-        jwt_handler=JWTHandler
+        jwt_handler=JwtService
     ) -> dict:
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
@@ -334,7 +334,7 @@ class UserService(IUser):
 
     @staticmethod
     def add_feature(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_service=JwtService
     ) -> dict:
         old = payload.get("x-thebes-answer")
         new = deepcopy(old)
@@ -345,9 +345,9 @@ class UserService(IUser):
             new.update({"scope": new_scope})
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
-            jwt = token_handler.generate_token(user_data=new, ttl=525600)
+            jwt = token_service.generate_token(user_data=new, ttl=525600)
             return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-        jwt = token_handler.generate_token(user_data=new, ttl=525600)
+        jwt = token_service.generate_token(user_data=new, ttl=525600)
         return {
             "status_code": status.HTTP_304_NOT_MODIFIED,
             "payload": {"jwt": jwt},
@@ -355,7 +355,7 @@ class UserService(IUser):
 
     @staticmethod
     def delete_feature(
-        payload: dict, user_repository=UserRepository(), token_handler=JWTHandler
+        payload: dict, user_repository=UserRepository(), token_service=JwtService
     ) -> dict:
         old = payload.get("x-thebes-answer")
         new = deepcopy(old)
@@ -370,7 +370,7 @@ class UserService(IUser):
         else:
             response.update({"status_code": status.HTTP_304_NOT_MODIFIED})
 
-        jwt = token_handler.generate_token(user_data=new, ttl=525600)
+        jwt = token_service.generate_token(user_data=new, ttl=525600)
 
         response.update({"jwt": jwt})
 
@@ -414,7 +414,7 @@ class UserService(IUser):
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
         user_repository=UserRepository(),
-        token_handler=JWTHandler,
+        token_service=JwtService,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
@@ -440,7 +440,7 @@ class UserService(IUser):
             sent_to_persephone and user_repository.update_one(old=old, new=new)
         ) is False:
             raise InternalServerError("common.unable_to_process")
-        jwt = token_handler.generate_token(user_data=new, ttl=525600)
+        jwt = token_service.generate_token(user_data=new, ttl=525600)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -873,7 +873,7 @@ class UserService(IUser):
         if entity is None:
             raise BadRequestError("common.register_not_exists")
         to_add_into_jwt = {"forgot_electronic_signature": True}
-        payload_jwt = JWTHandler.generate_token(
+        payload_jwt = JwtService.generate_token(
             user_data=entity, kwargs_to_add_on_jwt=to_add_into_jwt, ttl=10
         )
         authentication_service.send_authentication_email(
