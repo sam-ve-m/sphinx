@@ -81,7 +81,7 @@ def test_get_thebes_answer_from_request_fail_to_get_jwt(
         stub_jwt_service.get_thebes_answer_from_request(request=stub_request)
 
 
-@patch('src.utils.jwt_utils.JwtService.decrypt_payload')
+@patch('src.services.jwts.service.JwtService.decrypt_payload')
 def test_get_thebes_answer_from_request(
     mock_decrypt_payload,
     get_new_stub_request_with_thebes_answer_header,
