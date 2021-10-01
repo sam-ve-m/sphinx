@@ -90,6 +90,7 @@ class AuthenticationService(IAuthentication):
         ########################################################################### ADICIONAR ESSA VERIFICAÇAO QUANDO DELETAR USUARIO/CLIENTE ####################################################################
         # if entity.get("is_active_client") is False:
         #     raise UnauthorizedError("invalid_credential")
+
         if entity.get("use_magic_link") is True:
             payload_jwt = token_service.generate_token(user_data=entity, ttl=10)
             AuthenticationService.send_authentication_email(

@@ -16,13 +16,67 @@ from src.domain.solutiontech.client_import_status import SolutiontechClientImpor
 
 
 class ThebesHallBuilder:
-    def __init__(self, user_data: dict, kwargs_to_add_on_jwt: dict, ttl: int):
+    def __init__(
+        self,
+        user_data: dict,
+        kwargs_to_add_on_jwt: dict,
+        ttl: int,
+        user_repository=UserRepository(),
+        terms_validator=TermsValidator()
+    ):
         self._jwt_payload_data = dict()
         self._user_data = user_data
         self._kwargs_to_add_on_jwt = kwargs_to_add_on_jwt
         self._ttl = ttl
+        self.user_repository = user_repository
+        self.terms_validator = terms_validator
+
+    def _get_build_strategies(self) -> dict:
+        is_not_active_user = (False, None)
+        is_active_user = (True, None)
+        is_not_active_client = (True, False)
+        is_active_client = (True, True)
+
+        build_strategies = {
+            is_not_active_user: self._build_user_jwt,
+            is_active_user: self._build_user_jwt,
+            is_not_active_client: self._build_user_jwt,
+            is_active_client: self._build_client_jwt,
+        }
+
+        return build_strategies
+
+    def _get_strategy(self):
+        build_strategies = self._get_build_strategies()
+        is_active_user = self._user_data.get("is_active_user")
+        is_active_client = self._user_data.get("is_active_client")
+        build_strategy = build_strategies.get((is_active_user, is_active_client))
+
+        if build_strategy is None:
+            raise Exception("internal_error")
+
+        return build_strategy
 
     def build(self) -> dict:
+        build_strategy = self._get_strategy()
+        build_strategy()
+
+        Sindri.dict_to_primitive_types(values=self._jwt_payload_data)
+        return self._jwt_payload_data
+
+    def _build_user_jwt(self):
+        (
+            self.add_expiration_date_and_created_at()
+            .add_nick_name()
+            .add_email()
+            .add_scope()
+            .add_is_active_user()
+            .add_terms()
+            .add_last_modified_date()
+            .add_extra_kwargs()
+        )
+
+    def _build_client_jwt(self):
         (
             self.add_expiration_date_and_created_at()
             .add_extra_kwargs()
@@ -48,8 +102,6 @@ class ThebesHallBuilder:
                 ],
             )
         )
-        Sindri.dict_to_primitive_types(values=self._jwt_payload_data)
-        return self._jwt_payload_data
 
     def add_expiration_date_and_created_at(self):
         self._jwt_payload_data.update(
@@ -68,7 +120,7 @@ class ThebesHallBuilder:
         return self
 
     def add_terms(self):
-        TermsValidator.run(user_data=self._user_data)
+        self.terms_validator.run(user_data=self._user_data)
         self._jwt_payload_data.update({"terms": self._user_data["terms"]})
         return self
 
@@ -95,10 +147,9 @@ class ThebesHallBuilder:
         return self
 
     def add_using_suitability_or_refuse_term(self):
-        user_repository = UserRepository()
         self._jwt_payload_data.update(
             {
-                "using_suitability_or_refuse_term": user_repository.is_user_using_suitability_or_refuse_term(
+                "using_suitability_or_refuse_term": self.user_repository.is_user_using_suitability_or_refuse_term(
                     user_email=self._user_data.get("email")
                 )
             }
