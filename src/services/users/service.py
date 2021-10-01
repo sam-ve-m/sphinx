@@ -458,14 +458,7 @@ class UserService(IUser):
                     "term_retail_liquid_provider": None,
                     "term_refusal": None,
                     "term_non_compliance": None,
-                },
-                "can_be_managed_by_third_party_operator": False,
-                "is_managed_by_third_party_operator": False,
-                "third_party_operator": {
-                    "is_third_party_operator": False,
-                    "details": {},
-                    "third_party_operator_email": "string",
-                },
+                }
             }
         )
 

@@ -88,6 +88,8 @@ class SinacorService:
             )
         )
 
+        SinacorService._add_third_party_operator_information(database_and_bureau_dtvm_client_data_merged)
+
         database_and_bureau_dtvm_client_data_merged = SinacorService._add_dtvm_client_trade_metadata(
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
@@ -100,6 +102,20 @@ class SinacorService:
 
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
+
+    @staticmethod
+    def _add_third_party_operator_information(
+            database_and_bureau_dtvm_client_data_merged: dict,
+    ) -> dict:
+        database_and_bureau_dtvm_client_data_merged.update({
+            "can_be_managed_by_third_party_operator": False,
+            "is_managed_by_third_party_operator": False,
+            "third_party_operator": {
+                "is_third_party_operator": False,
+                "details": {},
+                "third_party_operator_email": "string",
+            }
+        })
 
     @staticmethod
     def _fill_not_exists_data_identifier_document(
