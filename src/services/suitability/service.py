@@ -17,11 +17,11 @@ from src.repositories.suitability.repository import (
 from src.repositories.user.repository import UserRepository
 from src.core.interfaces.services.suitability.interface import ISuitability
 from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
-from src.utils.persephone_templates import get_user_suitability_template_with_data
+from src.services.persephone.templates.persephone_templates import get_user_suitability_template_with_data
 from src.services.persephone.service import PersephoneService
-from src.domain.persephone_queue import PersephoneQueue
+from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.utils.jwt_utils import JWTHandler
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 
 
 class SuitabilityService(ISuitability):

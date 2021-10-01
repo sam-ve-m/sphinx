@@ -25,14 +25,14 @@ from src.repositories.file.enum.user_file import UserFileType
 from src.repositories.file.repository import FileRepository
 from src.repositories.user.repository import UserRepository
 
-from src.domain.persephone_queue import PersephoneQueue
+from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.services.sinacor.service import SinacorService
 from nidavellir.src.uru import Sindri
 
-from src.utils.genarate_id import generate_id, hash_field
+from src.domain.model_decorator.genarate_id import generate_id, hash_field
 from src.utils.jwt_utils import JWTHandler
-from src.utils.stone_age import StoneAge
-from src.utils.persephone_templates import (
+from src.services.third_part_integration.stone_age import StoneAge
+from src.services.persephone.templates.persephone_templates import (
     get_prospect_user_template_with_data,
     get_user_signed_term_template_with_data,
     get_user_identifier_data_schema_template_with_data,
@@ -44,8 +44,8 @@ from src.utils.persephone_templates import (
     get_user_change_or_reset_electronic_signature_schema_template_with_data,
     get_user_update_register_schema_template_with_data,
 )
-from src.utils.env_config import config
-from src.utils.encrypt.password.util import PasswordEncrypt
+from src.infrastructures.env_config import config
+from src.domain.encrypt.password import PasswordEncrypt
 from src.exceptions.exceptions import (
     BadRequestError,
     InternalServerError,

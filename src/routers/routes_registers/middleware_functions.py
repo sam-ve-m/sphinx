@@ -7,7 +7,7 @@ from fastapi import Request
 
 
 # SPHINX
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 from src.repositories.user.repository import UserRepository
 from src.utils.jwt_utils import JWTHandler
 

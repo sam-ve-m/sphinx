@@ -4,7 +4,7 @@
 from fastapi import Request
 
 # SPHINX
-from src.services.validators.suitability_validators import Suitability
+from src.domain.validators import Suitability
 from src.controllers.suitabilities.controller import SuitabilityController
 from src.controllers.base_controller import BaseController
 from src.utils.jwt_utils import JWTHandler

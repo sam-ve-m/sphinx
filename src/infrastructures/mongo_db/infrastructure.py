@@ -3,13 +3,13 @@ from typing import Optional
 import logging
 
 # OUTSIDE LIBRARIES
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 from pymongo.cursor import Cursor
 from pymongo import MongoClient
 
 # SPHINX
 from src.repositories.cache.redis import RepositoryRedis
-from src.utils.genarate_id import hash_field
+from src.domain.model_decorator.genarate_id import hash_field
 from src.core.interfaces.repositories.base_repository.interface import IRepository
 from nidavellir.src.uru import Sindri
 

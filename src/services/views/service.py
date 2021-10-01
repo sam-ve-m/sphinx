@@ -7,7 +7,7 @@ from fastapi import status
 # SPHINX
 from src.repositories.view.repository import ViewRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-from src.utils.genarate_id import generate_id, generate_list
+from src.domain.model_decorator.genarate_id import generate_id, generate_list
 from src.core.interfaces.services.view.interface import IView
 
 

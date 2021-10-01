@@ -1,9 +1,8 @@
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 import requests
 import logging
 import json
 
-from src.exceptions.exceptions import InternalServerError
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 
 

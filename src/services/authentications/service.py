@@ -9,8 +9,8 @@ from fastapi import status
 # SPHINX
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
-from src.utils.env_config import config
-from src.utils.email import HtmlModifier
+from src.infrastructures.env_config import config
+from src.services.email_builder.email import HtmlModifier
 from src.repositories.user.repository import UserRepository
 from src.controllers.jwts.controller import JwtController
 from src.utils.jwt_utils import JWTHandler
@@ -19,15 +19,15 @@ from src.exceptions.exceptions import (
     UnauthorizedError,
     InternalServerError,
 )
-from src.domain.persephone_queue import PersephoneQueue
+from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.services.persephone.service import PersephoneService
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
-from src.utils.genarate_id import hash_field
+from src.domain.model_decorator.genarate_id import hash_field
 from src.core.interfaces.services.authentication.interface import IAuthentication
 from src.repositories.client_register.repository import ClientRegisterRepository
-from src.utils.solutiontech import Solutiontech
-from src.utils.persephone_templates import (
+from src.services.third_part_integration.solutiontech import Solutiontech
+from src.services.persephone.templates.persephone_templates import (
     get_user_thebes_hall_schema_template_with_data,
     get_create_electronic_signature_session_schema_template_with_data,
     get_user_authentication_template_with_data,

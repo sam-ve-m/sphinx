@@ -2,14 +2,14 @@
 from fastapi import Request, Depends
 
 # SPHINX
-from src.services.validators.base import (
+from src.domain.validators import (
     PIN,
     ElectronicSignature,
     ChangeElectronicSignature,
     View
 )
-from src.services.validators.feature_validators import Feature
-from src.services.validators.onboarding_validators import (
+from src.domain.validators import Feature
+from src.domain.validators import (
     TermFile,
     FileBase64,
     DeviceInformation,
@@ -19,7 +19,7 @@ from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
 from src.routers.routes_registers.user import UserRouter
 from nidavellir.src.uru import Sindri
-from src.services.validators.user_validators import (
+from src.domain.validators import (
     UserIdentifierData,
     UserComplementaryData,
     QuizResponses,

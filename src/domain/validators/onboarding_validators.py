@@ -9,8 +9,8 @@ from pydantic import BaseModel, constr, validator, UUID1
 
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
-from src.services.validators.enum_template import MaritalStatusEnum
-from src.utils.brazil_register_number_validator import is_cpf_valid
+from src.domain.validators.enum_template import MaritalStatusEnum
+from src.domain.validators.brazil_register_number_validator import is_cpf_valid
 
 
 class Name(BaseModel):

@@ -2,7 +2,7 @@ from fastapi import Request, Depends
 
 from src.controllers.base_controller import BaseController
 from src.controllers.terms.controller import TermsController
-from src.services.validators.onboarding_validators import TermFile
+from src.domain.validators import TermFile
 from src.routers.routes_registers.public import PublicRouter
 
 

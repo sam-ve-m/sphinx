@@ -6,11 +6,11 @@ from fastapi import APIRouter
 from pydantic import BaseModel, root_validator
 
 # SPHINX
-from src.services.validators.base import (
+from src.domain.validators.base import (
     InvestorTypeSource,
     RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
 )
-from src.services.validators.bureau_validators import (
+from src.domain.validators.bureau_validators import (
     Uuid,
     Decision,
     Status,

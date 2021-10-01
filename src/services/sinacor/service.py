@@ -2,7 +2,6 @@
 import datetime
 import logging
 
-import json
 from copy import deepcopy
 from fastapi import status
 
@@ -12,13 +11,13 @@ from src.domain.solutiontech.client_import_status import SolutiontechClientImpor
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
 from src.services.persephone.service import PersephoneService
-from src.utils.stone_age import StoneAge
+from src.services.third_part_integration.stone_age import StoneAge
 from nidavellir.src.uru import Sindri
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-from src.utils.solutiontech import Solutiontech
+from src.services.third_part_integration.solutiontech import Solutiontech
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
-from src.domain.persephone_queue import PersephoneQueue
-from src.utils.env_config import config
+from src.domain.persephone_queue.persephone_queue import PersephoneQueue
+from src.infrastructures.env_config import config
 
 
 class SinacorService:

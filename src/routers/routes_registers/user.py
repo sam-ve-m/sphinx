@@ -2,7 +2,7 @@ from starlette.requests import Request
 
 # Sphinx
 from src.core.abstract_classes.routes_register.register import RoutesRegister
-from src.utils.middleware import MiddlewareUtils
+from src.routers.routes_registers.middleware_functions import MiddlewareUtils
 
 
 class UserRouter(RoutesRegister):

@@ -6,7 +6,7 @@ import pytest
 from unittest.mock import MagicMock
 
 # SPHINX
-from src.utils.middleware import MiddlewareUtils
+from src.routers.routes_registers.middleware_functions import MiddlewareUtils
 from tests.stub_classes.stub_base_repository import StubBaseRepository
 from tests.stub_classes.stub_request import (
     StubURL,

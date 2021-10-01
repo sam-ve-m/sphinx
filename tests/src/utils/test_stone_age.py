@@ -1,8 +1,7 @@
 # OUTSIDE LIBRARIES
-import pytest
 
 # SPHINX
-from src.utils.stone_age import StoneAge
+from src.services.third_part_integration.stone_age import StoneAge
 
 
 def test_get_only_values_from_user_data():

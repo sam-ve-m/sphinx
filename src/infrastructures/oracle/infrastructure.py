@@ -11,7 +11,7 @@ import cx_Oracle
 # SPHINX
 from src.exceptions.exceptions import InternalServerError
 from src.core.interfaces.repositories.oracle.interface import IOracle
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 
 
 class OracleInfrastructure(IOracle):

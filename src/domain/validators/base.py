@@ -7,9 +7,9 @@ from email_validator import validate_email
 
 
 # SPHIX
-from src.services.validators.onboarding_validators import *
-from src.services.validators.bureau_validators import Source
-from src.utils.env_config import config
+from src.domain.validators.onboarding_validators import *
+from src.domain.validators.bureau_validators import Source
+from src.infrastructures.env_config import config
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
 

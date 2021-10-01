@@ -2,7 +2,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from src.services.validators.onboarding_validators import Weight, ValueText, Score, Order
+from src.domain.validators.onboarding_validators import Weight, ValueText, Score, Order
 
 
 class Answer(Weight, ValueText):

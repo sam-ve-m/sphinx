@@ -2,7 +2,7 @@
 from redis import Redis
 
 # SPHINX
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 
 
 class RedisInfrastructure:

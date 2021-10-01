@@ -1,11 +1,11 @@
 # STANDARD LIBS
 from typing import Optional
 import logging
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 
 # OUTSIDE LIBRARIES
 from fastapi import Request
-from jwt import JWT, jwk_from_dict, jwk_from_pem
+from jwt import JWT, jwk_from_pem
 from heimdall_client.bifrost import Heimdall
 from mist_client.asgard import Mist
 

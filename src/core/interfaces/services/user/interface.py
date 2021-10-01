@@ -13,7 +13,6 @@ from src.repositories.user.repository import UserRepository
 from src.repositories.file.repository import FileRepository
 
 from src.utils.jwt_utils import JWTHandler
-from src.utils.stone_age import StoneAge
 
 
 class IUser(ABC):

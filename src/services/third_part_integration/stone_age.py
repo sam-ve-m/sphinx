@@ -1,7 +1,7 @@
 # OUTSIDE LIBRARIES
 from src.core.interfaces.repositories.file_repository.interface import IFile
 from src.repositories.file.enum.user_file import UserFileType
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 import requests
 import logging
 from typing import Optional

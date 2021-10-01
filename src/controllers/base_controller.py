@@ -5,7 +5,7 @@ import json
 
 # OUTSIDE LIBRARIES
 from fastapi import Response, status, Request
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 
 # SPHINX
 from src.exceptions.exceptions import (
@@ -15,21 +15,21 @@ from src.exceptions.exceptions import (
     InternalServerError,
 )
 from src.i18n.i18n_resolver import i18nResolver as i18n
-from src.utils.language_identifier import get_language_from_request
 from src.core.interfaces.controllers.base_controller.interface import IController
+from nidavellir.src.uru import Sindri
 
 
 class BaseController(IController):
     @staticmethod
     def run(callback: callable, payload: Optional[dict], request: Request) -> Response:
-        lang = get_language_from_request(request=request)
+        lang = i18n.get_language_from_request(request=request)
         try:
             response_metadata = callback(payload)
             payload = BaseController.create_response_payload(
                 response_metadata=response_metadata, lang=lang
             )
             return Response(
-                content=json.dumps(payload, cls=DateEncoder),
+                content=json.dumps(payload, cls=Sindri),
                 status_code=response_metadata.get("status_code"),
             )
         except UnauthorizedError as e:

@@ -1,6 +1,6 @@
 import sendgrid
 from sendgrid.helpers.mail import Email, To, Content, Mail
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 import logging
 
 from src.exceptions.exceptions import InternalServerError

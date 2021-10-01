@@ -1,6 +1,6 @@
 from src.core.interfaces.utils.encrypt.password.interface import IPasswordEncrypt
 from mist_client.asgard import Mist
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 import logging
 
 logger = logging.getLogger(config("LOG_NAME"))

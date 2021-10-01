@@ -8,7 +8,7 @@ from fastapi import status
 from src.core.interfaces.services.feature.interface import IFeature
 from src.repositories.feature.repository import FeatureRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-from src.utils.genarate_id import generate_id
+from src.domain.model_decorator.genarate_id import generate_id
 
 
 class FeatureService(IFeature):

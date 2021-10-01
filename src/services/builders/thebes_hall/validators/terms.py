@@ -1,5 +1,5 @@
 # OUTSIDE LIBRARIES
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 
 # SPHINX
 from src.core.interfaces.services.builders.thebes_hall.validators.interface import (

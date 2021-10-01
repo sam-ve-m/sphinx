@@ -1,7 +1,7 @@
 from typing import List
 
-from src.services.validators.base import *
-from src.services.validators.bureau_validators import *
+from src.domain.validators.base import *
+from src.domain.validators.bureau_validators import *
 
 
 class UserSimple(Email, NickName, OptionalPIN):
