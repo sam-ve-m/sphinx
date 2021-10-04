@@ -36,7 +36,8 @@ payload_rec = {"x-thebes-answer": {"email": ""}}
 payload = {"email": ""}
 
 
-def test_answer_register_exists():
+def test_thebes_gate_answer_register_not_exists(get_new_stub_persephone_service):
+    stub_persephone_service = get_new_stub_persephone_service
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
@@ -44,10 +45,13 @@ def test_answer_register_exists():
             thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
             token_service=StubTokenHandler,
+            persephone_client=stub_persephone_service
         )
 
 
-def test_answer_process_issue():
+def test_thebes_gate_answer_is_not_active_process_issue_on_update_user_data(get_new_stub_persephone_service):
+    stub_persephone_service = get_new_stub_persephone_service
+    stub_persephone_service.run = MagicMock(return_value=True)
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value={"is_active_user": False})
     stub_repository.update_one = MagicMock(return_value=False)
@@ -56,16 +60,32 @@ def test_answer_process_issue():
             thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
             token_service=StubTokenHandler,
+            persephone_client=stub_persephone_service
         )
 
 
-def test_answer_is_active_was_sent_to_persephone(get_new_stub_persephone_service):
+def test_thebes_gate_answer_is_not_active_process_issue_on_sent_to_persephone(get_new_stub_persephone_service):
+    stub_persephone_service = get_new_stub_persephone_service
+    stub_persephone_service.run = MagicMock(return_value=False)
+    stub_repository = StubRepository(database="", collection="")
+    stub_repository.find_one = MagicMock(return_value={"is_active_user": False})
+    stub_repository.update_one = MagicMock(return_value=True)
+    with pytest.raises(InternalServerError, match="^common.process_issue"):
+        AuthenticationService.thebes_gate(
+            thebes_answer_from_request_or_error=payload,
+            user_repository=stub_repository,
+            token_service=StubTokenHandler,
+            persephone_client=stub_persephone_service
+        )
+
+
+def test_thebes_gate_answer_is_not_active(get_new_stub_persephone_service):
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=True)
     generate_token_value = "lalala"
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(
-        return_value={"pin": "", "_id": "", "is_active_user": True}
+        return_value={"pin": "", "_id": "", "is_active_user": False}
     )
     stub_repository.update_one = MagicMock(return_value=True)
     StubTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
@@ -78,15 +98,15 @@ def test_answer_is_active_was_sent_to_persephone(get_new_stub_persephone_service
     assert response.get("status_code") == status.HTTP_200_OK
 
 
-def test_answer_is_active_was_sent_to_persephone(get_new_stub_persephone_service):
+def test_thebes_gate_answer_is_active_was_sent_to_persephone(get_new_stub_persephone_service):
     stub_persephone_service = get_new_stub_persephone_service
-    stub_persephone_service.run = MagicMock(return_value=False)
+    stub_persephone_service.run = MagicMock(return_value=True)
     generate_token_value = "lalala"
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(
         return_value={"pin": "", "_id": "", "is_active_user": True}
     )
-    stub_repository.update_one = MagicMock(return_value=True)
+    stub_repository.update_one = MagicMock(return_value=False)
     StubTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
     response = AuthenticationService.thebes_gate(
         thebes_answer_from_request_or_error=payload,
@@ -97,35 +117,12 @@ def test_answer_is_active_was_sent_to_persephone(get_new_stub_persephone_service
     assert response.get("status_code") == status.HTTP_200_OK
 
 
-def test_answer_is_not_active_and_was_sent_to_persephone(get_new_stub_persephone_service):
+def test_thebes_gate_answer_is_active_process_issue_on_sent_to_persephone(get_new_stub_persephone_service):
     stub_persephone_service = get_new_stub_persephone_service
-    generate_token_value = "lalala"
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(
-        return_value={"pin": "", "_id": "", "is_active_user": False}
-    )
-    stub_repository.update_one = MagicMock(return_value=True)
-    StubTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
-    stub_persephone_service.run = MagicMock(return_value=True)
-    response= AuthenticationService.thebes_gate(
-        thebes_answer_from_request_or_error=payload,
-        user_repository=stub_repository,
-        token_service=StubTokenHandler,
-        persephone_client=stub_persephone_service
-    )
-    assert response.get("status_code") == status.HTTP_200_OK
-
-
-def test_answer_is_not_active_and_was_not_sent_to_persephone(get_new_stub_persephone_service):
-    stub_persephone_service = get_new_stub_persephone_service
-    generate_token_value = "lalala"
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(
-        return_value={"pin": "", "_id": "", "is_active_user": False}
-    )
-    stub_repository.update_one = MagicMock(return_value=True)
-    StubTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
     stub_persephone_service.run = MagicMock(return_value=False)
+    stub_repository = StubRepository(database="", collection="")
+    stub_repository.find_one = MagicMock(return_value={"is_active_user": True})
+    stub_repository.update_one = MagicMock(return_value=True)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         AuthenticationService.thebes_gate(
             thebes_answer_from_request_or_error=payload,
@@ -144,7 +141,6 @@ def test_login_not_register_exists():
             user_repository=stub_repository,
             token_service=StubTokenHandler,
         )
-
 
 def test_login_use_magic_link():
     stub_repository = StubRepository(database="", collection="")
@@ -208,7 +204,7 @@ class StubThebesHall:
     pass
 
 
-def test_thebes_hall_not_register_exists_was_sent_to_persephone(get_new_stub_persephone_service):
+def test_thebes_hall_not_register_exists(get_new_stub_persephone_service):
     stub_persephone_service = get_new_stub_persephone_service
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(return_value=None)
@@ -222,52 +218,52 @@ def test_thebes_hall_not_register_exists_was_sent_to_persephone(get_new_stub_per
         )
 
 
-def test_thebes_hall_not_register_exists_was_not_sent_to_persephone(get_new_stub_persephone_service):
-    stub_persephone_service = get_new_stub_persephone_service
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value=None)
-    stub_persephone_service.run = MagicMock(return_value=False)
-    with pytest.raises(BadRequestError, match="^common.register_not_exists"):
-        AuthenticationService.thebes_hall(
-            device_and_thebes_answer_from_request=payload_rec,
-            user_repository=stub_repository,
-            token_service=StubTokenHandler,
-            persephone_client=stub_persephone_service
-        )
-
-
-def test_thebes_hall_was_sent_to_persephone(get_new_stub_persephone_service):
-    stub_persephone_service = get_new_stub_persephone_service
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={})
-    StubThebesHall.validate = MagicMock(return_value=True)
-    StubTokenHandler.generate_token = MagicMock(return_value="lallalala")
-    AuthenticationService.send_authentication_email = MagicMock(return_value=True)
-    AuthenticationService._dtvm_client_has_trade_allowed = MagicMock(return_value={})
-    stub_persephone_service.run = MagicMock(return_value=True)
-    response = AuthenticationService.thebes_hall(
-        device_and_thebes_answer_from_request=payload_rec,
-        user_repository=stub_repository,
-        token_service=StubTokenHandler,
-        persephone_client=stub_persephone_service
-    )
-    assert response.get("status_code") == status.HTTP_200_OK
-
-
-def test_thebes_hall_was_not_sent_to_persephone(get_new_stub_persephone_service):
-    stub_persephone_service = get_new_stub_persephone_service
-    stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={})
-    StubThebesHall.validate = MagicMock(return_value=True)
-    StubTokenHandler.generate_token = MagicMock(return_value="lallalala")
-    AuthenticationService.send_authentication_email = MagicMock(return_value=True)
-    stub_persephone_service.run = MagicMock(return_value=False)
-    AuthenticationService._dtvm_client_has_trade_allowed = MagicMock(return_value={})
-    with pytest.raises(InternalServerError, match="^common.process_issue"):
-        AuthenticationService.thebes_hall(
-            device_and_thebes_answer_from_request=payload_rec,
-            user_repository=stub_repository,
-            token_service=StubTokenHandler,
-            persephone_client=stub_persephone_service
-        )
-
+# def test_thebes_hall_not_register_exists_was_not_sent_to_persephone(get_new_stub_persephone_service):
+#     stub_persephone_service = get_new_stub_persephone_service
+#     stub_repository = StubRepository(database="", collection="")
+#     stub_repository.find_one = MagicMock(return_value=None)
+#     stub_persephone_service.run = MagicMock(return_value=False)
+#     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
+#         AuthenticationService.thebes_hall(
+#             device_and_thebes_answer_from_request=payload_rec,
+#             user_repository=stub_repository,
+#             token_service=StubTokenHandler,
+#             persephone_client=stub_persephone_service
+#         )
+#
+#
+# def test_thebes_hall_was_sent_to_persephone(get_new_stub_persephone_service):
+#     stub_persephone_service = get_new_stub_persephone_service
+#     stub_repository = StubRepository(database="", collection="")
+#     stub_repository.find_one = MagicMock(return_value={})
+#     StubThebesHall.validate = MagicMock(return_value=True)
+#     StubTokenHandler.generate_token = MagicMock(return_value="lallalala")
+#     AuthenticationService.send_authentication_email = MagicMock(return_value=True)
+#     AuthenticationService._dtvm_client_has_trade_allowed = MagicMock(return_value={})
+#     stub_persephone_service.run = MagicMock(return_value=True)
+#     response = AuthenticationService.thebes_hall(
+#         device_and_thebes_answer_from_request=payload_rec,
+#         user_repository=stub_repository,
+#         token_service=StubTokenHandler,
+#         persephone_client=stub_persephone_service
+#     )
+#     assert response.get("status_code") == status.HTTP_200_OK
+#
+#
+# def test_thebes_hall_was_not_sent_to_persephone(get_new_stub_persephone_service):
+#     stub_persephone_service = get_new_stub_persephone_service
+#     stub_repository = StubRepository(database="", collection="")
+#     stub_repository.find_one = MagicMock(return_value={})
+#     StubThebesHall.validate = MagicMock(return_value=True)
+#     StubTokenHandler.generate_token = MagicMock(return_value="lallalala")
+#     AuthenticationService.send_authentication_email = MagicMock(return_value=True)
+#     stub_persephone_service.run = MagicMock(return_value=False)
+#     AuthenticationService._dtvm_client_has_trade_allowed = MagicMock(return_value={})
+#     with pytest.raises(InternalServerError, match="^common.process_issue"):
+#         AuthenticationService.thebes_hall(
+#             device_and_thebes_answer_from_request=payload_rec,
+#             user_repository=stub_repository,
+#             token_service=StubTokenHandler,
+#             persephone_client=stub_persephone_service
+#         )
+#

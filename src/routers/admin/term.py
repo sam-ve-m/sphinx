@@ -16,7 +16,6 @@ async def save_term(
     file_type: TermFile = Depends(TermFile.as_form),
     file_or_base64: Union[UploadFile, str] = File(...),
 ):
-
     if isinstance(file_or_base64, str) is False:
         file_or_base64 = await file_or_base64.read()
     payload = file_type.dict()

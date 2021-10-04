@@ -110,19 +110,15 @@ def get_document_type(request: Request):
 
 @router.get("/client_register_enums/county", tags=["client_register_enums"])
 def get_county(request: Request, country_state: CountryState = Depends(CountryState)):
-    payload = dict()
-    payload.update(country_state.dict())
     return BaseController.run(
-        ClientRegisterEnumsController.get_county, payload=payload, request=request
+        ClientRegisterEnumsController.get_county, payload=country_state.dict(), request=request
     )
 
 
 @router.get("/client_register_enums/state", tags=["client_register_enums"])
 def get_state(request: Request, country: Country = Depends(Country)):
-    payload = dict()
-    payload.update(country.dict())
     return BaseController.run(
-        ClientRegisterEnumsController.get_state, payload=payload, request=request
+        ClientRegisterEnumsController.get_state, payload=country.dict(), request=request
     )
 
 
@@ -156,10 +152,8 @@ def get_customer_status(request: Request):
 
 @router.get("/client_register_enums/customer_status", tags=["client_register_enums"])
 def get_bmf_customer_type(client_type: ClientType, request: Request):
-    payload = dict()
-    payload.update(client_type.dict(), request=request)
     return BaseController.run(
-        ClientRegisterEnumsController.get_bmf_customer_type(payload=payload),
+        ClientRegisterEnumsController.get_bmf_customer_type(payload=client_type.dict()),
         request=request,
     )
 

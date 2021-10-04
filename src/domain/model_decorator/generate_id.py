@@ -12,11 +12,6 @@ def generate_id(key: str, payload: dict, must_remove: bool = False) -> dict:
     return payload
 
 
-def generate_list(key: str, payload: dict) -> dict:
-    payload[key] = list()
-    return payload
-
-
 def hash_field(payload: Union[dict, str], key: str = None) -> dict:
     _sha1 = sha1()
     if key:

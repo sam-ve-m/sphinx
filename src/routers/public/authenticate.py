@@ -41,7 +41,6 @@ def answer(request: Request):
             ),
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-
     return BaseController.run(
         AuthenticationController.thebes_gate,
         jwt_data,

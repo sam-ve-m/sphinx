@@ -23,7 +23,7 @@ from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.services.persephone.service import PersephoneService
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
-from src.domain.model_decorator.genarate_id import hash_field
+from src.domain.model_decorator.generate_id import hash_field
 from src.core.interfaces.services.authentication.interface import IAuthentication
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.services.third_part_integration.solutiontech import Solutiontech
@@ -43,35 +43,36 @@ class AuthenticationService(IAuthentication):
         token_service=JwtService,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        old = user_repository.find_one(
+        old_user_data = user_repository.find_one(
             {"_id": thebes_answer_from_request_or_error.get("email")}
         )
-        if old is None:
+        if old_user_data is None:
             raise BadRequestError("common.register_not_exists")
-        new = deepcopy(old)
-        is_active_user = old.get("is_active_user")
+        new_user_data = deepcopy(old_user_data)
+        is_active_user = old_user_data.get("is_active_user")
         response = {"status_code": None, "payload": {"jwt": None}}
         response.update({"status_code": status.HTTP_200_OK})
 
         if not is_active_user:
-            new.update(
+            new_user_data.update(
                 {
                     "is_active_user": True,
                     "scope": {"view_type": "default", "features": ["default"]},
                 }
             )
-            sent_to_persephone = persephone_client.run(
-                topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
-                partition=PersephoneQueue.USER_AUTHENTICATION.value,
-                payload=get_user_authentication_template_with_data(payload=new),
-                schema_key="user_authentication_schema",
-            )
-            if sent_to_persephone is False:
-                raise InternalServerError("common.process_issue")
-            if user_repository.update_one(old=old, new=new) is False:
+            if user_repository.update_one(old=old_user_data, new=new_user_data) is False:
                 raise InternalServerError("common.process_issue")
 
-        jwt = token_service.generate_token(user_data=new, ttl=525600)
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+            partition=PersephoneQueue.USER_AUTHENTICATION.value,
+            payload=get_user_authentication_template_with_data(payload=new_user_data),
+            schema_key="user_authentication_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
+        jwt = token_service.generate_token(user_data=new_user_data, ttl=525600)
 
         response.update({"payload": {"jwt": jwt}})
 
@@ -139,27 +140,27 @@ class AuthenticationService(IAuthentication):
         persephone_client=PersephoneService.get_client()
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request.get("x-thebes-answer")
-        user_old = user_repository.find_one({"_id": x_thebes_answer.get("email")})
-        if user_old is None:
+        old_user_data = user_repository.find_one({"_id": x_thebes_answer.get("email")})
+        if old_user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        user_new = deepcopy(user_old)
+        new_user_data = deepcopy(old_user_data)
 
         client_has_trade_allowed = AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user_old
+            user=old_user_data
         )
 
         must_update = False
         for key, value in client_has_trade_allowed.items():
             if value["status_changed"]:
                 must_update = True
-                user_new.update({key: value["status"]})
+                new_user_data.update({key: value["status"]})
 
         if must_update:
-            if user_repository.update_one(old=user_old, new=user_new) is False:
+            if user_repository.update_one(old=old_user_data, new=new_user_data) is False:
                 raise InternalServerError("common.process_issue")
 
-        jwt = token_service.generate_token(user_data=user_new, ttl=525600)
+        jwt = token_service.generate_token(user_data=new_user_data, ttl=525600)
 
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
@@ -179,35 +180,6 @@ class AuthenticationService(IAuthentication):
 
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
-    @staticmethod
-    def get_thebes_hall(
-        thebes_answer_from_request_or_error: dict,
-        user_repository=UserRepository(),
-        token_service=JwtService,
-    ) -> dict:
-        user_old = user_repository.find_one(
-            {"_id": thebes_answer_from_request_or_error.get("email")}
-        )
-        if user_old is None:
-            raise BadRequestError("common.register_not_exists")
-
-        user_new = deepcopy(user_old)
-        client_has_trade_allowed = AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user_old
-        )
-        must_update = False
-        for key, value in client_has_trade_allowed.items():
-            if value["status_changed"]:
-                must_update = True
-                user_new.update({key: value["status"]})
-
-        if must_update:
-            if user_repository.update_one(old=user_old, new=user_new) is False:
-                raise InternalServerError("common.process_issue")
-
-        jwt = token_service.generate_token(user_data=user_new, ttl=525600)
-
-        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
     def _dtvm_client_has_trade_allowed(user: dict) -> dict:

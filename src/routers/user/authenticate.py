@@ -28,7 +28,6 @@ def thebes_hall(device_information: DeviceInformationOptional, request: Request)
 @router.get("/thebes_hall", tags=["authentication"])
 def get_thebes_hall(request: Request):
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
-
     return BaseController.run(
         AuthenticationController.get_thebes_hall,
         jwt_data,

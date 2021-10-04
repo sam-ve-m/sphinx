@@ -29,7 +29,7 @@ from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.services.sinacor.service import SinacorService
 from nidavellir.src.uru import Sindri
 
-from src.domain.model_decorator.genarate_id import generate_id, hash_field
+from src.domain.model_decorator.generate_id import generate_id, hash_field
 from src.services.jwts.service import JwtService
 from src.services.third_part_integration.stone_age import StoneAge
 from src.services.persephone.templates.persephone_templates import (
@@ -324,7 +324,7 @@ class UserService(IUser):
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
-        new.update({"token_valid_after": datetime.now()})
+        new.update({"token_valid_after": datetime.now(), "use_magic_link": True})
         if user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {

@@ -41,21 +41,17 @@ def get_nationality_update(request: Request):
 def get_county_update(
     request: Request, country_state: CountryState = Depends(CountryState)
 ):
-    payload = dict()
-    payload.update(country_state.dict())
     return BaseController.run(
         ClientRegisterEnumsController.get_county_update,
-        payload=payload,
+        payload=country_state.dict(),
         request=request,
     )
 
 
 @router.get("/client_update_enums/state", tags=["client_update_enums"])
 def get_state_update(request: Request, country: Country = Depends(Country)):
-    payload = dict()
-    payload.update(country.dict())
     return BaseController.run(
-        ClientRegisterEnumsController.get_state_update, payload=payload, request=request
+        ClientRegisterEnumsController.get_state_update, payload=country.dict(), request=request
     )
 
 

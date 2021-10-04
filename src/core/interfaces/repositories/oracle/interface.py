@@ -7,11 +7,6 @@ class IOracle(ABC):
 
     pool = None
 
-    @contextmanager
-    @abstractmethod
-    def get_connection(self):
-        pass
-
     @abstractmethod
     def query(self, sql) -> list:
         pass
