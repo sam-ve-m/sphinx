@@ -3,10 +3,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 # SPHINX
-from tests.stub_classes.stub_request import (
-    StubURL,
-    StubRequest
-)
+from tests.stub_classes.stub_request import StubURL, StubRequest
 from tests.stub_classes.stub_jwt_service_composition import StubJwtService
 from src.exceptions.exceptions import UnauthorizedError, InternalServerError
 
@@ -45,7 +42,7 @@ def get_new_stub_request_with_out_thebes_answer_header():
 
 def test_get_jwt_from_request_with_header_with_wrong_encode(
     get_new_stub_jwt_service,
-    get_new_stub_request_with_thebes_answer_header_wrong_encode
+    get_new_stub_request_with_thebes_answer_header_wrong_encode,
 ):
     stub_request = get_new_stub_request_with_thebes_answer_header_wrong_encode
     stub_jwt_service = get_new_stub_jwt_service
@@ -54,8 +51,7 @@ def test_get_jwt_from_request_with_header_with_wrong_encode(
 
 
 def test_get_jwt_from_request_with_out_header(
-    get_new_stub_jwt_service,
-    get_new_stub_request_with_out_thebes_answer_header
+    get_new_stub_jwt_service, get_new_stub_request_with_out_thebes_answer_header
 ):
     stub_request = get_new_stub_request_with_out_thebes_answer_header
     stub_jwt_service = get_new_stub_jwt_service
@@ -63,8 +59,7 @@ def test_get_jwt_from_request_with_out_header(
 
 
 def test_get_jwt_from_request_with_header(
-    get_new_stub_jwt_service,
-    get_new_stub_request_with_thebes_answer_header
+    get_new_stub_jwt_service, get_new_stub_request_with_thebes_answer_header
 ):
     stub_request = get_new_stub_request_with_thebes_answer_header
     stub_jwt_service = get_new_stub_jwt_service
@@ -72,8 +67,7 @@ def test_get_jwt_from_request_with_header(
 
 
 def test_get_thebes_answer_from_request_fail_to_get_jwt(
-    get_new_stub_request_with_out_thebes_answer_header,
-    get_new_stub_jwt_service
+    get_new_stub_request_with_out_thebes_answer_header, get_new_stub_jwt_service
 ):
     stub_request = get_new_stub_request_with_out_thebes_answer_header
     stub_jwt_service = get_new_stub_jwt_service
@@ -81,33 +75,33 @@ def test_get_thebes_answer_from_request_fail_to_get_jwt(
         stub_jwt_service.get_thebes_answer_from_request(request=stub_request)
 
 
-@patch('src.services.jwts.service.JwtService.decrypt_payload')
+@patch("src.services.jwts.service.JwtService.decrypt_payload")
 def test_get_thebes_answer_from_request(
     mock_decrypt_payload,
     get_new_stub_request_with_thebes_answer_header,
-    get_new_stub_jwt_service
+    get_new_stub_jwt_service,
 ):
     stub_request = get_new_stub_request_with_thebes_answer_header
     stub_jwt_service = get_new_stub_jwt_service
     decrypted_payload = {"a": 1}
     mock_decrypt_payload.return_value = decrypted_payload
-    assert stub_jwt_service.get_thebes_answer_from_request(request=stub_request) == decrypted_payload
+    assert (
+        stub_jwt_service.get_thebes_answer_from_request(request=stub_request)
+        == decrypted_payload
+    )
 
 
-def test_decrypt_payload_error_raised(
-    get_new_stub_jwt_service
-):
+def test_decrypt_payload_error_raised(get_new_stub_jwt_service):
     stub_jwt_service = get_new_stub_jwt_service
     stub_jwt_service.heimdall.decrypt_payload = MagicMock(side_effect=Exception())
     with pytest.raises(InternalServerError):
-        stub_jwt_service.decrypt_payload(encrypted_payload='')
+        stub_jwt_service.decrypt_payload(encrypted_payload="")
 
 
-def test_decrypt_payload(
-    get_new_stub_jwt_service
-):
+def test_decrypt_payload(get_new_stub_jwt_service):
     stub_jwt_service = get_new_stub_jwt_service
     decrypted_payload = {"a": 1}
-    stub_jwt_service.heimdall.decrypt_payload = MagicMock(return_value=decrypted_payload)
-    assert stub_jwt_service.decrypt_payload(encrypted_payload='') == decrypted_payload
-
+    stub_jwt_service.heimdall.decrypt_payload = MagicMock(
+        return_value=decrypted_payload
+    )
+    assert stub_jwt_service.decrypt_payload(encrypted_payload="") == decrypted_payload

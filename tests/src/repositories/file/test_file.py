@@ -114,7 +114,7 @@ def test_save_valid_user_file(
         file_repository.save_user_file(
             file_type=UserFileType.SELF, content="data", user_email="test@validator"
         )
-        == 'validator/te/test@validator/user_selfie/user_selfie.jpg'
+        == "validator/te/test@validator/user_selfie/user_selfie.jpg"
     )
 
 

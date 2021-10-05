@@ -5,7 +5,6 @@ from __future__ import annotations
 from email_validator import validate_email
 
 
-
 # SPHIX
 from src.domain.validators.onboarding_validators import *
 from src.domain.validators.bureau_validators import Source

@@ -13,7 +13,9 @@ class AdminRouter(RoutesRegister):
     def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
         allowed_admin = False
         if token := middleware_utils.get_token_if_token_is_valid(request=request):
-            if valid_admin := middleware_utils.get_valid_admin_from_database(token=token):
+            if valid_admin := middleware_utils.get_valid_admin_from_database(
+                token=token
+            ):
                 allowed_admin = middleware_utils.is_user_token_life_time_valid(
                     user_data=valid_admin, token=token
                 )

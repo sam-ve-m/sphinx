@@ -51,7 +51,9 @@ def get_county_update(
 @router.get("/client_update_enums/state", tags=["client_update_enums"])
 def get_state_update(request: Request, country: Country = Depends(Country)):
     return BaseController.run(
-        ClientRegisterEnumsController.get_state_update, payload=country.dict(), request=request
+        ClientRegisterEnumsController.get_state_update,
+        payload=country.dict(),
+        request=request,
     )
 
 

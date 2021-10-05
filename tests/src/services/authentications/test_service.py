@@ -65,11 +65,13 @@ def test_thebes_gate_answer_register_not_exists(get_new_stub_persephone_service)
             thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
             token_service=StubTokenHandler,
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )
 
 
-def test_thebes_gate_answer_is_not_active_process_issue_on_update_user_data(get_new_stub_persephone_service):
+def test_thebes_gate_answer_is_not_active_process_issue_on_update_user_data(
+    get_new_stub_persephone_service,
+):
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=True)
     stub_repository = StubRepository(database="", collection="")
@@ -80,11 +82,13 @@ def test_thebes_gate_answer_is_not_active_process_issue_on_update_user_data(get_
             thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
             token_service=StubTokenHandler,
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )
 
 
-def test_thebes_gate_answer_is_not_active_process_issue_on_sent_to_persephone(get_new_stub_persephone_service):
+def test_thebes_gate_answer_is_not_active_process_issue_on_sent_to_persephone(
+    get_new_stub_persephone_service,
+):
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=False)
     stub_repository = StubRepository(database="", collection="")
@@ -95,7 +99,7 @@ def test_thebes_gate_answer_is_not_active_process_issue_on_sent_to_persephone(ge
             thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
             token_service=StubTokenHandler,
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )
 
 
@@ -113,12 +117,14 @@ def test_thebes_gate_answer_is_not_active(get_new_stub_persephone_service):
         thebes_answer_from_request_or_error=payload,
         user_repository=stub_repository,
         token_service=StubTokenHandler,
-        persephone_client=stub_persephone_service
+        persephone_client=stub_persephone_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
 
 
-def test_thebes_gate_answer_is_active_was_sent_to_persephone(get_new_stub_persephone_service):
+def test_thebes_gate_answer_is_active_was_sent_to_persephone(
+    get_new_stub_persephone_service,
+):
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=True)
     generate_token_value = "lalala"
@@ -132,12 +138,14 @@ def test_thebes_gate_answer_is_active_was_sent_to_persephone(get_new_stub_persep
         thebes_answer_from_request_or_error=payload,
         user_repository=stub_repository,
         token_service=StubTokenHandler,
-        persephone_client=stub_persephone_service
+        persephone_client=stub_persephone_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
 
 
-def test_thebes_gate_answer_is_active_process_issue_on_sent_to_persephone(get_new_stub_persephone_service):
+def test_thebes_gate_answer_is_active_process_issue_on_sent_to_persephone(
+    get_new_stub_persephone_service,
+):
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=False)
     stub_repository = StubRepository(database="", collection="")
@@ -148,7 +156,7 @@ def test_thebes_gate_answer_is_active_process_issue_on_sent_to_persephone(get_ne
             thebes_answer_from_request_or_error=payload,
             user_repository=stub_repository,
             token_service=StubTokenHandler,
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )
 
 
@@ -261,7 +269,7 @@ def test_thebes_hall_not_register_exists(get_new_stub_persephone_service):
             device_and_thebes_answer_from_request=payload_rec,
             user_repository=stub_repository,
             token_service=StubTokenHandler,
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )
 
 

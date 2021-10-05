@@ -22,7 +22,7 @@ class ThebesHallBuilder:
         kwargs_to_add_on_jwt: dict,
         ttl: int,
         user_repository=UserRepository(),
-        terms_validator=TermsValidator()
+        terms_validator=TermsValidator(),
     ):
         self._jwt_payload_data = dict()
         self._user_data = user_data

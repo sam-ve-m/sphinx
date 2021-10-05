@@ -6,7 +6,7 @@ import logging
 from pymongo.cursor import Cursor
 from nidavellir.src.uru import Sindri
 
-#Sphinx
+# Sphinx
 from src.infrastructures.env_config import config
 from src.core.interfaces.repositories.base_repository.interface import IRepository
 from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
@@ -15,7 +15,6 @@ from src.domain.model_decorator.generate_id import hash_field
 
 
 class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
-
     def __init__(self, database: str, collection: str) -> None:
         self.base_identifier = f"{database}:{collection}"
         self.database = self.client[database]
@@ -113,9 +112,7 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
             self.collection.delete_one(entity)
             # TODO need to delete user cache ???
             if entity.get("email"):  # pragma: no cover
-                self._delete_cache(
-                    query={"_id": entity.get("email")}, cache=cache
-                )
+                self._delete_cache(query={"_id": entity.get("email")}, cache=cache)
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))

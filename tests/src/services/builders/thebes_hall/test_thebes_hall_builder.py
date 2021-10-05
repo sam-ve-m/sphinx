@@ -17,7 +17,8 @@ from tests.src.services.builders.thebes_hall.test_thebes_hall_builder_arguments 
     kwargs_to_add_on_jwt,
     ttl_10_seconds,
     valid_user_data,
-    not_active_user_data, mocked_term,
+    not_active_user_data,
+    mocked_term,
 )
 from tests.src.services.builders.thebes_hall.test_thebes_hall_builder_validator import (
     ValidJwtPayloadToCompleteDtvmClient,
@@ -53,7 +54,7 @@ def test_builder_with_complete_dtvm_client_expect_valid_jwt_payload():
         kwargs_to_add_on_jwt=copied_kwargs_to_add_on_jwt,
         ttl=ttl_10_seconds,
         user_repository=user_repository,
-        terms_validator=terms_validator
+        terms_validator=terms_validator,
     )
 
     jwt_payload = thebes_hall_builder.build()
@@ -86,7 +87,7 @@ def test_builder_with_forgot_electronic_signature_expect_valid_recovery_jwt():
         kwargs_to_add_on_jwt=copied_kwargs_to_add_on_jwt,
         ttl=ttl_10_seconds,
         user_repository=user_repository,
-        terms_validator=terms_validator
+        terms_validator=terms_validator,
     )
 
     jwt_payload = thebes_hall_builder.build()
@@ -119,7 +120,7 @@ def test_builder_with_forgot_password_expect_valid_recovery_jwt():
         kwargs_to_add_on_jwt=copied_kwargs_to_add_on_jwt,
         ttl=ttl_10_seconds,
         user_repository=user_repository,
-        terms_validator=terms_validator
+        terms_validator=terms_validator,
     )
 
     jwt_payload = thebes_hall_builder.build()
@@ -149,7 +150,7 @@ def test_builder_with_empty_user_and_kwargs_expect_valid_recovery_exception():
             kwargs_to_add_on_jwt={},
             ttl=ttl_10_seconds,
             user_repository=user_repository,
-            terms_validator=terms_validator
+            terms_validator=terms_validator,
         )
         thebes_hall_builder.build()
 
@@ -166,7 +167,7 @@ def test_builder_with_complete_app_user_expect_valid_jwt_payload():
         kwargs_to_add_on_jwt=copied_kwargs_to_add_on_jwt,
         ttl=ttl_10_seconds,
         user_repository=UserRepository(),
-        terms_validator=terms_validator
+        terms_validator=terms_validator,
     )
 
     jwt_payload = thebes_hall_builder.build()
@@ -192,7 +193,7 @@ def test_builder_with_not_active_app_user_expect_valid_jwt_payload():
         kwargs_to_add_on_jwt=copied_kwargs_to_add_on_jwt,
         ttl=ttl_10_seconds,
         user_repository=UserRepository(),
-        terms_validator=terms_validator
+        terms_validator=terms_validator,
     )
 
     jwt_payload = thebes_hall_builder.build()
@@ -219,7 +220,7 @@ def test_builder_with_not_active_dtvm_client_expect_valid_jwt_payload():
         kwargs_to_add_on_jwt=copied_kwargs_to_add_on_jwt,
         ttl=ttl_10_seconds,
         user_repository=UserRepository(),
-        terms_validator=terms_validator
+        terms_validator=terms_validator,
     )
 
     jwt_payload = thebes_hall_builder.build()

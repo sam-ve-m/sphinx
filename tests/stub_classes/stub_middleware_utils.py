@@ -6,11 +6,8 @@ from fastapi import Request
 
 
 class StubMiddlewareUtils:
-
     @staticmethod
-    def get_valid_user_from_database(
-        token: dict, user_repository
-    ) -> Optional[dict]:
+    def get_valid_user_from_database(token: dict, user_repository) -> Optional[dict]:
         pass
 
     @staticmethod
@@ -18,9 +15,7 @@ class StubMiddlewareUtils:
         pass
 
     @staticmethod
-    def get_valid_admin_from_database(
-        token: dict, user_repository
-    ) -> Optional[dict]:
+    def get_valid_admin_from_database(token: dict, user_repository) -> Optional[dict]:
         pass
 
     @staticmethod
@@ -30,7 +25,5 @@ class StubMiddlewareUtils:
         pass
 
     @staticmethod
-    def get_token_if_token_is_valid(
-        request: Request, jwt_handler
-    ) -> Optional[dict]:
+    def get_token_if_token_is_valid(request: Request, jwt_handler) -> Optional[dict]:
         pass
