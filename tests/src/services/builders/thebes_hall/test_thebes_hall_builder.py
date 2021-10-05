@@ -65,6 +65,7 @@ def test_builder_with_complete_dtvm_client_expect_valid_jwt_payload():
         dict_to_validate=jwt_payload,
     )
     assert is_valid_jwt_payload is True
+    assert jwt_payload["client_has_trade_allowed"] is True
 
 
 def test_builder_with_forgot_electronic_signature_expect_valid_recovery_jwt():

@@ -212,14 +212,14 @@ class ThebesHallBuilder:
         sincad = self._user_data.get("sincad")
         sinacor = self._user_data.get("sinacor")
         is_active_client = self._user_data.get("is_active_client")
-        client_has_trade_allowed = (
-            solutiontech == SolutiontechClientImportStatus.SYNC.value
-            and sincad
-            and sinacor
-            and is_active_client
-            and suitability_months_past < 24
-            and last_modified_date_months_past < 24
-        )
+        client_has_trade_allowed = all([
+            solutiontech == SolutiontechClientImportStatus.SYNC.value,
+            sincad,
+            sinacor,
+            is_active_client,
+            suitability_months_past < 24,
+            last_modified_date_months_past < 24
+        ])
         self._jwt_payload_data.update(
             {"client_has_trade_allowed": client_has_trade_allowed}
         )
