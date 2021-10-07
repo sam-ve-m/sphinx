@@ -3,6 +3,10 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+invalid_client_data = {
+
+}
+
 valid_client_data = {
     "_id": "ilm@lionx.com.br",
     "pin": "7c4a8d09ca3762af61e59520943dc26494f8941b",
@@ -38,7 +42,7 @@ valid_client_data = {
     "cpf": "46947059895",
     "is_cvm_qualified_investor": True,
     "is_us_person": True,
-    "marital": {"status": "not_married", "spouse": "None"},
+    "marital": {"status": 1, "spouse": "None"},
     "us_tin": 926516515,
     "electronic_signature": "8f0a62e2be8463b281db124556386c7f8dba64bce4416744f1f5c7f3bb48a405",
     "register_analyses": "SEND_RESPONSES",
@@ -96,10 +100,6 @@ valid_client_data = {
         "months_past": 0,
     },
     "lawsuits": False,
-    "marital_update": {
-        "marital_regime": 1,
-        "spouse_birth_date": datetime(1993, 7, 12, 0, 0),
-    },
     "midia_person": False,
     "mother_name": "Antonia dos Santos Jr.",
     "name": "GERTRURDES 4",
@@ -127,3 +127,21 @@ valid_client_data = {
 
 sinacor_insert_client_control_data = (1, 1)
 sinacor_update_client_control_data = (0, 0)
+
+marital_married = {
+    "status": 5,
+    "spouse": {
+        "cpf": "16746756076",
+        "name": "Flavio Antobio Felicio",
+        "nationality": 1
+    }
+}
+
+unemployed_occupation = {
+    "activity": 609
+}
+
+other_occupation = {
+    "activity": 609,
+    "company": {"cnpj": "25811052000179", "name": "Tudo nosso .com.br"},
+}
