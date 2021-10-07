@@ -11,7 +11,7 @@ from src.services.authentications.service import AuthenticationService
 from tests.stub_classes.stub_base_repository import StubBaseRepository
 from tests.stub_classes.stub_persephone_service import StubPersephoneService
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
-from tests.stub_classes.stub_jwt_service_composition import StubJwtService
+from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 
 
 class StubRepository(StubBaseRepository):
@@ -48,7 +48,7 @@ def get_authentication_service_mock_send_authentication_email():
 
 @pytest.fixture
 def get_new_stub_jwt_service():
-    stub_jwt_service = StubJwtService()
+    stub_jwt_service = JwtServiceWithStubAttributes()
     return stub_jwt_service
 
 

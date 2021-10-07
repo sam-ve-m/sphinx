@@ -5,7 +5,9 @@ from src.infrastructures.env_config import config
 
 # OUTSIDE LIBRARIES
 from fastapi import Request
-from jwt import JWT, jwk_from_pem
+from jwt import JWT
+from jwt.jwk import jwk_from_pem
+
 from heimdall_client.bifrost import Heimdall
 from mist_client.asgard import Mist
 
@@ -13,7 +15,6 @@ from mist_client.asgard import Mist
 from src.repositories.jwt.repository import JwtRepository
 from src.exceptions.exceptions import InternalServerError, UnauthorizedError
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
-
 
 class JwtService:
 

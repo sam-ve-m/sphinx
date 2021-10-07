@@ -1,19 +1,20 @@
 # OUTSIDE LIBRARIES
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, mock_open
 
 # SPHINX
 from tests.stub_classes.stub_request import (
     StubURL,
     StubRequest
 )
-from tests.stub_classes.stub_jwt_service_composition import StubJwtService
+from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 from src.exceptions.exceptions import UnauthorizedError, InternalServerError
+from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 
 
 @pytest.fixture
 def get_new_stub_jwt_service():
-    stub_jwt_service = StubJwtService()
+    stub_jwt_service = JwtServiceWithStubAttributes()
     return stub_jwt_service
 
 
@@ -41,6 +42,13 @@ def get_new_stub_request_with_out_thebes_answer_header():
     stub_url.path = "/"
     stub_request = StubRequest(url=stub_url)
     return stub_request
+
+
+class StubThebesHallBuilder:
+
+    @staticmethod
+    def run(*args, **kwargs):
+        pass
 
 
 def test_get_jwt_from_request_with_header_with_wrong_encode(
@@ -111,3 +119,15 @@ def test_decrypt_payload(
     stub_jwt_service.heimdall.decrypt_payload = MagicMock(return_value=decrypted_payload)
     assert stub_jwt_service.decrypt_payload(encrypted_payload='') == decrypted_payload
 
+
+#TODO: cant mock from jwt.jwk import jwk_from_pem
+@patch('builtins.open')
+def test_generate_token_id_rsa_dont_find(
+        mock_open,
+        get_new_stub_jwt_service
+):
+    mock_open = MagicMock(side_effect=Exception())
+    stub_jwt_service = get_new_stub_jwt_service
+    user_data = {}
+    with pytest.raises(InternalServerError):
+        stub_jwt_service.generate_token(user_data=user_data)
