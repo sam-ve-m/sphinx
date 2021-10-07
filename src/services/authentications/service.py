@@ -84,18 +84,18 @@ class AuthenticationService(IAuthentication):
         user_repository=UserRepository(),
         token_service=JwtService
     ) -> dict:
-        entity = user_repository.find_one({"_id": user_credentials.get("email")})
-        if entity is None:
+        user_data = user_repository.find_one({"_id": user_credentials["email"]})
+        if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
         ########################################################################### ADICIONAR ESSA VERIFICAÇAO QUANDO DELETAR USUARIO/CLIENTE ####################################################################
-        # if entity.get("is_active_client") is False:
+        # if user_data.get("is_active_client") is False:
         #     raise UnauthorizedError("invalid_credential")
 
-        if entity.get("use_magic_link") is True:
-            payload_jwt = token_service.generate_token(user_data=entity, ttl=10)
+        if user_data["use_magic_link"] is True:
+            payload_jwt = token_service.generate_token(user_data=user_data, ttl=10)
             AuthenticationService.send_authentication_email(
-                email=entity.get("email"),
+                email=user_data["email"],
                 payload_jwt=payload_jwt,
                 body="email.body.created",
             )
@@ -110,11 +110,11 @@ class AuthenticationService(IAuthentication):
                     "status_code": status.HTTP_200_OK,
                     "message_key": "user.need_pin",
                 }
-            if hash_field(payload=pin) != entity.get("pin"):
+            if hash_field(payload=pin) != user_data["pin"]:
                 raise UnauthorizedError("user.pin_error")
 
-            jwt = token_service.generate_token(user_data=entity, ttl=525600)
-            JwtController.insert_one(jwt, entity.get("email"))
+            jwt = token_service.generate_token(user_data=user_data, ttl=525600)
+            JwtController.insert_one(jwt, user_data["email"])
             return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -139,8 +139,8 @@ class AuthenticationService(IAuthentication):
         token_service=JwtService,
         persephone_client=PersephoneService.get_client()
     ) -> dict:
-        x_thebes_answer = device_and_thebes_answer_from_request.get("x-thebes-answer")
-        old_user_data = user_repository.find_one({"_id": x_thebes_answer.get("email")})
+        x_thebes_answer = device_and_thebes_answer_from_request["x-thebes-answer"]
+        old_user_data = user_repository.find_one({"_id": x_thebes_answer["email"]})
         if old_user_data is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -182,13 +182,17 @@ class AuthenticationService(IAuthentication):
 
 
     @staticmethod
-    def _dtvm_client_has_trade_allowed(user: dict) -> dict:
+    def _dtvm_client_has_trade_allowed(
+        user: dict,
+        client_register_repository=ClientRegisterRepository(),
+        solutiontech=Solutiontech
+    ) -> dict:
 
-        user_solutiontech_status_from_database = user.get("solutiontech")
-        user_sincad_status_from_database = user.get("sincad")
-        user_sinacor_status_from_database = user.get("sinacor")
-        user_bmf_account_from_database = user.get("bmf_account")
-        user_cpf_from_database = user.get("cpf")
+        user_solutiontech_status_from_database = user["solutiontech"]
+        user_sincad_status_from_database = user["sincad"]
+        user_sinacor_status_from_database = user["sinacor"]
+        user_bmf_account_from_database = user["bmf_account"]
+        user_cpf_from_database = user["cpf"]
 
         client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
@@ -201,7 +205,7 @@ class AuthenticationService(IAuthentication):
         )
 
         if user_has_valid_solutiontech_status_in_database:
-            user_solutiontech_status_from_check_status_request = Solutiontech.check_if_client_is_synced_with_solutiontech(
+            user_solutiontech_status_from_check_status_request = solutiontech.check_if_client_is_synced_with_solutiontech(
                 user_bmf_code=int(user_bmf_account_from_database),
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             )
@@ -219,7 +223,8 @@ class AuthenticationService(IAuthentication):
         if user_is_already_sync_with_sincad:
             sincad_status_from_sinacor = (
                 AuthenticationService.sinacor_is_synced_with_sincad(
-                    user_cpf=user_cpf_from_database
+                    user_cpf=user_cpf_from_database,
+                    client_register_repository=client_register_repository
                 )
             )
 
@@ -230,7 +235,8 @@ class AuthenticationService(IAuthentication):
             )
 
         sinacor_status_from_sinacor = AuthenticationService.client_sinacor_is_blocked(
-            user_cpf=user_cpf_from_database
+            user_cpf=user_cpf_from_database,
+            client_register_repository=client_register_repository
         )
 
         AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
@@ -244,8 +250,8 @@ class AuthenticationService(IAuthentication):
     @staticmethod
     def _get_client_has_trade_allowed_status_with_database_user(
         user_solutiontech_status_from_database: str,
-        user_sincad_status_from_database: str,
-        user_sinacor_status_from_database: str,
+        user_sincad_status_from_database: bool,
+        user_sinacor_status_from_database: bool,
     ):
         client_has_trade_allowed_status_with_database_user = {
             "solutiontech": {
@@ -354,13 +360,14 @@ class AuthenticationService(IAuthentication):
     def create_electronic_signature_jwt(
         change_electronic_signature_request: dict,
         persephone_client=PersephoneService.get_client(),
+        jwt_service=JwtService
     ):
         jwt_mist_session = None
         allowed = None
         try:
-            jwt_mist_session = JwtService.generate_session_jwt(
-                change_electronic_signature_request.get("electronic_signature"),
-                change_electronic_signature_request.get("email"),
+            jwt_mist_session = jwt_service.generate_session_jwt(
+                change_electronic_signature_request["electronic_signature"],
+                change_electronic_signature_request["email"],
             )
             allowed = True
         except BaseException as e:
@@ -371,8 +378,8 @@ class AuthenticationService(IAuthentication):
                 topic=config("PERSEPHONE_TOPIC_USER"),
                 partition=PersephoneQueue.USER_ELECTRONIC_SIGNATURE_SESSION.value,
                 payload=get_create_electronic_signature_session_schema_template_with_data(
-                    email=change_electronic_signature_request.get("email"),
-                    mist_session=jwt_mist_session[0],
+                    email=change_electronic_signature_request["email"],
+                    mist_session=jwt_mist_session,
                     allowed=allowed,
                 ),
                 schema_key="create_electronic_signature_session_schema",
@@ -394,11 +401,11 @@ class AuthenticationService(IAuthentication):
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_LOGOUT.value,
             payload=get_user_logout_template_with_data(
-                jwt=device_jwt_and_thebes_answer_from_request.get("jwt"),
-                email=device_jwt_and_thebes_answer_from_request.get("email"),
-                device_information=device_jwt_and_thebes_answer_from_request.get(
+                jwt=device_jwt_and_thebes_answer_from_request["jwt"],
+                email=device_jwt_and_thebes_answer_from_request["email"],
+                device_information=device_jwt_and_thebes_answer_from_request[
                     "device_information"
-                ),
+                ],
             ),
             schema_key="user_logout_schema",
         )

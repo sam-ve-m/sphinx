@@ -12,7 +12,7 @@ from tests.stub_classes.stub_request import (
     StubURL,
     StubRequest
 )
-from tests.stub_classes.stub_jwt_service_composition import StubJwtService
+from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 
 
 class StubRepository(StubBaseRepository):
@@ -26,7 +26,7 @@ def get_new_stubby_repository():
 
 @pytest.fixture
 def get_new_stub_jwt_service():
-    stub_jwt_service = StubJwtService()
+    stub_jwt_service = JwtServiceWithStubAttributes()
     return stub_jwt_service
 
 
