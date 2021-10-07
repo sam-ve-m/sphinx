@@ -13,7 +13,10 @@ from src.repositories.sinacor_types.enum.person_type import PersonType
 from src.repositories.sinacor_types.enum.status import OutputStatus
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.domain.validators.enum_template import MaritalStatusEnum
-from src.domain.validators.brazil_register_number_validator import is_cpf_valid, is_cnpj_valid
+from src.domain.validators.brazil_register_number_validator import (
+    is_cpf_valid,
+    is_cnpj_valid,
+)
 from src.infrastructures.env_config import config
 
 

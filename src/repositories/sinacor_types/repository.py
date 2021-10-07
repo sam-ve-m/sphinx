@@ -327,14 +327,17 @@ class SinaCorTypesRepository(OracleInfrastructure):
         """
         return self.base_validator(sql=sql)
 
-    def is_others(self, value: str) -> bool:
+    def is_unemployed(self, value: str, cnpj: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCATIV
             WHERE DS_ATIV = 'OUTROS'
             AND CD_ATIV = {value}
         """
-        return self.base_validator(sql=sql)
+        is_other = self.base_validator(sql=sql)
+        has_cnpj = cnpj is not None
+
+        return is_other and not has_cnpj
 
     def is_business_person(self, value: str) -> bool:
         sql = f"""

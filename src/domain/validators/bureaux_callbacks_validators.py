@@ -8,7 +8,7 @@ from pydantic import BaseModel, root_validator
 # SPHINX
 from src.domain.validators.base import (
     InvestorTypeSource,
-    RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
+    RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource,
 )
 from src.domain.validators.bureau_validators import (
     Uuid,

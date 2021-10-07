@@ -13,7 +13,6 @@ from src.services.jwts.service import JwtService
 
 
 class MiddlewareUtils:
-
     @staticmethod
     def get_valid_user_from_database(
         token: dict, user_repository=UserRepository()

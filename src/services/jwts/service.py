@@ -32,7 +32,7 @@ class JwtService:
 
     @classmethod
     def generate_token(
-            cls, user_data: dict, kwargs_to_add_on_jwt: dict = None, ttl: int = 5
+        cls, user_data: dict, kwargs_to_add_on_jwt: dict = None, ttl: int = 5
     ) -> Optional[str]:
         """The ttl value in minutes"""
         try:
@@ -43,9 +43,7 @@ class JwtService:
                 user_data=user_data, kwargs_to_add_on_jwt=kwargs_to_add_on_jwt, ttl=ttl
             )
             payload_to_jwt = thebes_hall_builder.build()
-            compact_jws = cls.instance.encode(
-                payload_to_jwt, signing_key, alg="RS256"
-            )
+            compact_jws = cls.instance.encode(payload_to_jwt, signing_key, alg="RS256")
             return compact_jws
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))

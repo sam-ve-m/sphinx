@@ -20,7 +20,7 @@ class UpdateCustomerRegistrationBuilder:
 
     @staticmethod
     def _dictionary_insert_with_levels(
-            *levels, _value: any, _current_dict_level: dict, _current_arg_id: int = 0
+        *levels, _value: any, _current_dict_level: dict, _current_arg_id: int = 0
     ):
         level_size = len(levels)
         if level_size == 0:
@@ -38,7 +38,7 @@ class UpdateCustomerRegistrationBuilder:
             *levels,
             _value=_value,
             _current_arg_id=_current_arg_id + 1,
-            _current_dict_level=_current_dict_level[level]
+            _current_dict_level=_current_dict_level[level],
         )
 
     def _get_new_value(self, field_name: str) -> Optional[any]:
