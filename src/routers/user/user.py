@@ -7,7 +7,7 @@ from src.domain.validators.base import (
     ElectronicSignature,
     ChangeElectronicSignature,
     View,
-    Feature
+    Feature,
 )
 from src.domain.validators.onboarding_validators import (
     TermFile,

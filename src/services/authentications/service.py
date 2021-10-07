@@ -5,7 +5,6 @@ from copy import deepcopy
 from fastapi import status
 
 
-
 # SPHINX
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
@@ -60,7 +59,10 @@ class AuthenticationService(IAuthentication):
                     "scope": {"view_type": "default", "features": ["default"]},
                 }
             )
-            if user_repository.update_one(old=old_user_data, new=new_user_data) is False:
+            if (
+                user_repository.update_one(old=old_user_data, new=new_user_data)
+                is False
+            ):
                 raise InternalServerError("common.process_issue")
 
         sent_to_persephone = persephone_client.run(
@@ -82,7 +84,7 @@ class AuthenticationService(IAuthentication):
     def login(
         user_credentials: dict,
         user_repository=UserRepository(),
-        token_service=JwtService
+        token_service=JwtService,
     ) -> dict:
         user_data = user_repository.find_one({"_id": user_credentials["email"]})
         if user_data is None:
@@ -137,7 +139,7 @@ class AuthenticationService(IAuthentication):
         device_and_thebes_answer_from_request: dict,
         user_repository=UserRepository(),
         token_service=JwtService,
-        persephone_client=PersephoneService.get_client()
+        persephone_client=PersephoneService.get_client(),
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request["x-thebes-answer"]
         old_user_data = user_repository.find_one({"_id": x_thebes_answer["email"]})
@@ -157,7 +159,10 @@ class AuthenticationService(IAuthentication):
                 new_user_data.update({key: value["status"]})
 
         if must_update:
-            if user_repository.update_one(old=old_user_data, new=new_user_data) is False:
+            if (
+                user_repository.update_one(old=old_user_data, new=new_user_data)
+                is False
+            ):
                 raise InternalServerError("common.process_issue")
 
         jwt = token_service.generate_token(user_data=new_user_data, ttl=525600)
@@ -179,7 +184,6 @@ class AuthenticationService(IAuthentication):
             raise InternalServerError("common.process_issue")
 
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
-
 
     @staticmethod
     def _dtvm_client_has_trade_allowed(

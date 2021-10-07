@@ -10,13 +10,16 @@ from src.repositories.file.repository import TermsFileType
 from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 from tests.stub_classes.stub_base_repository import StubBaseRepository
 from tests.stub_classes.stub_persephone_service import StubPersephoneService
-from tests.stub_classes.stub_client_register_repository import StubClientRegisterRepository
+from tests.stub_classes.stub_client_register_repository import (
+    StubClientRegisterRepository,
+)
 
 
 @pytest.fixture
 def get_new_stub_persephone_service():
     stub_persephone_service = StubPersephoneService()
     return stub_persephone_service
+
 
 class StubRepository(StubBaseRepository):
     pass
@@ -89,7 +92,7 @@ def test_created(get_new_stubby_repository):
         user_repository=stub_repository,
         authentication_service=stub_authentication_service,
         persephone_client=stub_persephone_client,
-        jwt_handler=stub_jwt_service
+        jwt_handler=stub_jwt_service,
     )
     assert response.get("status_code") == status.HTTP_201_CREATED
     assert response.get("message_key") == "user.created"
@@ -175,15 +178,19 @@ def test_delete_register_exists(get_new_stubby_repository):
 
 def test_delete_process_issue(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
-    stub_repository.find_one = MagicMock(return_value={"bmf_account": '123', "cpf": '123', "scope": {"view_type": ""}})
+    stub_repository.find_one = MagicMock(
+        return_value={"bmf_account": "123", "cpf": "123", "scope": {"view_type": ""}}
+    )
     stub_repository.update_one = MagicMock(return_value=False)
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.client_is_allowed_to_cancel_registration = MagicMock(return_value=True)
+    stub_client_register_repository.client_is_allowed_to_cancel_registration = (
+        MagicMock(return_value=True)
+    )
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.delete(
             payload=payload_change_view,
             user_repository=stub_repository,
-            client_register=stub_client_register_repository
+            client_register=stub_client_register_repository,
         )
 
 
@@ -232,7 +239,7 @@ def test_forgot_password(get_new_stubby_repository):
         payload=payload_change_password,
         user_repository=stub_repository,
         authentication_service=StubAuthenticationService,
-        jwt_handler=stub_jwt_service
+        jwt_handler=stub_jwt_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "email.forgot_password"
@@ -383,7 +390,7 @@ def test_save_user_selfie(get_user_data, get_new_stubby_repository):
     response = UserService.save_user_selfie(
         payload={"x-thebes-answer": {"email": "lala@com.br"}, "file_or_base64": ""},
         file_repository=stub_repository,
-        persephone_client=StubPersephoneClient
+        persephone_client=StubPersephoneClient,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "files.uploaded"
@@ -542,7 +549,7 @@ def test_user_identifier_data_process_issue_v2(
     stub_user_repository = get_new_stubby_repository
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=True)
-    stub_user_repository.find_one = lambda x: None if 'cpf' in x else {'a': 1}
+    stub_user_repository.find_one = lambda x: None if "cpf" in x else {"a": 1}
     stub_user_repository.update_one = MagicMock(return_value=False)
     StubStoneAge.send_user_identifier_data = MagicMock(return_value={"a": 123})
     UserService.onboarding_step_validator = MagicMock(return_value=False)
@@ -550,22 +557,24 @@ def test_user_identifier_data_process_issue_v2(
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )
 
 
-def test_user_identifier_data(get_user_data, get_new_stubby_repository, get_new_stub_persephone_service):
+def test_user_identifier_data(
+    get_user_data, get_new_stubby_repository, get_new_stub_persephone_service
+):
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=True)
     stub_user_repository = get_new_stubby_repository
-    stub_user_repository.find_one = lambda x: None if 'cpf' in x else {'a': 1}
+    stub_user_repository.find_one = lambda x: None if "cpf" in x else {"a": 1}
     StubStoneAge.send_user_identifier_data = MagicMock(return_value={"a": 123})
     stub_user_repository.update_one = MagicMock(return_value=True)
     UserService.onboarding_step_validator = MagicMock(return_value=True)
     response = UserService.user_identifier_data(
         payload=payload_user_identifier_data,
         user_repository=stub_user_repository,
-        persephone_client=stub_persephone_service
+        persephone_client=stub_persephone_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
 

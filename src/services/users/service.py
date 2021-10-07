@@ -60,7 +60,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
         persephone_client=PersephoneService.get_client(),
-        jwt_handler=JwtService
+        jwt_handler=JwtService,
     ) -> dict:
         user = generate_id("email", user, must_remove=False)
         has_pin = user.get("pin")
@@ -299,7 +299,7 @@ class UserService(IUser):
         payload: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
-        jwt_handler=JwtService
+        jwt_handler=JwtService,
     ) -> dict:
         entity = user_repository.find_one({"_id": payload.get("email")})
         if entity is None:
@@ -458,7 +458,7 @@ class UserService(IUser):
                     "term_retail_liquid_provider": None,
                     "term_refusal": None,
                     "term_non_compliance": None,
-                }
+                },
             }
         )
 

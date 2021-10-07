@@ -21,5 +21,7 @@ def test_is_allow_with_out_is_third_part():
 
 def test_is_allow():
     middleware_utils = StubMiddlewareUtils()
-    middleware_utils.get_token_if_token_is_valid = MagicMock(return_value={"is_third_part": True})
+    middleware_utils.get_token_if_token_is_valid = MagicMock(
+        return_value={"is_third_part": True}
+    )
     assert ThirdPartRouter.is_allow(StubRequest(StubURL), middleware_utils) is True

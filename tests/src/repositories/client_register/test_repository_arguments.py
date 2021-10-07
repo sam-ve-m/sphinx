@@ -1,5 +1,11 @@
+# Std imports
 from datetime import datetime
 from pydantic import BaseModel
+
+
+invalid_client_data = {
+
+}
 
 valid_client_data = {
     "_id": "ilm@lionx.com.br",
@@ -36,7 +42,7 @@ valid_client_data = {
     "cpf": "46947059895",
     "is_cvm_qualified_investor": True,
     "is_us_person": True,
-    "marital": {"status": "not_married", "spouse": "None"},
+    "marital": {"status": 1, "spouse": "None"},
     "us_tin": 926516515,
     "electronic_signature": "8f0a62e2be8463b281db124556386c7f8dba64bce4416744f1f5c7f3bb48a405",
     "register_analyses": "SEND_RESPONSES",
@@ -94,10 +100,6 @@ valid_client_data = {
         "months_past": 0,
     },
     "lawsuits": False,
-    "marital_update": {
-        "marital_regime": 1,
-        "spouse_birth_date": datetime(1993, 7, 12, 0, 0),
-    },
     "midia_person": False,
     "mother_name": "Antonia dos Santos Jr.",
     "name": "GERTRURDES 4",
@@ -123,68 +125,23 @@ valid_client_data = {
     "stone_age_proposal_id": "cbf53b8b-bccb-4b96-a28e-43b54aa778f2",
 }
 
-valid_user_data = {
-    "_id": "ilm2@lionx.com.br",
-    "pin": None,
-    "nick_name": "Igao 2",
-    "email": "ilm2@lionx.com.br",
-    "created_at": datetime(2021, 9, 30, 17, 33, 26, 460000),
-    "scope": {"view_type": "default", "features": ["default"]},
-    "is_active_user": True,
-    "use_magic_link": True,
-    "token_valid_after": datetime(2021, 9, 30, 17, 33, 26, 460000),
-    "terms": {
-        "term_application": None,
-        "term_open_account": None,
-        "term_retail_liquid_provider": None,
-        "term_refusal": None,
-        "term_non_compliance": None,
-    },
-    "can_be_managed_by_third_party_operator": False,
-    "is_managed_by_third_party_operator": False,
-    "third_party_operator": {
-        "is_third_party_operator": False,
-        "details": {},
-        "third_party_operator_email": "string",
-    },
+sinacor_insert_client_control_data = (1, 1)
+sinacor_update_client_control_data = (0, 0)
+
+marital_married = {
+    "status": 5,
+    "spouse": {
+        "cpf": "16746756076",
+        "name": "Flavio Antobio Felicio",
+        "nationality": 1
+    }
 }
 
-not_active_user_data = {
-    "_id": "ilm3@lionx.com.br",
-    "pin": None,
-    "nick_name": "Sem Verificação De Email",
-    "email": "ilm3@lionx.com.br",
-    "created_at": datetime(2021, 10, 1, 15, 39, 53, 755000),
-    "scope": {"view_type": "default", "features": ["default"]},
-    "is_active_user": False,
-    "use_magic_link": True,
-    "token_valid_after": datetime(2021, 10, 1, 15, 39, 53, 755000),
-    "terms": {
-        "term_application": None,
-        "term_open_account": None,
-        "term_retail_liquid_provider": None,
-        "term_refusal": None,
-        "term_non_compliance": None,
-    },
-    "can_be_managed_by_third_party_operator": False,
-    "is_managed_by_third_party_operator": False,
-    "third_party_operator": {
-        "is_third_party_operator": False,
-        "details": {},
-        "third_party_operator_email": "string",
-    },
+unemployed_occupation = {
+    "activity": 609
 }
 
-mocked_term = (
-    {
-        "term_application": None,
-        "term_open_account": None,
-        "term_retail_liquid_provider": None,
-        "term_refusal": None,
-        "term_non_compliance": None,
-    },
-)
-
-kwargs_to_add_on_jwt = {}
-
-ttl_10_seconds = 10
+other_occupation = {
+    "activity": 609,
+    "company": {"cnpj": "25811052000179", "name": "Tudo nosso .com.br"},
+}
