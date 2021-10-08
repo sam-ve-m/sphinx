@@ -68,9 +68,8 @@ def send_quiz_responses(quiz_response: QuizResponses, request: Request):
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
 
     quiz_response_dict = quiz_response.dict()
+    Sindri.dict_to_primitive_types(values=quiz_response_dict)
     responses = quiz_response_dict.get("responses")
-
-    Sindri.dict_to_primitive_types(values=responses)
 
     payload = {
         "x-thebes-answer": jwt_data,

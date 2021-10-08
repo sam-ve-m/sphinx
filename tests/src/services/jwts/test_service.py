@@ -3,10 +3,7 @@ import pytest
 from unittest.mock import MagicMock, patch, mock_open
 
 # SPHINX
-from tests.stub_classes.stub_request import (
-    StubURL,
-    StubRequest
-)
+from tests.stub_classes.stub_request import StubURL, StubRequest
 from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 from src.exceptions.exceptions import UnauthorizedError, InternalServerError
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
@@ -45,7 +42,6 @@ def get_new_stub_request_with_out_thebes_answer_header():
 
 
 class StubThebesHallBuilder:
-
     @staticmethod
     def run(*args, **kwargs):
         pass
@@ -118,12 +114,9 @@ def test_decrypt_payload(get_new_stub_jwt_service):
     assert stub_jwt_service.decrypt_payload(encrypted_payload="") == decrypted_payload
 
 
-#TODO: cant mock from jwt.jwk import jwk_from_pem
-@patch('builtins.open')
-def test_generate_token_id_rsa_dont_find(
-        mock_open,
-        get_new_stub_jwt_service
-):
+# TODO: cant mock from jwt.jwk import jwk_from_pem
+@patch("builtins.open")
+def test_generate_token_id_rsa_dont_find(mock_open, get_new_stub_jwt_service):
     mock_open = MagicMock(side_effect=Exception())
     stub_jwt_service = get_new_stub_jwt_service
     user_data = {}

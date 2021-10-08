@@ -58,8 +58,8 @@ class StoneAge:
         request_session.cookies["access_token"] = cookies["access_token"]
 
         # TODO: remove this
-        # if body.get('marital_status'):
-        #     body['marital_status'] = 1
+        if body.get("marital_status"):
+            body["marital_status"] = 1
 
         body_dumps = json.dumps(body)
         response = request_session.post(url=motor_app_entry_point_url, data=body_dumps)

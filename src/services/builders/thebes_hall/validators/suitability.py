@@ -12,8 +12,6 @@ class Suitability(IValidator):
     @staticmethod
     def run(user_data: dict) -> dict:
         if suitability := user_data.get("suitability"):
-            total_months_past = months_past(
-                date=suitability["submission_date"]
-            )
+            total_months_past = months_past(date=suitability["submission_date"])
             user_data["suitability"]["months_past"] = total_months_past
         return user_data

@@ -12,9 +12,19 @@ from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from tests.src.repositories.client_register.test_repository_arguments import (
     valid_client_data,
-    sinacor_insert_client_control_data, marital_married, unemployed_occupation, invalid_client_data,
+    sinacor_insert_client_control_data,
+    marital_married,
+    unemployed_occupation,
+    invalid_client_data,
 )
-from tests.src.repositories.client_register.test_repository_builder_validator import ValidNotMarriedBusinessPerson, ValidMarriedBusinessPerson, ValidMarriedUnemployed, ValidNotMarriedUnemployed, ValidMarriedEmployed, ValidNotMarriedEmployed
+from tests.src.repositories.client_register.test_repository_builder_validator import (
+    ValidNotMarriedBusinessPerson,
+    ValidMarriedBusinessPerson,
+    ValidMarriedUnemployed,
+    ValidNotMarriedUnemployed,
+    ValidMarriedEmployed,
+    ValidNotMarriedEmployed,
+)
 
 
 def _validate_builder_response(callback, dict_to_validate: dict) -> bool:
@@ -44,9 +54,7 @@ def test_get_builder_with_married_business_person_expect_valid_builder_callback_
     client_sinacor_dict = builder.build()
 
     validate_married_business_person = (
-        lambda dict_to_validate: ValidMarriedBusinessPerson(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidMarriedBusinessPerson(**dict_to_validate)
     )
     is_valid_married_business_person = _validate_builder_response(
         callback=validate_married_business_person,
@@ -72,9 +80,7 @@ def test_get_builder_with_not_married_business_person_expect_valid_builder_callb
     client_sinacor_dict = builder.build()
 
     validate_not_married_business_person = (
-        lambda dict_to_validate: ValidNotMarriedBusinessPerson(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidNotMarriedBusinessPerson(**dict_to_validate)
     )
     is_valid_not_married_business_person = _validate_builder_response(
         callback=validate_not_married_business_person,
@@ -102,9 +108,7 @@ def test_get_builder_with_married_unemployed_expect_valid_builder_callback_to_in
     client_sinacor_dict = builder.build()
 
     validate_married_unemployed_occupation = (
-        lambda dict_to_validate: ValidMarriedUnemployed(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidMarriedUnemployed(**dict_to_validate)
     )
     is_valid_married_other_occupation = _validate_builder_response(
         callback=validate_married_unemployed_occupation,
@@ -131,9 +135,7 @@ def test_get_builder_with_not_married_unemployed_expect_valid_builder_callback_t
     client_sinacor_dict = builder.build()
 
     validate_not_married_unemployed_occupation = (
-        lambda dict_to_validate: ValidNotMarriedUnemployed(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidNotMarriedUnemployed(**dict_to_validate)
     )
     is_valid_not_married_unemployed_occupation = _validate_builder_response(
         callback=validate_not_married_unemployed_occupation,
@@ -159,10 +161,8 @@ def test_get_builder_with_married_employed_person_expect_valid_builder_callback_
 
     client_sinacor_dict = builder.build()
 
-    validate_married_employed = (
-        lambda dict_to_validate: ValidMarriedEmployed(
-            **dict_to_validate
-        )
+    validate_married_employed = lambda dict_to_validate: ValidMarriedEmployed(
+        **dict_to_validate
     )
     is_valid_married_employed_person = _validate_builder_response(
         callback=validate_married_employed,
@@ -188,9 +188,7 @@ def test_get_builder_with_not_married_employed_expect_valid_builder_callback_to_
     client_sinacor_dict = builder.build()
 
     validate_not_married_employed_occupation = (
-        lambda dict_to_validate: ValidNotMarriedEmployed(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidNotMarriedEmployed(**dict_to_validate)
     )
     is_valid_not_married_employed_occupation = _validate_builder_response(
         callback=validate_not_married_employed_occupation,
@@ -226,7 +224,7 @@ def test_get_builder_with_unemployed_and_business_person_data_expect_exception()
 
     with pytest.raises(InternalServerError, match="internal_error"):
         builder = client_register_repository.get_builder(
-                user_data=copied_invalid_client_data,
-                sinacor_user_control_data=sinacor_insert_client_control_data,
-                sinacor_types_repository=sinacor_types_repository
+            user_data=copied_invalid_client_data,
+            sinacor_user_control_data=sinacor_insert_client_control_data,
+            sinacor_types_repository=sinacor_types_repository,
         )

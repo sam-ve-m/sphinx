@@ -33,7 +33,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         error_temp = "DELETE FROM TSCERROH WHERE CD_CPFCGC = :cpf"
         self.execute(sql=error_temp, values={"cpf": str(user_cpf)})
 
-    def validate_user_data_erros(self, user_cpf: int) -> bool:
+    def validate_user_data_errors(self, user_cpf: int) -> bool:
         self._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
         return self._validate_errors_on_temp_tables(user_cpf=user_cpf)
 
@@ -117,12 +117,14 @@ class ClientRegisterRepository(OracleInfrastructure):
     ) -> Type[ClientRegisterBuilder]:
         occupation = user_data["occupation"]
         activity = occupation["activity"]
-        company = occupation.get('company', {})
-        cnpj = company.get('cnpj')
+        company = occupation.get("company", {})
+        cnpj = company.get("cnpj")
 
         is_married = self.is_married(user_data=user_data)
         is_unemployed = sinacor_types_repository.is_unemployed(value=activity)
-        is_business_person = sinacor_types_repository.is_business_person(value=activity, cnpj=cnpj)
+        is_business_person = sinacor_types_repository.is_business_person(
+            value=activity, cnpj=cnpj
+        )
 
         callback_key = (
             is_married,
@@ -171,8 +173,8 @@ class ClientRegisterRepository(OracleInfrastructure):
             raise InternalServerError("internal_error")
 
         return callback(
-                user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
-            )
+            user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
+        )
 
     def client_is_allowed_to_cancel_registration(self, user_cpf: int, bmf_account: int):
         is_client_blocked = self._is_client_blocked(user_cpf)

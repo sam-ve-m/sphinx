@@ -189,7 +189,7 @@ class AuthenticationService(IAuthentication):
     def _dtvm_client_has_trade_allowed(
         user: dict,
         client_register_repository=ClientRegisterRepository(),
-        solutiontech=Solutiontech
+        solutiontech=Solutiontech,
     ) -> dict:
 
         user_solutiontech_status_from_database = user["solutiontech"]
@@ -228,7 +228,7 @@ class AuthenticationService(IAuthentication):
             sincad_status_from_sinacor = (
                 AuthenticationService.sinacor_is_synced_with_sincad(
                     user_cpf=user_cpf_from_database,
-                    client_register_repository=client_register_repository
+                    client_register_repository=client_register_repository,
                 )
             )
 
@@ -240,7 +240,7 @@ class AuthenticationService(IAuthentication):
 
         sinacor_status_from_sinacor = AuthenticationService.client_sinacor_is_blocked(
             user_cpf=user_cpf_from_database,
-            client_register_repository=client_register_repository
+            client_register_repository=client_register_repository,
         )
 
         AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
@@ -364,7 +364,7 @@ class AuthenticationService(IAuthentication):
     def create_electronic_signature_jwt(
         change_electronic_signature_request: dict,
         persephone_client=PersephoneService.get_client(),
-        jwt_service=JwtService
+        jwt_service=JwtService,
     ):
         jwt_mist_session = None
         allowed = None

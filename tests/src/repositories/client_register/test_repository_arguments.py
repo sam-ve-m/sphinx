@@ -3,9 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-invalid_client_data = {
-
-}
+invalid_client_data = {}
 
 valid_client_data = {
     "_id": "ilm@lionx.com.br",
@@ -133,13 +131,11 @@ marital_married = {
     "spouse": {
         "cpf": "16746756076",
         "name": "Flavio Antobio Felicio",
-        "nationality": 1
-    }
+        "nationality": 1,
+    },
 }
 
-unemployed_occupation = {
-    "activity": 609
-}
+unemployed_occupation = {"activity": 609}
 
 other_occupation = {
     "activity": 609,
