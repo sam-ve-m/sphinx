@@ -3,7 +3,9 @@ from datetime import datetime
 from typing import Optional
 
 # SPHINX
-from src.domain.sinacor.sinacor_identifier_document_types import SinacorIdentifierDocumentTypes as SID
+from src.domain.sinacor.sinacor_identifier_document_types import (
+    SinacorIdentifierDocumentTypes as SID,
+)
 from src.repositories.sinacor_types.enum.register_type import RegisterType
 from src.repositories.sinacor_types.enum.dependency_condition import DependencyCondition
 from src.repositories.sinacor_types.enum.client_status_basic_registration import (
@@ -64,7 +66,17 @@ from src.repositories.sinacor_types.enum.home_execution_brokerage_note_issuance_
 class ClientRegisterBuilder:
     def __init__(self):
         self._fields_added = dict()
-        self.sinacor_document_types = [SID.KS.value, SID.PP.value, SID.RG.value, SID.TE.value, SID.RN.value, SID.PL.value, SID.PF.value, SID.TO.value, SID.CH.value]
+        self.sinacor_document_types = [
+            SID.KS.value,
+            SID.PP.value,
+            SID.RG.value,
+            SID.TE.value,
+            SID.RN.value,
+            SID.PL.value,
+            SID.PF.value,
+            SID.TO.value,
+            SID.CH.value,
+        ]
 
     def build(self):
         return self._fields_added

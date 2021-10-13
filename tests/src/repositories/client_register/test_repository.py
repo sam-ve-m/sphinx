@@ -13,9 +13,19 @@ from src.repositories.sinacor_types.enum.indicator_by_account import IndicatorBy
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from tests.src.repositories.client_register.test_repository_arguments import (
     valid_client_data,
-    sinacor_insert_client_control_data, marital_married, unemployed_occupation, invalid_client_data,
+    sinacor_insert_client_control_data,
+    marital_married,
+    unemployed_occupation,
+    invalid_client_data,
 )
-from tests.src.repositories.client_register.test_repository_builder_validator import ValidNotMarriedBusinessPerson, ValidMarriedBusinessPerson, ValidMarriedUnemployed, ValidNotMarriedUnemployed, ValidMarriedEmployed, ValidNotMarriedEmployed
+from tests.src.repositories.client_register.test_repository_builder_validator import (
+    ValidNotMarriedBusinessPerson,
+    ValidMarriedBusinessPerson,
+    ValidMarriedUnemployed,
+    ValidNotMarriedUnemployed,
+    ValidMarriedEmployed,
+    ValidNotMarriedEmployed,
+)
 
 
 def _validate_builder_response(callback, dict_to_validate: dict) -> bool:
@@ -28,12 +38,18 @@ def _validate_builder_response(callback, dict_to_validate: dict) -> bool:
 
 
 def validate_option_fields(client_data, sinacor_dict_from_builder) -> bool:
-    values_from_optional_client_data_fields = get_values_from_optional_client_data_fields(client_data=client_data)
-    values_from_optional_client_data_keys = values_from_optional_client_data_fields.keys()
+    values_from_optional_client_data_fields = (
+        get_values_from_optional_client_data_fields(client_data=client_data)
+    )
+    values_from_optional_client_data_keys = (
+        values_from_optional_client_data_fields.keys()
+    )
     is_the_same_value = True
 
     for values_from_optional_client_data_key in values_from_optional_client_data_keys:
-        equal_values = values_from_optional_client_data_fields.get(values_from_optional_client_data_key) == sinacor_dict_from_builder.get(values_from_optional_client_data_key)
+        equal_values = values_from_optional_client_data_fields.get(
+            values_from_optional_client_data_key
+        ) == sinacor_dict_from_builder.get(values_from_optional_client_data_key)
         if not equal_values:
             is_the_same_value = False
 
@@ -55,7 +71,7 @@ def get_values_from_optional_client_data_fields(client_data):
         "CD_ORG_EMIT": None,
         "DT_DOC_IDENT": None,
         "CD_DOC_IDENT": None,
-        "IND_PCTA": IndicatorByAccount.YES.value
+        "IND_PCTA": IndicatorByAccount.YES.value,
     }
 
     return values_from_optional_client_data_fields
@@ -79,16 +95,19 @@ def test_get_builder_with_married_business_person_expect_valid_builder_callback_
     client_sinacor_dict = builder.build()
 
     validate_married_business_person = (
-        lambda dict_to_validate: ValidMarriedBusinessPerson(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidMarriedBusinessPerson(**dict_to_validate)
     )
     is_valid_married_business_person = _validate_builder_response(
         callback=validate_married_business_person,
         dict_to_validate=client_sinacor_dict,
     )
 
-    assert validate_option_fields(client_data=valid_client_data, sinacor_dict_from_builder=client_sinacor_dict) is True
+    assert (
+        validate_option_fields(
+            client_data=valid_client_data, sinacor_dict_from_builder=client_sinacor_dict
+        )
+        is True
+    )
     assert is_valid_married_business_person is True
 
 
@@ -109,16 +128,20 @@ def test_get_builder_with_not_married_business_person_expect_valid_builder_callb
     client_sinacor_dict = builder.build()
 
     validate_not_married_business_person = (
-        lambda dict_to_validate: ValidNotMarriedBusinessPerson(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidNotMarriedBusinessPerson(**dict_to_validate)
     )
     is_valid_not_married_business_person = _validate_builder_response(
         callback=validate_not_married_business_person,
         dict_to_validate=client_sinacor_dict,
     )
 
-    assert validate_option_fields(client_data=copied_valid_client_data, sinacor_dict_from_builder=client_sinacor_dict) is True
+    assert (
+        validate_option_fields(
+            client_data=copied_valid_client_data,
+            sinacor_dict_from_builder=client_sinacor_dict,
+        )
+        is True
+    )
     assert is_valid_not_married_business_person is True
 
 
@@ -141,16 +164,20 @@ def test_get_builder_with_married_unemployed_expect_valid_builder_callback_to_in
     client_sinacor_dict = builder.build()
 
     validate_married_unemployed_occupation = (
-        lambda dict_to_validate: ValidMarriedUnemployed(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidMarriedUnemployed(**dict_to_validate)
     )
     is_valid_married_other_occupation = _validate_builder_response(
         callback=validate_married_unemployed_occupation,
         dict_to_validate=client_sinacor_dict,
     )
 
-    assert validate_option_fields(client_data=copied_valid_client_data, sinacor_dict_from_builder=client_sinacor_dict) is True
+    assert (
+        validate_option_fields(
+            client_data=copied_valid_client_data,
+            sinacor_dict_from_builder=client_sinacor_dict,
+        )
+        is True
+    )
     assert is_valid_married_other_occupation is True
 
 
@@ -172,16 +199,20 @@ def test_get_builder_with_not_married_unemployed_expect_valid_builder_callback_t
     client_sinacor_dict = builder.build()
 
     validate_not_married_unemployed_occupation = (
-        lambda dict_to_validate: ValidNotMarriedUnemployed(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidNotMarriedUnemployed(**dict_to_validate)
     )
     is_valid_not_married_unemployed_occupation = _validate_builder_response(
         callback=validate_not_married_unemployed_occupation,
         dict_to_validate=client_sinacor_dict,
     )
 
-    assert validate_option_fields(client_data=copied_valid_client_data, sinacor_dict_from_builder=client_sinacor_dict) is True
+    assert (
+        validate_option_fields(
+            client_data=copied_valid_client_data,
+            sinacor_dict_from_builder=client_sinacor_dict,
+        )
+        is True
+    )
     assert is_valid_not_married_unemployed_occupation is True
 
 
@@ -202,17 +233,21 @@ def test_get_builder_with_married_employed_person_expect_valid_builder_callback_
 
     client_sinacor_dict = builder.build()
 
-    validate_married_employed = (
-        lambda dict_to_validate: ValidMarriedEmployed(
-            **dict_to_validate
-        )
+    validate_married_employed = lambda dict_to_validate: ValidMarriedEmployed(
+        **dict_to_validate
     )
     is_valid_married_employed_person = _validate_builder_response(
         callback=validate_married_employed,
         dict_to_validate=client_sinacor_dict,
     )
 
-    assert validate_option_fields(client_data=copied_valid_client_data, sinacor_dict_from_builder=client_sinacor_dict) is True
+    assert (
+        validate_option_fields(
+            client_data=copied_valid_client_data,
+            sinacor_dict_from_builder=client_sinacor_dict,
+        )
+        is True
+    )
     assert is_valid_married_employed_person is True
 
 
@@ -233,15 +268,19 @@ def test_get_builder_with_not_married_employed_expect_valid_builder_callback_to_
     client_sinacor_dict = builder.build()
 
     validate_not_married_employed_occupation = (
-        lambda dict_to_validate: ValidNotMarriedEmployed(
-            **dict_to_validate
-        )
+        lambda dict_to_validate: ValidNotMarriedEmployed(**dict_to_validate)
     )
     is_valid_not_married_employed_occupation = _validate_builder_response(
         callback=validate_not_married_employed_occupation,
         dict_to_validate=client_sinacor_dict,
     )
-    assert validate_option_fields(client_data=copied_valid_client_data, sinacor_dict_from_builder=client_sinacor_dict) is True
+    assert (
+        validate_option_fields(
+            client_data=copied_valid_client_data,
+            sinacor_dict_from_builder=client_sinacor_dict,
+        )
+        is True
+    )
     assert is_valid_not_married_employed_occupation is True
 
 
@@ -272,7 +311,7 @@ def test_get_builder_with_unemployed_and_business_person_data_expect_exception()
 
     with pytest.raises(InternalServerError, match="internal_error"):
         builder = client_register_repository.get_builder(
-                user_data=copied_invalid_client_data,
-                sinacor_user_control_data=sinacor_insert_client_control_data,
-                sinacor_types_repository=sinacor_types_repository
+            user_data=copied_invalid_client_data,
+            sinacor_user_control_data=sinacor_insert_client_control_data,
+            sinacor_types_repository=sinacor_types_repository,
         )

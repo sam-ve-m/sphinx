@@ -16,6 +16,7 @@ from src.repositories.jwt.repository import JwtRepository
 from src.exceptions.exceptions import InternalServerError, UnauthorizedError
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 
+
 class JwtService:
 
     instance = JWT()
