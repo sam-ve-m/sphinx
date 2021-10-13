@@ -33,7 +33,7 @@ class DtEmissRg(BaseModel):
 
 
 class CdOrgEmitRg(BaseModel):
-    CD_ORG_EMIT_RG: str
+    CD_ORG_EMIT_RG: Optional[str]
 
 
 class CdDocIdent(BaseModel):

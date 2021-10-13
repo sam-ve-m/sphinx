@@ -5,8 +5,9 @@ from fastapi import status
 
 # SPHINX
 from src.exceptions.exceptions import BadRequestError, InternalServerError
+from src.repositories.user.repository import UserRepository
 from src.services.users.service import UserService
-from src.repositories.file.repository import TermsFileType
+from src.repositories.file.repository import TermsFileType, FileRepository
 from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 from tests.stub_classes.stub_base_repository import StubBaseRepository
 from tests.stub_classes.stub_persephone_service import StubPersephoneService
@@ -529,20 +530,6 @@ def test_user_identifier_data_register_not_exists(
         )
 
 
-# def test_user_identifier_data_process_issue_v1(
-#     get_user_data, get_new_stubby_repository
-# ):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
-#     stub_user_repository.update_one = MagicMock(return_value=True)
-#     StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
-#     with pytest.raises(InternalServerError, match="^user.quiz.trouble"):
-#         UserService.user_identifier_data(
-#             payload=payload_user_identifier_data,
-#             user_repository=stub_user_repository,
-#         )
-
-
 def test_user_identifier_data_process_issue_v2(
     get_user_data, get_new_stubby_repository, get_new_stub_persephone_service
 ):
@@ -577,83 +564,6 @@ def test_user_identifier_data(
         persephone_client=stub_persephone_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
-
-
-# def test_user_quiz_responses_register_not_exists(
-#     get_user_data, get_new_stubby_repository
-# ):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(return_value=None)
-#     StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
-#     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
-#         UserService.fill_user_data(
-#             payload=payload_user_identifier_data,
-#             user_repository=stub_user_repository,
-#             stone_age=StubStoneAge,
-#             persephone_client=StubPersephoneClient,
-#         )
-
-
-# @patch(
-#     "src.services.users.service.get_user_account_template_with_data",
-#     MagicMock(return_value={}),
-# )
-# def test_user_quiz_responses_process_issue_v1(get_user_data, get_new_stubby_repository):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
-#     StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
-#     StubPersephoneClient.run = MagicMock(return_value=False)
-#     with pytest.raises(InternalServerError, match="^common.process_issue"):
-#         UserService.fill_user_data(
-#             payload=payload_user_identifier_data,
-#             user_repository=stub_user_repository,
-#             stone_age=StubStoneAge,
-#             persephone_client=StubPersephoneClient,
-#         )
-
-
-# @patch(
-#     "src.services.users.service.get_user_account_template_with_data",
-#     MagicMock(return_value={}),
-# )
-# def test_user_quiz_responses_process_issue_v2(get_user_data, get_new_stubby_repository):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(
-#         return_value={"user_account_data": {"data": "lalal"}}
-#     )
-#     stub_user_repository.update_one = MagicMock(return_value=False)
-#     StubStoneAge.send_user_quiz_responses = MagicMock(return_value={})
-#     StubPersephoneClient.run = MagicMock(return_value=True)
-#     with pytest.raises(InternalServerError, match="^common.process_issue"):
-#         UserService.fill_user_data(
-#             payload=payload_user_identifier_data,
-#             user_repository=stub_user_repository,
-#             stone_age=StubStoneAge,
-#             persephone_client=StubPersephoneClient,
-#         )
-
-
-# @patch(
-#     "src.services.users.service.get_user_account_template_with_data",
-#     MagicMock(return_value={}),
-# )
-# def test_user_quiz_responses(get_user_data, get_new_stubby_repository):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(
-#         return_value={"user_account_data": {"data": "lalal"}}
-#     )
-#     stub_user_repository.update_one = MagicMock(return_value=True)
-#     StubPersephoneClient.run = MagicMock(return_value=True)
-#     stone_age = StubStoneAge()
-#     stone_age.send_user_quiz_responses = MagicMock(return_value={})
-#     response = UserService.fill_user_data(
-#         payload=payload_user_identifier_data,
-#         user_repository=stub_user_repository,
-#         stone_age=stone_age,
-#         persephone_client=StubPersephoneClient,
-#     )
-#     assert response.get("status_code") == status.HTTP_200_OK
-#     assert response.get("message_key") == "user.creating_account"
 
 
 def test_fill_term_signed_empty_terms_on_payload():
@@ -697,3 +607,22 @@ def test_fill_account_data_on_user_document_with_provided_by_bureaux_field():
         payload=payload, stone_age_user_data=stone_age_user_data
     )
     assert payload.get("provided_by_bureaux").get("year") == 2012
+
+
+# def test_get_onboarding_current_steps():
+#     bucket_name = "dtvm-user-self"
+#     user_repository = UserRepository()
+#     file_repository = FileRepository(bucket_name=bucket_name)
+#     file_repository.validate_bucket_name = MagicMock(return_value=bucket_name)
+#     user_repository.find_one = MagicMock(return_value={})
+#
+#     user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+#         payload={},
+#         user_repository=user_repository,
+#         file_repository=file_repository
+#     )
+#
+#     on_boarding_steps = user_onboarding_steps_response.get("payload")
+#
+#     assert True is True
+
