@@ -255,10 +255,6 @@ class SinacorService:
         bovespa_account_mask = bovespa_account_mask_without_prefix.zfill(
             number_of_account_prefix_digits
         )
-        if len(bovespa_account_mask) > 11:
-            raise InternalServerError(
-                f"Bovespa account to long '{bovespa_account_mask}'"
-            )
         return bovespa_account_mask
 
     @staticmethod
