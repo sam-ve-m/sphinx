@@ -2,6 +2,8 @@
 from copy import deepcopy
 
 # External imports
+from datetime import datetime
+
 import pytest
 from pydantic import ValidationError
 from unittest.mock import MagicMock
@@ -315,3 +317,95 @@ def test_get_builder_with_unemployed_and_business_person_data_expect_exception()
             sinacor_user_control_data=sinacor_insert_client_control_data,
             sinacor_types_repository=sinacor_types_repository,
         )
+
+
+def test_get_builder_with_greater_than_invalid_register_document_type_expect_valid_client_sinacor_dict():
+    copied_valid_client_data = deepcopy(valid_client_data)
+
+    client_register_repository = ClientRegisterRepository()
+    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
+    sinacor_types_repository.is_business_person = MagicMock(return_value=False)
+
+    copied_valid_client_data.update({
+        "identifier_document": {
+            "type": "WZ",
+            "document_data": {
+                "number": 485416803,
+                "date": datetime(1970, 1, 1, 0, 51, 52),
+                "state": "SSP",
+                "issuer": "SSP",
+            },
+        }
+    })
+
+    builder = client_register_repository.get_builder(
+        user_data=copied_valid_client_data,
+        sinacor_user_control_data=sinacor_insert_client_control_data,
+        sinacor_types_repository=sinacor_types_repository,
+    )
+
+    client_sinacor_dict = builder.build()
+    cd_org_emit_rg = client_sinacor_dict.get("CD_ORG_EMIT_RG")
+    dt_emiss_rg = client_sinacor_dict.get("DT_EMISS_RG")
+    sg_estado_emiss_rg = client_sinacor_dict.get("SG_ESTADO_EMISS_RG")
+    nr_rg = client_sinacor_dict.get("NR_RG")
+
+    cd_doc_ident = client_sinacor_dict.get("CD_DOC_IDENT")
+    cd_org_emit = client_sinacor_dict.get("CD_ORG_EMIT")
+    dt_doc_ident = client_sinacor_dict.get("DT_DOC_IDENT")
+
+    assert cd_doc_ident is not None
+    assert cd_org_emit is not None
+    assert dt_doc_ident is not None
+
+    assert cd_org_emit_rg is None
+    assert dt_emiss_rg is None
+    assert sg_estado_emiss_rg is None
+    assert nr_rg is None
+
+
+def test_get_builder_with_less_than_invalid_register_document_type_expect_valid_client_sinacor_dict():
+    copied_valid_client_data = deepcopy(valid_client_data)
+
+    client_register_repository = ClientRegisterRepository()
+    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
+    sinacor_types_repository.is_business_person = MagicMock(return_value=False)
+
+    copied_valid_client_data.update({
+        "identifier_document": {
+            "type": "A",
+            "document_data": {
+                "number": 485416803,
+                "date": datetime(1970, 1, 1, 0, 51, 52),
+                "state": "SSP",
+                "issuer": "SSP",
+            },
+        }
+    })
+
+    builder = client_register_repository.get_builder(
+        user_data=copied_valid_client_data,
+        sinacor_user_control_data=sinacor_insert_client_control_data,
+        sinacor_types_repository=sinacor_types_repository,
+    )
+
+    client_sinacor_dict = builder.build()
+    cd_org_emit_rg = client_sinacor_dict.get("CD_ORG_EMIT_RG")
+    dt_emiss_rg = client_sinacor_dict.get("DT_EMISS_RG")
+    sg_estado_emiss_rg = client_sinacor_dict.get("SG_ESTADO_EMISS_RG")
+    nr_rg = client_sinacor_dict.get("NR_RG")
+
+    cd_doc_ident = client_sinacor_dict.get("CD_DOC_IDENT")
+    cd_org_emit = client_sinacor_dict.get("CD_ORG_EMIT")
+    dt_doc_ident = client_sinacor_dict.get("DT_DOC_IDENT")
+
+    assert cd_doc_ident is not None
+    assert cd_org_emit is not None
+    assert dt_doc_ident is not None
+
+    assert cd_org_emit_rg is None
+    assert dt_emiss_rg is None
+    assert sg_estado_emiss_rg is None
+    assert nr_rg is None

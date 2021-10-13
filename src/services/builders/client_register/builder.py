@@ -175,64 +175,57 @@ class ClientRegisterBuilder:
     def add_cd_doc_ident(self, user_data: dict):
         type = user_data["identifier_document"]["type"]
         value = None
-        if type in self.sinacor_document_types:
-            if type != SID.RG.value:
-                value = user_data["identifier_document"]["document_data"]["number"]
-            self._fields_added.update({"CD_DOC_IDENT": value})
+        if type != SID.RG.value:
+            value = user_data["identifier_document"]["document_data"]["number"]
+        self._fields_added.update({"CD_DOC_IDENT": value})
         return self
 
     def add_cd_org_emit(self, user_data: dict):
         type = user_data["identifier_document"]["type"]
         value = None
-        if type in self.sinacor_document_types:
-            if type != SID.RG.value:
-                value = user_data["identifier_document"]["document_data"]["issuer"]
-            self._fields_added.update({"CD_ORG_EMIT": value})
+        if type != SID.RG.value:
+            value = user_data["identifier_document"]["document_data"]["issuer"]
+        self._fields_added.update({"CD_ORG_EMIT": value})
         return self
 
     def add_dt_doc_ident(self, user_data: dict):
         type = user_data["identifier_document"]["type"]
         value = None
-        if type in self.sinacor_document_types:
-            if type != SID.RG.value:
-                value = user_data["identifier_document"]["document_data"]["date"]
-            self._fields_added.update({"DT_DOC_IDENT": value})
+        if type != SID.RG.value:
+            value = user_data["identifier_document"]["document_data"]["date"]
+        self._fields_added.update({"DT_DOC_IDENT": value})
         return self
 
     def add_nr_rg(self, user_data: dict):
         type = user_data["identifier_document"]["type"]
         value = None
-        if type in self.sinacor_document_types:
-            if type == SID.RG.value:
-                value = user_data["identifier_document"]["document_data"]["number"]
-            self._fields_added.update({"NR_RG": value})
+        if type == SID.RG.value:
+            value = user_data["identifier_document"]["document_data"]["number"]
+        self._fields_added.update({"NR_RG": value})
         return self
 
     def add_sg_estado_emiss_rg(self, user_data: dict):
         type = user_data["identifier_document"]["type"]
         value = None
-        if type in self.sinacor_document_types:
-            if type == SID.RG.value:
-                value = user_data["identifier_document"]["document_data"]["state"]
-            self._fields_added.update({"SG_ESTADO_EMISS_RG": value})
+        if type == SID.RG.value:
+            value = user_data["identifier_document"]["document_data"]["state"]
+        self._fields_added.update({"SG_ESTADO_EMISS_RG": value})
         return self
 
     def add_dt_emiss_rg(self, user_data: dict):
         type = user_data["identifier_document"]["type"]
         value = None
-        if type in self.sinacor_document_types:
-            if type == SID.RG.value:
-                value = user_data["identifier_document"]["document_data"]["date"]
-            self._fields_added.update({"DT_EMISS_RG": value})
+        if type == SID.RG.value:
+            value = user_data["identifier_document"]["document_data"]["date"]
+        self._fields_added.update({"DT_EMISS_RG": value})
         return self
 
     def add_cd_org_emit_rg(self, user_data: dict):
         type = user_data["identifier_document"]["type"]
         value = None
-        if type in self.sinacor_document_types:
-            if type == SID.RG.value:
-                value = user_data["identifier_document"]["document_data"]["issuer"]
-            self._fields_added.update({"CD_ORG_EMIT_RG": value})
+        if type == SID.RG.value:
+            value = user_data["identifier_document"]["document_data"]["issuer"]
+        self._fields_added.update({"CD_ORG_EMIT_RG": value})
         return self
 
     def add_id_sexo(self, user_data: dict):

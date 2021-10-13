@@ -880,5 +880,3 @@ def test_get_onboarding_current_steps_with_not_exists_user_expect_bad_request_er
             user_repository=user_repository,
             file_repository=file_repository,
         )
-
-
