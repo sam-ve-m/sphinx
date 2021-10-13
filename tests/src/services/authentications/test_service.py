@@ -643,7 +643,9 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
     )
     client_has_trade_allowed_status_with_database_user = (
         AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user, client_register_repository=stub_client_register_repository
+            user=user,
+            client_register_repository=stub_client_register_repository,
+            solutiontech=stub_solutiontech
         )
     )
     assert client_has_trade_allowed_status_with_database_user == {

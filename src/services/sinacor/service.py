@@ -242,14 +242,18 @@ class SinacorService:
 
     @staticmethod
     def _build_bovespa_account_mask(account_prefix: int, account_digit: int):
-        number_of_account_prefix_digits = 9
         str_account_prefix = str(account_prefix)
-        str_account_prefix_filled_with_zeros = str_account_prefix.zfill(
-            number_of_account_prefix_digits
-        )
         str_account_digit = str(account_digit)
-        bovespa_account_mask = (
-            f"{str_account_prefix_filled_with_zeros}-{str_account_digit}"
+        bovespa_account_mask_without_prefix = (
+            f"{str_account_prefix}-{str_account_digit}"
+        )
+        if len(bovespa_account_mask_without_prefix) > 11:
+            raise InternalServerError(
+                f"Bovespa account to long '{bovespa_account_mask_without_prefix}'"
+            )
+        number_of_account_prefix_digits = 11
+        bovespa_account_mask = bovespa_account_mask_without_prefix.zfill(
+            number_of_account_prefix_digits
         )
         if len(bovespa_account_mask) > 11:
             raise InternalServerError(

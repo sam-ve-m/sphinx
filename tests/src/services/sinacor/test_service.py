@@ -155,6 +155,13 @@ def test_build_bovespa_account_mask():
     assert bovespa_account_mask == "000000001-1"
 
 
+def test_build_bovespa_account_mask_exact_match():
+    bovespa_account_mask = SinacorService._build_bovespa_account_mask(
+        account_prefix=111111111, account_digit=1
+    )
+    assert bovespa_account_mask == "111111111-1"
+
+
 def test_build_bmf_account_int_input():
     bmf_account = SinacorService._build_bmf_account(account_prefix=1)
     assert isinstance(bmf_account, str)

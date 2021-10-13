@@ -339,11 +339,11 @@ class AuthenticationService(IAuthentication):
     ):
         user_has_valid_solutiontech_status_in_database = (
             user_solutiontech_status_from_database
-            == SolutiontechClientImportStatus.SEND.value
-            or user_solutiontech_status_from_database
-            == SolutiontechClientImportStatus.FAILED.value
+            in [
+                SolutiontechClientImportStatus.SEND.value,
+                SolutiontechClientImportStatus.FAILED.value
+            ]
         )
-
         return user_has_valid_solutiontech_status_in_database
 
     @staticmethod
