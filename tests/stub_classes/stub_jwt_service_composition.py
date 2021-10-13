@@ -23,4 +23,3 @@ class JwtServiceWithStubAttributes(JwtService):
     instance = StubJWT()
     mist = StubMist()
     heimdall = StubHeimdall()
-

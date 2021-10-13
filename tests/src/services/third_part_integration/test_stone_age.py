@@ -18,5 +18,7 @@ def test_get_only_values_from_user_data():
         "date": 123,
         "address": {"street": "R. imbuia", "number": "153"},
     }
+    print(data)
     result = StoneAge.get_only_values_from_user_data(user_data=data)
+    print(result)
     assert expected == result

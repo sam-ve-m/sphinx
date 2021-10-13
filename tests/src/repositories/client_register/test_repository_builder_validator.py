@@ -488,7 +488,7 @@ class ValidMarriedBusinessPerson(
     DataCfin,
     CdCnpjEmpresa,
     CdCpfConjuge,
-    NmConjuge
+    NmConjuge,
 ):
     class Config:
         extra = "forbid"
@@ -573,7 +573,7 @@ class ValidMarriedUnemployed(
     ValCfin,
     DataCfin,
     CdCpfConjuge,
-    NmConjuge
+    NmConjuge,
 ):
     class Config:
         extra = "forbid"
@@ -656,7 +656,7 @@ class ValidNotMarriedUnemployed(
     DescRiscCmtt,
     NumUsPerson,
     ValCfin,
-    DataCfin
+    DataCfin,
 ):
     class Config:
         extra = "forbid"
@@ -742,7 +742,7 @@ class ValidMarriedEmployed(
     DataCfin,
     CdCnpjEmpresa,
     CdCpfConjuge,
-    NmConjuge
+    NmConjuge,
 ):
     class Config:
         extra = "forbid"
@@ -825,7 +825,7 @@ class ValidNotMarriedEmployed(
     DescRiscCmtt,
     NumUsPerson,
     ValCfin,
-    DataCfin
+    DataCfin,
 ):
     class Config:
         extra = "forbid"

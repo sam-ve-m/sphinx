@@ -8,10 +8,7 @@ from unittest.mock import MagicMock
 # SPHINX
 from src.routers.routes_registers.middleware_functions import MiddlewareUtils
 from tests.stub_classes.stub_base_repository import StubBaseRepository
-from tests.stub_classes.stub_request import (
-    StubURL,
-    StubRequest
-)
+from tests.stub_classes.stub_request import StubURL, StubRequest
 from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 
 

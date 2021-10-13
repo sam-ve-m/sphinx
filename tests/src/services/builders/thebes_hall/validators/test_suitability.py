@@ -16,11 +16,7 @@ def test_run_without_suitability():
 
 
 def test_run_without_submission_date_in_suitability():
-    user_data = {
-        "suitability": {
-            "fake_key": None
-        }
-    }
+    user_data = {"suitability": {"fake_key": None}}
     with pytest.raises(KeyError):
         Suitability.run(user_data)
 
@@ -30,13 +26,7 @@ def test_run_with_empty_terms_version():
     user_data = {
         "suitability": {
             "submission_date": datetime(
-                year=2021,
-                month=1,
-                day=1,
-                hour=1,
-                minute=1,
-                second=1,
-                microsecond=1
+                year=2021, month=1, day=1, hour=1, minute=1, second=1, microsecond=1
             )
         }
     }

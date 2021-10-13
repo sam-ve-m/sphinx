@@ -171,13 +171,14 @@ def test_login_not_register_exists():
         )
 
 
-def test_login_use_magic_link(get_authentication_service_mock_send_authentication_email):
+def test_login_use_magic_link(
+    get_authentication_service_mock_send_authentication_email,
+):
     authentication_service = get_authentication_service_mock_send_authentication_email
     stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={
-        "use_magic_link": True,
-        "email": ''
-    })
+    stub_repository.find_one = MagicMock(
+        return_value={"use_magic_link": True, "email": ""}
+    )
     response = authentication_service.login(
         user_credentials=payload,
         user_repository=stub_repository,
@@ -189,10 +190,9 @@ def test_login_use_magic_link(get_authentication_service_mock_send_authenticatio
 
 def test_login_without_pin():
     stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={
-        "use_magic_link": False,
-        "email": ''
-    })
+    stub_repository.find_one = MagicMock(
+        return_value={"use_magic_link": False, "email": ""}
+    )
     response = AuthenticationService.login(
         user_credentials=payload,
         user_repository=stub_repository,
@@ -208,7 +208,7 @@ def test_login_pin_error_1():
         return_value={
             "use_magic_link": False,
             "pin": "7110eda4d09e062aa5e4sa390b0a572ac0d2c0220",
-            "email": ''
+            "email": "",
         }
     )
     with pytest.raises(UnauthorizedError, match="^user.pin_error"):
@@ -219,14 +219,13 @@ def test_login_pin_error_1():
         )
 
 
-
 def test_login_pin_error_2():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(
         return_value={
             "use_magic_link": False,
             "pin": "7110eda4d09e062aa5e4sa390b0a572ac0d2c0220",
-            "email": ''
+            "email": "",
         }
     )
     with pytest.raises(UnauthorizedError, match="^user.pin_error"):
@@ -243,7 +242,7 @@ def test_login_with_pin():
         return_value={
             "use_magic_link": False,
             "pin": "7110eda4d09e062aa5e4a390b0a572ac0d2c0220",
-            "email": ''
+            "email": "",
         }
     )
     response = AuthenticationService.login(
@@ -273,11 +272,13 @@ def test_thebes_hall_not_register_exists(get_new_stub_persephone_service):
         )
 
 
-@patch('src.services.authentications.service.AuthenticationService._dtvm_client_has_trade_allowed')
+@patch(
+    "src.services.authentications.service.AuthenticationService._dtvm_client_has_trade_allowed"
+)
 def test_thebes_hall_muts_update_and_raise_error_on_update(
-        mock_dtvm_client_has_trade_allowed,
-        get_new_stub_persephone_service,
-        get_authentication_service
+    mock_dtvm_client_has_trade_allowed,
+    get_new_stub_persephone_service,
+    get_authentication_service,
 ):
     authentication_service = get_authentication_service
     stub_persephone_service = get_new_stub_persephone_service
@@ -287,7 +288,7 @@ def test_thebes_hall_muts_update_and_raise_error_on_update(
     authentication_service.send_authentication_email = MagicMock(return_value=True)
     mock_dtvm_client_has_trade_allowed.return_value = {
         "solutiontech": {
-            "status": 'changed',
+            "status": "changed",
             "status_changed": True,
         }
     }
@@ -297,15 +298,17 @@ def test_thebes_hall_muts_update_and_raise_error_on_update(
             device_and_thebes_answer_from_request=payload_rec,
             user_repository=stub_repository,
             token_service=StubTokenHandler,
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )
 
 
-@patch('src.services.authentications.service.AuthenticationService._dtvm_client_has_trade_allowed')
+@patch(
+    "src.services.authentications.service.AuthenticationService._dtvm_client_has_trade_allowed"
+)
 def test_thebes_hall_muts_update_dont_sent_to_persephone(
-        mock_dtvm_client_has_trade_allowed,
-        get_new_stub_persephone_service,
-        get_authentication_service
+    mock_dtvm_client_has_trade_allowed,
+    get_new_stub_persephone_service,
+    get_authentication_service,
 ):
     authentication_service = get_authentication_service
     stub_persephone_service = get_new_stub_persephone_service
@@ -315,7 +318,7 @@ def test_thebes_hall_muts_update_dont_sent_to_persephone(
     authentication_service.send_authentication_email = MagicMock(return_value=True)
     mock_dtvm_client_has_trade_allowed.return_value = {
         "solutiontech": {
-            "status": 'changed',
+            "status": "changed",
             "status_changed": True,
         }
     }
@@ -325,15 +328,17 @@ def test_thebes_hall_muts_update_dont_sent_to_persephone(
             device_and_thebes_answer_from_request=payload_rec,
             user_repository=stub_repository,
             token_service=StubTokenHandler,
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )
 
 
-@patch('src.services.authentications.service.AuthenticationService._dtvm_client_has_trade_allowed')
+@patch(
+    "src.services.authentications.service.AuthenticationService._dtvm_client_has_trade_allowed"
+)
 def test_thebes_hall_was_sent_to_persephone(
-        mock_dtvm_client_has_trade_allowed,
-        get_new_stub_persephone_service,
-        get_authentication_service
+    mock_dtvm_client_has_trade_allowed,
+    get_new_stub_persephone_service,
+    get_authentication_service,
 ):
     authentication_service = get_authentication_service
     stub_persephone_service = get_new_stub_persephone_service
@@ -344,7 +349,7 @@ def test_thebes_hall_was_sent_to_persephone(
     authentication_service.send_authentication_email = MagicMock(return_value=True)
     mock_dtvm_client_has_trade_allowed.return_value = {
         "solutiontech": {
-            "status": 'changed',
+            "status": "changed",
             "status_changed": False,
         }
     }
@@ -353,7 +358,7 @@ def test_thebes_hall_was_sent_to_persephone(
         device_and_thebes_answer_from_request=payload_rec,
         user_repository=stub_repository,
         token_service=StubTokenHandler,
-        persephone_client=stub_persephone_service
+        persephone_client=stub_persephone_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
 
@@ -361,41 +366,57 @@ def test_thebes_hall_was_sent_to_persephone(
 def test_update_client_has_trade_allowed_status_with_solutiontech_status_response_change():
     client_has_trade_allowed_status_with_database_user = (
         AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database='t1',
+            user_solutiontech_status_from_database="t1",
             user_sincad_status_from_database=True,
             user_sinacor_status_from_database=True,
         )
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
-        user_solutiontech_status_from_database='t1',
-        user_solutiontech_status_from_check_status_request='t2'
+        user_solutiontech_status_from_database="t1",
+        user_solutiontech_status_from_check_status_request="t2",
     )
-    assert client_has_trade_allowed_status_with_database_user["solutiontech"]["status"] == 't2'
-    assert client_has_trade_allowed_status_with_database_user["solutiontech"]["status_changed"] is True
+    assert (
+        client_has_trade_allowed_status_with_database_user["solutiontech"]["status"]
+        == "t2"
+    )
+    assert (
+        client_has_trade_allowed_status_with_database_user["solutiontech"][
+            "status_changed"
+        ]
+        is True
+    )
 
 
 def test_update_client_has_trade_allowed_status_with_solutiontech_status_response_dont_change():
     client_has_trade_allowed_status_with_database_user = (
         AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database='t1',
+            user_solutiontech_status_from_database="t1",
             user_sincad_status_from_database=True,
             user_sinacor_status_from_database=True,
         )
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
-        user_solutiontech_status_from_database='t1',
-        user_solutiontech_status_from_check_status_request='t1'
+        user_solutiontech_status_from_database="t1",
+        user_solutiontech_status_from_check_status_request="t1",
     )
-    assert client_has_trade_allowed_status_with_database_user["solutiontech"]["status"] == 't1'
-    assert client_has_trade_allowed_status_with_database_user["solutiontech"]["status_changed"] is False
+    assert (
+        client_has_trade_allowed_status_with_database_user["solutiontech"]["status"]
+        == "t1"
+    )
+    assert (
+        client_has_trade_allowed_status_with_database_user["solutiontech"][
+            "status_changed"
+        ]
+        is False
+    )
 
 
 def test_update_client_has_trade_allowed_status_with_sincad_status_response_change_to_true():
     client_has_trade_allowed_status_with_database_user = (
         AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database='t1',
+            user_solutiontech_status_from_database="t1",
             user_sincad_status_from_database=False,
             user_sinacor_status_from_database=True,
         )
@@ -403,16 +424,21 @@ def test_update_client_has_trade_allowed_status_with_sincad_status_response_chan
     AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
         sincad_status_from_sinacor=True,
-        user_sincad_status_from_database=False
+        user_sincad_status_from_database=False,
     )
-    assert client_has_trade_allowed_status_with_database_user["sincad"]["status"] is True
-    assert client_has_trade_allowed_status_with_database_user["sincad"]["status_changed"] is True
+    assert (
+        client_has_trade_allowed_status_with_database_user["sincad"]["status"] is True
+    )
+    assert (
+        client_has_trade_allowed_status_with_database_user["sincad"]["status_changed"]
+        is True
+    )
 
 
 def test_update_client_has_trade_allowed_status_with_sincad_status_response_change_to_false():
     client_has_trade_allowed_status_with_database_user = (
         AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database='t1',
+            user_solutiontech_status_from_database="t1",
             user_sincad_status_from_database=True,
             user_sinacor_status_from_database=False,
         )
@@ -420,16 +446,21 @@ def test_update_client_has_trade_allowed_status_with_sincad_status_response_chan
     AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
         sincad_status_from_sinacor=False,
-        user_sincad_status_from_database=True
+        user_sincad_status_from_database=True,
     )
-    assert client_has_trade_allowed_status_with_database_user["sincad"]["status"] is False
-    assert client_has_trade_allowed_status_with_database_user["sincad"]["status_changed"] is True
+    assert (
+        client_has_trade_allowed_status_with_database_user["sincad"]["status"] is False
+    )
+    assert (
+        client_has_trade_allowed_status_with_database_user["sincad"]["status_changed"]
+        is True
+    )
 
 
 def test_update_client_has_trade_allowed_status_with_sincad_status_response_dont_change():
     client_has_trade_allowed_status_with_database_user = (
         AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database='t1',
+            user_solutiontech_status_from_database="t1",
             user_sincad_status_from_database=True,
             user_sinacor_status_from_database=True,
         )
@@ -437,16 +468,21 @@ def test_update_client_has_trade_allowed_status_with_sincad_status_response_dont
     AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
         sincad_status_from_sinacor=True,
-        user_sincad_status_from_database=True
+        user_sincad_status_from_database=True,
     )
-    assert client_has_trade_allowed_status_with_database_user["sincad"]["status"] is True
-    assert client_has_trade_allowed_status_with_database_user["sincad"]["status_changed"] is False
+    assert (
+        client_has_trade_allowed_status_with_database_user["sincad"]["status"] is True
+    )
+    assert (
+        client_has_trade_allowed_status_with_database_user["sincad"]["status_changed"]
+        is False
+    )
 
 
 def test_update_client_has_trade_allowed_status_with_sinacor_status_response_change():
     client_has_trade_allowed_status_with_database_user = (
         AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database='t1',
+            user_solutiontech_status_from_database="t1",
             user_sincad_status_from_database=False,
             user_sinacor_status_from_database=False,
         )
@@ -454,16 +490,21 @@ def test_update_client_has_trade_allowed_status_with_sinacor_status_response_cha
     AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
         sinacor_status_from_sinacor=True,
-        user_sinacor_status_from_database=False
+        user_sinacor_status_from_database=False,
     )
-    assert client_has_trade_allowed_status_with_database_user["sinacor"]["status"] is True
-    assert client_has_trade_allowed_status_with_database_user["sinacor"]["status_changed"] is True
+    assert (
+        client_has_trade_allowed_status_with_database_user["sinacor"]["status"] is True
+    )
+    assert (
+        client_has_trade_allowed_status_with_database_user["sinacor"]["status_changed"]
+        is True
+    )
 
 
 def test_update_client_has_trade_allowed_status_with_sinacor_status_response_dont_change():
     client_has_trade_allowed_status_with_database_user = (
         AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database='t1',
+            user_solutiontech_status_from_database="t1",
             user_sincad_status_from_database=True,
             user_sinacor_status_from_database=True,
         )
@@ -471,10 +512,15 @@ def test_update_client_has_trade_allowed_status_with_sinacor_status_response_don
     AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
         sinacor_status_from_sinacor=True,
-        user_sinacor_status_from_database=True
+        user_sinacor_status_from_database=True,
     )
-    assert client_has_trade_allowed_status_with_database_user["sinacor"]["status"] is True
-    assert client_has_trade_allowed_status_with_database_user["sinacor"]["status_changed"] is False
+    assert (
+        client_has_trade_allowed_status_with_database_user["sinacor"]["status"] is True
+    )
+    assert (
+        client_has_trade_allowed_status_with_database_user["sinacor"]["status_changed"]
+        is False
+    )
 
 
 def test_check_if_user_has_valid_solutiontech_status_in_database_send_status():
@@ -490,9 +536,12 @@ def test_check_if_user_has_valid_solutiontech_status_in_database_failed_status()
 
 
 def test_check_if_user_has_valid_solutiontech_status_in_database_sync_status():
-    assert AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
-        user_solutiontech_status_from_database=SolutiontechClientImportStatus.SYNC.value
-    ) is False
+    assert (
+        AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
+            user_solutiontech_status_from_database=SolutiontechClientImportStatus.SYNC.value
+        )
+        is False
+    )
 
 
 class StubClientRegisterRepository:
@@ -502,55 +551,75 @@ class StubClientRegisterRepository:
 def test_sinacor_is_synced_with_sincad_empty_return():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.get_sincad_status = MagicMock(return_value=None)
-    assert AuthenticationService.sinacor_is_synced_with_sincad(
-        user_cpf=1234567890,
-        client_register_repository=stub_client_register_repository
-    ) is None
+    assert (
+        AuthenticationService.sinacor_is_synced_with_sincad(
+            user_cpf=1234567890,
+            client_register_repository=stub_client_register_repository,
+        )
+        is None
+    )
 
 
 def test_sinacor_is_synced_with_sincad_not_synced():
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sincad_status = MagicMock(return_value=('AAA',))
-    assert AuthenticationService.sinacor_is_synced_with_sincad(
-        user_cpf=1234567890,
-        client_register_repository=stub_client_register_repository
-    ) is False
+    stub_client_register_repository.get_sincad_status = MagicMock(return_value=("AAA",))
+    assert (
+        AuthenticationService.sinacor_is_synced_with_sincad(
+            user_cpf=1234567890,
+            client_register_repository=stub_client_register_repository,
+        )
+        is False
+    )
 
 
 def test_sinacor_is_synced_with_sincad_synced():
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sincad_status = MagicMock(return_value=('ACE',))
-    assert AuthenticationService.sinacor_is_synced_with_sincad(
-        user_cpf=1234567890,
-        client_register_repository=stub_client_register_repository
-    ) is True
+    stub_client_register_repository.get_sincad_status = MagicMock(return_value=("ACE",))
+    assert (
+        AuthenticationService.sinacor_is_synced_with_sincad(
+            user_cpf=1234567890,
+            client_register_repository=stub_client_register_repository,
+        )
+        is True
+    )
 
 
 def test_client_sinacor_is_blocked_empty_return():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.get_sinacor_status = MagicMock(return_value=None)
-    assert AuthenticationService.client_sinacor_is_blocked(
-        user_cpf=1234567890,
-        client_register_repository=stub_client_register_repository
-    ) is None
+    assert (
+        AuthenticationService.client_sinacor_is_blocked(
+            user_cpf=1234567890,
+            client_register_repository=stub_client_register_repository,
+        )
+        is None
+    )
 
 
 def test_client_sinacor_is_blocked_not_synced():
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=('AAA',))
-    assert AuthenticationService.client_sinacor_is_blocked(
-        user_cpf=1234567890,
-        client_register_repository=stub_client_register_repository
-    ) is False
+    stub_client_register_repository.get_sinacor_status = MagicMock(
+        return_value=("AAA",)
+    )
+    assert (
+        AuthenticationService.client_sinacor_is_blocked(
+            user_cpf=1234567890,
+            client_register_repository=stub_client_register_repository,
+        )
+        is False
+    )
 
 
 def test_client_sinacor_is_blocked_synced():
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=('A',))
-    assert AuthenticationService.client_sinacor_is_blocked(
-        user_cpf=1234567890,
-        client_register_repository=stub_client_register_repository
-    ) is True
+    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("A",))
+    assert (
+        AuthenticationService.client_sinacor_is_blocked(
+            user_cpf=1234567890,
+            client_register_repository=stub_client_register_repository,
+        )
+        is True
+    )
 
 
 class StubSolutiontech:
@@ -563,11 +632,11 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         "sincad": True,
         "sinacor": True,
         "bmf_account": 1,
-        "cpf": 12345678900
+        "cpf": 12345678900,
     }
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sincad_status = MagicMock(return_value=('ACE',))
-    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=('A',))
+    stub_client_register_repository.get_sincad_status = MagicMock(return_value=("ACE",))
+    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("A",))
     stub_solutiontech = StubSolutiontech()
     stub_solutiontech.check_if_client_is_synced_with_solutiontech = MagicMock(
         return_value=SolutiontechClientImportStatus.SYNC.value
@@ -575,13 +644,14 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
     client_has_trade_allowed_status_with_database_user = (
         AuthenticationService._dtvm_client_has_trade_allowed(
             user=user,
-            client_register_repository=stub_client_register_repository
+            client_register_repository=stub_client_register_repository,
+            solutiontech=stub_solutiontech
         )
     )
     assert client_has_trade_allowed_status_with_database_user == {
-        'solutiontech': {'status': 'sync', 'status_changed': False},
-        'sincad': {'status': True, 'status_changed': False},
-        'sinacor': {'status': True, 'status_changed': False}
+        "solutiontech": {"status": "sync", "status_changed": False},
+        "sincad": {"status": True, "status_changed": False},
+        "sinacor": {"status": True, "status_changed": False},
     }
 
 
@@ -591,11 +661,11 @@ def test_dtvm_client_has_trade_allowed_not_synced_solutiontech_synced_sincad_syn
         "sincad": True,
         "sinacor": True,
         "bmf_account": 1,
-        "cpf": 12345678900
+        "cpf": 12345678900,
     }
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sincad_status = MagicMock(return_value=('ACE',))
-    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=('A',))
+    stub_client_register_repository.get_sincad_status = MagicMock(return_value=("ACE",))
+    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("A",))
     stub_solutiontech = StubSolutiontech()
     stub_solutiontech.check_if_client_is_synced_with_solutiontech = MagicMock(
         return_value=SolutiontechClientImportStatus.SYNC.value
@@ -604,13 +674,13 @@ def test_dtvm_client_has_trade_allowed_not_synced_solutiontech_synced_sincad_syn
         AuthenticationService._dtvm_client_has_trade_allowed(
             user=user,
             client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech
+            solutiontech=stub_solutiontech,
         )
     )
     assert client_has_trade_allowed_status_with_database_user == {
-        'solutiontech': {'status': 'sync', 'status_changed': True},
-        'sincad': {'status': True, 'status_changed': False},
-        'sinacor': {'status': True, 'status_changed': False}
+        "solutiontech": {"status": "sync", "status_changed": True},
+        "sincad": {"status": True, "status_changed": False},
+        "sinacor": {"status": True, "status_changed": False},
     }
 
 
@@ -620,11 +690,11 @@ def test_dtvm_client_has_trade_allowed_not_synced_solutiontech_not_synced_sincad
         "sincad": False,
         "sinacor": True,
         "bmf_account": 1,
-        "cpf": 12345678900
+        "cpf": 12345678900,
     }
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sincad_status = MagicMock(return_value=('ACE',))
-    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=('A',))
+    stub_client_register_repository.get_sincad_status = MagicMock(return_value=("ACE",))
+    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("A",))
     stub_solutiontech = StubSolutiontech()
     stub_solutiontech.check_if_client_is_synced_with_solutiontech = MagicMock(
         return_value=SolutiontechClientImportStatus.SYNC.value
@@ -633,13 +703,13 @@ def test_dtvm_client_has_trade_allowed_not_synced_solutiontech_not_synced_sincad
         AuthenticationService._dtvm_client_has_trade_allowed(
             user=user,
             client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech
+            solutiontech=stub_solutiontech,
         )
     )
     assert client_has_trade_allowed_status_with_database_user == {
-        'solutiontech': {'status': 'sync', 'status_changed': True},
-        'sincad': {'status': True, 'status_changed': True},
-        'sinacor': {'status': True, 'status_changed': False}
+        "solutiontech": {"status": "sync", "status_changed": True},
+        "sincad": {"status": True, "status_changed": True},
+        "sinacor": {"status": True, "status_changed": False},
     }
 
 
@@ -649,11 +719,11 @@ def test_dtvm_client_has_trade_allowed_not_synced_solutiontech_not_synced_sincad
         "sincad": False,
         "sinacor": False,
         "bmf_account": 1,
-        "cpf": 12345678900
+        "cpf": 12345678900,
     }
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sincad_status = MagicMock(return_value=('ACE',))
-    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=('A',))
+    stub_client_register_repository.get_sincad_status = MagicMock(return_value=("ACE",))
+    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("A",))
     stub_solutiontech = StubSolutiontech()
     stub_solutiontech.check_if_client_is_synced_with_solutiontech = MagicMock(
         return_value=SolutiontechClientImportStatus.SYNC.value
@@ -662,13 +732,13 @@ def test_dtvm_client_has_trade_allowed_not_synced_solutiontech_not_synced_sincad
         AuthenticationService._dtvm_client_has_trade_allowed(
             user=user,
             client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech
+            solutiontech=stub_solutiontech,
         )
     )
     assert client_has_trade_allowed_status_with_database_user == {
-        'solutiontech': {'status': 'sync', 'status_changed': True},
-        'sincad': {'status': True, 'status_changed': True},
-        'sinacor': {'status': True, 'status_changed': True}
+        "solutiontech": {"status": "sync", "status_changed": True},
+        "sincad": {"status": True, "status_changed": True},
+        "sinacor": {"status": True, "status_changed": True},
     }
 
 
@@ -678,11 +748,11 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         "sincad": True,
         "sinacor": True,
         "bmf_account": 1,
-        "cpf": 12345678900
+        "cpf": 12345678900,
     }
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sincad_status = MagicMock(return_value=('ACE',))
-    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=('A',))
+    stub_client_register_repository.get_sincad_status = MagicMock(return_value=("ACE",))
+    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("A",))
     stub_solutiontech = StubSolutiontech()
     stub_solutiontech.check_if_client_is_synced_with_solutiontech = MagicMock(
         return_value=SolutiontechClientImportStatus.FAILED.value
@@ -691,13 +761,13 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         AuthenticationService._dtvm_client_has_trade_allowed(
             user=user,
             client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech
+            solutiontech=stub_solutiontech,
         )
     )
     assert client_has_trade_allowed_status_with_database_user == {
-        'solutiontech': {'status': 'sync', 'status_changed': False},
-        'sincad': {'status': True, 'status_changed': False},
-        'sinacor': {'status': True, 'status_changed': False}
+        "solutiontech": {"status": "sync", "status_changed": False},
+        "sincad": {"status": True, "status_changed": False},
+        "sinacor": {"status": True, "status_changed": False},
     }
 
 
@@ -707,11 +777,11 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         "sincad": True,
         "sinacor": True,
         "bmf_account": 1,
-        "cpf": 12345678900
+        "cpf": 12345678900,
     }
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sincad_status = MagicMock(return_value=('AAA',))
-    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=('A',))
+    stub_client_register_repository.get_sincad_status = MagicMock(return_value=("AAA",))
+    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("A",))
     stub_solutiontech = StubSolutiontech()
     stub_solutiontech.check_if_client_is_synced_with_solutiontech = MagicMock(
         return_value=SolutiontechClientImportStatus.SYNC.value
@@ -720,13 +790,13 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         AuthenticationService._dtvm_client_has_trade_allowed(
             user=user,
             client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech
+            solutiontech=stub_solutiontech,
         )
     )
     assert client_has_trade_allowed_status_with_database_user == {
-        'solutiontech': {'status': 'sync', 'status_changed': False},
-        'sincad': {'status': True, 'status_changed': False},
-        'sinacor': {'status': True, 'status_changed': False}
+        "solutiontech": {"status": "sync", "status_changed": False},
+        "sincad": {"status": True, "status_changed": False},
+        "sinacor": {"status": True, "status_changed": False},
     }
 
 
@@ -736,11 +806,11 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         "sincad": True,
         "sinacor": True,
         "bmf_account": 1,
-        "cpf": 12345678900
+        "cpf": 12345678900,
     }
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.get_sincad_status = MagicMock(return_value=('ACE',))
-    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=('B',))
+    stub_client_register_repository.get_sincad_status = MagicMock(return_value=("ACE",))
+    stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("B",))
     stub_solutiontech = StubSolutiontech()
     stub_solutiontech.check_if_client_is_synced_with_solutiontech = MagicMock(
         return_value=SolutiontechClientImportStatus.SYNC.value
@@ -749,19 +819,18 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         AuthenticationService._dtvm_client_has_trade_allowed(
             user=user,
             client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech
+            solutiontech=stub_solutiontech,
         )
     )
     assert client_has_trade_allowed_status_with_database_user == {
-        'solutiontech': {'status': 'sync', 'status_changed': False},
-        'sincad': {'status': True, 'status_changed': False},
-        'sinacor': {'status': False, 'status_changed': True}
+        "solutiontech": {"status": "sync", "status_changed": False},
+        "sincad": {"status": True, "status_changed": False},
+        "sinacor": {"status": False, "status_changed": True},
     }
 
 
 def test_create_electronic_signature_jwt_failed_to_generate_session_and_send_to_persephone(
-    get_new_stub_persephone_service,
-    get_new_stub_jwt_service
+    get_new_stub_persephone_service, get_new_stub_jwt_service
 ):
     stub_persephone_service = get_new_stub_persephone_service
     stub_jwt_service = get_new_stub_jwt_service
@@ -774,13 +843,12 @@ def test_create_electronic_signature_jwt_failed_to_generate_session_and_send_to_
                 "email": "",
             },
             persephone_client=stub_persephone_service,
-            jwt_service=stub_jwt_service
+            jwt_service=stub_jwt_service,
         )
 
 
 def test_create_electronic_signature_jwt_failed_to_generate_session_and_fail_to_send_to_persephone(
-    get_new_stub_persephone_service,
-    get_new_stub_jwt_service
+    get_new_stub_persephone_service, get_new_stub_jwt_service
 ):
     stub_persephone_service = get_new_stub_persephone_service
     stub_jwt_service = get_new_stub_jwt_service
@@ -793,38 +861,38 @@ def test_create_electronic_signature_jwt_failed_to_generate_session_and_fail_to_
                 "email": "",
             },
             persephone_client=stub_persephone_service,
-            jwt_service=stub_jwt_service
+            jwt_service=stub_jwt_service,
         )
 
 
 def test_create_electronic_signature_jwt_sent_to_persephone(
-    get_new_stub_persephone_service,
-    get_new_stub_jwt_service
+    get_new_stub_persephone_service, get_new_stub_jwt_service
 ):
     stub_persephone_service = get_new_stub_persephone_service
     stub_jwt_service = get_new_stub_jwt_service
-    session_jwt = ('jwt_generated', True)
+    session_jwt = ("jwt_generated", True)
     get_new_stub_jwt_service.generate_session_jwt = MagicMock(return_value=session_jwt)
     stub_persephone_service.run = MagicMock(return_value=True)
     response = AuthenticationService.create_electronic_signature_jwt(
         change_electronic_signature_request={
-                "electronic_signature": "",
-                "email": "",
-            },
+            "electronic_signature": "",
+            "email": "",
+        },
         persephone_client=stub_persephone_service,
-        jwt_service=stub_jwt_service
+        jwt_service=stub_jwt_service,
     )
-    assert response['status_code'] == status.HTTP_200_OK
-    assert response['payload'] == session_jwt[0]
+    assert response["status_code"] == status.HTTP_200_OK
+    assert response["payload"] == session_jwt[0]
 
 
 def test_create_electronic_signature_jwt_fail_to_send_to_persephone(
-    get_new_stub_persephone_service,
-    get_new_stub_jwt_service
+    get_new_stub_persephone_service, get_new_stub_jwt_service
 ):
     stub_persephone_service = get_new_stub_persephone_service
     stub_jwt_service = get_new_stub_jwt_service
-    get_new_stub_jwt_service.generate_session_jwt = MagicMock(return_value=('jwt_generated', True))
+    get_new_stub_jwt_service.generate_session_jwt = MagicMock(
+        return_value=("jwt_generated", True)
+    )
     stub_persephone_service.run = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
         AuthenticationService.create_electronic_signature_jwt(
@@ -833,7 +901,7 @@ def test_create_electronic_signature_jwt_fail_to_send_to_persephone(
                 "email": "",
             },
             persephone_client=stub_persephone_service,
-            jwt_service=stub_jwt_service
+            jwt_service=stub_jwt_service,
         )
 
 
@@ -844,23 +912,23 @@ def test_logout(get_new_stub_persephone_service):
         device_jwt_and_thebes_answer_from_request={
             "jwt": "",
             "email": "",
-            "device_information": {}
+            "device_information": {},
         },
-        persephone_client=stub_persephone_service
+        persephone_client=stub_persephone_service,
     )
-    assert response['status_code'] == status.HTTP_200_OK
-    assert response['message_key'] == "email.logout"
+    assert response["status_code"] == status.HTTP_200_OK
+    assert response["message_key"] == "email.logout"
 
 
 def test_logout_fail_to_sent_to_persephone(get_new_stub_persephone_service):
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="common.process_issue"):
-         AuthenticationService.logout(
+        AuthenticationService.logout(
             device_jwt_and_thebes_answer_from_request={
                 "jwt": "",
                 "email": "",
-                "device_information": {}
+                "device_information": {},
             },
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )

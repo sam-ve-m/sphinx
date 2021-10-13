@@ -48,7 +48,7 @@ class DeviceInformationOptional(BaseModel):
     device_model: str = None
     is_emulator: bool = None
     device_operating_system_name: str = None
-    os_sdk_version: int = None
+    os_sdk_version: str = None
     device_is_in_root_mode: bool = None
     device_network_interfaces: str = None
     public_ip: str = None
@@ -119,8 +119,8 @@ class Nationality(BaseModel):
 
 
 class QuizQuestionOption(BaseModel):
-    quiz_question_id: UUID1
-    quiz_option_id: UUID1
+    quiz_question_id: str
+    quiz_option_id: str
 
 
 class IsCvmQualifiedInvestor(BaseModel):

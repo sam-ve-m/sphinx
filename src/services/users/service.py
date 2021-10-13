@@ -716,16 +716,16 @@ class UserService(IUser):
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         if type(current_user) is not dict:
             raise BadRequestError("common.register_not_exists")
-        must_send_quiz = (
-            current_user.get("register_analyses")
-            == StoneAgeRegisterAnalyses.POINTS.value
-        )
-
-        if must_send_quiz is False:
-            return {
-                "status_code": status.HTTP_200_OK,
-                "message_key": "requests.not_modified",
-            }
+        # must_send_quiz = (
+        #     current_user.get("register_analyses")
+        #     == StoneAgeRegisterAnalyses.POINTS.value
+        # )
+        #
+        # if must_send_quiz is False:
+        #     return {
+        #         "status_code": status.HTTP_200_OK,
+        #         "message_key": "requests.not_modified",
+        #     }
 
         send_quiz_request = stone_age.get_user_send_quiz_request(
             payload=payload, current_user=current_user
@@ -776,9 +776,12 @@ class UserService(IUser):
     ):
         if payload.get("provided_by_bureaux") is None:
             payload["provided_by_bureaux"] = dict()
-        for key, value in stone_age.get_only_values_from_user_data(
-            user_data=stone_age_user_data
-        ).items():
+        user_data = dict()
+        stone_age.get_only_values_from_user_data(
+            user_data=stone_age_user_data,
+            new_user_data=user_data
+        )
+        for key, value in user_data.items():
             payload["provided_by_bureaux"].update({key: value})
         payload["provided_by_bureaux"]["concluded_at"] = datetime.now()
 
