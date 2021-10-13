@@ -8,6 +8,23 @@ from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.repositories.user.repository import UserRepository
 from src.services.users.service import UserService
 from src.repositories.file.repository import TermsFileType, FileRepository
+from tests.src.services.users.test_service_arguments import (
+    onboarding_complete_client_data,
+    on_boarding_steps,
+    onboarding_steps_success_status_code,
+    get_x_thebes_answer_with_client_data,
+    onboarding_unstarted_client_data,
+    stub_bucket_name,
+    stub_buckets,
+    onboarding_suitability_step_client_data,
+    onboarding_user_identifier_data_step_client_data,
+    onboarding_user_complementary_data_step_client_data,
+    onboarding_user_quiz_step_client_data,
+)
+from tests.src.services.users.test_service_utils import (
+    get_current_onboarding_step,
+    get_onboarding_steps,
+)
 from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 from tests.stub_classes.stub_base_repository import StubBaseRepository
 from tests.stub_classes.stub_persephone_service import StubPersephoneService
@@ -609,20 +626,259 @@ def test_fill_account_data_on_user_document_with_provided_by_bureaux_field():
     assert payload.get("provided_by_bureaux").get("year") == 2012
 
 
-# def test_get_onboarding_current_steps():
-#     bucket_name = "dtvm-user-self"
-#     user_repository = UserRepository()
-#     file_repository = FileRepository(bucket_name=bucket_name)
-#     file_repository.validate_bucket_name = MagicMock(return_value=bucket_name)
-#     user_repository.find_one = MagicMock(return_value={})
-#
-#     user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
-#         payload={},
-#         user_repository=user_repository,
-#         file_repository=file_repository
-#     )
-#
-#     on_boarding_steps = user_onboarding_steps_response.get("payload")
-#
-#     assert True is True
+def test_get_onboarding_current_steps_with_none_steps_completed_expect_all_steps_false():
+    user_repository = UserRepository()
+    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.get_user_file = MagicMock(return_value=True)
+
+    user_repository.find_one = MagicMock(return_value=onboarding_unstarted_client_data)
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert current_onboarding_step is on_boarding_steps.get("suitability_step")
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_suitability_step_completed_expect_only_suitability_step_true():
+    user_repository = UserRepository()
+    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.get_user_file = MagicMock(return_value=False)
+
+    user_repository.find_one = MagicMock(
+        return_value=onboarding_suitability_step_client_data
+    )
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert current_onboarding_step is on_boarding_steps.get("user_identifier_data_step")
+    assert onboarding_steps.get("suitability_step") is True
+    del onboarding_steps["suitability_step"]
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_user_identifier_data_step_completed_expect_identifier_step_true():
+    user_repository = UserRepository()
+    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.get_user_file = MagicMock(return_value=False)
+
+    user_repository.find_one = MagicMock(
+        return_value=onboarding_user_identifier_data_step_client_data
+    )
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert current_onboarding_step is on_boarding_steps.get("user_selfie_step")
+    assert onboarding_steps.get("suitability_step") is True
+    assert onboarding_steps.get("user_identifier_data_step") is True
+    del onboarding_steps["suitability_step"]
+    del onboarding_steps["user_identifier_data_step"]
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_user_selfie_step_completed_expect_user_selfie_step_true():
+    user_repository = UserRepository()
+    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.get_user_file = MagicMock(return_value=True)
+
+    user_repository.find_one = MagicMock(
+        return_value=onboarding_user_identifier_data_step_client_data
+    )
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert current_onboarding_step is on_boarding_steps.get("user_complementary_step")
+    assert onboarding_steps.get("suitability_step") is True
+    assert onboarding_steps.get("user_identifier_data_step") is True
+    assert onboarding_steps.get("user_selfie_step") is True
+    del onboarding_steps["suitability_step"]
+    del onboarding_steps["user_identifier_data_step"]
+    del onboarding_steps["user_selfie_step"]
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_user_complementary_step_completed_expect_user_complementary_step_true():
+    user_repository = UserRepository()
+    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.get_user_file = MagicMock(return_value=True)
+
+    user_repository.find_one = MagicMock(
+        return_value=onboarding_user_complementary_data_step_client_data
+    )
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert current_onboarding_step is on_boarding_steps.get("user_quiz_step")
+    assert onboarding_steps.get("suitability_step") is True
+    assert onboarding_steps.get("user_identifier_data_step") is True
+    assert onboarding_steps.get("user_selfie_step") is True
+    assert onboarding_steps.get("user_complementary_step") is True
+    del onboarding_steps["suitability_step"]
+    del onboarding_steps["user_identifier_data_step"]
+    del onboarding_steps["user_selfie_step"]
+    del onboarding_steps["user_complementary_step"]
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_user_quiz_step_client_data_completed_expect_user_quiz_step_true():
+    user_repository = UserRepository()
+    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.get_user_file = MagicMock(return_value=True)
+
+    user_repository.find_one = MagicMock(
+        return_value=onboarding_user_quiz_step_client_data
+    )
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert current_onboarding_step is on_boarding_steps.get("user_electronic_signature")
+    assert onboarding_steps.get("suitability_step") is True
+    assert onboarding_steps.get("user_identifier_data_step") is True
+    assert onboarding_steps.get("user_selfie_step") is True
+    assert onboarding_steps.get("user_complementary_step") is True
+    assert onboarding_steps.get("user_quiz_step") is True
+    del onboarding_steps["suitability_step"]
+    del onboarding_steps["user_identifier_data_step"]
+    del onboarding_steps["user_selfie_step"]
+    del onboarding_steps["user_complementary_step"]
+    del onboarding_steps["user_quiz_step"]
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_all_steps_completed_expect_true_filled_on_boarding_steps():
+    user_repository = UserRepository()
+
+    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.get_user_file = MagicMock(return_value=True)
+
+    user_repository.find_one = MagicMock(return_value=onboarding_complete_client_data)
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert all(step is True for step in onboarding_steps.values()) is True
+    assert current_onboarding_step is on_boarding_steps.get("finished")
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_not_exists_user_expect_bad_request_error():
+    user_repository = UserRepository()
+
+    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.get_user_file = MagicMock(return_value=False)
+
+    user_repository.find_one = MagicMock(return_value=None)
+    payload = get_x_thebes_answer_with_client_data()
+
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+        UserService.get_onboarding_user_current_step(
+            payload=payload,
+            user_repository=user_repository,
+            file_repository=file_repository,
+        )
+
 

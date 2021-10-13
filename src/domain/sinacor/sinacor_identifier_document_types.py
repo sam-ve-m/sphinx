@@ -11,4 +11,3 @@ class SinacorIdentifierDocumentTypes(Enum):
     PF = "PF"
     TO = "TO"
     CH = "CH"
-
