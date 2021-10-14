@@ -716,16 +716,16 @@ class UserService(IUser):
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         if type(current_user) is not dict:
             raise BadRequestError("common.register_not_exists")
-        # must_send_quiz = (
-        #     current_user.get("register_analyses")
-        #     == StoneAgeRegisterAnalyses.POINTS.value
-        # )
-        #
-        # if must_send_quiz is False:
-        #     return {
-        #         "status_code": status.HTTP_200_OK,
-        #         "message_key": "requests.not_modified",
-        #     }
+        must_send_quiz = (
+            current_user.get("register_analyses")
+            == StoneAgeRegisterAnalyses.POINTS.value
+        )
+
+        if must_send_quiz is False:
+            return {
+                "status_code": status.HTTP_200_OK,
+                "message_key": "requests.not_modified",
+            }
 
         send_quiz_request = stone_age.get_user_send_quiz_request(
             payload=payload, current_user=current_user

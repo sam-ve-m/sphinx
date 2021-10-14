@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 from src.repositories.user.repository import UserRepository
 from src.services.builders.thebes_hall.validators.terms import Terms as TermsValidator
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
+from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 
 # Test imports
 from tests.src.services.builders.thebes_hall.test_thebes_hall_builder_arguments import (
@@ -232,3 +233,315 @@ def test_builder_with_not_active_dtvm_client_expect_valid_jwt_payload():
         dict_to_validate=jwt_payload,
     )
     assert is_valid_jwt_payload is True
+
+
+class StubUserRepository:
+    pass
+
+
+def test_add_client_has_trade_allowed_solutiontech_length_0():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": "",
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 0
+    last_modified_date_months_past = 0
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is False
+
+
+def test_add_client_has_trade_allowed_solutiontech_length_10():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": "1234567890",
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 0
+    last_modified_date_months_past = 0
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is False
+
+
+def test_add_client_has_trade_allowed_solutiontech_failed():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": SolutiontechClientImportStatus.FAILED.value,
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 0
+    last_modified_date_months_past = 0
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is False
+
+
+def test_add_client_has_trade_allowed_solutiontech_send():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": SolutiontechClientImportStatus.SEND.value,
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 0
+    last_modified_date_months_past = 0
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is False
+
+
+def test_add_client_has_trade_allowed_solutiontech_correct():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": SolutiontechClientImportStatus.SYNC.value,
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 0
+    last_modified_date_months_past = 0
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is True
+
+
+def test_add_client_has_trade_allowed_suitability_lt():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": SolutiontechClientImportStatus.SYNC.value,
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 0
+    last_modified_date_months_past = 0
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is True
+
+
+def test_add_client_has_trade_allowed_suitability_gt():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": SolutiontechClientImportStatus.SYNC.value,
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 25
+    last_modified_date_months_past = 0
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is False
+
+
+def test_add_client_has_trade_allowed_suitability_eq():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": SolutiontechClientImportStatus.SYNC.value,
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 24
+    last_modified_date_months_past = 0
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is False
+
+
+def test_add_client_has_trade_allowed_modified_date_lt():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": SolutiontechClientImportStatus.SYNC.value,
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 0
+    last_modified_date_months_past = 0
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is True
+
+
+def test_add_client_has_trade_allowed_modified_date_gt():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": SolutiontechClientImportStatus.SYNC.value,
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 0
+    last_modified_date_months_past = 25
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is False
+
+
+def test_add_client_has_trade_allowed_modified_date_eq():
+
+    terms_validator = TermsValidator()
+    terms_validator.run = MagicMock(return_value=mocked_term)
+
+    thebes_hall_builder = ThebesHallBuilder(
+        user_data={
+            "solutiontech": SolutiontechClientImportStatus.SYNC.value,
+            "sincad": True,
+            "sinacor": True,
+            "is_active_client": True,
+        },
+        kwargs_to_add_on_jwt={},
+        ttl=ttl_10_seconds,
+        user_repository=StubUserRepository,
+        terms_validator=terms_validator,
+    )
+    suitability_months_past = 0
+    last_modified_date_months_past = 24
+
+    thebes_hall_builder.add_client_has_trade_allowed(
+        suitability_months_past=suitability_months_past,
+        last_modified_date_months_past=last_modified_date_months_past
+    )
+
+    assert thebes_hall_builder._jwt_payload_data["client_has_trade_allowed"] is False
