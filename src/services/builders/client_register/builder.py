@@ -281,12 +281,6 @@ class ClientRegisterBuilder:
         self._fields_added.update({"SG_PAIS": country})
         return self
 
-    # def add_tp_regcas(self, valid_user_data: dict):
-    #     self._fields_added.update(
-    #         {"TP_REGCAS": valid_user_data["marital"]["marital_regime"]}
-    #     )
-    #     return self
-
     def add_cd_cep(self, user_data: dict):
         self._fields_added.update({"CD_CEP": int(user_data["address"]["zip_code"])})
         return self
@@ -355,7 +349,6 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cliente(self, sinacor_user_control_data: Optional[tuple]):
-        value = sinacor_user_control_data
         if sinacor_user_control_data:
             value = sinacor_user_control_data[0]
         else:
