@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup as bs
 import tempfile
 import os
 import logging
+from src.infrastructures.env_config import config
 
 
 class HtmlModifier:
