@@ -5,18 +5,18 @@ from base64 import b64decode
 from enum import Enum
 
 # OUTSIDE LIBRARIES
-import boto3
 from src.infrastructures.env_config import config
 
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError
+from src.infrastructures.s3.infrastructure import S3Infrastructure
 from src.repositories.cache.redis import RepositoryRedis
 from src.core.interfaces.repositories.file_repository.interface import IFile
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.file.enum.user_file import UserFileType
 
 
-class FileRepository(IFile):
+class FileRepository(S3Infrastructure, IFile):
 
     # This dict keys must be TermsFileType, UserFileType constants
     file_extension_by_type = {
@@ -28,19 +28,13 @@ class FileRepository(IFile):
         "term_retail_liquid_provider": ".pdf",
     }
 
-    s3_client = boto3.client(
-        "s3",
-        aws_access_key_id=config("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=config("AWS_SECRET_ACCESS_KEY"),
-        region_name=config("REGION_NAME"),
-    )
-
     def __init__(self, bucket_name: str) -> None:
         self.bucket_name = FileRepository.validate_bucket_name(bucket_name)
 
     @staticmethod
     def validate_bucket_name(bucket_name: str = "") -> str:
-        response = FileRepository.s3_client.list_buckets()
+        s3_client = FileRepository._get_client()
+        response = s3_client.list_buckets()
         buckets = [bucket["Name"] for bucket in response["Buckets"]]
         if bucket_name not in buckets:
             logger = logging.getLogger(config("LOG_NAME"))
@@ -60,7 +54,8 @@ class FileRepository(IFile):
         if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
         fully_qualified_path = f"{path}{file_name}{file_extension}"
-        self.s3_client.put_object(
+        s3_client = FileRepository._get_client()
+        s3_client.put_object(
             Bucket=self.bucket_name,
             Body=self.resolve_content(content=content),
             Key=fully_qualified_path,
@@ -78,7 +73,8 @@ class FileRepository(IFile):
         if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
         fully_qualified_path = f"{path}{file_name}{file_extension}"
-        value = self.s3_client.generate_presigned_url(
+        s3_client = FileRepository._get_client()
+        value = s3_client.generate_presigned_url(
             "get_object",
             Params={"Bucket": self.bucket_name, "Key": fully_qualified_path},
             ExpiresIn=604800,
@@ -87,14 +83,14 @@ class FileRepository(IFile):
         return value
 
     def get_user_file(self, file_type: UserFileType, user_email: str):
-        exists_self = False
         prefix = self.resolve_user_path(user_email=user_email, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if not prefix or not file_name or not file_extension:
             raise InternalServerError("files.error")
 
-        objects = self.s3_client.list_objects(
+        s3_client = FileRepository._get_client()
+        objects = s3_client.list_objects(
             Bucket=self.bucket_name,
             Prefix=prefix,
             Delimiter="/",
@@ -122,7 +118,8 @@ class FileRepository(IFile):
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
-        self.s3_client.put_object(
+        s3_client = FileRepository._get_client()
+        s3_client.put_object(
             Body=content,
             Bucket=self.bucket_name,
             Key=f"{path}{file_name}{file_extension}",
@@ -144,7 +141,8 @@ class FileRepository(IFile):
         else:
             if not file_path:
                 return
-            value = self.s3_client.generate_presigned_url(
+            s3_client = FileRepository._get_client()
+            value = s3_client.generate_presigned_url(
                 "get_object",
                 Params={"Bucket": self.bucket_name, "Key": file_path},
                 ExpiresIn=ttl,
@@ -176,7 +174,8 @@ class FileRepository(IFile):
         file_name = self.generate_term_file_name(name=file_type.value, version=version)
         path = self.resolve_term_path(file_type=file_type)
         file_extension = self.get_file_extension_by_type(file_type=file_type)
-        value = self.s3_client.generate_presigned_url(
+        s3_client = FileRepository._get_client()
+        value = s3_client.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": self.bucket_name,
@@ -189,7 +188,8 @@ class FileRepository(IFile):
     def _get_last_saved_file_from_folder(self, path: str) -> Optional[str]:
         if type(path) is not str:
             raise InternalServerError("files.error")
-        objects = self.s3_client.list_objects(
+        s3_client = FileRepository._get_client()
+        objects = s3_client.list_objects(
             Bucket=self.bucket_name, Prefix=path, Delimiter="/"
         )
         files_metadata = objects.get("Contents")
@@ -241,7 +241,8 @@ class FileRepository(IFile):
         return f"{file_type.value}/"
 
     def get_current_term_version(self, file_type: TermsFileType) -> int:
-        objects = self.s3_client.list_objects(
+        s3_client = FileRepository._get_client()
+        objects = s3_client.list_objects(
             Bucket=self.bucket_name,
             Prefix=FileRepository.resolve_term_path(file_type=file_type),
             Delimiter="/",

@@ -15,9 +15,11 @@ from src.domain.model_decorator.generate_id import hash_field
 
 
 class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
+
     def __init__(self, database: str, collection: str) -> None:
+        mongo_client = MongoDbBaseRepository._get_client()
         self.base_identifier = f"{database}:{collection}"
-        self.database = self.client[database]
+        self.database = mongo_client[database]
         self.collection = self.database[collection]
 
     def insert(self, data: dict) -> bool:

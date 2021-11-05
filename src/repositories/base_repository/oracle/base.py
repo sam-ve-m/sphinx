@@ -15,6 +15,7 @@ from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 
 
 class OracleBaseRepository(OracleInfrastructure, IOracle):
+
     def query(self, sql: str) -> list:
         try:
             with self.get_connection() as connection:

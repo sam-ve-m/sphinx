@@ -4,7 +4,7 @@ from typing import Type, Optional
 
 # SPHINX
 from src.exceptions.exceptions import InternalServerError
-from src.infrastructures.oracle.infrastructure import OracleInfrastructure
+from src.repositories.base_repository.oracle.base import OracleBaseRepository
 from src.services.builders.client_register.builder import ClientRegisterBuilder
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.domain.validators.marital_status_stone_age_to_sphinx import (
@@ -13,7 +13,8 @@ from src.domain.validators.marital_status_stone_age_to_sphinx import (
 from src.infrastructures.env_config import config
 
 
-class ClientRegisterRepository(OracleInfrastructure):
+class ClientRegisterRepository(OracleBaseRepository):
+
     def register_validated_users(self, user_cpf: str):
         values = {
             "cd_empresa": config("COMPANY_OPERATION_CODE"),

@@ -3,11 +3,11 @@ from typing import Type, List
 from hashlib import sha1
 
 # SPHINX
-from src.infrastructures.oracle.infrastructure import OracleInfrastructure
+from src.repositories.base_repository.oracle.base import OracleBaseRepository
 from src.repositories.cache.redis import RepositoryRedis
 
 
-class SinaCorTypesRepository(OracleInfrastructure):
+class SinaCorTypesRepository(OracleBaseRepository):
     @staticmethod
     def tuples_to_dict_list(fields: List[str], values: List[tuple]):
         dicts_result = list()

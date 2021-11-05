@@ -4,6 +4,13 @@ from pymongo import MongoClient
 
 
 class MongoDBInfrastructure:
-    client: MongoClient = MongoClient(
-        f"{config('MONGO_CONNECTION')}://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
-    )
+
+    client = None
+
+    @classmethod
+    def _get_client(cls):
+        if cls.client is None:
+            cls.client = MongoClient(
+                f"{config('MONGO_CONNECTION')}://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
+            )
+        return cls.client
