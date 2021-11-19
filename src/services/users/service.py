@@ -51,6 +51,7 @@ from src.exceptions.exceptions import (
     InternalServerError,
     UnauthorizedError,
 )
+from src.services.valhalla.service import ValhallaService
 
 
 class UserService(IUser):
@@ -60,6 +61,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
         persephone_client=PersephoneService.get_client(),
+        social_client=ValhallaService.get_social_client(),
         jwt_handler=JwtService,
     ) -> dict:
         user = generate_id("email", user, must_remove=False)
@@ -81,6 +83,13 @@ class UserService(IUser):
         was_user_inserted = user_repository.insert(user)
 
         if (sent_to_persephone and was_user_inserted) is False:
+            raise InternalServerError("common.process_issue")
+
+
+        was_user_created_on_social_network = social_client.create_social_network_user(msg={
+            "email": user.get("email"), "name": user.get("nick_name")})
+
+        if(not was_user_created_on_social_network):
             raise InternalServerError("common.process_issue")
 
         payload_jwt = jwt_handler.generate_token(user_data=user, ttl=10)
