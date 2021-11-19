@@ -71,10 +71,10 @@ class ThebesHallBuilder:
             .add_email()
             .add_scope()
             # TODO: precisa desses caras? Não me parece ser necessário isso
-            .add_is_active_user()
-            .add_terms()
+            #.add_is_active_user()
+            #.add_terms()
             # TODO: precisa desses caras? isso seria uma chama no back end?
-            .add_last_modified_date()
+            #.add_last_modified_date()
             .add_extra_kwargs()
         )
 
@@ -82,12 +82,12 @@ class ThebesHallBuilder:
         (
             self.add_expiration_date_and_created_at()
             .add_extra_kwargs()
-            .add_terms()
+            #.add_terms()
             # TODO: Indicar que precisa buscas o q falta? ou deixar em um end-point
             # TODO: precisa desses caras? isso seria uma chama no back end?
-            .add_suitability_months_past()
+            #.add_suitability_months_past()
             # TODO: precisa desses caras? isso seria uma chama no back end?
-            .add_last_modified_date()
+            #.add_last_modified_date()
             # ===================================
             # TODO: precisa desses caras? Não
             # .add_is_admin()
@@ -95,18 +95,19 @@ class ThebesHallBuilder:
             .add_email()
             .add_scope()
             # TODO: precisa desses caras? Não me parece ser necessário isso
-            .add_is_active_user()
+            #.add_is_active_user()
             # TODO: precisa desses caras? Não vejo sentido neviar isso no jwt de atutenticação
-            .add_is_blocked_electronic_signature()
+            #.add_is_blocked_electronic_signature()
             # TODO: precisa desses caras? Esse cara precisa ter dois status US/BR
-            .add_register_analyses()
+            #.add_register_analyses()
             # TODO: Contas precisam ser unificadas em um unico ponto ponto US/BR
-            # .add_brazil_accounts()
-            .add_bovespa_account()
-            .add_bmf_account()
+            .add_br_accounts()
+            .add_us_accounts()
+            # .add_bovespa_account()
+            # .add_bmf_account()
             # TODO: precisa desses caras? Isso precisa ser aki ou uma chamada informa isos apra o ususario
-            .add_using_suitability_or_refuse_term()
-            .add_client_has_trade_allowed(
+            #.add_using_suitability_or_refuse_term()
+            .add_client_has_br_trade_allowed(
                 suitability_months_past=self._jwt_payload_data[
                     "suitability_months_past"
                 ],
@@ -114,6 +115,7 @@ class ThebesHallBuilder:
                     "last_modified_date_months_past"
                 ],
             )
+            .add_client_has_us_trade_allowed()
         )
 
     def add_expiration_date_and_created_at(self):
@@ -207,7 +209,7 @@ class ThebesHallBuilder:
             self._jwt_payload_data.update({"register_analyses": register_analyses})
         return self
 
-    def add_brazil_accounts(self):
+    def add_br_accounts(self):
         if self._user_data.get("accounts") is None:
             self._jwt_payload_data.update({"accounts": dict()})
         if self._user_data.get["accounts"].get('BR') is None:
@@ -218,19 +220,28 @@ class ThebesHallBuilder:
         )
         return self
 
+    
+    def add_us_accounts(self):
+        if self._user_data.get("accounts") is None:
+            self._jwt_payload_data.update({"accounts": dict()})
+        if self._user_data.get["accounts"].get('US') is None:
+            self._user_data.get["accounts"].update({'US': dict})
+        self._jwt_payload_data['accounts']['US'].update({"dw_account": 123})
+        return self
+
     def add_bovespa_account(self):
         if bovespa_account := self._user_data.get("bovespa_account"):
-            self._jwt_payload_data.update({"bovespa_account": bovespa_account})
-            # self._jwt_payload_data['accounts']['BR'].update({"bovespa_account": bovespa_account})
+            # self._jwt_payload_data.update({"bovespa_account": bovespa_account})
+            self._jwt_payload_data['accounts']['BR'].update({"bovespa_account": bovespa_account})
         return self
 
     def add_bmf_account(self):
         if bmf_account := self._user_data.get("bmf_account"):
-            self._jwt_payload_data.update({"bmf_account": bmf_account})
-            # self._jwt_payload_data['accounts']['BR'].update({"bmf_account": bmf_account})
+            # self._jwt_payload_data.update({"bmf_account": bmf_account})
+            self._jwt_payload_data['accounts']['BR'].update({"bmf_account": bmf_account})
         return self
 
-    def add_client_has_trade_allowed(
+    def add_client_has_br_trade_allowed(
         self, suitability_months_past: int, last_modified_date_months_past: int
     ):
         self._jwt_payload_data.update({"client_has_trade_allowed": False})
@@ -249,6 +260,15 @@ class ThebesHallBuilder:
             ]
         )
         self._jwt_payload_data.update(
-            {"client_has_trade_allowed": client_has_trade_allowed}
+            {"client_has_br_trade_allowed": client_has_trade_allowed}
+        )
+        return self
+
+    def add_client_has_us_trade_allowed(
+        self,
+    ):
+        # TODO 
+        self._jwt_payload_data.update(
+            {"client_has_us_trade_allowed": True}
         )
         return self
