@@ -32,6 +32,7 @@ from src.services.persephone.templates.persephone_templates import (
     get_user_authentication_template_with_data,
     get_user_logout_template_with_data,
 )
+from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 
 
 class AuthenticationService(IAuthentication):
@@ -74,9 +75,11 @@ class AuthenticationService(IAuthentication):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-        jwt = token_service.generate_token(user_data=new_user_data, ttl=525600)
+        jwt_payload_data, control_data = ThebesHallBuilder(user_data=new_user_data, ttl=525600).build()
 
-        response.update({"payload": {"jwt": jwt}})
+        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+
+        response.update({"payload": {"jwt": jwt, "control_data": control_data}})
 
         return response
 
@@ -90,15 +93,17 @@ class AuthenticationService(IAuthentication):
         if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        ########################################################################### ADICIONAR ESSA VERIFICAÇAO QUANDO DELETAR USUARIO/CLIENTE ####################################################################
+        jwt_payload_data, control_data = ThebesHallBuilder(user_data=user_data, ttl=10).build()
+
+        # TODO: Adicioanr essa verificação condicionalmente
         # if user_data.get("is_active_client") is False:
         #     raise UnauthorizedError("invalid_credential")
 
         if user_data["use_magic_link"] is True:
-            payload_jwt = token_service.generate_token(user_data=user_data, ttl=10)
+            jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
             AuthenticationService.send_authentication_email(
                 email=user_data["email"],
-                payload_jwt=payload_jwt,
+                payload_jwt=jwt,
                 body="email.body.created",
             )
             return {
@@ -115,7 +120,7 @@ class AuthenticationService(IAuthentication):
             if hash_field(payload=pin) != user_data["pin"]:
                 raise UnauthorizedError("user.pin_error")
 
-            jwt = token_service.generate_token(user_data=user_data, ttl=525600)
+            jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
             JwtController.insert_one(jwt, user_data["email"])
             return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
@@ -165,7 +170,8 @@ class AuthenticationService(IAuthentication):
             ):
                 raise InternalServerError("common.process_issue")
 
-        jwt = token_service.generate_token(user_data=new_user_data, ttl=525600)
+        jwt_payload_data, control_data = ThebesHallBuilder(user_data=new_user_data, ttl=525600).build()
+        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
@@ -183,7 +189,7 @@ class AuthenticationService(IAuthentication):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt, "control_data": control_data}}
 
     @staticmethod
     def _dtvm_client_has_trade_allowed(
