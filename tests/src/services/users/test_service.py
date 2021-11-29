@@ -72,6 +72,7 @@ def get_user_data():
     return {
         "email": "afl@lionx.com.br",
         "name": "anderson",
+        "terms": {},
         "scope": {"view_type": None, "features": ["real_time_data"]},
         "is_active_user": True,
         "is_active_client": False,
@@ -173,7 +174,7 @@ def test_change_view_process_issue(get_new_stubby_repository):
 
 def test_change_view(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
-    stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
+    stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}, "terms": {}, "is_active_user": True})
     stub_repository.update_one = MagicMock(return_value=True)
     stub_jwt_service = JwtServiceWithStubAttributes()
     stub_jwt_service.generate_token = MagicMock(return_value="toaskjdg1.233213.123123")
@@ -248,7 +249,7 @@ def test_forgot_password_register_exists(get_new_stubby_repository):
 
 def test_forgot_password(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
-    stub_repository.find_one = MagicMock(return_value={})
+    stub_repository.find_one = MagicMock(return_value={"is_active_user": True, "terms": {}})
     stub_repository.update_one = MagicMock(return_value=True)
     StubAuthenticationService.send_authentication_email = MagicMock(return_value=True)
     stub_jwt_service = JwtServiceWithStubAttributes()
@@ -464,7 +465,7 @@ def test_sign_term_process_issue_v2(get_user_data, get_new_stubby_repository):
 
 def test_sign_term(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
-    stub_user_repository.find_one = MagicMock(return_value={"email": "lala"})
+    stub_user_repository.find_one = MagicMock(return_value={"email": "lala", "is_active_user": True})
     stub_user_repository.update_one = MagicMock(return_value=True)
 
     stub_file_repository = StubRepository(database="", collection="")
@@ -475,7 +476,7 @@ def test_sign_term(get_user_data, get_new_stubby_repository):
     stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     response = UserService.sign_term(
         payload={
-            "x-thebes-answer": {"email": "lala"},
+            "x-thebes-answer": {"email": "lala", "is_active_user": True},
             "file_type": TermsFileType.TERM_REFUSAL,
         },
         file_repository=stub_file_repository,
@@ -628,7 +629,7 @@ def test_fill_account_data_on_user_document_with_provided_by_bureaux_field():
 
 def test_get_onboarding_current_steps_with_none_steps_completed_expect_all_steps_false():
     user_repository = UserRepository()
-    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
     file_repository.get_user_file = MagicMock(return_value=True)
@@ -656,7 +657,7 @@ def test_get_onboarding_current_steps_with_none_steps_completed_expect_all_steps
 
 def test_get_onboarding_current_steps_with_suitability_step_completed_expect_only_suitability_step_true():
     user_repository = UserRepository()
-    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
     file_repository.get_user_file = MagicMock(return_value=False)
@@ -688,7 +689,7 @@ def test_get_onboarding_current_steps_with_suitability_step_completed_expect_onl
 
 def test_get_onboarding_current_steps_with_user_identifier_data_step_completed_expect_identifier_step_true():
     user_repository = UserRepository()
-    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
     file_repository.get_user_file = MagicMock(return_value=False)
@@ -722,7 +723,7 @@ def test_get_onboarding_current_steps_with_user_identifier_data_step_completed_e
 
 def test_get_onboarding_current_steps_with_user_selfie_step_completed_expect_user_selfie_step_true():
     user_repository = UserRepository()
-    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
     file_repository.get_user_file = MagicMock(return_value=True)
@@ -758,7 +759,7 @@ def test_get_onboarding_current_steps_with_user_selfie_step_completed_expect_use
 
 def test_get_onboarding_current_steps_with_user_complementary_step_completed_expect_user_complementary_step_true():
     user_repository = UserRepository()
-    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
     file_repository.get_user_file = MagicMock(return_value=True)
@@ -796,7 +797,7 @@ def test_get_onboarding_current_steps_with_user_complementary_step_completed_exp
 
 def test_get_onboarding_current_steps_with_user_quiz_step_client_data_completed_expect_user_quiz_step_true():
     user_repository = UserRepository()
-    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
     file_repository.get_user_file = MagicMock(return_value=True)
@@ -837,7 +838,7 @@ def test_get_onboarding_current_steps_with_user_quiz_step_client_data_completed_
 def test_get_onboarding_current_steps_with_all_steps_completed_expect_true_filled_on_boarding_steps():
     user_repository = UserRepository()
 
-    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
     file_repository.get_user_file = MagicMock(return_value=True)
@@ -866,7 +867,7 @@ def test_get_onboarding_current_steps_with_all_steps_completed_expect_true_fille
 def test_get_onboarding_current_steps_with_not_exists_user_expect_bad_request_error():
     user_repository = UserRepository()
 
-    FileRepository.s3_client.list_buckets = MagicMock(return_value=stub_buckets)
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
     file_repository.get_user_file = MagicMock(return_value=False)

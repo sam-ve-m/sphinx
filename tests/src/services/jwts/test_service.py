@@ -121,4 +121,5 @@ def test_generate_token_id_rsa_dont_find(mock_open, get_new_stub_jwt_service):
     stub_jwt_service = get_new_stub_jwt_service
     user_data = {}
     with pytest.raises(InternalServerError):
-        stub_jwt_service.generate_token(user_data=user_data)
+        stub_jwt_service.generate_token(jwt_payload_data=user_data)
+

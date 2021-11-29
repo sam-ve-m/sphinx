@@ -17,6 +17,7 @@ from src.repositories.suitability.repository import (
 from src.repositories.user.repository import UserRepository
 from src.core.interfaces.services.suitability.interface import ISuitability
 from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
+from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 from src.services.persephone.templates.persephone_templates import (
     get_user_suitability_template_with_data,
 )
@@ -115,8 +116,12 @@ class SuitabilityService(ISuitability):
                 submission_date=suitability_submission_date,
             )
         )
-        new = user_repository.find_one({"_id": user_email})
-        jwt = token_service.generate_token(user_data=new, ttl=525600)
+        user_data = user_repository.find_one({"_id": user_email})
+
+        jwt_payload_data, control_data = ThebesHallBuilder(user_data=user_data, ttl=525600).build()
+
+        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+
         return {"status_code": status.HTTP_201_CREATED, "payload": {"jwt": jwt}}
 
     @staticmethod

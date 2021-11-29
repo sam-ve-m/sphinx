@@ -10,12 +10,14 @@ from src.infrastructures.env_config import config
 
 class PersephoneService:
 
-    client = Persephone(
-        host=config("PERSEPHONE_QUEUE_HOST"),
-        port=config("PERSEPHONE_QUEUE_PORT"),
-        logger=logging.getLogger(config("LOG_NAME")),
-    )
+    client = None
 
-    @staticmethod
-    def get_client():
-        return PersephoneService.client
+    @classmethod
+    def get_client(cls):
+        if cls.client is None:
+            cls.client = Persephone(
+                host=config("PERSEPHONE_QUEUE_HOST"),
+                port=config("PERSEPHONE_QUEUE_PORT"),
+                logger=logging.getLogger(config("LOG_NAME")),
+            )
+        return cls.client

@@ -49,8 +49,12 @@ class LastModifiedDateMonthsPast(BaseModel):
     last_modified_date_months_past: int
 
 
-class ClientHasTradeAllowed(BaseModel):
-    client_has_trade_allowed: bool
+class ClientHasUsTradeAllowed(BaseModel):
+    client_has_us_trade_allowed: bool
+
+
+class ClientHasBRTradeAllowed(BaseModel):
+    client_has_br_trade_allowed: bool
 
 
 class CreatedAt(BaseModel):
@@ -79,12 +83,22 @@ class UsingSuitabilityOrRefuseTerm(BaseModel):
         return using_suitability_or_refuse_term
 
 
-class BovespaAccount(BaseModel):
+class AccountsDw(BaseModel):
+    dw_account: str
+
+
+class AccountsBr(BaseModel):
     bovespa_account: str
-
-
-class BmfAccount(BaseModel):
     bmf_account: str
+
+
+class AccountsBrUs(BaseModel):
+    US: AccountsDw
+    BR: AccountsBr
+
+
+class Accounts(BaseModel):
+    accounts: AccountsBrUs
 
 
 class RegisterAnalyses(BaseModel):
@@ -129,65 +143,23 @@ class ValidJwtPayloadToCompleteDtvmClient(
     NickName,
     Email,
     Scope,
-    IsActiveUser,
-    IsBlockedElectronicSignature,
-    Terms,
-    SuitabilityMonthsPast,
-    LastModifiedDateMonthsPast,
-    ClientHasTradeAllowed,
+    ClientHasUsTradeAllowed,
+    ClientHasBRTradeAllowed,
     CreatedAt,
     Exp,
-    UsingSuitabilityOrRefuseTerm,
-    BovespaAccount,
-    BmfAccount,
-    RegisterAnalyses,
-    IsAdmin,
+    Accounts
 ):
     class Config:
         extra = "forbid"
 
 
-class ForgotElectronicSignatureJwtPayload(
-    NickName,
-    Email,
-    Scope,
-    IsActiveUser,
+class ValidControlDataToCompleteDtvmClient(
     IsBlockedElectronicSignature,
     Terms,
     SuitabilityMonthsPast,
     LastModifiedDateMonthsPast,
-    ClientHasTradeAllowed,
-    CreatedAt,
-    Exp,
     UsingSuitabilityOrRefuseTerm,
-    BovespaAccount,
-    BmfAccount,
     RegisterAnalyses,
-    IsAdmin,
-    ForgotElectronicSignature,
-):
-    class Config:
-        extra = "forbid"
-
-
-class ForgotPasswordJwtPayload(
-    NickName,
-    Email,
-    Scope,
-    IsActiveUser,
-    IsBlockedElectronicSignature,
-    Terms,
-    SuitabilityMonthsPast,
-    LastModifiedDateMonthsPast,
-    ClientHasTradeAllowed,
-    CreatedAt,
-    Exp,
-    UsingSuitabilityOrRefuseTerm,
-    BovespaAccount,
-    BmfAccount,
-    RegisterAnalyses,
-    IsAdmin,
-    ForgotPassword,
 ):
     class Config:
         extra = "forbid"
@@ -197,11 +169,16 @@ class ValidJwtPayloadToCompleteAppUser(
     NickName,
     Email,
     Scope,
-    IsActiveUser,
-    Terms,
-    LastModifiedDateMonthsPast,
     CreatedAt,
     Exp,
+):
+    class Config:
+        extra = "forbid"
+
+
+class ValidControlDataToCompleteAppUser(
+    Terms,
+    LastModifiedDateMonthsPast
 ):
     class Config:
         extra = "forbid"
