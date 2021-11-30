@@ -8,13 +8,13 @@ from fastapi import Request
 from jwt import JWT
 from jwt.jwk import jwk_from_pem
 
-from heimdall_client.bifrost import Heimdall
+from heimdall_client.bifrost import Heimdall, HeimdallStatusResponses
 from mist_client.asgard import Mist
+from mist_client.src.domain.enums.mist_status_responses import MistStatusResponses
 
 # SPHINX
 from src.repositories.jwt.repository import JwtRepository
 from src.exceptions.exceptions import InternalServerError, UnauthorizedError
-from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 
 
 class JwtService:
@@ -49,13 +49,12 @@ class JwtService:
 
     @classmethod
     def decrypt_payload(cls, encrypted_payload: str) -> Optional[dict]:
-        try:
-            payload = cls.heimdall.decrypt_payload(jwt=encrypted_payload)
-            return payload
-        except Exception as e:
+        payload, status = cls.heimdall.decode_payload(jwt=encrypted_payload)
+        if status != HeimdallStatusResponses.SUCCESS:
             logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            logger.error(str(payload), exc_info=True)
             raise InternalServerError("common.process_issue")
+        return payload['decoded_jwt']
 
     @staticmethod
     def get_jwt_from_request(request: Request):
@@ -81,4 +80,9 @@ class JwtService:
             "password": electronic_signature.get("signature"),
             "signatureExpireTime": electronic_signature.get("signature_expire_time"),
         }
-        return cls.mist.generate_jwt(jwt=session_dict)
+        payload, status = cls.mist.generate_jwt(jwt=session_dict)
+        if status != MistStatusResponses.SUCCESS:
+            logger = logging.getLogger(config("LOG_NAME"))
+            logger.error(str(payload), exc_info=True)
+            raise InternalServerError("common.process_issue")
+        return payload['jwt_token_session']
