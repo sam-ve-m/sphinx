@@ -62,7 +62,26 @@ class ViewService(IView):
         old = view_repository.find_one({"_id": payload.get("view_id")})
         if old and feature_id not in old.get("features"):
             new = deepcopy(old)
-            new.get("features").append(feature_id)
+            new["features"].append(feature_id)
+            if view_repository.update_one(old=old, new=new):
+                return {
+                    "status_code": status.HTTP_200_OK,
+                    "message_key": "requests.updated",
+                }
+            else:
+                raise InternalServerError("common.process_issue")
+        return {
+            "status_code": status.HTTP_304_NOT_MODIFIED,
+            "message_key": "requests.not_modified",
+        }
+
+    @staticmethod
+    def delink_feature(payload: dict, view_repository=ViewRepository()) -> dict:
+        feature_id = payload.get("feature_id")
+        old = view_repository.find_one({"_id": payload.get("view_id")})
+        if old and feature_id in old.get("features"):
+            new = deepcopy(old)
+            new["features"].remove(feature_id)
             if view_repository.update_one(old=old, new=new):
                 return {
                     "status_code": status.HTTP_200_OK,

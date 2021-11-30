@@ -24,7 +24,7 @@ class MiddlewareUtils:
     @staticmethod
     def is_user_token_life_time_valid(user_data: dict, token: dict) -> bool:
         try:
-            user_created = str(user_data["token_valid_after"])
+            user_created = user_data["token_valid_after"].timestamp()
             jwt_created_at = token["created_at"]
             is_token_valid = jwt_created_at >= user_created
             return is_token_valid

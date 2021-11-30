@@ -1,5 +1,6 @@
 # STANDARD LIBS
 from __future__ import annotations
+import logging
 
 # OUTSIDE LIBRARIES
 from email_validator import validate_email
@@ -32,26 +33,40 @@ class Email(BaseModel):
         raise ValueError("The given email is invalid")
 
 
-class View(BaseModel):
-    view: constr(min_length=1)
+class ViewId(BaseModel):
+    view_id: constr(min_length=1)
 
-    @validator("view", always=True, allow_reuse=True)
-    def validate_view(cls, e):
+    @validator("view_id", always=True, allow_reuse=True)
+    def validate_view_id(cls, e):
         view_repository = ViewRepository()
         if view_repository.find_one({"_id": e}, ttl=60):
             return e
         raise ValueError("view not exists")
 
 
-class Feature(BaseModel):
-    feature: constr(min_length=1)
+class FeatureId(BaseModel):
+    feature_id: constr(min_length=1)
 
-    @validator("feature", always=True, allow_reuse=True)
-    def validate_feature(cls, e):
+    @validator("feature_id", always=True, allow_reuse=True)
+    def validate_feature_id(cls, e):
         feature_repository = FeatureRepository()
         if feature_repository.find_one({"_id": e}, ttl=60):
             return e
         raise ValueError("feature not exists")
+
+
+class LinkViewFeature(ViewId, FeatureId):
+    pass
+
+
+class Feature(BaseModel):
+    name: constr(min_length=1)
+    display_name: constr(min_length=1)
+
+
+class View(BaseModel):
+    name: constr(min_length=1)
+    display_name: constr(min_length=1)
 
 
 class OptionalPIN(BaseModel):

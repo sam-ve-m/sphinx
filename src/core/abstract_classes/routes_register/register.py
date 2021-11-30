@@ -10,6 +10,7 @@ import json
 from fastapi import APIRouter, FastAPI, status, Response
 
 # Sphinx
+from src.domain.api_router.router import SphinxAPIRouter
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.routers.routes_registers.middleware_functions import MiddlewareUtils
 
@@ -21,7 +22,7 @@ class RoutesRegister(ABC):
     @classmethod
     def instance(cls):
         if cls._instance is None:
-            cls._instance = APIRouter()
+            cls._instance = SphinxAPIRouter()
         return cls._instance
 
     @classmethod
@@ -37,27 +38,25 @@ class RoutesRegister(ABC):
 
         @cls.router_middleware(app, router)
         async def middleware(request: Request, call_next):
-            if cls.is_allow(request):
+            if cls.is_allow(request) and cls.has_permission(request):
                 response = await call_next(request)
                 return response
             return RoutesRegister.get_unauthorized_response(request=request)
 
     @staticmethod
     def router_middleware(app: FastAPI, router: APIRouter):
-        """Decorator to add a router-specific middleware."""
 
         def deco(func: Callable) -> Callable:
             async def _middleware(request: Request, call_next):
-                # Check if scopes match
                 matches = any(
                     [
                         route.matches(request.scope)[0] == Match.FULL
                         for route in router.routes
                     ]
                 )
-                if matches:  # Run the middleware if they do
+                if matches:
                     return await func(request, call_next)
-                else:  # Otherwise skip the middleware
+                else:
                     return await call_next(request)
 
             app.add_middleware(BaseHTTPMiddleware, dispatch=_middleware)
@@ -85,3 +84,26 @@ class RoutesRegister(ABC):
     @abstractmethod
     def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
         pass
+
+    @classmethod
+    def has_permission(cls, request: Request, middleware_utils=MiddlewareUtils) -> bool:
+        permissions_mapped = cls._instance.get_permission_by_route(route=request.url.path)
+        if permissions_mapped is None:
+            return True
+        token = middleware_utils.get_token_if_token_is_valid(request)
+        if token is None:
+            return True
+        user = middleware_utils.get_valid_user_from_database(token=token)
+        if user is None:
+            return False
+        scope = user['scope']
+        view_and_feature_permission = list()
+        if permissions_mapped['views']:
+            is_view_allowed = scope["view_type"] in permissions_mapped['views']
+            view_and_feature_permission.append(is_view_allowed)
+        if permissions_mapped['features']:
+            is_feature_allowed =  any(
+                [user_view in permissions_mapped['features'] for user_view in scope["features"]]
+            )
+            view_and_feature_permission.append(is_feature_allowed)
+        return all(view_and_feature_permission)
