@@ -19,5 +19,9 @@ class ViewController:
         return ViewService.link_feature(payload=payload)
 
     @staticmethod
+    def delink_feature(payload: dict):
+        return ViewService.delink_feature(payload=payload)
+
+    @staticmethod
     def get_view(payload: dict):
         return ViewService.get_view(payload=payload)
