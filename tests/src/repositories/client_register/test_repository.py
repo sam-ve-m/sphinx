@@ -11,7 +11,7 @@ from unittest.mock import MagicMock
 # Src imports
 from src.exceptions.exceptions import InternalServerError
 from src.repositories.client_register.repository import ClientRegisterRepository
-from src.repositories.sinacor_types.enum.indicator_by_account import IndicatorByAccount
+from src.domain.sinacor.indicator_by_account import IndicatorByAccount
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from tests.src.repositories.client_register.test_repository_arguments import (
     valid_client_data,
