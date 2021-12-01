@@ -3,62 +3,63 @@ from datetime import datetime
 from typing import Optional
 
 # SPHINX
+from src.domain.sinacor.broker_type_of_brokerage import BrokerTypeOfBrokerage
 from src.domain.sinacor.sinacor_identifier_document_types import (
     SinacorIdentifierDocumentTypes as SID,
 )
-from src.repositories.sinacor_types.enum.register_type import RegisterType
-from src.repositories.sinacor_types.enum.dependency_condition import DependencyCondition
-from src.repositories.sinacor_types.enum.client_status_basic_registration import (
+from src.domain.sinacor.register_type import RegisterType
+from src.domain.sinacor.dependency_condition import DependencyCondition
+from src.domain.sinacor.client_status_basic_registration import (
     ClientStatusBasicRegistration,
 )
-from src.repositories.sinacor_types.enum.receipt_dividends_by_stock_exchange import (
+from src.domain.sinacor.receipt_dividends_by_stock_exchange import (
     ReceiptDividendsByStockExchange,
 )
-from src.repositories.sinacor_types.enum.address_type import AddressType
-from src.repositories.sinacor_types.enum.address_purpose import AddressPurpose
-from src.repositories.sinacor_types.enum.client_origin import ClientOrigin
-from src.repositories.sinacor_types.enum.client_registration_status import (
+from src.domain.sinacor.address_type import AddressType
+from src.domain.sinacor.address_purpose import AddressPurpose
+from src.domain.sinacor.client_origin import ClientOrigin
+from src.domain.sinacor.client_registration_status import (
     ClientRegistrationStatus,
 )
-from src.repositories.sinacor_types.enum.is_own_trader import IsOwnTrader
-from src.repositories.sinacor_types.enum.client_type_of_exchange_activity import (
+from src.domain.sinacor.is_own_trader import IsOwnTrader
+from src.domain.sinacor.client_type_of_exchange_activity import (
     ClientTypeOfExchangeActivity,
 )
-from src.repositories.sinacor_types.enum.investor_type_of_exchange_activity import (
+from src.domain.sinacor.investor_type_of_exchange_activity import (
     InvestorTypeOfExchangeActivity,
 )
-from src.repositories.sinacor_types.enum.indicator_by_account import IndicatorByAccount
-from src.repositories.sinacor_types.enum.mailing_address import MailingAddress
-from src.repositories.sinacor_types.enum.account_linked_address import (
+from src.domain.sinacor.indicator_by_account import IndicatorByAccount
+from src.domain.sinacor.mailing_address import MailingAddress
+from src.domain.sinacor.account_linked_address import (
     AccountLinkedAddress,
 )
-from src.repositories.sinacor_types.enum.must_send_email_to_bvmf import (
+from src.domain.sinacor.must_send_email_to_bvmf import (
     MustSendEmailToBvmf,
 )
-from src.repositories.sinacor_types.enum.operates_by_treasury_direct_agent import (
+from src.domain.sinacor.operates_by_treasury_direct_agent import (
     OperatesByTreasuryDirectAgent,
 )
-from src.repositories.sinacor_types.enum.register_in_the_direct_treasure_activity import (
+from src.domain.sinacor.register_in_the_direct_treasure_activity import (
     RegisterInTheDirectTreasureActivity,
 )
-from src.repositories.sinacor_types.enum.collateralization_type_code import (
+from src.domain.sinacor.collateralization_type_code import (
     CollateralizationTypeCode,
 )
-from src.repositories.sinacor_types.enum.customer_risk_rating import CustomerRiskRating
-from src.repositories.sinacor_types.enum.risk import Risk
-from src.repositories.sinacor_types.enum.work_in_some_company import WorkInSomeCompany
-from src.repositories.sinacor_types.enum.is_us_person import IsUsPerson
-from src.repositories.sinacor_types.enum.client_digit import ClientDigit
-from src.repositories.sinacor_types.enum.brokerage_note_issuance_indicator import (
+from src.domain.sinacor.customer_risk_rating import CustomerRiskRating
+from src.domain.sinacor.risk import Risk
+from src.domain.sinacor.work_in_some_company import WorkInSomeCompany
+from src.domain.sinacor.is_us_person import IsUsPerson
+from src.domain.sinacor.client_digit import ClientDigit
+from src.domain.sinacor.brokerage_note_issuance_indicator import (
     BrokerageNoteIssuanceIndicator,
 )
-from src.repositories.sinacor_types.enum.foreign_zip_code import ForeignZipCode
-from src.repositories.sinacor_types.enum.foreign_state import ForeignState
-from src.repositories.sinacor_types.enum.bmf_client import BmfClient
-from src.repositories.sinacor_types.enum.brokerage_discount_percentage import (
+from src.domain.sinacor.foreign_zip_code import ForeignZipCode
+from src.domain.sinacor.foreign_state import ForeignState
+from src.domain.sinacor.bmf_client import BmfClient
+from src.domain.sinacor.brokerage_discount_percentage import (
     BrokerageDiscountPercentage,
 )
-from src.repositories.sinacor_types.enum.home_execution_brokerage_note_issuance_indicator import (
+from src.domain.sinacor.home_execution_brokerage_note_issuance_indicator import (
     HomeExecutionBrokerageNoteIssuanceIndicator,
 )
 
@@ -104,8 +105,8 @@ class ClientRegisterBuilder:
         self._fields_added.update({"DT_NASC_FUND": user_data["birth_date"]})
         return self
 
-    def add_cd_con_dep(self):
-        self._fields_added.update({"CD_CON_DEP": DependencyCondition.HOLDER.value})
+    def add_cd_con_dep(self, value=DependencyCondition.HOLDER.value):
+        self._fields_added.update({"CD_CON_DEP": value})
         return self
 
     def add_in_irsdiv(self, user_data: dict):
@@ -132,9 +133,9 @@ class ClientRegisterBuilder:
         self._fields_added.update({"TP_INVESTIDOR": user_data["investor_type"]})
         return self
 
-    def add_in_situac_cliger(self):
+    def add_in_situac_cliger(self, value=ClientStatusBasicRegistration.ACTIVATE.value):
         self._fields_added.update(
-            {"IN_SITUAC_CLIGER": ClientStatusBasicRegistration.ACTIVATE.value}
+            {"IN_SITUAC_CLIGER": value}
         )
         return self
 
@@ -232,9 +233,9 @@ class ClientRegisterBuilder:
         self._fields_added.update({"ID_SEXO": user_data["gender"]})
         return self
 
-    def add_in_rec_divi(self):
+    def add_in_rec_divi(self, value=ReceiptDividendsByStockExchange.YES.value):
         self._fields_added.update(
-            {"IN_REC_DIVI": ReceiptDividendsByStockExchange.YES.value}
+            {"IN_REC_DIVI": value}
         )
         return self
 
@@ -296,8 +297,8 @@ class ClientRegisterBuilder:
         )
         return self
 
-    def add_in_ende(self):
-        self._fields_added.update({"IN_ENDE": AddressType.RESIDENTIAL.value})
+    def add_in_ende(self, value=AddressType.RESIDENTIAL.value):
+        self._fields_added.update({"IN_ENDE": value})
         return self
 
     def add_nm_bairro(self, user_data: dict):
@@ -336,8 +337,8 @@ class ClientRegisterBuilder:
         self._fields_added.update({"SG_PAIS_ENDE1": user_data["address"]["country"]})
         return self
 
-    def add_cod_finl_end1(self):
-        self._fields_added.update({"COD_FINL_END1": AddressPurpose.MAIN.value})
+    def add_cod_finl_end1(self, value=AddressPurpose.MAIN.value):
+        self._fields_added.update({"COD_FINL_END1": value})
         return self
 
     def add_cd_agente(self, value=None):
@@ -356,8 +357,8 @@ class ClientRegisterBuilder:
         self._fields_added.update({"CD_CLIENTE": value})
         return self
 
-    def add_cd_origem(self):
-        self._fields_added.update({"CD_ORIGEM": ClientOrigin.BROKER.value})
+    def add_cd_origem(self, value=ClientOrigin.BROKER.value):
+        self._fields_added.update({"CD_ORIGEM": value})
         return self
 
     def add_cd_vinculo(self, value=None):
@@ -371,31 +372,31 @@ class ClientRegisterBuilder:
         self._fields_added.update({"DV_CLIENTE": value})
         return self
 
-    def add_in_cart_prop(self):
-        self._fields_added.update({"IN_CART_PROP": IsOwnTrader.YES.value})
+    def add_in_cart_prop(self, value=IsOwnTrader.YES.value):
+        self._fields_added.update({"IN_CART_PROP": value})
         return self
 
-    def add_in_emite_nota(self):
+    def add_in_emite_nota(self, value=BrokerageNoteIssuanceIndicator.DEFAULT.value):
         self._fields_added.update(
-            {"IN_EMITE_NOTA": BrokerageNoteIssuanceIndicator.DEFAULT.value}
+            {"IN_EMITE_NOTA": value}
         )
         return self
 
-    def add_in_situac(self):
+    def add_in_situac(self, value=ClientRegistrationStatus.ACTIVATE.value):
         self._fields_added.update(
-            {"IN_SITUAC": ClientRegistrationStatus.ACTIVATE.value}
+            {"IN_SITUAC": value}
         )
         return self
 
-    def add_pc_corcor_prin(self):
+    def add_pc_corcor_prin(self, value=BrokerageDiscountPercentage.DEFAULT.value):
         self._fields_added.update(
-            {"PC_CORCOR_PRIN": BrokerageDiscountPercentage.DEFAULT.value}
+            {"PC_CORCOR_PRIN": value}
         )
         return self
 
-    def add_tp_cliente_bol(self):
+    def add_tp_cliente_bol(self, value=ClientTypeOfExchangeActivity.NORMAL.value):
         self._fields_added.update(
-            {"TP_CLIENTE_BOL": ClientTypeOfExchangeActivity.NORMAL.value}
+            {"TP_CLIENTE_BOL": value}
         )
         return self
 
@@ -403,9 +404,9 @@ class ClientRegisterBuilder:
         self._fields_added.update({"TP_CONTA": value})
         return self
 
-    def add_tp_investidor_bol(self):
+    def add_tp_investidor_bol(self, value=InvestorTypeOfExchangeActivity.PHYSICAL_PERSON.value):
         self._fields_added.update(
-            {"TP_INVESTIDOR_BOL": InvestorTypeOfExchangeActivity.PHYSICAL_PERSON.value}
+            {"TP_INVESTIDOR_BOL": value}
         )
         return self
 
@@ -413,41 +414,41 @@ class ClientRegisterBuilder:
         self._fields_added.update({"IN_LIFO_FIFO": value})
         return self
 
-    def add_ind_pcta(self):
-        self._fields_added.update({"IND_PCTA": IndicatorByAccount.YES.value})
+    def add_ind_pcta(self, value=IndicatorByAccount.YES.value):
+        self._fields_added.update({"IND_PCTA": value})
         return self
 
-    def add_in_emite_nota_cs(self):
+    def add_in_emite_nota_cs(self, value=HomeExecutionBrokerageNoteIssuanceIndicator.NO.value):
         self._fields_added.update(
-            {"IN_EMITE_NOTA_CS": HomeExecutionBrokerageNoteIssuanceIndicator.NO.value}
+            {"IN_EMITE_NOTA_CS": value}
         )
         return self
 
-    def add_ind_end_vinc_con(self):
-        self._fields_added.update({"IND_END_VINC_CON": MailingAddress.FIRST.value})
+    def add_ind_end_vinc_con(self, value=MailingAddress.FIRST.value):
+        self._fields_added.update({"IND_END_VINC_CON": value})
         return self
 
-    def add_ind_end_crsp(self):
-        self._fields_added.update({"IND_END_CRSP": AccountLinkedAddress.FIRST.value})
+    def add_ind_end_crsp(self, value=AccountLinkedAddress.FIRST.value):
+        self._fields_added.update({"IND_END_CRSP": value})
         return self
 
-    def add_ind_env_email_bvmf(self):
-        self._fields_added.update({"IND_ENV_EMAIL_BVMF": MustSendEmailToBvmf.YES.value})
+    def add_ind_env_email_bvmf(self, value=MustSendEmailToBvmf.YES.value):
+        self._fields_added.update({"IND_ENV_EMAIL_BVMF": value})
         return self
 
-    def add_tp_cliente_bmf(self):
-        self._fields_added.update({"TP_CLIENTE_BMF": BmfClient.DEFAULT.value})
+    def add_tp_cliente_bmf(self, value=BmfClient.DEFAULT.value):
+        self._fields_added.update({"TP_CLIENTE_BMF": value})
         return self
 
-    def add_ind_oprc_td(self):
+    def add_ind_oprc_td(self, value=RegisterInTheDirectTreasureActivity.YES.value):
         self._fields_added.update(
-            {"IND_OPRC_TD": RegisterInTheDirectTreasureActivity.YES.value}
+            {"IND_OPRC_TD": value}
         )
         return self
 
-    def add_ind_oprc_agnt_td(self):
+    def add_ind_oprc_agnt_td(self, value=OperatesByTreasuryDirectAgent.YES.value):
         self._fields_added.update(
-            {"IND_OPRC_AGNT_TD": OperatesByTreasuryDirectAgent.YES.value}
+            {"IND_OPRC_AGNT_TD": value}
         )
         return self
 
@@ -476,27 +477,27 @@ class ClientRegisterBuilder:
         self._fields_added.update({"NUM_TIPO_CON": value})
         return self
 
-    def add_cod_tipo_colt(self):
+    def add_cod_tipo_colt(self, value=CollateralizationTypeCode.INVESTOR.value):
         self._fields_added.update(
-            {"COD_TIPO_COLT": CollateralizationTypeCode.INVESTOR.value}
+            {"COD_TIPO_COLT": value}
         )
         return self
 
-    def add_cod_cep_estr1(self):
-        self._fields_added.update({"COD_CEP_ESTR1": ForeignZipCode.DEFAULT.value})
+    def add_cod_cep_estr1(self, value=ForeignZipCode.DEFAULT.value):
+        self._fields_added.update({"COD_CEP_ESTR1": value})
         return self
 
-    def add_uf_estr1(self):
-        self._fields_added.update({"UF_ESTR1": ForeignState.DEFAULT.value})
+    def add_uf_estr1(self, value=ForeignState.DEFAULT.value):
+        self._fields_added.update({"UF_ESTR1": value})
         return self
 
-    def add_num_class_risc_cmtt(self):
-        self._fields_added.update({"NUM_CLASS_RISC_CMTT": CustomerRiskRating.NO.value})
+    def add_num_class_risc_cmtt(self, value=CustomerRiskRating.NO.value):
+        self._fields_added.update({"NUM_CLASS_RISC_CMTT": value})
         return self
 
-    def add_desc_risc_cmtt(self):
+    def add_desc_risc_cmtt(self, value=Risk.HIGH.value):
         # TODO: FROM STONEAGE
-        self._fields_added.update({"DESC_RISC_CMTT": Risk.HIGH.value})
+        self._fields_added.update({"DESC_RISC_CMTT": value})
         return self
 
     def add_data_ult_atlz(self, value=None):
@@ -529,12 +530,6 @@ class ClientRegisterBuilder:
         spouse = user_data["marital"].get("spouse", {})
         self._fields_added.update({"CD_CPF_CONJUGE": spouse.get("cpf")})
         return self
-
-    # def add_dt_nasc_conjuge(self, valid_user_data: dict):
-    #     self._fields_added.update(
-    #         {"DT_NASC_CONJUGE": valid_user_data["marital"]["spouse"]["birth_date"]}
-    #     )
-    #     return self
 
     def add_cd_cnpj_empresa(self, user_data: dict):
         self._fields_added.update(
@@ -774,15 +769,15 @@ class ClientRegisterBuilder:
         self._fields_added.update({"NM_CONTA": value})
         return self
 
-    def add_pc_corcor_prin_cs(self):
+    def add_pc_corcor_prin_cs(self, value=BrokerageDiscountPercentage.DEFAULT.value):
         # TODO: Define with operation table
         self._fields_added.update(
-            {"PC_CORCOR_PRIN_CS": BrokerageDiscountPercentage.DEFAULT.value}
+            {"PC_CORCOR_PRIN_CS": value}
         )
         return self
 
-    def add_in_tipo_corret_exec_cs(self, value=None):
-        self._fields_added.update({"IN_TIPO_CORRET_EXEC_CS": 0})
+    def add_in_tipo_corret_exec_cs(self, value=BrokerTypeOfBrokerage.DEFAULT.value):
+        self._fields_added.update({"IN_TIPO_CORRET_EXEC_CS": value})
         return self
 
     def add_pc_total_cs(self, value=None):
@@ -925,14 +920,14 @@ class ClientRegisterBuilder:
         self._fields_added.update({"TXT_EMAIL_TD": user_data["email"]})
         return self
 
-    def add_val_lim_neg_td(self, value=None):
+    def add_val_lim_neg_td(self, value: float = 0.0):
         # TODO: Define with operation table
-        self._fields_added.update({"VAL_LIM_NEG_TD": 0})
+        self._fields_added.update({"VAL_LIM_NEG_TD": value})
         return self
 
-    def add_val_taxa_agnt_td(self, value=None):
+    def add_val_taxa_agnt_td(self, value: float = 0.0):
         # TODO: Define with operation table
-        self._fields_added.update({"VAL_TAXA_AGNT_TD": 0})
+        self._fields_added.update({"VAL_TAXA_AGNT_TD": value})
         return self
 
     def add_cod_aeco_princ(self, value=None):

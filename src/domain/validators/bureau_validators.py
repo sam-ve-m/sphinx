@@ -5,12 +5,12 @@ from typing import Optional
 from email_validator import validate_email
 from pydantic import BaseModel, validator, constr
 
-from src.repositories.sinacor_types.enum.connected_person import ConnectedPerson
-from src.repositories.sinacor_types.enum.decision import Decisions
-from src.repositories.sinacor_types.enum.document_type import DocumentTypes
-from src.repositories.sinacor_types.enum.person_gender import PersonGender
-from src.repositories.sinacor_types.enum.person_type import PersonType
-from src.repositories.sinacor_types.enum.status import OutputStatus
+from src.domain.sinacor.connected_person import ConnectedPerson
+from src.domain.sinacor.decision import Decisions
+from src.domain.sinacor.document_type import DocumentTypes
+from src.domain.sinacor.person_gender import PersonGender
+from src.domain.sinacor.person_type import PersonType
+from src.domain.sinacor.status import OutputStatus
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 from src.domain.validators.enum_template import MaritalStatusEnum
 from src.domain.validators.brazil_register_number_validator import (

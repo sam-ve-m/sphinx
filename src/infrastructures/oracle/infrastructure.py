@@ -39,10 +39,5 @@ class OracleInfrastructure:
     def get_connection(self):
         pool = OracleInfrastructure._get_pool()
         connection = pool.acquire()
-        try:
-            yield connection
-        except (cx_Oracle.Error, Exception) as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-        finally:
-            pool.release(connection)
+        yield connection
+        pool.release(connection)
