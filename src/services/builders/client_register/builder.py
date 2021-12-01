@@ -414,7 +414,7 @@ class ClientRegisterBuilder:
         self._fields_added.update({"IN_LIFO_FIFO": value})
         return self
 
-    def add_ind_pcta(self, value=IndicatorByAccount.YES.value):
+    def add_ind_pcta(self, value=IndicatorByAccount.NO.value):
         self._fields_added.update({"IND_PCTA": value})
         return self
 
