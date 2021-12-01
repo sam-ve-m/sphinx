@@ -396,10 +396,9 @@ class AuthenticationService(IAuthentication):
             )
             if sent_to_persephone is False:
                 raise InternalServerError("common.process_issue")
-
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": jwt_mist_session[0],
+            "payload": jwt_mist_session,
         }
 
     @staticmethod

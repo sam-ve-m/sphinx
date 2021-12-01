@@ -85,4 +85,4 @@ class JwtService:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(str(payload), exc_info=True)
             raise InternalServerError("common.process_issue")
-        return payload['jwt_token_session']
+        return payload

@@ -110,10 +110,6 @@ class UserService(IUser):
         UserService.create(user=payload)
 
     @staticmethod
-    def update(payload: dict, user_repository=UserRepository()) -> None:
-        pass
-
-    @staticmethod
     def delete(
         payload: dict,
         user_repository=UserRepository(),
@@ -396,9 +392,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        UserService.onboarding_step_validator(
-            payload=payload, on_board_step="user_selfie_step"
-        )
+        UserService.onboarding_step_validator(payload=payload, onboard_step="user_selfie_step")
 
         file_path = file_repository.save_user_file(
             file_type=UserFileType.SELF,
@@ -528,9 +522,7 @@ class UserService(IUser):
         if user_by_cpf is not None:
             raise BadRequestError("common.register_exists")
 
-        UserService.onboarding_step_validator(
-            payload=payload, on_board_step="user_identifier_data_step"
-        )
+        UserService.onboarding_step_validator(payload=payload, onboard_step="user_identifier_data_step")
 
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
 
@@ -579,9 +571,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        UserService.onboarding_step_validator(
-            payload=payload, on_board_step="user_complementary_step"
-        )
+        UserService.onboarding_step_validator(payload=payload, onboard_step="user_complementary_step")
         thebes_answer = payload.get("x-thebes-answer")
         current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
         if current_user is None:
@@ -654,9 +644,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
     ) -> dict:
-        UserService.onboarding_step_validator(
-            payload=payload, on_board_step="user_quiz_step"
-        )
+        UserService.onboarding_step_validator(payload=payload, onboard_step="user_quiz_step")
         thebes_answer = payload.get("x-thebes-answer")
         user_onboarding_current_step = UserService.get_onboarding_user_current_step(
             payload=payload
@@ -835,9 +823,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        UserService.onboarding_step_validator(
-            payload=payload, on_board_step="user_electronic_signature"
-        )
+        UserService.onboarding_step_validator(payload=payload, onboard_step="user_electronic_signature")
         thebes_answer = payload.get("x-thebes-answer")
         electronic_signature = payload.get("electronic_signature")
         encrypted_electronic_signature = PasswordEncrypt.encrypt_password(
@@ -1025,13 +1011,13 @@ class UserService(IUser):
         return fake_response
 
     @staticmethod
-    def onboarding_step_validator(payload: dict, on_board_step: str):
+    def onboarding_step_validator(payload: dict, onboard_step: str):
         onboarding_steps = UserService.get_onboarding_user_current_step(payload)
         payload_from_onboarding_steps = onboarding_steps.get("payload")
         current_onboarding_step = payload_from_onboarding_steps.get(
             "current_onboarding_step"
         )
-        if current_onboarding_step != on_board_step:
+        if current_onboarding_step != onboard_step:
             raise BadRequestError("user.invalid_on_boarding_step")
 
     @staticmethod

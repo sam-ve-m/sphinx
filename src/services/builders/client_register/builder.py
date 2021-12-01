@@ -368,8 +368,6 @@ class ClientRegisterBuilder:
         value = ClientDigit.DEFAULT.value
         if sinacor_user_control_data:
             value = sinacor_user_control_data[1]
-        else:
-            value = 0
         self._fields_added.update({"DV_CLIENTE": value})
         return self
 

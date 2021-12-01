@@ -275,7 +275,7 @@ class SinacorService:
         is_update = sinacor_client_control_data is not None
 
         if is_update is False:
-            has_error = client_register_repository.validate_user_data_erros(
+            has_error = client_register_repository.validate_user_data_errors(
                 user_cpf=database_and_bureau_dtvm_client_data_merged["cpf"]
             )
             if has_error:

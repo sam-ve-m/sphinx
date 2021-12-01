@@ -10,6 +10,7 @@ from fastapi import Request
 from src.infrastructures.env_config import config
 from src.repositories.user.repository import UserRepository
 from src.services.jwts.service import JwtService
+from mist_client.src.domain.enums.mist_status_responses import MistStatusResponses
 
 
 class MiddlewareUtils:
@@ -54,8 +55,8 @@ class MiddlewareUtils:
                 break
         is_valid = jwt_handler.mist.validate_jwt(jwt=mist_token)
         if is_valid:
-            mist_content = jwt_handler.mist.decrypt_payload(jwt=mist_token)
-            if user_data["email"] == mist_content["email"]:
+            mist_content, status = jwt_handler.mist.decode_payload(jwt=mist_token)
+            if status == MistStatusResponses.SUCCESS and user_data["email"] == mist_content["decoded_jwt"]["email"]:
                 return True
         return False
 

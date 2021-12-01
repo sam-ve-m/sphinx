@@ -122,9 +122,9 @@ class ClientRegisterRepository(OracleBaseRepository):
         cnpj = company.get("cnpj")
 
         is_married = self.is_married(user_data=user_data)
-        is_unemployed = sinacor_types_repository.is_unemployed(value=activity)
+        is_unemployed = sinacor_types_repository.is_unemployed(value=activity, cnpj=cnpj)
         is_business_person = sinacor_types_repository.is_business_person(
-            value=activity, cnpj=cnpj
+            value=activity
         )
 
         callback_key = (
