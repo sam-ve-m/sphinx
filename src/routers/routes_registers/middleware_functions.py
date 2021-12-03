@@ -56,7 +56,10 @@ class MiddlewareUtils:
         is_valid = jwt_handler.mist.validate_jwt(jwt=mist_token)
         if is_valid:
             mist_content, status = jwt_handler.mist.decode_payload(jwt=mist_token)
-            if status == MistStatusResponses.SUCCESS and user_data["email"] == mist_content["decoded_jwt"]["email"]:
+            if (
+                status == MistStatusResponses.SUCCESS
+                and user_data["email"] == mist_content["decoded_jwt"]["email"]
+            ):
                 return True
         return False
 

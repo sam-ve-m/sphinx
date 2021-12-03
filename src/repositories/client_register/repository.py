@@ -14,7 +14,6 @@ from src.infrastructures.env_config import config
 
 
 class ClientRegisterRepository(OracleBaseRepository):
-
     def register_validated_users(self, user_cpf: str):
         values = {
             "cd_empresa": config("COMPANY_OPERATION_CODE"),
@@ -122,10 +121,10 @@ class ClientRegisterRepository(OracleBaseRepository):
         cnpj = company.get("cnpj")
 
         is_married = self.is_married(user_data=user_data)
-        is_unemployed = sinacor_types_repository.is_unemployed(value=activity, cnpj=cnpj)
-        is_business_person = sinacor_types_repository.is_business_person(
-            value=activity
+        is_unemployed = sinacor_types_repository.is_unemployed(
+            value=activity, cnpj=cnpj
         )
+        is_business_person = sinacor_types_repository.is_business_person(value=activity)
 
         callback_key = (
             is_married,

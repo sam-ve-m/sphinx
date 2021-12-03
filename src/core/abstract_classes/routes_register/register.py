@@ -45,7 +45,6 @@ class RoutesRegister(ABC):
 
     @staticmethod
     def router_middleware(app: FastAPI, router: APIRouter):
-
         def deco(func: Callable) -> Callable:
             async def _middleware(request: Request, call_next):
                 matches = any(
@@ -87,7 +86,9 @@ class RoutesRegister(ABC):
 
     @classmethod
     def has_permission(cls, request: Request, middleware_utils=MiddlewareUtils) -> bool:
-        permissions_mapped = cls._instance.get_permission_by_route(route=request.url.path)
+        permissions_mapped = cls._instance.get_permission_by_route(
+            route=request.url.path
+        )
         if permissions_mapped is None:
             return True
         token = middleware_utils.get_token_if_token_is_valid(request)
@@ -96,14 +97,17 @@ class RoutesRegister(ABC):
         user = middleware_utils.get_valid_user_from_database(token=token)
         if user is None:
             return False
-        scope = user['scope']
+        scope = user["scope"]
         view_and_feature_permission = list()
-        if permissions_mapped['views']:
-            is_view_allowed = scope["view_type"] in permissions_mapped['views']
+        if permissions_mapped["views"]:
+            is_view_allowed = scope["view_type"] in permissions_mapped["views"]
             view_and_feature_permission.append(is_view_allowed)
-        if permissions_mapped['features']:
-            is_feature_allowed =  any(
-                [user_view in permissions_mapped['features'] for user_view in scope["features"]]
+        if permissions_mapped["features"]:
+            is_feature_allowed = any(
+                [
+                    user_view in permissions_mapped["features"]
+                    for user_view in scope["features"]
+                ]
             )
             view_and_feature_permission.append(is_feature_allowed)
         return all(view_and_feature_permission)

@@ -75,7 +75,9 @@ class AuthenticationService(IAuthentication):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-        jwt_payload_data, control_data = ThebesHallBuilder(user_data=new_user_data, ttl=525600).build()
+        jwt_payload_data, control_data = ThebesHallBuilder(
+            user_data=new_user_data, ttl=525600
+        ).build()
 
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
@@ -93,7 +95,9 @@ class AuthenticationService(IAuthentication):
         if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        jwt_payload_data, control_data = ThebesHallBuilder(user_data=user_data, ttl=10).build()
+        jwt_payload_data, control_data = ThebesHallBuilder(
+            user_data=user_data, ttl=10
+        ).build()
 
         # TODO: Adicioanr essa verificação condicionalmente
         # if user_data.get("is_active_client") is False:
@@ -170,7 +174,9 @@ class AuthenticationService(IAuthentication):
             ):
                 raise InternalServerError("common.process_issue")
 
-        jwt_payload_data, control_data = ThebesHallBuilder(user_data=new_user_data, ttl=525600).build()
+        jwt_payload_data, control_data = ThebesHallBuilder(
+            user_data=new_user_data, ttl=525600
+        ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         sent_to_persephone = persephone_client.run(
@@ -189,7 +195,10 @@ class AuthenticationService(IAuthentication):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt, "control_data": control_data}}
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"jwt": jwt, "control_data": control_data},
+        }
 
     @staticmethod
     def _dtvm_client_has_trade_allowed(
@@ -347,7 +356,7 @@ class AuthenticationService(IAuthentication):
             user_solutiontech_status_from_database
             in [
                 SolutiontechClientImportStatus.SEND.value,
-                SolutiontechClientImportStatus.FAILED.value
+                SolutiontechClientImportStatus.FAILED.value,
             ]
         )
         return user_has_valid_solutiontech_status_in_database

@@ -73,7 +73,7 @@ def get_values_from_optional_client_data_fields(client_data):
         "CD_ORG_EMIT": None,
         "DT_DOC_IDENT": None,
         "CD_DOC_IDENT": None,
-        "IND_PCTA": IndicatorByAccount.YES.value,
+        "IND_PCTA": IndicatorByAccount.NO.value,
     }
 
     return values_from_optional_client_data_fields
@@ -327,17 +327,19 @@ def test_get_builder_with_greater_than_invalid_register_document_type_expect_val
     sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
     sinacor_types_repository.is_business_person = MagicMock(return_value=False)
 
-    copied_valid_client_data.update({
-        "identifier_document": {
-            "type": "WZ",
-            "document_data": {
-                "number": 485416803,
-                "date": datetime(1970, 1, 1, 0, 51, 52),
-                "state": "SSP",
-                "issuer": "SSP",
-            },
+    copied_valid_client_data.update(
+        {
+            "identifier_document": {
+                "type": "WZ",
+                "document_data": {
+                    "number": 485416803,
+                    "date": datetime(1970, 1, 1, 0, 51, 52),
+                    "state": "SSP",
+                    "issuer": "SSP",
+                },
+            }
         }
-    })
+    )
 
     builder = client_register_repository.get_builder(
         user_data=copied_valid_client_data,
@@ -373,17 +375,19 @@ def test_get_builder_with_less_than_invalid_register_document_type_expect_valid_
     sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
     sinacor_types_repository.is_business_person = MagicMock(return_value=False)
 
-    copied_valid_client_data.update({
-        "identifier_document": {
-            "type": "A",
-            "document_data": {
-                "number": 485416803,
-                "date": datetime(1970, 1, 1, 0, 51, 52),
-                "state": "SSP",
-                "issuer": "SSP",
-            },
+    copied_valid_client_data.update(
+        {
+            "identifier_document": {
+                "type": "A",
+                "document_data": {
+                    "number": 485416803,
+                    "date": datetime(1970, 1, 1, 0, 51, 52),
+                    "state": "SSP",
+                    "issuer": "SSP",
+                },
+            }
         }
-    })
+    )
 
     builder = client_register_repository.get_builder(
         user_data=copied_valid_client_data,

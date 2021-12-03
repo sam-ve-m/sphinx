@@ -89,9 +89,7 @@ class ThebesHallBuilder:
             .add_us_accounts()
             .add_using_suitability_or_refuse_term()
             .add_client_has_br_trade_allowed(
-                suitability_months_past=self._control_data[
-                    "suitability_months_past"
-                ],
+                suitability_months_past=self._control_data["suitability_months_past"],
                 last_modified_date_months_past=self._control_data[
                     "last_modified_date_months_past"
                 ],
@@ -121,9 +119,7 @@ class ThebesHallBuilder:
         suitability_months_past = 0
         if suitability:
             suitability_months_past = suitability.get("months_past")
-        self._control_data.update(
-            {"suitability_months_past": suitability_months_past}
-        )
+        self._control_data.update({"suitability_months_past": suitability_months_past})
         return self
 
     def add_last_modified_date(self):
@@ -177,30 +173,31 @@ class ThebesHallBuilder:
     def add_br_accounts(self):
         if self._jwt_payload_data.get("accounts") is None:
             self._jwt_payload_data.update({"accounts": dict()})
-        if self._jwt_payload_data["accounts"].get('BR') is None:
-            self._jwt_payload_data["accounts"].update({'BR': dict()})
-        (
-            self.add_bovespa_account()
-            .add_bmf_account()
-        )
+        if self._jwt_payload_data["accounts"].get("BR") is None:
+            self._jwt_payload_data["accounts"].update({"BR": dict()})
+        (self.add_bovespa_account().add_bmf_account())
         return self
 
     def add_us_accounts(self):
         if self._jwt_payload_data.get("accounts") is None:
             self._jwt_payload_data.update({"accounts": dict()})
-        if self._jwt_payload_data["accounts"].get('US') is None:
-            self._jwt_payload_data["accounts"].update({'US': dict()})
-        self._jwt_payload_data['accounts']['US'].update({"dw_account": "123"})
+        if self._jwt_payload_data["accounts"].get("US") is None:
+            self._jwt_payload_data["accounts"].update({"US": dict()})
+        self._jwt_payload_data["accounts"]["US"].update({"dw_account": "123"})
         return self
 
     def add_bovespa_account(self):
         if bovespa_account := self._user_data.get("bovespa_account"):
-            self._jwt_payload_data['accounts']['BR'].update({"bovespa_account": bovespa_account})
+            self._jwt_payload_data["accounts"]["BR"].update(
+                {"bovespa_account": bovespa_account}
+            )
         return self
 
     def add_bmf_account(self):
         if bmf_account := self._user_data.get("bmf_account"):
-            self._jwt_payload_data['accounts']['BR'].update({"bmf_account": bmf_account})
+            self._jwt_payload_data["accounts"]["BR"].update(
+                {"bmf_account": bmf_account}
+            )
         return self
 
     def add_client_has_br_trade_allowed(
@@ -229,8 +226,6 @@ class ThebesHallBuilder:
     def add_client_has_us_trade_allowed(
         self,
     ):
-        # TODO 
-        self._jwt_payload_data.update(
-            {"client_has_us_trade_allowed": True}
-        )
+        # TODO
+        self._jwt_payload_data.update({"client_has_us_trade_allowed": True})
         return self

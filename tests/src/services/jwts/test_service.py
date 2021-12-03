@@ -3,6 +3,8 @@ import pytest
 from unittest.mock import MagicMock, patch, mock_open
 
 # SPHINX
+from heimdall_client.src.domain.enums.heimdall_status_responses import HeimdallStatusResponses
+
 from tests.stub_classes.stub_request import StubURL, StubRequest
 from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 from src.exceptions.exceptions import UnauthorizedError, InternalServerError
@@ -100,18 +102,18 @@ def test_get_thebes_answer_from_request(
 
 def test_decrypt_payload_error_raised(get_new_stub_jwt_service):
     stub_jwt_service = get_new_stub_jwt_service
-    stub_jwt_service.heimdall.decrypt_payload = MagicMock(side_effect=Exception())
+    stub_jwt_service.heimdall.decode_payload = MagicMock(return_value=(1, HeimdallStatusResponses.INTERNAL_HEIMDALL_ERROR))
     with pytest.raises(InternalServerError):
         stub_jwt_service.decrypt_payload(encrypted_payload="")
 
 
-def test_decrypt_payload(get_new_stub_jwt_service):
+def test_decode_payload(get_new_stub_jwt_service):
     stub_jwt_service = get_new_stub_jwt_service
-    decrypted_payload = {"a": 1}
-    stub_jwt_service.heimdall.decrypt_payload = MagicMock(
-        return_value=decrypted_payload
+    decrypted_payload = {"decoded_jwt": {"a": 1}}
+    stub_jwt_service.heimdall.decode_payload = MagicMock(
+        return_value=(decrypted_payload, HeimdallStatusResponses.SUCCESS)
     )
-    assert stub_jwt_service.decrypt_payload(encrypted_payload="") == decrypted_payload
+    assert stub_jwt_service.decrypt_payload(encrypted_payload="") == decrypted_payload['decoded_jwt']
 
 
 # TODO: cant mock from jwt.jwk import jwk_from_pem
@@ -122,4 +124,3 @@ def test_generate_token_id_rsa_dont_find(mock_open, get_new_stub_jwt_service):
     user_data = {}
     with pytest.raises(InternalServerError):
         stub_jwt_service.generate_token(jwt_payload_data=user_data)
-

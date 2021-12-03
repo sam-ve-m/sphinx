@@ -134,9 +134,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_in_situac_cliger(self, value=ClientStatusBasicRegistration.ACTIVATE.value):
-        self._fields_added.update(
-            {"IN_SITUAC_CLIGER": value}
-        )
+        self._fields_added.update({"IN_SITUAC_CLIGER": value})
         return self
 
     def add_cd_ativ(self, user_data: dict):
@@ -234,9 +232,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_in_rec_divi(self, value=ReceiptDividendsByStockExchange.YES.value):
-        self._fields_added.update(
-            {"IN_REC_DIVI": value}
-        )
+        self._fields_added.update({"IN_REC_DIVI": value})
         return self
 
     def add_nm_conjuge(self, user_data: dict):
@@ -377,37 +373,29 @@ class ClientRegisterBuilder:
         return self
 
     def add_in_emite_nota(self, value=BrokerageNoteIssuanceIndicator.DEFAULT.value):
-        self._fields_added.update(
-            {"IN_EMITE_NOTA": value}
-        )
+        self._fields_added.update({"IN_EMITE_NOTA": value})
         return self
 
     def add_in_situac(self, value=ClientRegistrationStatus.ACTIVATE.value):
-        self._fields_added.update(
-            {"IN_SITUAC": value}
-        )
+        self._fields_added.update({"IN_SITUAC": value})
         return self
 
     def add_pc_corcor_prin(self, value=BrokerageDiscountPercentage.DEFAULT.value):
-        self._fields_added.update(
-            {"PC_CORCOR_PRIN": value}
-        )
+        self._fields_added.update({"PC_CORCOR_PRIN": value})
         return self
 
     def add_tp_cliente_bol(self, value=ClientTypeOfExchangeActivity.NORMAL.value):
-        self._fields_added.update(
-            {"TP_CLIENTE_BOL": value}
-        )
+        self._fields_added.update({"TP_CLIENTE_BOL": value})
         return self
 
     def add_tp_conta(self, value=None):
         self._fields_added.update({"TP_CONTA": value})
         return self
 
-    def add_tp_investidor_bol(self, value=InvestorTypeOfExchangeActivity.PHYSICAL_PERSON.value):
-        self._fields_added.update(
-            {"TP_INVESTIDOR_BOL": value}
-        )
+    def add_tp_investidor_bol(
+        self, value=InvestorTypeOfExchangeActivity.PHYSICAL_PERSON.value
+    ):
+        self._fields_added.update({"TP_INVESTIDOR_BOL": value})
         return self
 
     def add_in_lifo_fifo(self, value=None):
@@ -418,10 +406,10 @@ class ClientRegisterBuilder:
         self._fields_added.update({"IND_PCTA": value})
         return self
 
-    def add_in_emite_nota_cs(self, value=HomeExecutionBrokerageNoteIssuanceIndicator.NO.value):
-        self._fields_added.update(
-            {"IN_EMITE_NOTA_CS": value}
-        )
+    def add_in_emite_nota_cs(
+        self, value=HomeExecutionBrokerageNoteIssuanceIndicator.NO.value
+    ):
+        self._fields_added.update({"IN_EMITE_NOTA_CS": value})
         return self
 
     def add_ind_end_vinc_con(self, value=MailingAddress.FIRST.value):
@@ -441,15 +429,11 @@ class ClientRegisterBuilder:
         return self
 
     def add_ind_oprc_td(self, value=RegisterInTheDirectTreasureActivity.YES.value):
-        self._fields_added.update(
-            {"IND_OPRC_TD": value}
-        )
+        self._fields_added.update({"IND_OPRC_TD": value})
         return self
 
     def add_ind_oprc_agnt_td(self, value=OperatesByTreasuryDirectAgent.YES.value):
-        self._fields_added.update(
-            {"IND_OPRC_AGNT_TD": value}
-        )
+        self._fields_added.update({"IND_OPRC_AGNT_TD": value})
         return self
 
     def add_cod_cidade_nasc(self, user_data: dict):
@@ -478,9 +462,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cod_tipo_colt(self, value=CollateralizationTypeCode.INVESTOR.value):
-        self._fields_added.update(
-            {"COD_TIPO_COLT": value}
-        )
+        self._fields_added.update({"COD_TIPO_COLT": value})
         return self
 
     def add_cod_cep_estr1(self, value=ForeignZipCode.DEFAULT.value):
@@ -771,9 +753,7 @@ class ClientRegisterBuilder:
 
     def add_pc_corcor_prin_cs(self, value=BrokerageDiscountPercentage.DEFAULT.value):
         # TODO: Define with operation table
-        self._fields_added.update(
-            {"PC_CORCOR_PRIN_CS": value}
-        )
+        self._fields_added.update({"PC_CORCOR_PRIN_CS": value})
         return self
 
     def add_in_tipo_corret_exec_cs(self, value=BrokerTypeOfBrokerage.DEFAULT.value):

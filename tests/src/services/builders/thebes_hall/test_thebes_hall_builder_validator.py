@@ -147,7 +147,7 @@ class ValidJwtPayloadToCompleteDtvmClient(
     ClientHasBRTradeAllowed,
     CreatedAt,
     Exp,
-    Accounts
+    Accounts,
 ):
     class Config:
         extra = "forbid"
@@ -176,9 +176,6 @@ class ValidJwtPayloadToCompleteAppUser(
         extra = "forbid"
 
 
-class ValidControlDataToCompleteAppUser(
-    Terms,
-    LastModifiedDateMonthsPast
-):
+class ValidControlDataToCompleteAppUser(Terms, LastModifiedDateMonthsPast):
     class Config:
         extra = "forbid"

@@ -118,7 +118,9 @@ class SuitabilityService(ISuitability):
         )
         user_data = user_repository.find_one({"_id": user_email})
 
-        jwt_payload_data, control_data = ThebesHallBuilder(user_data=user_data, ttl=525600).build()
+        jwt_payload_data, control_data = ThebesHallBuilder(
+            user_data=user_data, ttl=525600
+        ).build()
 
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 

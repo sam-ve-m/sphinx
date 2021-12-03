@@ -24,7 +24,7 @@ from tests.src.services.builders.thebes_hall.test_thebes_hall_builder_validator 
     ValidJwtPayloadToCompleteDtvmClient,
     ValidControlDataToCompleteDtvmClient,
     ValidJwtPayloadToCompleteAppUser,
-    ValidControlDataToCompleteAppUser
+    ValidControlDataToCompleteAppUser,
 )
 
 
@@ -60,7 +60,9 @@ def test_builder_with_complete_dtvm_client_expect_valid_jwt_payload():
         lambda dict_to_validate: ValidJwtPayloadToCompleteDtvmClient(**dict_to_validate)
     )
     validate_control_data_to_complete_dtvm_user = (
-        lambda dict_to_validate: ValidControlDataToCompleteDtvmClient(**dict_to_validate)
+        lambda dict_to_validate: ValidControlDataToCompleteDtvmClient(
+            **dict_to_validate
+        )
     )
     is_valid_jwt_payload = _validate_builder_response(
         callback=validate_jwt_payload_to_complete_dtvm_user,
@@ -125,6 +127,7 @@ def test_builder_with_complete_app_user_expect_valid_jwt_payload():
     assert is_valid_jwt_payload is True
     assert is_valid_control_data is True
 
+
 class StubUserRepository:
     pass
 
@@ -150,7 +153,7 @@ def test_add_client_has_br_trade_allowed_solutiontech_length_0():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is False
@@ -177,7 +180,7 @@ def test_add_client_has_br_trade_allowed_solutiontech_length_10():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is False
@@ -204,7 +207,7 @@ def test_add_client_has_br_trade_allowed_solutiontech_failed():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is False
@@ -231,7 +234,7 @@ def test_add_client_has_br_trade_allowed_solutiontech_send():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is False
@@ -258,7 +261,7 @@ def test_add_client_has_br_trade_allowed_solutiontech_correct():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is True
@@ -285,7 +288,7 @@ def test_add_client_has_br_trade_allowed_suitability_lt():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is True
@@ -312,7 +315,7 @@ def test_add_client_has_br_trade_allowed_suitability_gt():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is False
@@ -339,7 +342,7 @@ def test_add_client_has_br_trade_allowed_suitability_eq():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is False
@@ -366,7 +369,7 @@ def test_add_client_has_br_trade_allowed_modified_date_lt():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is True
@@ -393,7 +396,7 @@ def test_add_client_has_br_trade_allowed_modified_date_gt():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is False
@@ -420,7 +423,7 @@ def test_add_client_has_br_trade_allowed_modified_date_eq():
 
     thebes_hall_builder.add_client_has_br_trade_allowed(
         suitability_months_past=suitability_months_past,
-        last_modified_date_months_past=last_modified_date_months_past
+        last_modified_date_months_past=last_modified_date_months_past,
     )
 
     assert thebes_hall_builder._jwt_payload_data["client_has_br_trade_allowed"] is False

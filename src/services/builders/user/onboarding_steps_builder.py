@@ -1,4 +1,3 @@
-from src.domain.stone_age.stone_age_register_analyses import StoneAgeRegisterAnalyses
 
 
 class OnboardingStepBuilder:
@@ -9,7 +8,6 @@ class OnboardingStepBuilder:
             "user_identifier_data_step": False,
             "user_selfie_step": False,
             "user_complementary_step": False,
-            "user_quiz_step": False,
             "user_electronic_signature": False,
             "finished": False,
         }
@@ -18,7 +16,6 @@ class OnboardingStepBuilder:
             "user_identifier_data_step",
             "user_selfie_step",
             "user_complementary_step",
-            "user_quiz_step",
             "user_electronic_signature",
         ]
 
@@ -73,28 +70,8 @@ class OnboardingStepBuilder:
             == "user_complementary_step"
         ):
             self.__onboarding_steps["user_complementary_step"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "user_quiz_step"
+            self.__onboarding_steps["current_onboarding_step"] = "user_electronic_signature"
 
-        return self
-
-    def user_quiz_step(self, current_user):
-        register_analyses = current_user.get("register_analyses")
-
-        register_analyses_allowed_to_next_step = [
-            StoneAgeRegisterAnalyses.TABLE.value,
-            StoneAgeRegisterAnalyses.APPROVED.value,
-            StoneAgeRegisterAnalyses.REJECTED.value,
-            StoneAgeRegisterAnalyses.SEND_RESPONSES.value,
-        ]
-
-        if (
-            register_analyses in register_analyses_allowed_to_next_step
-            and self.__onboarding_steps["current_onboarding_step"] == "user_quiz_step"
-        ):
-            self.__onboarding_steps["user_quiz_step"] = True
-            self.__onboarding_steps[
-                "current_onboarding_step"
-            ] = "user_electronic_signature"
         return self
 
     def user_electronic_signature(self, current_user):

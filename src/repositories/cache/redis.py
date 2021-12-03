@@ -10,7 +10,6 @@ from src.infrastructures.redis.infrastructure import RedisInfrastructure
 
 
 class RepositoryRedis(RedisInfrastructure, IRedis):
-
     @staticmethod
     def set(key: str, value: dict, ttl: int = 0) -> None:
         redis = RepositoryRedis._get_redis()

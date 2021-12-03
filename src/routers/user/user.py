@@ -52,33 +52,6 @@ def update_user_complementary_data(
     return BaseController.run(UserController.user_complementary_data, payload, request)
 
 
-@router.put("/user/quiz", tags=["user"])
-def user_quiz(device_information: DeviceInformation, request: Request):
-    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
-
-    payload = {
-        "x-thebes-answer": jwt_data,
-        "device_information": device_information.dict(),
-    }
-    return BaseController.run(UserController.user_quiz, payload, request)
-
-
-@router.put("/user/send_quiz_responses", tags=["user"])
-def send_quiz_responses(quiz_response: QuizResponses, request: Request):
-    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
-
-    quiz_response_dict = quiz_response.dict()
-    Sindri.dict_to_primitive_types(values=quiz_response_dict)
-    responses = quiz_response_dict.get("responses")
-
-    payload = {
-        "x-thebes-answer": jwt_data,
-        "quiz": responses,
-        "device_information": quiz_response_dict.get("device_information"),
-    }
-    return BaseController.run(UserController.send_quiz_responses, payload, request)
-
-
 @router.delete("/user", tags=["user"])
 def delete_user(request: Request):
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
@@ -100,14 +73,12 @@ def change_user_password(pin: PIN, request: Request):
 @router.put("/user/logout_all", tags=["user"])
 def logout_all(request: Request):
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
-
     return BaseController.run(UserController.logout_all, jwt_data, request)
 
 
 @router.put("/user/views", tags=["user"])
 def change_user_view(view: View, request: Request):
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
-
     payload = {
         "x-thebes-answer": jwt_data,
         "new_view": view.dict()["views"],

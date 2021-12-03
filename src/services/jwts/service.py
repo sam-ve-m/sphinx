@@ -32,15 +32,14 @@ class JwtService:
             raise InternalServerError("common.process_issue")
 
     @classmethod
-    def generate_token(
-        cls,
-        jwt_payload_data: dict
-    ) -> Optional[str]:
+    def generate_token(cls, jwt_payload_data: dict) -> Optional[str]:
         """The ttl value in minutes"""
         try:
             with open("src/keys/id_rsa", "rb") as fh:
                 signing_key = jwk_from_pem(fh.read())
-            compact_jws = cls.instance.encode(jwt_payload_data, signing_key, alg="RS256")
+            compact_jws = cls.instance.encode(
+                jwt_payload_data, signing_key, alg="RS256"
+            )
             return compact_jws
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
@@ -54,7 +53,7 @@ class JwtService:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(str(payload), exc_info=True)
             raise InternalServerError("common.process_issue")
-        return payload['decoded_jwt']
+        return payload["decoded_jwt"]
 
     @staticmethod
     def get_jwt_from_request(request: Request):

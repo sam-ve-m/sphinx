@@ -11,7 +11,6 @@ from src.domain.solutiontech.client_import_status import SolutiontechClientImpor
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
 from src.services.persephone.service import PersephoneService
-from src.services.third_part_integration.stone_age import StoneAge
 from nidavellir.src.uru import Sindri
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.services.third_part_integration.solutiontech import Solutiontech
@@ -287,12 +286,15 @@ class SinacorService:
     ) -> dict:
         new = deepcopy(user_database_document)
         output_normalized = dict()
-        StoneAge.get_only_values_from_user_data(user_data=output, new_user_data=output_normalized)
+        # TODO REMOVE STONEAGE
+        # StoneAge.get_only_values_from_user_data(
+        #     user_data=output, new_user_data=output_normalized
+        # )
         Sindri.dict_to_primitive_types(output_normalized)
-        new.update({"register_analyses": output_normalized["decision"]})
-        del output_normalized["decision"]
-        del output_normalized["status"]
-        del output_normalized["email"]
-        del output_normalized["date_of_acquisition"]
+        # new.update({"register_analyses": output_normalized["decision"]})
+        # del output_normalized["decision"]
+        # del output_normalized["status"]
+        # del output_normalized["email"]
+        # del output_normalized["date_of_acquisition"]
         new.update(output_normalized)
         return new

@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from src.domain.stone_age.stone_age_register_analyses import StoneAgeRegisterAnalyses
-
 
 def get_x_thebes_answer_with_client_data():
     payload = {}
@@ -10,32 +8,27 @@ def get_x_thebes_answer_with_client_data():
 
 
 jwt_decoded = {
-  "nick_name": "Sem Verificação De Email",
-  "email": "ilm3@lionx.com.br",
-  "scope": {
-    "view_type": "default",
-    "features": [
-      "default"
-    ]
-  },
-  "is_active_user": True,
-  "is_blocked_electronic_signature": False,
-  "terms": {
-    "term_application": None,
-    "term_open_account": None,
-    "term_retail_liquid_provider": None,
-    "term_refusal": None,
-    "term_non_compliance": None
-  },
-  "suitability_months_past": 0,
-  "last_modified_date_months_past": 0,
-  "client_has_trade_allowed": True,
-  "created_at": "2021-10-13 13:51:45.372674",
-  "exp": 1665669105,
-  "using_suitability_or_refuse_term": "suitability",
-  "bovespa_account": "000000204-1",
-  "bmf_account": "204",
-  "register_analyses": "APROVADO"
+    "nick_name": "Sem Verificação De Email",
+    "email": "ilm3@lionx.com.br",
+    "scope": {"view_type": "default", "features": ["default"]},
+    "is_active_user": True,
+    "is_blocked_electronic_signature": False,
+    "terms": {
+        "term_application": None,
+        "term_open_account": None,
+        "term_retail_liquid_provider": None,
+        "term_refusal": None,
+        "term_non_compliance": None,
+    },
+    "suitability_months_past": 0,
+    "last_modified_date_months_past": 0,
+    "client_has_trade_allowed": True,
+    "created_at": "2021-10-13 13:51:45.372674",
+    "exp": 1665669105,
+    "using_suitability_or_refuse_term": "suitability",
+    "bovespa_account": "000000204-1",
+    "bmf_account": "204",
+    "register_analyses": "APROVADO",
 }
 
 onboarding_complete_client_data = {
@@ -282,45 +275,6 @@ onboarding_user_complementary_data_step_client_data = {
     "stone_age_contract_uuid": "6d6e2a04-00e4-11ec-9a03-0242ac130003",
 }
 
-onboarding_user_quiz_step_client_data = {
-    "_id": "ilm5@lionx.com.br",
-    "pin": None,
-    "nick_name": "Igão Do Onbiarding",
-    "email": "ilm5@lionx.com.br",
-    "created_at": {"$date": "2021-10-13T14:27:09.973Z"},
-    "scope": {"view_type": "default", "features": ["default"]},
-    "is_active_user": True,
-    "use_magic_link": True,
-    "token_valid_after": {"$date": "2021-10-13T14:27:09.973Z"},
-    "terms": {
-        "term_application": None,
-        "term_open_account": None,
-        "term_retail_liquid_provider": None,
-        "term_refusal": None,
-        "term_non_compliance": None,
-    },
-    "can_be_managed_by_third_party_operator": False,
-    "is_managed_by_third_party_operator": False,
-    "third_party_operator": {
-        "is_third_party_operator": False,
-        "details": {},
-        "third_party_operator_email": "string",
-    },
-    "suitability": {
-        "score": 1,
-        "submission_date": {"$date": "2021-10-13T16:53:11.039Z"},
-        "suitability_version": 4,
-    },
-    "cel_phone": "11987450574",
-    "cpf": "63025165014",
-    "is_cvm_qualified_investor": False,
-    "is_us_person": False,
-    "marital": {"status": "not_married", "spouse": None},
-    "us_tin": None,
-    "register_analyses": StoneAgeRegisterAnalyses.SEND_RESPONSES.value,
-    "stone_age_contract_uuid": "6d6e2a04-00e4-11ec-9a03-0242ac130003",
-}
-
 onboarding_steps_success_status_code = 200
 
 on_boarding_steps = {
@@ -329,7 +283,6 @@ on_boarding_steps = {
     "user_identifier_data_step": "user_identifier_data_step",
     "user_selfie_step": "user_selfie_step",
     "user_complementary_step": "user_complementary_step",
-    "user_quiz_step": "user_quiz_step",
     "user_electronic_signature": "user_electronic_signature",
 }
 

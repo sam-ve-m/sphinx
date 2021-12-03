@@ -20,4 +20,4 @@ class PasswordEncrypt(IPasswordEncrypt):
         if status != MistStatusResponses.SUCCESS:
             logger.error(str(payload), exc_info=True)
             raise InternalServerError("common.process_issue")
-        return payload['encrypted_password']
+        return payload["encrypted_password"]

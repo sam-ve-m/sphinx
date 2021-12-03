@@ -41,7 +41,7 @@ def link_feature(link: LinkViewFeature, request: Request):
 
 
 @router.delete("/views/link_feature", tags=["views_link"])
-@router.requested_permissions(views=['default'], features=['default'])
+@router.requested_permissions(views=["default"], features=["default"])
 def link_feature(link: LinkViewFeature, request: Request):
     return BaseController.run(
         ViewController.delink_feature,

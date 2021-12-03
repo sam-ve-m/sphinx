@@ -22,7 +22,9 @@ from src.domain.solutiontech.client_import_status import SolutiontechClientImpor
 
 
 class StubClientRegisterRepository:
-    pass
+    @staticmethod
+    def validate_user_data_errors(*args, **kwargs):
+        pass
 
 
 @pytest.fixture
@@ -66,35 +68,9 @@ def _validate_builder_response(callback, dict_to_validate: dict) -> bool:
         return False
 
 
-def test_merge_bureau_client_data_with_user_database_missing_keys_that_will_be_deleted():
-    fake_response_obj = deepcopy(fake_response)
-    fake_user_obj = deepcopy(fake_user)
-    del fake_response_obj["data"]["decision"]
-    del fake_response_obj["data"]["status"]
-    del fake_response_obj["data"]["email"]
-    del fake_response_obj["data"]["date_of_acquisition"]
-    with pytest.raises(KeyError):
-        SinacorService._merge_bureau_client_data_with_user_database(
-            output=fake_response_obj["data"], user_database_document=fake_user_obj
-        )
-
-
-def test_merge_bureau_client_data_with_user_database():
-    fake_response_obj = deepcopy(fake_response)
-    fake_user_obj = deepcopy(fake_user)
-    response = SinacorService._merge_bureau_client_data_with_user_database(
-        output=fake_response_obj["data"], user_database_document=fake_user_obj
-    )
-    assert response.get("decision") is None
-    assert response.get("status") is None
-    assert response.get("date_of_acquisition") is None
-    assert response.get("register_analyses") == fake_response_obj["data"]["decision"]
-    assert _validate_builder_response(FirstLevelJsonUserMergedDataValidator, response)
-
-
 def test_check_sinacor_errors_if_is_not_update_client_is_not_update():
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.validate_user_data_erros = MagicMock(
+    stub_client_register_repository.validate_user_data_errors = MagicMock(
         return_value=False
     )
     response = SinacorService._check_sinacor_errors_if_is_not_update_client(
@@ -105,14 +81,11 @@ def test_check_sinacor_errors_if_is_not_update_client_is_not_update():
     assert response is None
 
 
-def test_check_sinacor_errors_if_is_not_update_client_is_not_update_and_fail():
-    stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.validate_user_data_erros = MagicMock(
-        return_value=True
-    )
+@patch.object(StubClientRegisterRepository, 'validate_user_data_errors', return_value=True)
+def test_check_sinacor_errors_if_is_not_update_client_is_not_update_and_fail(mock_validate_user_data_errors):
     with pytest.raises(BadRequestError, match="bureau.error.fail"):
         SinacorService._check_sinacor_errors_if_is_not_update_client(
-            client_register_repository=stub_client_register_repository,
+            client_register_repository=StubClientRegisterRepository,
             sinacor_client_control_data=None,
             database_and_bureau_dtvm_client_data_merged={"cpf": 12345678900},
         )
@@ -120,7 +93,7 @@ def test_check_sinacor_errors_if_is_not_update_client_is_not_update_and_fail():
 
 def test_check_sinacor_errors_if_is_not_update_client_is_update():
     stub_client_register_repository = StubClientRegisterRepository()
-    stub_client_register_repository.validate_user_data_erros = MagicMock(
+    stub_client_register_repository.validate_user_data_errors = MagicMock(
         return_value=False
     )
     response = SinacorService._check_sinacor_errors_if_is_not_update_client(
@@ -266,13 +239,15 @@ def test_save_or_update_client_data():
 
 
 @patch.object(SinacorService, "_send_dtvm_client_data_to_persephone", return_value=None)
-@patch.object(SinacorService, "_merge_bureau_client_data_with_user_database", return_value=None)
+@patch.object(
+    SinacorService, "_merge_bureau_client_data_with_user_database", return_value=None
+)
 @patch.object(SinacorService, "save_or_update_client_data", return_value=None)
 def test_process_callback_error_to_find_user(
     mock_send_dtvm_client_data_to_persephone,
     mock_merge_bureau_client_data_with_user_database,
     mock_save_or_update_client_data,
-    get_new_stub_persephone_service
+    get_new_stub_persephone_service,
 ):
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=False)
@@ -284,18 +259,20 @@ def test_process_callback_error_to_find_user(
             payload={"data": {"email": {"value": ""}}},
             client_register_repository=stub_client_register_repository,
             user_repository=stub_user_repository,
-            persephone_client=stub_persephone_service
+            persephone_client=stub_persephone_service,
         )
 
 
 @patch.object(SinacorService, "_send_dtvm_client_data_to_persephone", return_value=None)
-@patch.object(SinacorService, "_merge_bureau_client_data_with_user_database", return_value=None)
+@patch.object(
+    SinacorService, "_merge_bureau_client_data_with_user_database", return_value=None
+)
 @patch.object(SinacorService, "save_or_update_client_data", return_value=None)
 def test_process_callback(
     mock_send_dtvm_client_data_to_persephone,
     mock_merge_bureau_client_data_with_user_database,
     mock_save_or_update_client_data,
-    get_new_stub_persephone_service
+    get_new_stub_persephone_service,
 ):
     stub_persephone_service = get_new_stub_persephone_service
     stub_persephone_service.run = MagicMock(return_value=False)
@@ -306,5 +283,5 @@ def test_process_callback(
         payload={"data": {"email": {"value": ""}}},
         client_register_repository=stub_client_register_repository,
         user_repository=stub_user_repository,
-        persephone_client=stub_persephone_service
+        persephone_client=stub_persephone_service,
     )

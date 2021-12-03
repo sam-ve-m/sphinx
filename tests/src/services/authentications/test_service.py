@@ -130,8 +130,7 @@ def test_thebes_gate_answer_is_active_was_sent_to_persephone(
     generate_token_value = "lalala"
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(
-        return_value={"pin": "", "_id": "", "is_active_user": True,
-            "terms": {}}
+        return_value={"pin": "", "_id": "", "is_active_user": True, "terms": {}}
     )
     stub_repository.update_one = MagicMock(return_value=False)
     StubTokenHandler.generate_token = MagicMock(return_value=generate_token_value)
@@ -178,8 +177,12 @@ def test_login_use_magic_link(
     authentication_service = get_authentication_service_mock_send_authentication_email
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(
-        return_value={"use_magic_link": True, "email": "",  "is_active_user": True,
-            "terms": {}}
+        return_value={
+            "use_magic_link": True,
+            "email": "",
+            "is_active_user": True,
+            "terms": {},
+        }
     )
     response = authentication_service.login(
         user_credentials=payload,
@@ -193,8 +196,12 @@ def test_login_use_magic_link(
 def test_login_without_pin():
     stub_repository = StubRepository(database="", collection="")
     stub_repository.find_one = MagicMock(
-        return_value={"use_magic_link": False, "email": "",  "is_active_user": True,
-            "terms": {}}
+        return_value={
+            "use_magic_link": False,
+            "email": "",
+            "is_active_user": True,
+            "terms": {},
+        }
     )
     response = AuthenticationService.login(
         user_credentials=payload,
@@ -213,7 +220,7 @@ def test_login_pin_error_1():
             "pin": "7110eda4d09e062aa5e4sa390b0a572ac0d2c0220",
             "email": "",
             "is_active_user": True,
-            "terms": {}
+            "terms": {},
         }
     )
     with pytest.raises(UnauthorizedError, match="^user.pin_error"):
@@ -232,7 +239,7 @@ def test_login_pin_error_2():
             "pin": "7110eda4d09e062aa5e4sa390b0a572ac0d2c0220",
             "email": "",
             "is_active_user": True,
-            "terms": {}
+            "terms": {},
         }
     )
     with pytest.raises(UnauthorizedError, match="^user.pin_error"):
@@ -251,7 +258,7 @@ def test_login_with_pin():
             "pin": "7110eda4d09e062aa5e4a390b0a572ac0d2c0220",
             "email": "",
             "is_active_user": True,
-            "terms": {}
+            "terms": {},
         }
     )
     response = AuthenticationService.login(
@@ -322,7 +329,9 @@ def test_thebes_hall_muts_update_dont_sent_to_persephone(
     authentication_service = get_authentication_service
     stub_persephone_service = get_new_stub_persephone_service
     stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={"is_active_user": True, "terms": {}})
+    stub_repository.find_one = MagicMock(
+        return_value={"is_active_user": True, "terms": {}}
+    )
     stub_repository.update_one = MagicMock(return_value=True)
     authentication_service.send_authentication_email = MagicMock(return_value=True)
     mock_dtvm_client_has_trade_allowed.return_value = {
@@ -352,7 +361,9 @@ def test_thebes_hall_was_sent_to_persephone(
     authentication_service = get_authentication_service
     stub_persephone_service = get_new_stub_persephone_service
     stub_repository = StubRepository(database="", collection="")
-    stub_repository.find_one = MagicMock(return_value={"terms": {}, "is_active_user": True})
+    stub_repository.find_one = MagicMock(
+        return_value={"terms": {}, "is_active_user": True}
+    )
     StubThebesHall.validate = MagicMock(return_value=True)
     StubTokenHandler.generate_token = MagicMock(return_value="lallalala")
     authentication_service.send_authentication_email = MagicMock(return_value=True)
@@ -654,7 +665,7 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         AuthenticationService._dtvm_client_has_trade_allowed(
             user=user,
             client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech
+            solutiontech=stub_solutiontech,
         )
     )
     assert client_has_trade_allowed_status_with_database_user == {
@@ -891,7 +902,7 @@ def test_create_electronic_signature_jwt_sent_to_persephone(
         jwt_service=stub_jwt_service,
     )
     assert response["status_code"] == status.HTTP_200_OK
-    assert response["payload"] == session_jwt[0]
+    assert response["payload"] == session_jwt
 
 
 def test_create_electronic_signature_jwt_fail_to_send_to_persephone(

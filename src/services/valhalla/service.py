@@ -13,6 +13,6 @@ class ValhallaService:
         if cls.social_client is None:
             cls.social_client = SocialNetworkQueue(
                 logger=logging.getLogger(config("LOG_NAME")),
-                producer=KafkaProducer(bootstrap_servers=config("VALHALLA_QUEUE_HOST"))
+                producer=KafkaProducer(bootstrap_servers=config("VALHALLA_QUEUE_HOST")),
             )
         return cls.social_client

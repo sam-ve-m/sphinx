@@ -10,7 +10,7 @@ class StubMist:
 
 
 class StubHeimdall:
-    def decrypt_payload(self, jwt):
+    def decode_payload(self, jwt):
         pass
 
 

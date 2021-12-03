@@ -78,9 +78,9 @@ def test_is_user_token_valid_false_because_token_is_expired():
 
 def test_is_user_token_valid_true():
     user_data = {
-        "token_valid_after": datetime(year=2020, month=10, day=10).strftime("%Y-%m-%d")
+        "token_valid_after": datetime(year=2020, month=10, day=10)
     }
-    jwt_data = {"created_at": "2020-11-01"}
+    jwt_data = {"created_at": 1602298801}
     token_valid = MiddlewareUtils.is_user_token_life_time_valid(
         user_data=user_data, token=jwt_data
     )
