@@ -400,7 +400,7 @@ class UserService(IUser):
         )
 
         file_path = file_repository.save_user_file(
-            file_type=UserFileType.SELF,
+            file_type=UserFileType.SELFIE,
             content=payload.get("file_or_base64"),
             user_email=thebes_answer.get("email"),
         )
@@ -655,13 +655,13 @@ class UserService(IUser):
     ) -> dict:
         onboarding_step_builder = OnboardingStepBuilder()
         thebes_answer = payload.get("x-thebes-answer")
-        jwt_user_email = thebes_answer.get("email")
+        jwt_user_unique_id = thebes_answer["unique_id"]
 
         user_file_exists = file_repository.get_user_file(
-            file_type=UserFileType.SELF, user_email=jwt_user_email
+            file_type=UserFileType.SELFIE, unique_id=jwt_user_unique_id
         )
 
-        current_user = user_repository.find_one({"_id": jwt_user_email})
+        current_user = user_repository.find_one({"unique_id": jwt_user_unique_id})
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
 
