@@ -67,27 +67,26 @@ class ThebesHallBuilder:
     def _build_user_jwt(self):
         (
             self.add_expiration_date_and_created_at()
-            .add_nick_name()
-            .add_email()
+            .add_unique_id()
             .add_scope()
+            .add_nick_name()
             .add_terms()
-            .add_last_modified_date()
+            .add_last_modified_date_months_past()
         )
 
     def _build_client_jwt(self):
         (
             self.add_expiration_date_and_created_at()
-            .add_terms()
-            .add_suitability_months_past()
-            .add_last_modified_date()
+            .add_unique_id()
             .add_nick_name()
-            .add_email()
             .add_scope()
             .add_is_blocked_electronic_signature()
             .add_register_analyses()
             .add_br_accounts()
             .add_us_accounts()
             .add_using_suitability_or_refuse_term()
+            .add_last_modified_date_months_past()
+            .add_suitability_months_past()
             .add_client_has_br_trade_allowed(
                 suitability_months_past=self._control_data["suitability_months_past"],
                 last_modified_date_months_past=self._control_data[
@@ -95,6 +94,7 @@ class ThebesHallBuilder:
                 ],
             )
             .add_client_has_us_trade_allowed()
+            .add_terms()
         )
 
     def add_expiration_date_and_created_at(self):
@@ -122,7 +122,7 @@ class ThebesHallBuilder:
         self._control_data.update({"suitability_months_past": suitability_months_past})
         return self
 
-    def add_last_modified_date(self):
+    def add_last_modified_date_months_past(self):
         AccountDataValidator.run(user_data=self._user_data)
         last_modified_date = self._user_data.get("last_modified_date")
         last_modified_date_months_past = 0
@@ -147,8 +147,8 @@ class ThebesHallBuilder:
         self._jwt_payload_data.update({"nick_name": self._user_data.get("nick_name")})
         return self
 
-    def add_email(self):
-        self._jwt_payload_data.update({"email": self._user_data.get("email")})
+    def add_unique_id(self):
+        self._jwt_payload_data.update({"unique_id": self._user_data.get("unique_id")})
         return self
 
     def add_scope(self):

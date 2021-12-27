@@ -7,15 +7,16 @@ from fastapi import status
 # SPHINX
 from src.repositories.view.repository import ViewRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-from src.domain.model_decorator.generate_id import generate_id
 from src.core.interfaces.services.view.interface import IView
 
 
 class ViewService(IView):
     @staticmethod
     def create(payload: dict, view_repository=ViewRepository()) -> dict:
-        payload = generate_id("name", payload)
-        payload.update({"features": list()})
+        payload.update({
+            "_id": payload['name'],
+            "features": list()
+        })
         if view_repository.find_one(payload) is not None:
             raise BadRequestError("common.register_exists")
         if view_repository.insert(payload):

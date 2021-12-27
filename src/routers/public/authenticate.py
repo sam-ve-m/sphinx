@@ -24,7 +24,6 @@ def login(user_credentials: Login, request: Request):
 
 @router.get("/thebes_gate", tags=["authentication"])
 def answer(request: Request):
-    # This will be called from the frontend after open TARGET_LINK (.env) received on the email confirmation
     try:
         jwt_data = JwtService.get_thebes_answer_from_request(request=request)
     except Exception as e:

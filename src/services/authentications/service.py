@@ -43,40 +43,40 @@ class AuthenticationService(IAuthentication):
         token_service=JwtService,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        old_user_data = user_repository.find_one(
-            {"_id": thebes_answer_from_request_or_error.get("email")}
+        user_data = user_repository.find_one(
+            {"unique_id": thebes_answer_from_request_or_error.get("unique_id")}
         )
-        if old_user_data is None:
+        if user_data is None:
             raise BadRequestError("common.register_not_exists")
-        new_user_data = deepcopy(old_user_data)
-        is_active_user = old_user_data.get("is_active_user")
+        is_active_user = user_data.get("is_active_user")
         response = {"status_code": None, "payload": {"jwt": None}}
         response.update({"status_code": status.HTTP_200_OK})
 
         if not is_active_user:
-            new_user_data.update(
-                {
-                    "is_active_user": True,
-                    "scope": {"view_type": "default", "features": ["default"]},
-                }
-            )
+            update_data = {
+                "is_active_user": True,
+                "must_do_first_login": False,
+                "scope": {"view_type": "default", "features": ["default", "realtime"]},
+            }
             if (
-                user_repository.update_one(old=old_user_data, new=new_user_data)
+                user_repository.update_one(old=user_data, new=update_data)
                 is False
             ):
                 raise InternalServerError("common.process_issue")
+            user_data.update(update_data)
 
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
-            partition=PersephoneQueue.USER_AUTHENTICATION.value,
-            payload=get_user_authentication_template_with_data(payload=new_user_data),
-            schema_key="user_authentication_schema",
-        )
-        if sent_to_persephone is False:
-            raise InternalServerError("common.process_issue")
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+        #     partition=PersephoneQueue.USER_AUTHENTICATION.value,
+        #     payload=get_user_authentication_template_with_data(payload=new_user_data),
+        #     schema_key="user_authentication_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
 
         jwt_payload_data, control_data = ThebesHallBuilder(
-            user_data=new_user_data, ttl=525600
+            user_data=user_data, ttl=525600
         ).build()
 
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
@@ -99,9 +99,13 @@ class AuthenticationService(IAuthentication):
             user_data=user_data, ttl=10
         ).build()
 
-        # TODO: Adicioanr essa verificação condicionalmente
-        # if user_data.get("is_active_client") is False:
-        #     raise UnauthorizedError("invalid_credential")
+        is_active_user = user_data["is_active_user"]
+        must_do_first_login = user_data["must_do_first_login"]
+        if must_do_first_login is False and is_active_user is False:
+            raise UnauthorizedError("invalid_credential")
+
+
+        # TODO: add PERSEPHONE HERE
 
         if user_data["use_magic_link"] is True:
             jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
@@ -151,49 +155,48 @@ class AuthenticationService(IAuthentication):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request["x-thebes-answer"]
-        old_user_data = user_repository.find_one({"_id": x_thebes_answer["email"]})
-        if old_user_data is None:
+        user_data = user_repository.find_one({"unique_id": x_thebes_answer["unique_id"]})
+        if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        new_user_data = deepcopy(old_user_data)
+        br_third_part_synchronization_status = AuthenticationService._dtvm_client_has_br_trade_allowed(user=user_data)
 
-        client_has_trade_allowed = AuthenticationService._dtvm_client_has_trade_allowed(
-            user=old_user_data
-        )
-
+        user_data_update = {}
         must_update = False
-        for key, value in client_has_trade_allowed.items():
+        for key, value in br_third_part_synchronization_status.items():
             if value["status_changed"]:
                 must_update = True
-                new_user_data.update({key: value["status"]})
+                user_data_update.update({key: value["status"]})
 
         if must_update:
             if (
-                user_repository.update_one(old=old_user_data, new=new_user_data)
+                user_repository.update_one(old=user_data, new=user_data_update)
                 is False
             ):
                 raise InternalServerError("common.process_issue")
+            user_data.update(user_data_update)
 
         jwt_payload_data, control_data = ThebesHallBuilder(
-            user_data=new_user_data, ttl=525600
+            user_data=user_data, ttl=525600
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
-
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
-            partition=PersephoneQueue.USER_THEBES_HALL.value,
-            payload=get_user_thebes_hall_schema_template_with_data(
-                email=device_and_thebes_answer_from_request.get("email"),
-                jwt=jwt,
-                has_trade_allowed=client_has_trade_allowed,
-                device_information=device_and_thebes_answer_from_request.get(
-                    "device_information"
-                ),
-            ),
-            schema_key="user_thebes_hall_schema",
-        )
-        if sent_to_persephone is False:
-            raise InternalServerError("common.process_issue")
+        
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+        #     partition=PersephoneQueue.USER_THEBES_HALL.value,
+        #     payload=get_user_thebes_hall_schema_template_with_data(
+        #         email=device_and_thebes_answer_from_request.get("email"),
+        #         jwt=jwt,
+        #         has_trade_allowed=client_has_trade_allowed,
+        #         device_information=device_and_thebes_answer_from_request.get(
+        #             "device_information"
+        #         ),
+        #     ),
+        #     schema_key="user_thebes_hall_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
 
         return {
             "status_code": status.HTTP_200_OK,
@@ -201,17 +204,26 @@ class AuthenticationService(IAuthentication):
         }
 
     @staticmethod
-    def _dtvm_client_has_trade_allowed(
+    def _dtvm_client_has_br_trade_allowed(
         user: dict,
         client_register_repository=ClientRegisterRepository(),
         solutiontech=Solutiontech,
     ) -> dict:
 
-        user_solutiontech_status_from_database = user["solutiontech"]
-        user_sincad_status_from_database = user["sincad"]
-        user_sinacor_status_from_database = user["sinacor"]
-        user_bmf_account_from_database = user["bmf_account"]
-        user_cpf_from_database = user["cpf"]
+        user_solutiontech_status_from_database = user.get("solutiontech")
+        user_sincad_status_from_database = user.get("sincad")
+        user_sinacor_status_from_database = user.get("sinacor")
+        user_bmf_account_from_database = user.get("bmf_account")
+        user_cpf_from_database = user.get("cpf")
+
+        if not all([
+            user_solutiontech_status_from_database,
+            user_sincad_status_from_database,
+            user_sinacor_status_from_database,
+            user_bmf_account_from_database,
+            user_cpf_from_database
+        ]):
+            return {}
 
         client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,

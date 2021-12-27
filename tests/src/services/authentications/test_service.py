@@ -662,11 +662,9 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         return_value=SolutiontechClientImportStatus.SYNC.value
     )
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user,
-            client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech,
-        )
+        AuthenticationService._dtvm_client_has_br_trade_allowed(user=user,
+                                                                client_register_repository=stub_client_register_repository,
+                                                                solutiontech=stub_solutiontech)
     )
     assert client_has_trade_allowed_status_with_database_user == {
         "solutiontech": {"status": "sync", "status_changed": False},
@@ -691,11 +689,9 @@ def test_dtvm_client_has_trade_allowed_not_synced_solutiontech_synced_sincad_syn
         return_value=SolutiontechClientImportStatus.SYNC.value
     )
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user,
-            client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech,
-        )
+        AuthenticationService._dtvm_client_has_br_trade_allowed(user=user,
+                                                                client_register_repository=stub_client_register_repository,
+                                                                solutiontech=stub_solutiontech)
     )
     assert client_has_trade_allowed_status_with_database_user == {
         "solutiontech": {"status": "sync", "status_changed": True},
@@ -720,11 +716,9 @@ def test_dtvm_client_has_trade_allowed_not_synced_solutiontech_not_synced_sincad
         return_value=SolutiontechClientImportStatus.SYNC.value
     )
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user,
-            client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech,
-        )
+        AuthenticationService._dtvm_client_has_br_trade_allowed(user=user,
+                                                                client_register_repository=stub_client_register_repository,
+                                                                solutiontech=stub_solutiontech)
     )
     assert client_has_trade_allowed_status_with_database_user == {
         "solutiontech": {"status": "sync", "status_changed": True},
@@ -749,11 +743,9 @@ def test_dtvm_client_has_trade_allowed_not_synced_solutiontech_not_synced_sincad
         return_value=SolutiontechClientImportStatus.SYNC.value
     )
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user,
-            client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech,
-        )
+        AuthenticationService._dtvm_client_has_br_trade_allowed(user=user,
+                                                                client_register_repository=stub_client_register_repository,
+                                                                solutiontech=stub_solutiontech)
     )
     assert client_has_trade_allowed_status_with_database_user == {
         "solutiontech": {"status": "sync", "status_changed": True},
@@ -778,11 +770,9 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         return_value=SolutiontechClientImportStatus.FAILED.value
     )
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user,
-            client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech,
-        )
+        AuthenticationService._dtvm_client_has_br_trade_allowed(user=user,
+                                                                client_register_repository=stub_client_register_repository,
+                                                                solutiontech=stub_solutiontech)
     )
     assert client_has_trade_allowed_status_with_database_user == {
         "solutiontech": {"status": "sync", "status_changed": False},
@@ -807,11 +797,9 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         return_value=SolutiontechClientImportStatus.SYNC.value
     )
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user,
-            client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech,
-        )
+        AuthenticationService._dtvm_client_has_br_trade_allowed(user=user,
+                                                                client_register_repository=stub_client_register_repository,
+                                                                solutiontech=stub_solutiontech)
     )
     assert client_has_trade_allowed_status_with_database_user == {
         "solutiontech": {"status": "sync", "status_changed": False},
@@ -836,11 +824,9 @@ def test_dtvm_client_has_trade_allowed_synced_solutiontech_synced_sincad_synced_
         return_value=SolutiontechClientImportStatus.SYNC.value
     )
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user,
-            client_register_repository=stub_client_register_repository,
-            solutiontech=stub_solutiontech,
-        )
+        AuthenticationService._dtvm_client_has_br_trade_allowed(user=user,
+                                                                client_register_repository=stub_client_register_repository,
+                                                                solutiontech=stub_solutiontech)
     )
     assert client_has_trade_allowed_status_with_database_user == {
         "solutiontech": {"status": "sync", "status_changed": False},

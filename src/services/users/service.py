@@ -27,7 +27,7 @@ from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.services.sinacor.service import SinacorService
 from nidavellir.src.uru import Sindri
 
-from src.domain.model_decorator.generate_id import generate_id, hash_field
+from src.domain.model_decorator.generate_id import generate_unique_id, hash_field
 from src.services.jwts.service import JwtService
 from src.services.persephone.templates.persephone_templates import (
     get_prospect_user_template_with_data,
@@ -59,11 +59,11 @@ class UserService(IUser):
         social_client=ValhallaService.get_social_client(),
         jwt_handler=JwtService,
     ) -> dict:
-        user = generate_id("email", user, must_remove=False)
+        user = generate_unique_id("email", user)
         has_pin = user.get("pin")
         if has_pin:
             user = hash_field(key="pin", payload=user)
-        if user_repository.find_one({"_id": user.get("_id")}) is not None:
+        if user_repository.find_one({"email": user.get("email")}) is not None:
             raise BadRequestError("common.register_exists")
         user.update({"created_at": datetime.now()})
         UserService.add_user_control_metadata(payload=user)
@@ -464,6 +464,7 @@ class UserService(IUser):
             {
                 "scope": {"view_type": "default", "features": ["default", "realtime"]},
                 "is_active_user": False,
+                "must_do_first_login": True,
                 "use_magic_link": True,
                 "token_valid_after": datetime.utcnow(),
                 "terms": {

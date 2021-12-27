@@ -8,13 +8,14 @@ from fastapi import status
 from src.core.interfaces.services.feature.interface import IFeature
 from src.repositories.feature.repository import FeatureRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-from src.domain.model_decorator.generate_id import generate_id
 
 
 class FeatureService(IFeature):
     @staticmethod
     def create(payload: dict, feature_repository=FeatureRepository()) -> dict:
-        payload = generate_id("name", payload)
+        payload.update({
+            "_id": payload['name']
+        })
         if feature_repository.find_one({"_id": payload.get("_id")}):
             raise BadRequestError("common.register_exists")
         if feature_repository.insert(payload):

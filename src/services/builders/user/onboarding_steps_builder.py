@@ -30,7 +30,6 @@ class OnboardingStepBuilder:
             self.__onboarding_steps[
                 "current_onboarding_step"
             ] = "user_identifier_data_step"
-
         return self
 
     def user_identifier_step(self, current_user: dict):

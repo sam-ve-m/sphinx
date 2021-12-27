@@ -23,7 +23,7 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
 
     def insert(self, data: dict) -> bool:
         try:
-            self.collection.insert_one(data)
+            result = self.collection.insert_one(data)
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
