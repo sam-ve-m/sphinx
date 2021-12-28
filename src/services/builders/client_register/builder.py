@@ -495,7 +495,7 @@ class ClientRegisterBuilder:
 
     def add_num_us_person(self, user_data: dict):
         value = IsUsPerson.NO.value
-        if user_data["is_us_person"]:
+        if list(filter(lambda x: x['country'] == 'USA', user_data["tax_residences"])):
             value = IsUsPerson.YES.value
         self._fields_added.update({"NUM_US_PERSON": value})
         return self
@@ -901,12 +901,10 @@ class ClientRegisterBuilder:
         return self
 
     def add_val_lim_neg_td(self, value: float = 0.0):
-        # TODO: Define with operation table
         self._fields_added.update({"VAL_LIM_NEG_TD": value})
         return self
 
     def add_val_taxa_agnt_td(self, value: float = 0.0):
-        # TODO: Define with operation table
         self._fields_added.update({"VAL_TAXA_AGNT_TD": value})
         return self
 

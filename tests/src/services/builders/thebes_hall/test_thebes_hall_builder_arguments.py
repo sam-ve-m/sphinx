@@ -37,7 +37,6 @@ valid_client_data = {
     "is_cvm_qualified_investor": True,
     "is_us_person": True,
     "marital": {"status": "not_married", "spouse": "None"},
-    "us_tin": 926516515,
     "electronic_signature": "8f0a62e2be8463b281db124556386c7f8dba64bce4416744f1f5c7f3bb48a405",
     "register_analyses": "SEND_RESPONSES",
     "stone_age_contract_uuid": "d65a2301-330f-4fef-b314-9834df20d067",

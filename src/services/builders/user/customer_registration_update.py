@@ -53,15 +53,6 @@ class UpdateCustomerRegistrationBuilder:
             )
         return self
 
-    def person_us_tin(self):
-        new_us_tin = self.__old_personal_data.get("us_tin")
-
-        if old_us_tin := self._get_new_value("us_tin"):
-            self._update_modified_data(
-                levels=("us_tin",), old_field=new_us_tin, new_filed=old_us_tin
-            )
-        return self
-
     def personal_phone(self):
         old_phone = self.__old_personal_data.get("cel_phone")
         if new_phone := self._get_new_value("cel_phone"):

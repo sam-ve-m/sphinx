@@ -2,6 +2,7 @@ from typing import List
 
 from src.domain.validators.base import *
 from src.domain.validators.bureau_validators import *
+from src.repositories.sinacor_types.repository import SinaCorTypesRepository
 
 
 class UserSimple(Email, NickName, OptionalPIN):
@@ -12,11 +13,27 @@ class Spouse(Name, Cpf, Nationality):
     pass
 
 
+class Country(BaseModel):
+    country: constr(min_length=3, max_length=3)
+
+    @validator("country", always=True, allow_reuse=True)
+    def validate_country(cls, e):
+        sinacor_types_repository = SinaCorTypesRepository()
+        if sinacor_types_repository.validate_country(value=e):
+            return e
+        raise ValueError("nationality not exists")
+
+
+class TaxResidence(Country):
+    tax_number: str
+
+
 class UserIdentifierData(Cpf, CelPhone):
-    pass
+    tax_residences: Optional[List[TaxResidence]]
 
 
-class UserComplementaryData(MaritalStatus, IsUsPerson, UsTin, IsCvmQualifiedInvestor):
+# TODO: IsCvmQualifiedInvestor must relly remove this?
+class UserComplementaryData(MaritalStatus):
     spouse: Optional[Spouse]
 
 
@@ -36,7 +53,7 @@ class UpdateCustomerRegistrationData(BaseModel):
     document_expedition_date: Optional[DateSource]
     document_identity_number: Optional[IdentityDocumentNumber]
 
-    marital_status: Optional[MaritalStatusSource]
+    marital_status: Optional[MaritalStatus]
     marital_spouse_name: Optional[NameSource]
     marital_nationality: Optional[NationalitySource]
     marital_cpf: Optional[CpfSource]
@@ -53,5 +70,3 @@ class UpdateCustomerRegistrationData(BaseModel):
     address_street_name: Optional[StreetNameSource]
     address_zip_code: Optional[ZipCodeSource]
     address_neighborhood: Optional[NeighborhoodSource]
-
-    us_tin: Optional[UsTinSource]

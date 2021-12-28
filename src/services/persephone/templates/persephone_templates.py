@@ -36,8 +36,6 @@ def get_user_authentication_template_with_data(payload: dict) -> dict:
 def get_user_complementary_data_schema_template_with_data(payload: dict) -> dict:
     return {
         "user_email": payload.get("email"),
-        "is_us_person": payload.get("is_us_person"),
-        "us_tin": payload.get("us_tin"),
         "is_cvm_qualified_investor": payload.get("is_cvm_qualified_investor"),
         "marital": payload.get("marital"),
     }

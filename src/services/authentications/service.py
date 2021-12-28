@@ -91,7 +91,7 @@ class AuthenticationService(IAuthentication):
         user_repository=UserRepository(),
         token_service=JwtService,
     ) -> dict:
-        user_data = user_repository.find_one({"_id": user_credentials["email"]})
+        user_data = user_repository.find_one({"email": user_credentials["email"]})
         if user_data is None:
             raise BadRequestError("common.register_not_exists")
 

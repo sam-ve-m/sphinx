@@ -12,7 +12,6 @@ from src.domain.sinacor.person_gender import PersonGender
 from src.domain.sinacor.person_type import PersonType
 from src.domain.sinacor.status import OutputStatus
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
-from src.domain.validators.enum_template import MaritalStatusEnum
 from src.domain.validators.brazil_register_number_validator import (
     is_cpf_valid,
     is_cnpj_valid,
@@ -80,7 +79,7 @@ class CelPhoneSource(Source):
     value: constr(min_length=11, max_length=11)
 
 
-class MaritalRegime(BaseModel):
+class MaritalStatus(BaseModel):
     marital_status: int
 
     @validator("marital_status", always=True, allow_reuse=True)
@@ -313,7 +312,7 @@ class CountySource(Source):
     value: int
 
 
-class MaritalRegimeSource(Source):
+class MaritalStatusSource(Source):
     value: int
 
     @validator("value", always=True, allow_reuse=True)
@@ -321,11 +320,7 @@ class MaritalRegimeSource(Source):
         sinacor_types_repository = SinaCorTypesRepository()
         if sinacor_types_repository.validate_marital_regime(value=e):
             return e
-        raise ValueError("Martial Regime not exists")
-
-
-class MaritalStatusSource(BaseModel):
-    value: MaritalStatusEnum
+        raise ValueError("Martial Status not exists")
 
 
 class NeighborhoodSource(Source):
@@ -367,14 +362,6 @@ class NameSource(Source):
 
 class SelfLinkSource(Source):
     value: str
-
-
-class IsUsPersonSource(Source):
-    value: bool
-
-
-class UsTinSource(Source):
-    value: int
 
 
 class IrsSharingSource(Source):

@@ -59,8 +59,6 @@ from src.domain.validators.bureau_validators import (
     ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource,
     RegistrationOfForeignInvestorsSecuritiesCommissionSource,
     SelfLinkSource,
-    IsUsPersonSource,
-    UsTinSource,
     IrsSharingSource,
     FatherNameSource,
     DocumentNumber,
@@ -192,7 +190,6 @@ class Data(Decision, Status):
     investor_type: InvestorTypeSource
     cosif_tax_classification: CosifTaxClassificationSource
     gender: GenderSource
-    is_us_person: IsUsPersonSource
     birth_date: BirthDateSource
     birthplace: Birthplace
     mother_name: MotherNameSource
@@ -215,7 +212,6 @@ class Data(Decision, Status):
     registration_of_foreign_investors_securities_commission: RegistrationOfForeignInvestorsSecuritiesCommissionSource
     registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
     date_of_acquisition: DateOfAcquisition
-    us_tin: Optional[UsTinSource]
     irs_sharing: Optional[IrsSharingSource]
     father_name: Optional[FatherNameSource]
     identifier_document: Optional[IdentifierDocument]

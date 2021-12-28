@@ -10,7 +10,7 @@ import json
 from fastapi import APIRouter, FastAPI, status, Response
 
 # Sphinx
-from src.domain.api_router.router import SphinxAPIRouter
+from src.core.api_router.router import SphinxAPIRouter
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.routers.routes_registers.middleware_functions import MiddlewareUtils
 

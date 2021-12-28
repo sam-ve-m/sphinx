@@ -45,11 +45,6 @@ class CustomerRegistrationBuilder:
         self.__buffer["personal"].update({"patrimony": patrimony})
         return self
 
-    def personal_us_tin(self):
-        us_tin = self.__personal_data.get("us_tin")
-        self.__buffer["personal"].update({"us_tin": us_tin})
-        return self
-
     def personal_occupation_activity(self):
         occupation_activity = self.__personal_data.get("occupation", {}).get("activity")
 

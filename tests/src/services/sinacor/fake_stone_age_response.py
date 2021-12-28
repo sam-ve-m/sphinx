@@ -92,8 +92,6 @@ fake_response = {
         },
         "cpf": {"source": "PH3W", "value": "43056808820"},
         "self_link": {"source": "PH3W", "value": "http://self_user.jpg"},
-        "is_us_person": {"source": "PH3W", "value": True},
-        "us_tin": {"source": "PH3W", "value": 126516515},
         "irs_sharing": {"source": "PH3W", "value": True},
         "father_name": {"source": "PH3W", "value": "Antonio dos Santos"},
         "midia_person": {"source": "PH3W", "value": False},

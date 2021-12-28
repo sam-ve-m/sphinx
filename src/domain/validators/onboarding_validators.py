@@ -9,7 +9,6 @@ from pydantic import BaseModel, constr, validator, UUID1
 
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
-from src.domain.validators.enum_template import MaritalStatusEnum
 from src.domain.validators.brazil_register_number_validator import is_cpf_valid
 
 
@@ -103,10 +102,6 @@ class CelPhone(BaseModel):
     cel_phone: constr(min_length=11, max_length=11)
 
 
-class MaritalStatus(BaseModel):
-    marital_status: MaritalStatusEnum
-
-
 class Nationality(BaseModel):
     nationality: str
 
@@ -125,11 +120,3 @@ class QuizQuestionOption(BaseModel):
 
 class IsCvmQualifiedInvestor(BaseModel):
     is_cvm_qualified_investor: bool
-
-
-class IsUsPerson(BaseModel):
-    is_us_person: bool
-
-
-class UsTin(BaseModel):
-    us_tin: Optional[int]

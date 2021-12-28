@@ -1,4 +1,4 @@
-
+from src.domain.enums.caf.status import CAFStatus
 
 class OnboardingStepBuilder:
     def __init__(self):
@@ -8,6 +8,8 @@ class OnboardingStepBuilder:
             "user_identifier_data_step": False,
             "user_selfie_step": False,
             "user_complementary_step": False,
+            "user_document_validator": False,
+            "user_data_validation": False,
             "user_electronic_signature": False,
             "finished": False,
         }
@@ -16,8 +18,11 @@ class OnboardingStepBuilder:
             "user_identifier_data_step",
             "user_selfie_step",
             "user_complementary_step",
+            "user_document_validator",
+            "user_data_validation",
             "user_electronic_signature",
         ]
+        self.bureau_status = None
 
     def user_suitability_step(self, current_user):
         user_suitability_profile = current_user.get("suitability")
@@ -60,15 +65,42 @@ class OnboardingStepBuilder:
 
     def user_complementary_step(self, current_user):
         marital = current_user.get("marital")
-        is_us_person = current_user.get("is_us_person")
 
         if (
             marital is not None
-            and (is_us_person is False or is_us_person is not None)
             and self.__onboarding_steps["current_onboarding_step"]
             == "user_complementary_step"
         ):
             self.__onboarding_steps["user_complementary_step"] = True
+            self.__onboarding_steps["current_onboarding_step"] = "user_document_validator"
+
+        return self
+
+    def user_document_validator(self, current_user):
+        bureau_status = current_user.get("bureau_status")
+
+        if bureau_status is not None:
+            self.bureau_status = bureau_status
+
+        if (
+            bureau_status and bureau_status != CAFStatus.DOCUMENT.value
+            and self.__onboarding_steps["current_onboarding_step"]
+            == "user_document_validator"
+        ):
+            self.__onboarding_steps["user_document_validator"] = True
+            self.__onboarding_steps["current_onboarding_step"] = "user_data_validation"
+
+        return self
+
+    def user_data_validation(self, current_user):
+        has_validate_data = current_user.get("is_bureau_data_validated")
+
+        if (
+            has_validate_data
+            and self.__onboarding_steps["current_onboarding_step"]
+            == "user_data_validation"
+        ):
+            self.__onboarding_steps["user_data_validation"] = True
             self.__onboarding_steps["current_onboarding_step"] = "user_electronic_signature"
 
         return self
@@ -87,6 +119,9 @@ class OnboardingStepBuilder:
         if all([self.__onboarding_steps[step] for step in self.__steps]):
             self.__onboarding_steps["current_onboarding_step"] = "finished"
             self.__onboarding_steps["finished"] = True
+        elif self.bureau_status == CAFStatus.REFUSED.value:
+            self.__onboarding_steps["finished"] = True
+            self.__onboarding_steps["current_onboarding_step"] = self.bureau_status
 
     def build(self) -> dict:
         self.is_finished()

@@ -72,35 +72,36 @@ class SuitabilityService(ISuitability):
         token_service=JwtService,
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
-        user_email: str = thebes_answer.get("email")
+        unique_id: str = thebes_answer.get("unique_id")
         suitability_submission_date = datetime.utcnow()
         (
             answers,
             score,
             suitability_version,
         ) = SuitabilityService.__get_last_suitability_answers_metadata()
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.SUITABILITY_QUEUE.value,
-            payload=get_user_suitability_template_with_data(
-                payload={
-                    "answers": answers,
-                    "score": score,
-                    "suitability_version": suitability_version,
-                    "suitability_submission_date": int(
-                        suitability_submission_date.timestamp()
-                    ),
-                    "email": user_email,
-                }
-            ),
-            schema_key="suitability_schema",
-        )
-        if sent_to_persephone is False:
-            raise InternalServerError("common.process_issue")
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.SUITABILITY_QUEUE.value,
+        #     payload=get_user_suitability_template_with_data(
+        #         payload={
+        #             "answers": answers,
+        #             "score": score,
+        #             "suitability_version": suitability_version,
+        #             "suitability_submission_date": int(
+        #                 suitability_submission_date.timestamp()
+        #             ),
+        #             "email": user_email,
+        #         }
+        #     ),
+        #     schema_key="suitability_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
         (
             SuitabilityService.__update_suitability_score_and_submission_date_in_user_db(
                 user_repository=user_repository,
-                user_email=user_email,
+                unique_id=unique_id,
                 score=score,
                 suitability_version=suitability_version,
                 submission_date=suitability_submission_date,
@@ -109,14 +110,14 @@ class SuitabilityService(ISuitability):
         (
             SuitabilityService.__insert_suitability_answers_in_user_profile_db(
                 suitability_user_profile_repository=suitability_user_profile_repository,
-                user_email=user_email,
+                unique_id=unique_id,
                 user_score=score,
                 suitability_version=suitability_version,
                 answers=answers,
                 submission_date=suitability_submission_date,
             )
         )
-        user_data = user_repository.find_one({"_id": user_email})
+        user_data = user_repository.find_one({"unique_id": unique_id})
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
@@ -140,8 +141,7 @@ class SuitabilityService(ISuitability):
         del user_profile["_id"]
         user_profile["date"] = str(user_profile["date"])
         return {
-            "status_code": status.HTTP_201_CREATED,
-            "message_key": "ok",
+            "status_code": status.HTTP_200_OK,
             "payload": user_profile,
         }
 
@@ -241,13 +241,13 @@ class SuitabilityService(ISuitability):
     @staticmethod
     def __update_suitability_score_and_submission_date_in_user_db(
         user_repository: MongoDbBaseRepository,
-        user_email: str,
+        unique_id: str,
         score: int,
         suitability_version: int,
         submission_date: datetime,
     ) -> None:
         try:
-            old = user_repository.find_one({"_id": user_email})
+            old = user_repository.find_one({"unique_id": unique_id})
         except AttributeError:
             raise InternalServerError("common.process_issue")
 
@@ -256,7 +256,7 @@ class SuitabilityService(ISuitability):
 
         if not all(
             [
-                user_email,
+                unique_id,
                 score,
                 suitability_version,
                 submission_date,
@@ -264,18 +264,15 @@ class SuitabilityService(ISuitability):
         ):
             raise InternalServerError("common.process_issue")
 
-        new = deepcopy(old)
-        new.update(
-            {
-                "suitability": {
-                    "score": score,
-                    "submission_date": submission_date,
-                    "suitability_version": suitability_version,
-                }
+        suitability_data = {
+            "suitability": {
+                "score": score,
+                "submission_date": submission_date,
+                "suitability_version": suitability_version,
             }
-        )
+        }
         try:
-            updated = user_repository.update_one(old=old, new=new)
+            updated = user_repository.update_one(old=old, new=suitability_data)
         except AttributeError:
             raise InternalServerError("common.process_issue")
         else:
@@ -288,7 +285,7 @@ class SuitabilityService(ISuitability):
         suitability_user_profile_repository: MongoDbBaseRepository,
         answers: List[dict],
         suitability_version: int,
-        user_email: str,
+        unique_id: str,
         user_score: int,
         submission_date: datetime,
     ) -> None:
@@ -296,7 +293,7 @@ class SuitabilityService(ISuitability):
             [
                 answers,
                 suitability_version,
-                user_email,
+                unique_id,
                 user_score,
                 submission_date,
             ]
@@ -304,7 +301,7 @@ class SuitabilityService(ISuitability):
             raise InternalServerError("common.process_issue")
 
         payload = {
-            "email": user_email,
+            "unique_id": unique_id,
             "date": submission_date,
             "user_score": user_score,
             "answers": answers,
