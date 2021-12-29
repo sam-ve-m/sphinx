@@ -3,7 +3,9 @@ class CustomerRegistrationBuilder:
         self.__personal_data = personal_data
         self.__buffer = {
             "personal": {},
-            "marital": {},
+            "marital": {
+                "spouse": {}
+            },
             "documents": {},
             "address": {},
         }
@@ -11,6 +13,11 @@ class CustomerRegistrationBuilder:
     def personal_name(self):
         name = self.__personal_data.get("name")
         self.__buffer["personal"].update({"name": name})
+        return self
+
+    def personal_nick_name(self):
+        nick_name = self.__personal_data.get("nick_name")
+        self.__buffer["personal"].update({"nick_name": nick_name})
         return self
 
     def personal_birth_date(self):
@@ -22,7 +29,7 @@ class CustomerRegistrationBuilder:
         father_name = self.__personal_data.get("father_name")
         self.__buffer["personal"].update({"father_name": father_name})
         mother_name = self.__personal_data.get("mother_name")
-        self.__buffer["personal"].update({"father_name": mother_name})
+        self.__buffer["personal"].update({"mother_name": mother_name})
         return self
 
     def personal_gender(self):
@@ -38,6 +45,11 @@ class CustomerRegistrationBuilder:
     def personal_phone(self):
         phone = self.__personal_data.get("cel_phone")
         self.__buffer["personal"].update({"phone": phone})
+        return self
+
+    def personal_nationality(self):
+        nationality = self.__personal_data.get("nationality")
+        self.__buffer["personal"].update({"nationality": nationality})
         return self
 
     def personal_patrimony(self):
@@ -58,6 +70,13 @@ class CustomerRegistrationBuilder:
         self.__buffer["personal"].update({"company_name": company_name})
         return self
 
+    def personal_company_cnpj(self):
+        company_cnpj = (
+            self.__personal_data.get("occupation", {}).get("company", {}).get("cnpj")
+        )
+        self.__buffer["personal"].update({"company_cnpj": company_cnpj})
+        return self
+
     def marital_status(self):
         marital_status = self.__personal_data.get("marital", {}).get("status")
         self.__buffer["marital"].update({"status": marital_status})
@@ -67,33 +86,35 @@ class CustomerRegistrationBuilder:
         spouse = self.__personal_data.get("marital", {}).get("spouse", {})
         if spouse:
             spouse_name = spouse.get("name")
-            self.__buffer["marital"].update({"spouse_name": spouse_name})
+            self.__buffer["marital"]["spouse"].update({"spouse_name": spouse_name})
         return self
 
     def marital_spouse_cpf(self):
         spouse = self.__personal_data.get("marital", {}).get("spouse", {})
         if spouse:
             spouse_cpf = spouse.get("cpf")
-            self.__buffer["marital"].update({"spouse_cpf": spouse_cpf})
-        return self
-
-    def marital_cpf(self):
-        spouse = self.__personal_data.get("marital", {}).get("spouse", {})
-        if spouse:
-            marital_cpf = spouse.get("cpf")
-            self.__buffer["marital"].update({"marital_cpf": marital_cpf})
+            self.__buffer["marital"]["spouse"].update({"spouse_cpf": spouse_cpf})
         return self
 
     def marital_nationality(self):
         spouse = self.__personal_data.get("marital", {}).get("spouse", {})
         if spouse:
             nationality = spouse.get("nationality")
-            self.__buffer["marital"].update({"nationality": nationality})
+            self.__buffer["marital"]["spouse"].update({"nationality": nationality})
         return self
 
     def documents_cpf(self):
         cpf = self.__personal_data.get("cpf")
         self.__buffer["documents"].update({"cpf": cpf})
+        return self
+
+    def documents_identity_type(self):
+        identity_tpe = (
+            self.__personal_data.get("identifier_document", {})
+            .get("document_data", {})
+            .get("type")
+        )
+        self.__buffer["documents"].update({"identity_tpe": identity_tpe})
         return self
 
     def documents_identity_number(self):
@@ -121,6 +142,11 @@ class CustomerRegistrationBuilder:
             .get("issuer")
         )
         self.__buffer["documents"].update({"issuer": issuer})
+        return self
+
+    def personal_tax_residences(self):
+        cpf = self.__personal_data.get("tax_residences")
+        self.__buffer["personal"].update({"tax_residences": cpf})
         return self
 
     def documents_state(self):

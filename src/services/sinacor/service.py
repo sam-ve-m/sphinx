@@ -84,7 +84,9 @@ class SinacorService:
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
         )
-
+        database_and_bureau_dtvm_client_data_merged.update({
+            "is_bureau_data_validated": True
+        })
         user_is_updated = user_repository.update_one(
             old={"_id": database_and_bureau_dtvm_client_data_merged["email"]},
             new=database_and_bureau_dtvm_client_data_merged,

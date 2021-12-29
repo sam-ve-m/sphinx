@@ -2,10 +2,10 @@ from typing import Tuple, Optional
 
 
 class UpdateCustomerRegistrationBuilder:
-    def __init__(self, old_personal_data: dict, new_personal_data: dict, email: str):
+    def __init__(self, old_personal_data: dict, new_personal_data: dict, unique_id: str):
         self.__old_personal_data = old_personal_data
         self.__new_personal_data = new_personal_data
-        self.__email = email
+        self.__unique_id = unique_id
         self.__update_buffer = old_personal_data.copy()
         self.__modified_data = []
 
@@ -50,6 +50,22 @@ class UpdateCustomerRegistrationBuilder:
         if new_name := self._get_new_value("name"):
             self._update_modified_data(
                 levels=("name",), old_field=old_name, new_filed=new_name
+            )
+        return self
+
+    def personal_nationality(self):
+        old_name = self.__old_personal_data.get("personal_nationality")
+        if new_name := self._get_new_value("personal_nationality"):
+            self._update_modified_data(
+                levels=("personal_nationality",), old_field=old_name, new_filed=new_name
+            )
+        return self
+
+    def personal_nick_name(self):
+        old_name = self.__old_personal_data.get("nick_name")
+        if new_name := self._get_new_value("nick_name"):
+            self._update_modified_data(
+                levels=("nick_name",), old_field=old_name, new_filed=new_name
             )
         return self
 
@@ -120,6 +136,14 @@ class UpdateCustomerRegistrationBuilder:
 
         return self
 
+    def personal_tax_residences(self):
+        old_tax_residences = self.__old_personal_data.get("tax_residences")
+        if new_tax_residences := self._get_new_value("tax_residences"):
+            self._update_modified_data(
+                levels=("tax_residences",), old_field=old_tax_residences, new_filed=new_tax_residences
+            )
+        return self
+
     def marital_status(self):
         old_marital_status = self.__old_personal_data.get("marital", {}).get("status")
 
@@ -178,6 +202,23 @@ class UpdateCustomerRegistrationBuilder:
         if new_cpf := self._get_new_value("document_cpf"):
             self._update_modified_data(
                 levels=("cpf",), old_field=old_cpf, new_filed=new_cpf
+            )
+        return self
+
+    def documents_identity_type(self):
+        old_document_identity_type = (
+            self.__old_personal_data.get("identifier_document", {})
+            .get("document_data", {})
+            .get("type")
+        )
+
+        if new_document_identity_type := self._get_new_value(
+            "document_identity_type"
+        ):
+            self._update_modified_data(
+                levels=("identifier_document", "document_data", "type"),
+                old_field=old_document_identity_type,
+                new_filed=new_document_identity_type,
             )
         return self
 
@@ -342,7 +383,7 @@ class UpdateCustomerRegistrationBuilder:
 
     def build(self) -> Tuple[dict, dict]:
         modified_register = {
-            "email": self.__email,
+            "unique_id": self.__unique_id,
             "modified_data": self.__modified_data,
             "source": "user",
         }

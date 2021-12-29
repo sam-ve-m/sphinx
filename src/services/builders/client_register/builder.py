@@ -67,17 +67,6 @@ from src.domain.sinacor.home_execution_brokerage_note_issuance_indicator import 
 class ClientRegisterBuilder:
     def __init__(self):
         self._fields_added = dict()
-        self.sinacor_document_types = [
-            SID.KS.value,
-            SID.PP.value,
-            SID.RG.value,
-            SID.TE.value,
-            SID.RN.value,
-            SID.PL.value,
-            SID.PF.value,
-            SID.TO.value,
-            SID.CH.value,
-        ]
 
     def build(self):
         return self._fields_added

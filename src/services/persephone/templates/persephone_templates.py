@@ -98,10 +98,10 @@ def get_user_set_electronic_signature_schema_template_with_data(payload: dict) -
 
 
 def get_user_update_register_schema_template_with_data(
-    email: str, modified_register_data: dict, update_customer_registration_data: dict
+    unique_id: str, modified_register_data: dict, update_customer_registration_data: dict
 ) -> dict:
     return {
-        "user_email": email,
+        "unique_id": unique_id,
         "modified_register_data": modified_register_data,
         "update_customer_registration_data": update_customer_registration_data,
     }

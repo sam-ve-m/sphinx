@@ -6,12 +6,11 @@ from fastapi import APIRouter
 from pydantic import BaseModel, root_validator
 
 # SPHINX
-from src.domain.validators.base import (
+from src.domain.validators.bureau_validators import (
     InvestorTypeSource,
     RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource,
 )
 from src.domain.validators.bureau_validators import (
-    Uuid,
     Decision,
     Status,
     GenderSource,
@@ -61,7 +60,7 @@ from src.domain.validators.bureau_validators import (
     SelfLinkSource,
     IrsSharingSource,
     FatherNameSource,
-    DocumentNumber,
+    DocumentNumberSource,
     MaritalStatusSource,
 )
 from src.repositories.sinacor_types.repository import SinaCorTypesRepository
@@ -70,7 +69,7 @@ router = APIRouter()
 
 
 class DocumentData(BaseModel):
-    number: Optional[DocumentNumber]
+    number: Optional[DocumentNumberSource]
     date: Optional[DateSource]
     state: Optional[StateSource]
     issuer: Optional[IssuerSource]
@@ -216,9 +215,6 @@ class Data(Decision, Status):
     father_name: Optional[FatherNameSource]
     identifier_document: Optional[IdentifierDocument]
 
-
-class BureauCallback(Uuid):
-    data: Data
 
 
 def validate_contry_state_city_and_id_city(

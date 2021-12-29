@@ -12,17 +12,14 @@ from src.domain.validators.base import (
 from src.domain.validators.onboarding_validators import (
     TermFile,
     FileBase64,
-    DeviceInformation,
 )
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
 from src.routers.routes_registers.user import UserRouter
-from nidavellir.src.uru import Sindri
+from src.domain.validators.bureau_validators import UpdateCustomerRegistrationData, ClientValidationData, UserMaritalData
 from src.domain.validators.user_validators import (
-    UserIdentifierData,
-    UserComplementaryData,
-    QuizResponses,
+    UserIdentifierData
 )
 
 router = UserRouter.instance()
@@ -41,7 +38,7 @@ def update_user_identifier_data(user_identifier: UserIdentifierData, request: Re
 
 @router.put("/user/complementary_data", tags=["user"])
 def update_user_complementary_data(
-    user_identifier: UserComplementaryData, request: Request
+    user_identifier: UserMaritalData, request: Request
 ):
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
 
@@ -220,4 +217,54 @@ def change_electronic_signature(
 
     return BaseController.run(
         UserController.change_electronic_signature, payload, request
+    )
+
+
+@router.get("/user/customer_registration_data", tags=["user"])
+def get_customer_registration_data(request: Request):
+    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    return BaseController.run(
+        UserController.get_customer_registration_data, payload, request
+    )
+
+
+@router.put("/user/customer_registration_data", tags=["user"])
+def update_customer_registration_data(
+    customer_registration_data: UpdateCustomerRegistrationData, request: Request
+):
+    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+    payload = {
+        "x-thebes-answer": jwt_data,
+        "customer_registration_data": customer_registration_data.dict(),
+    }
+    return BaseController.run(
+        UserController.update_customer_registration_data, payload, request
+    )
+
+
+@router.get("/user/customer_validation_data", tags=["user"])
+def get_customer_registration_data(request: Request):
+    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    return BaseController.run(
+        UserController.get_customer_registration_data, payload, request
+    )
+
+
+@router.put("/user/customer_validation_data", tags=["user"])
+def update_customer_registration_data(
+    customer_validation_data: ClientValidationData, request: Request
+):
+    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+    payload = {
+        "x-thebes-answer": jwt_data,
+        "customer_registration_data": customer_registration_data.dict(),
+    }
+    return BaseController.run(
+        UserController.update_customer_registration_data, payload, request
     )

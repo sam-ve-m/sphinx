@@ -768,24 +768,29 @@ class UserService(IUser):
         customer_registration_data_built = (
             CustomerRegistrationBuilder(customer_registration_data)
             .personal_name()
+            .personal_nick_name()
             .personal_birth_date()
-            .personal_parentage()
+            .personal_nationality()
             .personal_gender()
+            .personal_parentage()
             .personal_email()
             .personal_phone()
-            .personal_patrimony()
+            .personal_nationality()
             .personal_occupation_activity()
             .personal_company_name()
+            .personal_company_cnpj()
+            .personal_patrimony()
             .marital_status()
             .marital_spouse_name()
             .marital_spouse_cpf()
-            .marital_cpf()
             .marital_nationality()
             .documents_cpf()
+            .documents_identity_type()
             .documents_identity_number()
             .documents_expedition_date()
             .documents_issuer()
             .documents_state()
+            .personal_tax_residences()
             .address_country()
             .address_number()
             .address_street_name()
@@ -806,8 +811,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ):
-        email: str = payload.get("x-thebes-answer", {}).get("email")
-        unique_id: str = payload.get("x-thebes-answer", {}).get("unique_id")
+        unique_id: str = payload.get("x-thebes-answer").get("unique_id")
         update_customer_registration_data: dict = payload.get(
             "customer_registration_data"
         )
@@ -819,19 +823,23 @@ class UserService(IUser):
             UpdateCustomerRegistrationBuilder(
                 old_personal_data=old_customer_registration_data,
                 new_personal_data=update_customer_registration_data,
-                email=email,
+                unique_id=unique_id,
             )
             .personal_name()
+            .personal_nick_name()
             .personal_phone()
             .personal_patrimony()
             .personal_occupation_activity()
             .personal_occupation_cnpj()
             .personal_company_name()
+            .personal_nationality()
+            .personal_tax_residences()
             .marital_status()
             .marital_cpf()
             .marital_nationality()
             .marital_spouse_name()
             .documents_cpf()
+            .documents_identity_type()
             .documents_identity_number()
             .documents_expedition_date()
             .documents_issuer()
@@ -848,7 +856,7 @@ class UserService(IUser):
 
         user_update_register_schema = (
             get_user_update_register_schema_template_with_data(
-                email=email,
+                unique_id=unique_id,
                 modified_register_data=modified_register_data,
                 update_customer_registration_data=update_customer_registration_data,
             )
