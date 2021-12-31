@@ -89,3 +89,12 @@ def get_economic_activity(request: Request):
         payload={},
         request=request,
     )
+
+
+@router.get("/client_update_enums/income_tax_type", tags=["client_update_enums"])
+def get_economic_activity(request: Request):
+    return BaseController.run(
+        ClientRegisterEnumsController.get_income_tax_type_update,
+        payload={},
+        request=request,
+    )

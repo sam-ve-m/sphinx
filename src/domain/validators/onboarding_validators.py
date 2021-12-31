@@ -8,7 +8,7 @@ from fastapi import Form
 from pydantic import BaseModel, constr, validator, UUID1
 
 from src.repositories.file.enum.term_file import TermsFileType
-from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.domain.validators.brazil_register_number_validator import is_cpf_valid
 
 
@@ -107,7 +107,7 @@ class Nationality(BaseModel):
 
     @validator("nationality", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_nationality(value=e):
             return e
         raise ValueError("Nationality not exists")

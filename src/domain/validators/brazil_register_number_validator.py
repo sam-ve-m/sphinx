@@ -12,6 +12,10 @@ def is_cpf_valid(cpf: Union[int, str]) -> bool:
     if not isinstance(cpf, str):
         return False
 
+    # Checks if string has 11 characters
+    if len(cpf) != 11:
+        return False
+
     # Remove some unwanted characters
     cpf = re.sub("[^0-9]", "", cpf)
 
@@ -28,10 +32,6 @@ def is_cpf_valid(cpf: Union[int, str]) -> bool:
         or cpf == "88888888888"
         or cpf == "99999999999"
     ):
-        return False
-
-    # Checks if string has 11 characters
-    if len(cpf) != 11:
         return False
 
     sum = 0
@@ -82,12 +82,13 @@ def is_cnpj_valid(cnpj: Union[int, str]) -> bool:
     if not isinstance(cnpj, str):
         return False
 
-    # Remove some unwanted characters
-    cnpj = re.sub("[^0-9]", "", cnpj)
-
     # Checks if string has 11 characters
     if len(cnpj) != 14:
         return False
+
+    # Remove some unwanted characters
+    cnpj = re.sub("[^0-9]", "", cnpj)
+
 
     sum = 0
     weight = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]

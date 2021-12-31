@@ -1,7 +1,7 @@
 from typing import List
 
 from src.domain.validators.base import *
-from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 
 
 class UserSimple(Email, NickName, OptionalPIN):
@@ -17,7 +17,7 @@ class Country(BaseModel):
 
     @validator("country", always=True, allow_reuse=True)
     def validate_country(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_country(value=e):
             return e
         raise ValueError("nationality not exists")

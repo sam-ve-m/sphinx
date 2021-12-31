@@ -58,10 +58,7 @@ class AuthenticationService(IAuthentication):
                 "must_do_first_login": False,
                 "scope": {"view_type": "default", "features": ["default", "realtime"]},
             }
-            if (
-                user_repository.update_one(old=user_data, new=update_data)
-                is False
-            ):
+            if user_repository.update_one(old=user_data, new=update_data) is False:
                 raise InternalServerError("common.process_issue")
             user_data.update(update_data)
 
@@ -103,7 +100,6 @@ class AuthenticationService(IAuthentication):
         must_do_first_login = user_data["must_do_first_login"]
         if must_do_first_login is False and is_active_user is False:
             raise UnauthorizedError("invalid_credential")
-
 
         # TODO: add PERSEPHONE HERE
 
@@ -155,11 +151,15 @@ class AuthenticationService(IAuthentication):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request["x-thebes-answer"]
-        user_data = user_repository.find_one({"unique_id": x_thebes_answer["unique_id"]})
+        user_data = user_repository.find_one(
+            {"unique_id": x_thebes_answer["unique_id"]}
+        )
         if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        br_third_part_synchronization_status = AuthenticationService._dtvm_client_has_br_trade_allowed(user=user_data)
+        br_third_part_synchronization_status = (
+            AuthenticationService._dtvm_client_has_br_trade_allowed(user=user_data)
+        )
 
         user_data_update = {}
         must_update = False
@@ -169,10 +169,7 @@ class AuthenticationService(IAuthentication):
                 user_data_update.update({key: value["status"]})
 
         if must_update:
-            if (
-                user_repository.update_one(old=user_data, new=user_data_update)
-                is False
-            ):
+            if user_repository.update_one(old=user_data, new=user_data_update) is False:
                 raise InternalServerError("common.process_issue")
             user_data.update(user_data_update)
 
@@ -180,7 +177,7 @@ class AuthenticationService(IAuthentication):
             user_data=user_data, ttl=525600
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
-        
+
         # TODO: BACK WITH THAT
         # sent_to_persephone = persephone_client.run(
         #     topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
@@ -214,15 +211,17 @@ class AuthenticationService(IAuthentication):
         user_sincad_status_from_database = user.get("sincad")
         user_sinacor_status_from_database = user.get("sinacor")
         user_bmf_account_from_database = user.get("bmf_account")
-        user_cpf_from_database = user.get("cpf")
+        user_cpf_from_database = user.get("identifier_document").get("cpf")
 
-        if not all([
-            user_solutiontech_status_from_database,
-            user_sincad_status_from_database,
-            user_sinacor_status_from_database,
-            user_bmf_account_from_database,
-            user_cpf_from_database
-        ]):
+        if not all(
+            [
+                user_solutiontech_status_from_database,
+                user_sincad_status_from_database,
+                user_sinacor_status_from_database,
+                user_bmf_account_from_database,
+                user_cpf_from_database,
+            ]
+        ):
             return {}
 
         client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(

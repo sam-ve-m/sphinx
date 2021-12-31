@@ -1,9 +1,9 @@
 import logging
-from datetime import datetime
-from typing import Optional, List
+from datetime import datetime, timezone
+from typing import Optional, List, Dict, Any
 
 from email_validator import validate_email
-from pydantic import BaseModel, validator, constr
+from pydantic import BaseModel, validator, constr, root_validator
 
 from src.domain.sinacor.connected_person import ConnectedPerson
 from src.domain.validators.base import Email
@@ -13,7 +13,7 @@ from src.domain.validators.user_validators import TaxResidence, Spouse
 from src.domain.sinacor.person_gender import PersonGender
 from src.domain.sinacor.person_type import PersonType
 from src.domain.sinacor.status import OutputStatus
-from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.domain.validators.brazil_register_number_validator import (
     is_cpf_valid,
     is_cnpj_valid,
@@ -67,7 +67,7 @@ class BirthDateSource(Source):
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
         try:
-            date = datetime.fromtimestamp(e)
+            date = datetime.fromtimestamp(e, tz=timezone.utc)
             return date
         except Exception:
             raise ValueError("Wrong timestamp supplied")
@@ -76,6 +76,9 @@ class BirthDateSource(Source):
 class CelPhoneSource(Source):
     value: constr(min_length=11, max_length=11)
 
+
+class PhoneSource(Source):
+    value: constr(min_length=10, max_length=10)
 
 class EmailSource(Source):
     value: Email
@@ -86,7 +89,7 @@ class MaritalStatus(BaseModel):
 
     @validator("marital_status", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_marital_regime(value=e):
             return e
         raise ValueError("marital not exists")
@@ -123,8 +126,9 @@ class CpfSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
+        e = e.replace(".", "").replace("-", "").replace("/", "")
         if is_cpf_valid(cpf=e):
-            return e.replace(".", "").replace("-", "").replace("/", "")
+            return e
         raise ValueError("invalid cpf")
 
 
@@ -145,7 +149,7 @@ class StateSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_state(value=e):
             return e
         raise ValueError("state not exists")
@@ -168,7 +172,7 @@ class CountrySource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_country(value=e):
             return e
         raise ValueError("nationality not exists")
@@ -179,7 +183,7 @@ class NationalitySource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_nationality(value=e):
             return e
         raise ValueError("nationality not exists")
@@ -206,7 +210,7 @@ class ActivitySource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_activity(value=e):
             return e
         raise ValueError("Activity not exists")
@@ -217,8 +221,9 @@ class CnpjSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
+        e = e.replace(".", "").replace("-", "").replace("/", "")
         if is_cnpj_valid(cnpj=e):
-            return e.replace(".", "").replace("-", "").replace("/", "")
+            return e
         raise ValueError("invalid cnpj")
 
 
@@ -263,7 +268,7 @@ class IncomeTaxTypeSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_income_tax_type(value=e):
             return e
         raise ValueError("Income tax type not exists")
@@ -278,7 +283,7 @@ class ClientTypeSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_client_type(value=e):
             return e
         raise ValueError("Client type not exists")
@@ -293,7 +298,7 @@ class InvestorTypeTypeSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_investor_type(value=e):
             return e
         raise ValueError("Investor type not exists")
@@ -304,7 +309,7 @@ class CosifTaxClassificationSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_cosif_tax_classification(value=e):
             return e
         raise ValueError("Cosif tax classification not exists")
@@ -319,7 +324,7 @@ class MaritalStatusSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_marital_regime(value=e):
             return e
         raise ValueError("Martial Status not exists")
@@ -330,7 +335,7 @@ class NeighborhoodSource(Source):
 
 
 class TaxResidenceSource(Source):
-    value: TaxResidence
+    value: List[TaxResidence]
 
 
 class AssetsDateSource(Source):
@@ -437,7 +442,7 @@ class InvestorTypeSource(Source):
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
+        sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_investor_type(value=e):
             return e
         raise ValueError("InvestorType not exists in our investor type enum")
@@ -458,7 +463,7 @@ class UserMaritalData(MaritalStatus):
 
 
 class UserMaritalDataSource(BaseModel):
-    marital_status: MaritalStatusSource
+    status: MaritalStatusSource
     spouse: Optional[SpouseSource]
 
 
@@ -470,13 +475,15 @@ class UserPersonalDataValidation(BaseModel):
     father_name: Optional[NameSource]
     mother_name: NameSource
     email: EmailSource
-    phone: CelPhoneSource
+    cel_phone: CelPhoneSource
     nationality: NationalitySource
     occupation_activity: ActivitySource
     company_name: Optional[CompanyNameSource]
     company_cnpj: Optional[CnpjSource]
     patrimony: PatrimonySource
-    tax_residences: Optional[List[TaxResidenceSource]]
+    income_tax_type: IncomeTaxTypeSource
+    income: IncomeSource
+    tax_residences: Optional[TaxResidenceSource]
 
 
 class UserDocumentsDataValidation(BaseModel):
@@ -496,6 +503,41 @@ class UserAddressDataValidation(BaseModel):
     street_name: StreetNameSource
     number: AddressNumberSource
     zip_code: ZipCodeSource
+    phone: PhoneSource
+
+    @classmethod
+    def validate_contry_state_city(cls, country: str, state: str, id_city: int) -> bool:
+        sinacor_types_repository = SinacorTypesRepository()
+        is_valid = sinacor_types_repository.validate_contry_state_and_id_city(
+            country, state, id_city
+        )
+        return is_valid
+
+    @root_validator()
+    def validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        country = values.get("country")
+        state = values.get("state")
+        city = values.get("city")
+        neighborhood = values.get("neighborhood")
+        street_name = values.get("street_name")
+        number = values.get("number")
+        zip_code = values.get("zip_code")
+        if all([country, state, city, neighborhood, street_name, number, zip_code]):
+            is_valid = cls.validate_contry_state_city(
+                country.get("value"),
+                state.get("value"),
+                city.get("value"),
+            )
+            if not is_valid:
+                raise ValueError(
+                    f"The combination of values {country}, {state}, {city} does not match"
+                )
+        else:
+            raise ValueError(
+                f"Some values are missing country: {country}, state: {state}, city: {city}, neighborhood: {neighborhood}, street_name: {street_name}, number: {number}, zip_code: {zip_code}"
+            )
+
+        return values
 
 
 class ClientValidationData(BaseModel):
@@ -519,6 +561,8 @@ class UserPersonalDataUpdate(BaseModel):
     company_name: Optional[CompanyNameSource]
     company_cnpj: Optional[CnpjSource]
     patrimony: Optional[PatrimonySource]
+    income_tax_type: Optional[IncomeTaxTypeSource]
+    income: Optional[IncomeSource]
     tax_residences: Optional[List[TaxResidenceSource]]
 
 
@@ -539,6 +583,7 @@ class UserAddressDataUpdate(BaseModel):
     street_name: Optional[StreetNameSource]
     number: Optional[AddressNumberSource]
     zip_code: Optional[ZipCodeSource]
+    phone: Optional[PhoneSource]
 
 
 class UpdateCustomerRegistrationData(BaseModel):

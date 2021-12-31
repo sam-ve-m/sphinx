@@ -63,7 +63,7 @@ from src.domain.validators.bureau_validators import (
     DocumentNumberSource,
     MaritalStatusSource,
 )
-from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 
 router = APIRouter()
 
@@ -216,11 +216,10 @@ class Data(Decision, Status):
     identifier_document: Optional[IdentifierDocument]
 
 
-
 def validate_contry_state_city_and_id_city(
     country: str, state: str, city: str, id_city: int
 ) -> bool:
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     is_valid = sinacor_types_repository.validate_contry_state_city_and_id_city(
         country, state, city, id_city
     )

@@ -6,7 +6,7 @@ from typing import Type, Optional
 from src.exceptions.exceptions import InternalServerError
 from src.repositories.base_repository.oracle.base import OracleBaseRepository
 from src.services.builders.client_register.builder import ClientRegisterBuilder
-from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.domain.validators.marital_status_stone_age_to_sphinx import (
     MaritalStatusStoneAgeToSphinxEnum,
 )
@@ -113,7 +113,7 @@ class ClientRegisterRepository(OracleBaseRepository):
         self,
         user_data: dict,
         sinacor_user_control_data: Optional[tuple],
-        sinacor_types_repository=SinaCorTypesRepository(),
+        sinacor_types_repository=SinacorTypesRepository(),
     ) -> Type[ClientRegisterBuilder]:
         occupation = user_data["occupation"]
         activity = occupation["activity"]

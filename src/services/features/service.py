@@ -13,9 +13,7 @@ from src.exceptions.exceptions import BadRequestError, InternalServerError
 class FeatureService(IFeature):
     @staticmethod
     def create(payload: dict, feature_repository=FeatureRepository()) -> dict:
-        payload.update({
-            "_id": payload['name']
-        })
+        payload.update({"_id": payload["name"]})
         if feature_repository.find_one({"_id": payload.get("_id")}):
             raise BadRequestError("common.register_exists")
         if feature_repository.insert(payload):

@@ -1,5 +1,6 @@
 from src.domain.enums.caf.status import CAFStatus
 
+
 class OnboardingStepBuilder:
     def __init__(self):
         self.__onboarding_steps: dict = {
@@ -38,7 +39,7 @@ class OnboardingStepBuilder:
         return self
 
     def user_identifier_step(self, current_user: dict):
-        user_cpf = current_user.get("cpf")
+        user_cpf = current_user.get('identifier_document').get("cpf")
         user_cel_phone = current_user.get("cel_phone")
         if (
             user_cpf is not None
@@ -72,7 +73,9 @@ class OnboardingStepBuilder:
             == "user_complementary_step"
         ):
             self.__onboarding_steps["user_complementary_step"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "user_document_validator"
+            self.__onboarding_steps[
+                "current_onboarding_step"
+            ] = "user_document_validator"
 
         return self
 
@@ -83,7 +86,8 @@ class OnboardingStepBuilder:
             self.bureau_status = bureau_status
 
         if (
-            bureau_status and bureau_status != CAFStatus.DOCUMENT.value
+            bureau_status
+            and bureau_status != CAFStatus.DOCUMENT.value
             and self.__onboarding_steps["current_onboarding_step"]
             == "user_document_validator"
         ):
@@ -101,7 +105,9 @@ class OnboardingStepBuilder:
             == "user_data_validation"
         ):
             self.__onboarding_steps["user_data_validation"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "user_electronic_signature"
+            self.__onboarding_steps[
+                "current_onboarding_step"
+            ] = "user_electronic_signature"
 
         return self
 
@@ -112,7 +118,7 @@ class OnboardingStepBuilder:
             and self.__onboarding_steps["current_onboarding_step"]
             == "user_electronic_signature"
         ):
-            self.__onboarding_steps["user_electronic_signature"] = True
+            self.__onboarding_steps["user_electronic_s]ignature"] = True
         return self
 
     def is_finished(self):

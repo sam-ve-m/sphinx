@@ -17,10 +17,12 @@ from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
 from src.routers.routes_registers.user import UserRouter
-from src.domain.validators.bureau_validators import UpdateCustomerRegistrationData, ClientValidationData, UserMaritalData
-from src.domain.validators.user_validators import (
-    UserIdentifierData
+from src.domain.validators.bureau_validators import (
+    UpdateCustomerRegistrationData,
+    ClientValidationData,
+    UserMaritalData,
 )
+from src.domain.validators.user_validators import UserIdentifierData
 
 router = UserRouter.instance()
 
@@ -37,9 +39,7 @@ def update_user_identifier_data(user_identifier: UserIdentifierData, request: Re
 
 
 @router.put("/user/complementary_data", tags=["user"])
-def update_user_complementary_data(
-    user_identifier: UserMaritalData, request: Request
-):
+def update_user_complementary_data(user_identifier: UserMaritalData, request: Request):
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
 
     payload = {
@@ -263,7 +263,7 @@ def update_customer_registration_data(
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
     payload = {
         "x-thebes-answer": jwt_data,
-        "customer_registration_data": customer_registration_data.dict(),
+        "customer_registration_data": customer_validation_data.dict(),
     }
     return BaseController.run(
         UserController.update_customer_registration_data, payload, request

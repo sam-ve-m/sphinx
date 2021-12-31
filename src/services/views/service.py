@@ -13,10 +13,7 @@ from src.core.interfaces.services.view.interface import IView
 class ViewService(IView):
     @staticmethod
     def create(payload: dict, view_repository=ViewRepository()) -> dict:
-        payload.update({
-            "_id": payload['name'],
-            "features": list()
-        })
+        payload.update({"_id": payload["name"], "features": list()})
         if view_repository.find_one(payload) is not None:
             raise BadRequestError("common.register_exists")
         if view_repository.insert(payload):

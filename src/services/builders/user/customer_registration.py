@@ -3,9 +3,7 @@ class CustomerRegistrationBuilder:
         self.__personal_data = personal_data
         self.__buffer = {
             "personal": {},
-            "marital": {
-                "spouse": {}
-            },
+            "marital": {"spouse": {}},
             "documents": {},
             "address": {},
         }
@@ -44,7 +42,7 @@ class CustomerRegistrationBuilder:
 
     def personal_phone(self):
         phone = self.__personal_data.get("cel_phone")
-        self.__buffer["personal"].update({"phone": phone})
+        self.__buffer["personal"].update({"cel_phone": phone})
         return self
 
     def personal_nationality(self):
@@ -55,6 +53,16 @@ class CustomerRegistrationBuilder:
     def personal_patrimony(self):
         patrimony = self.__personal_data.get("assets", {}).get("patrimony")
         self.__buffer["personal"].update({"patrimony": patrimony})
+        return self
+
+    def personal_income_tax_type(self):
+        patrimony = self.__personal_data.get("assets", {}).get("income_tax_type")
+        self.__buffer["personal"].update({"income_tax_type": patrimony})
+        return self
+
+    def personal_income(self):
+        patrimony = self.__personal_data.get("assets", {}).get("income")
+        self.__buffer["personal"].update({"income": patrimony})
         return self
 
     def personal_occupation_activity(self):
@@ -104,7 +112,7 @@ class CustomerRegistrationBuilder:
         return self
 
     def documents_cpf(self):
-        cpf = self.__personal_data.get("cpf")
+        cpf = self.__personal_data.get("identifier_document").get("cpf")
         self.__buffer["documents"].update({"cpf": cpf})
         return self
 
@@ -191,6 +199,11 @@ class CustomerRegistrationBuilder:
     def address_state(self):
         state = self.__personal_data.get("address", {}).get("state")
         self.__buffer["address"].update({"state": state})
+        return self
+
+    def address_phone(self):
+        state = self.__personal_data.get("address", {}).get("phone")
+        self.__buffer["address"].update({"phone": state})
         return self
 
     def build(self) -> dict:

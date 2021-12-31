@@ -1,6 +1,7 @@
 # STANDARD LIBS
 from typing import Optional
 import logging
+from datetime import datetime
 
 # OUTSIDE LIBRARIES
 from pymongo.cursor import Cursor
@@ -95,7 +96,7 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
         if not new or len(new) == 0:
             return False
         try:
-            Sindri.dict_to_primitive_types(new)
+            Sindri.dict_to_primitive_types(new, types_to_ignore=[datetime])
             self.collection.update_one(old, {"$set": new})
             if new.get("email"):
                 self._save_cache(

@@ -1,5 +1,5 @@
 # STANDARD LIBS
-from typing import Type, List
+from typing import Type, List, Optional
 from hashlib import sha1
 
 # SPHINX
@@ -7,7 +7,18 @@ from src.repositories.base_repository.oracle.base import OracleBaseRepository
 from src.repositories.cache.redis import RepositoryRedis
 
 
-class SinaCorTypesRepository(OracleBaseRepository):
+class SinacorTypesRepository(OracleBaseRepository):
+
+    def get_county_name_by_id(self, id: int) -> Optional[str]:
+        sql = f"""
+            SELECT NOME_MUNI
+            FROM TSCDXMUNICIPIO
+            WHERE NUM_SEQ_MUNI = {id}
+        """
+        tuple_result = self.query_with_cache(sql=sql)
+        if tuple_result:
+            return tuple_result[0][0]
+
     @staticmethod
     def tuples_to_dict_list(fields: List[str], values: List[tuple]):
         dicts_result = list()
@@ -405,4 +416,11 @@ class SinaCorTypesRepository(OracleBaseRepository):
     ) -> bool:
         sql = f"""SELECT 1 FROM TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
         AND SIGL_ESTADO = '{state}' AND NOME_MUNI = '{city}' AND NUM_SEQ_MUNI = {id_city}"""
+        return self.base_validator(sql=sql)
+
+    def validate_contry_state_and_id_city(
+        self, contry: str, state: str, id_city: int
+    ) -> bool:
+        sql = f"""SELECT 1 FROM TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
+        AND SIGL_ESTADO = '{state}' AND NUM_SEQ_MUNI = {id_city}"""
         return self.base_validator(sql=sql)

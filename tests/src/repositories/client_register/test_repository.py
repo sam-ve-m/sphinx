@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 from src.exceptions.exceptions import InternalServerError
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.domain.sinacor.indicator_by_account import IndicatorByAccount
-from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from tests.src.repositories.client_register.test_repository_arguments import (
     valid_client_data,
     sinacor_insert_client_control_data,
@@ -84,7 +84,7 @@ def test_get_builder_with_married_business_person_expect_valid_builder_callback_
     copied_valid_client_data.update({"marital": marital_married})
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=False)
     sinacor_types_repository.is_business_person = MagicMock(return_value=True)
 
@@ -117,7 +117,7 @@ def test_get_builder_with_not_married_business_person_expect_valid_builder_callb
     copied_valid_client_data = deepcopy(valid_client_data)
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=False)
     sinacor_types_repository.is_business_person = MagicMock(return_value=True)
 
@@ -153,7 +153,7 @@ def test_get_builder_with_married_unemployed_expect_valid_builder_callback_to_in
     copied_valid_client_data.update({"occupation": unemployed_occupation})
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
     sinacor_types_repository.is_business_person = MagicMock(return_value=False)
 
@@ -188,7 +188,7 @@ def test_get_builder_with_not_married_unemployed_expect_valid_builder_callback_t
     copied_valid_client_data.update({"occupation": unemployed_occupation})
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
     sinacor_types_repository.is_business_person = MagicMock(return_value=False)
 
@@ -223,7 +223,7 @@ def test_get_builder_with_married_employed_person_expect_valid_builder_callback_
     copied_valid_client_data.update({"marital": marital_married})
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=False)
     sinacor_types_repository.is_business_person = MagicMock(return_value=True)
 
@@ -257,7 +257,7 @@ def test_get_builder_with_not_married_employed_expect_valid_builder_callback_to_
     copied_valid_client_data = deepcopy(valid_client_data)
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
     sinacor_types_repository.is_business_person = MagicMock(return_value=False)
 
@@ -290,7 +290,7 @@ def test_get_builder_with_not_valid_occupation_data_expect_exception():
     copied_invalid_client_data = deepcopy(invalid_client_data)
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
     sinacor_types_repository.is_business_person = MagicMock(return_value=False)
 
@@ -307,7 +307,7 @@ def test_get_builder_with_unemployed_and_business_person_data_expect_exception()
     copied_invalid_client_data = deepcopy(valid_client_data)
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
     sinacor_types_repository.is_business_person = MagicMock(return_value=True)
 
@@ -323,7 +323,7 @@ def test_get_builder_with_greater_than_invalid_register_document_type_expect_val
     copied_valid_client_data = deepcopy(valid_client_data)
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
     sinacor_types_repository.is_business_person = MagicMock(return_value=False)
 
@@ -371,7 +371,7 @@ def test_get_builder_with_less_than_invalid_register_document_type_expect_valid_
     copied_valid_client_data = deepcopy(valid_client_data)
 
     client_register_repository = ClientRegisterRepository()
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     sinacor_types_repository.is_unemployed = MagicMock(return_value=True)
     sinacor_types_repository.is_business_person = MagicMock(return_value=False)
 
