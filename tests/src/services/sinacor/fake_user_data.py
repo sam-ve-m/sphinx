@@ -36,9 +36,7 @@ fake_user = {
     "cel_phone": "11952906652",
     "cpf": "35202904800",
     "is_cvm_qualified_investor": False,
-    "is_us_person": False,
     "marital": {"status": "not_married", "spouse": None},
-    "us_tin": None,
     "register_analyses": "PENDING",
     "stone_age_contract_uuid": "6d6e2a04-00e4-11ec-9a03-0242ac130003",
 }

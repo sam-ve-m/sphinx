@@ -1,14 +1,10 @@
 from hashlib import sha1
 from typing import Union
+from uuid import uuid4
 
 
-def generate_id(key: str, payload: dict, must_remove: bool = False) -> dict:
-    _id = payload.get(key)
-    if _id is None:
-        raise Exception("Error to generate _id")
-    payload.update({"_id": _id})
-    if must_remove:
-        del payload[key]
+def generate_unique_id(key: str, payload: dict) -> dict:
+    payload.update({"unique_id": str(uuid4())})
     return payload
 
 

@@ -81,8 +81,12 @@ def test_check_sinacor_errors_if_is_not_update_client_is_not_update():
     assert response is None
 
 
-@patch.object(StubClientRegisterRepository, 'validate_user_data_errors', return_value=True)
-def test_check_sinacor_errors_if_is_not_update_client_is_not_update_and_fail(mock_validate_user_data_errors):
+@patch.object(
+    StubClientRegisterRepository, "validate_user_data_errors", return_value=True
+)
+def test_check_sinacor_errors_if_is_not_update_client_is_not_update_and_fail(
+    mock_validate_user_data_errors,
+):
     with pytest.raises(BadRequestError, match="bureau.error.fail"):
         SinacorService._check_sinacor_errors_if_is_not_update_client(
             client_register_repository=StubClientRegisterRepository,

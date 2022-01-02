@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 # SPHINX
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.domain.sinacor.broker_type_of_brokerage import BrokerTypeOfBrokerage
 from src.domain.sinacor.sinacor_identifier_document_types import (
     SinacorIdentifierDocumentTypes as SID,
@@ -67,17 +68,6 @@ from src.domain.sinacor.home_execution_brokerage_note_issuance_indicator import 
 class ClientRegisterBuilder:
     def __init__(self):
         self._fields_added = dict()
-        self.sinacor_document_types = [
-            SID.KS.value,
-            SID.PP.value,
-            SID.RG.value,
-            SID.TE.value,
-            SID.RN.value,
-            SID.PL.value,
-            SID.PF.value,
-            SID.TO.value,
-            SID.CH.value,
-        ]
 
     def build(self):
         return self._fields_added
@@ -98,7 +88,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cpfcgc(self, user_data: dict):
-        self._fields_added.update({"CD_CPFCGC": int(user_data["cpf"])})
+        self._fields_added.update({"CD_CPFCGC": int(user_data["identifier_document"]["cpf"])})
         return self
 
     def add_dt_nasc_fund(self, user_data: dict):
@@ -157,22 +147,17 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_nacion(self, user_data: dict):
-        birthplace = (
-            user_data.get("birthplace")
-            if user_data.get("birthplace") is not None
-            else {}
-        )
-        nationality = birthplace.get("nationality")
+        nationality = user_data.get("nationality")
         self._fields_added.update({"CD_NACION": nationality})
         return self
 
     def add_cd_tipo_doc(self, user_data: dict):
-        value = user_data["identifier_document"]["type"]
+        value = user_data["identifier_document"]["document_data"]["type"]
         self._fields_added.update({"CD_TIPO_DOC": value})
         return self
 
     def add_cd_doc_ident(self, user_data: dict):
-        type = user_data["identifier_document"]["type"]
+        type = user_data["identifier_document"]["document_data"]["type"]
         value = None
         if type != SID.RG.value:
             value = user_data["identifier_document"]["document_data"]["number"]
@@ -180,7 +165,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_org_emit(self, user_data: dict):
-        type = user_data["identifier_document"]["type"]
+        type = user_data["identifier_document"]["document_data"]["type"]
         value = None
         if type != SID.RG.value:
             value = user_data["identifier_document"]["document_data"]["issuer"]
@@ -188,7 +173,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_dt_doc_ident(self, user_data: dict):
-        type = user_data["identifier_document"]["type"]
+        type = user_data["identifier_document"]["document_data"]["type"]
         value = None
         if type != SID.RG.value:
             value = user_data["identifier_document"]["document_data"]["date"]
@@ -196,7 +181,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_nr_rg(self, user_data: dict):
-        type = user_data["identifier_document"]["type"]
+        type = user_data["identifier_document"]["document_data"]["type"]
         value = None
         if type == SID.RG.value:
             value = user_data["identifier_document"]["document_data"]["number"]
@@ -204,7 +189,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_sg_estado_emiss_rg(self, user_data: dict):
-        type = user_data["identifier_document"]["type"]
+        type = user_data["identifier_document"]["document_data"]["type"]
         value = None
         if type == SID.RG.value:
             value = user_data["identifier_document"]["document_data"]["state"]
@@ -212,7 +197,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_dt_emiss_rg(self, user_data: dict):
-        type = user_data["identifier_document"]["type"]
+        type = user_data["identifier_document"]["document_data"]["type"]
         value = None
         if type == SID.RG.value:
             value = user_data["identifier_document"]["document_data"]["date"]
@@ -220,7 +205,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_org_emit_rg(self, user_data: dict):
-        type = user_data["identifier_document"]["type"]
+        type = user_data["identifier_document"]["document_data"]["type"]
         value = None
         if type == SID.RG.value:
             value = user_data["identifier_document"]["document_data"]["issuer"]
@@ -284,12 +269,15 @@ class ClientRegisterBuilder:
 
     def add_cd_ddd_celular1(self, user_data: dict):
         # TODO: celphone format validate
-        self._fields_added.update({"CD_DDD_CELULAR1": int(user_data["cel_phone"][:2])})
+        self._fields_added.update({"CD_DDD_CELULAR1": int(user_data["phone"][:2])})
         return self
 
     def add_cd_ddd_tel(self, user_data: dict):
+        phone = user_data["address"].get("phone")
+        if not phone:
+            phone = user_data["phone"]
         self._fields_added.update(
-            {"CD_DDD_TEL": int(user_data["address"]["phone_number"][:2])}
+            {"CD_DDD_TEL": int(phone[:2])}
         )
         return self
 
@@ -302,11 +290,12 @@ class ClientRegisterBuilder:
         return self
 
     def add_nr_celular1(self, user_data: dict):
-        self._fields_added.update({"NR_CELULAR1": user_data["cel_phone"][2:]})
+        self._fields_added.update({"NR_CELULAR1": user_data["phone"][2:]})
         return self
 
-    def add_nm_cidade(self, user_data: dict):
-        self._fields_added.update({"NM_CIDADE": user_data["address"]["city"]})
+    def add_nm_cidade(self, user_data: dict, sinacor_types_repository=SinacorTypesRepository()):
+        name = sinacor_types_repository.get_county_name_by_id(id=user_data["address"]["city"])
+        self._fields_added.update({"NM_CIDADE": name})
         return self
 
     def add_nm_logradouro(self, user_data: dict):
@@ -320,8 +309,11 @@ class ClientRegisterBuilder:
         return self
 
     def add_nr_telefone(self, user_data: dict):
+        phone = user_data["address"].get("phone")
+        if not phone:
+            phone = user_data["phone"]
         self._fields_added.update(
-            {"NR_TELEFONE": int(user_data["address"]["phone_number"][2:])}
+            {"NR_TELEFONE": int(phone[2:])}
         )
         return self
 
@@ -453,7 +445,7 @@ class ClientRegisterBuilder:
 
     def add_num_seq_muni_end1(self, user_data: dict):
         self._fields_added.update(
-            {"NUM_SEQ_MUNI_END1": user_data["address"]["id_city"]}
+            {"NUM_SEQ_MUNI_END1": user_data["address"]["city"]}
         )
         return self
 
@@ -495,7 +487,7 @@ class ClientRegisterBuilder:
 
     def add_num_us_person(self, user_data: dict):
         value = IsUsPerson.NO.value
-        if user_data["is_us_person"]:
+        if list(filter(lambda x: x["country"] == "USA", user_data["tax_residences"])):
             value = IsUsPerson.YES.value
         self._fields_added.update({"NUM_US_PERSON": value})
         return self
@@ -901,12 +893,10 @@ class ClientRegisterBuilder:
         return self
 
     def add_val_lim_neg_td(self, value: float = 0.0):
-        # TODO: Define with operation table
         self._fields_added.update({"VAL_LIM_NEG_TD": value})
         return self
 
     def add_val_taxa_agnt_td(self, value: float = 0.0):
-        # TODO: Define with operation table
         self._fields_added.update({"VAL_TAXA_AGNT_TD": value})
         return self
 

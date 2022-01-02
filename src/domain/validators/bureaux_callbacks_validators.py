@@ -6,12 +6,11 @@ from fastapi import APIRouter
 from pydantic import BaseModel, root_validator
 
 # SPHINX
-from src.domain.validators.base import (
+from src.domain.validators.bureau_validators import (
     InvestorTypeSource,
     RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource,
 )
 from src.domain.validators.bureau_validators import (
-    Uuid,
     Decision,
     Status,
     GenderSource,
@@ -59,20 +58,18 @@ from src.domain.validators.bureau_validators import (
     ForeignInvestorsRegisterOfAnnexIvNotReregisteredSource,
     RegistrationOfForeignInvestorsSecuritiesCommissionSource,
     SelfLinkSource,
-    IsUsPersonSource,
-    UsTinSource,
     IrsSharingSource,
     FatherNameSource,
-    DocumentNumber,
+    DocumentNumberSource,
     MaritalStatusSource,
 )
-from src.repositories.sinacor_types.repository import SinaCorTypesRepository
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 
 router = APIRouter()
 
 
 class DocumentData(BaseModel):
-    number: Optional[DocumentNumber]
+    number: Optional[DocumentNumberSource]
     date: Optional[DateSource]
     state: Optional[StateSource]
     issuer: Optional[IssuerSource]
@@ -192,7 +189,6 @@ class Data(Decision, Status):
     investor_type: InvestorTypeSource
     cosif_tax_classification: CosifTaxClassificationSource
     gender: GenderSource
-    is_us_person: IsUsPersonSource
     birth_date: BirthDateSource
     birthplace: Birthplace
     mother_name: MotherNameSource
@@ -215,20 +211,15 @@ class Data(Decision, Status):
     registration_of_foreign_investors_securities_commission: RegistrationOfForeignInvestorsSecuritiesCommissionSource
     registration_representative_of_nonresident_investors_securities_commission: RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
     date_of_acquisition: DateOfAcquisition
-    us_tin: Optional[UsTinSource]
     irs_sharing: Optional[IrsSharingSource]
     father_name: Optional[FatherNameSource]
     identifier_document: Optional[IdentifierDocument]
 
 
-class BureauCallback(Uuid):
-    data: Data
-
-
 def validate_contry_state_city_and_id_city(
     country: str, state: str, city: str, id_city: int
 ) -> bool:
-    sinacor_types_repository = SinaCorTypesRepository()
+    sinacor_types_repository = SinacorTypesRepository()
     is_valid = sinacor_types_repository.validate_contry_state_city_and_id_city(
         country, state, city, id_city
     )

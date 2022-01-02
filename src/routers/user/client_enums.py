@@ -7,9 +7,9 @@ from src.domain.validators.client_register_validators import CountryState, Count
 from src.controllers.cliente_register_enums.controller import (
     ClientRegisterEnumsController,
 )
-from src.routers.routes_registers.client import ClientRouter
+from src.routers.routes_registers.user import UserRouter
 
-router = ClientRouter.instance()
+router = UserRouter.instance()
 
 
 @router.get("/client_update_enums/gender", tags=["client_update_enums"])
@@ -86,6 +86,15 @@ def get_economic_activity(request: Request):
 def get_economic_activity(request: Request):
     return BaseController.run(
         ClientRegisterEnumsController.get_issuing_body_update,
+        payload={},
+        request=request,
+    )
+
+
+@router.get("/client_update_enums/income_tax_type", tags=["client_update_enums"])
+def get_economic_activity(request: Request):
+    return BaseController.run(
+        ClientRegisterEnumsController.get_income_tax_type_update,
         payload={},
         request=request,
     )

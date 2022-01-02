@@ -46,9 +46,9 @@ class FileRepository(S3Infrastructure, IFile):
         self,
         file_type: UserFileType,
         content: Union[str, bytes],
-        user_email: str,
+        unique_id: str,
     ) -> str:
-        path = self.resolve_user_path(user_email=user_email, file_type=file_type)
+        path = self.resolve_user_path(unique_id=unique_id, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if not path or not file_name or not file_extension:
@@ -65,9 +65,9 @@ class FileRepository(S3Infrastructure, IFile):
     def get_user_selfie(
         self,
         file_type: UserFileType,
-        user_email: str,
+        unique_id: str,
     ) -> Union[str, dict]:
-        path = self.resolve_user_path(user_email=user_email, file_type=file_type)
+        path = self.resolve_user_path(unique_id=unique_id, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if not path or not file_name or not file_extension:
@@ -82,8 +82,8 @@ class FileRepository(S3Infrastructure, IFile):
         # week link validation
         return value
 
-    def get_user_file(self, file_type: UserFileType, user_email: str):
-        prefix = self.resolve_user_path(user_email=user_email, file_type=file_type)
+    def get_user_file(self, file_type: UserFileType, unique_id: str):
+        prefix = self.resolve_user_path(unique_id=unique_id, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
         if not prefix or not file_name or not file_extension:
@@ -216,9 +216,8 @@ class FileRepository(S3Infrastructure, IFile):
         return content
 
     @staticmethod
-    def resolve_user_path(user_email: str, file_type: UserFileType) -> str:
-        name, domain = user_email.split("@")
-        return f"{domain}/{name[:2]}/{user_email}/{file_type.value}/"
+    def resolve_user_path(unique_id: str, file_type: UserFileType) -> str:
+        return f"{unique_id}/{file_type.value}/"
 
     @staticmethod
     def get_file_extension_by_type(file_type: Enum) -> Optional[str]:

@@ -29,42 +29,42 @@ class OracleBaseRepository(OracleInfrastructure, IOracle):
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Sql: {sql} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.ProgrammingError as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Sql: {sql} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.InternalError as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Sql: {sql} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.NotSupportedError as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Sql: {sql} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.DatabaseError as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Sql: {sql} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.Error as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Sql: {sql} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
     @staticmethod
     def _normalize_encode(rows: List[tuple]) -> List[tuple]:
@@ -90,39 +90,39 @@ class OracleBaseRepository(OracleInfrastructure, IOracle):
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Values: {values} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.ProgrammingError as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Values: {values} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.InternalError as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Values: {values} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.NotSupportedError as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Values: {values} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.DatabaseError as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Values: {values} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")
 
         except cx_Oracle.Error as e:
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Values: {values} - Oracle-ex: {e}"
             logger.error(message, exc_info=True)
-            raise InternalServerError(message) from e
+            raise InternalServerError("common.process_issue")

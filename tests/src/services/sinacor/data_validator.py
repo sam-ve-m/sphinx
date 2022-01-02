@@ -23,9 +23,7 @@ class FirstLevelJsonUserMergedDataValidator(BaseModel):
     cel_phone: str
     cpf: str
     is_cvm_qualified_investor: bool
-    is_us_person: bool
     marital: dict
-    us_tin: int
     register_analyses: str
     stone_age_contract_uuid: str
     gender: str

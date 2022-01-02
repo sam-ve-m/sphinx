@@ -8,7 +8,6 @@ from email_validator import validate_email
 
 # SPHIX
 from src.domain.validators.onboarding_validators import *
-from src.domain.validators.bureau_validators import Source
 from src.infrastructures.env_config import config
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
@@ -87,20 +86,3 @@ class NewElectronicSignature(BaseModel):
 
 class ChangeElectronicSignature(ElectronicSignature, NewElectronicSignature):
     pass
-
-
-class RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource(
-    Source
-):
-    value: bool
-
-
-class InvestorTypeSource(Source):
-    value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinaCorTypesRepository()
-        if sinacor_types_repository.validate_investor_type(value=e):
-            return e
-        raise ValueError("InvestorType not exists in our investor type enum")

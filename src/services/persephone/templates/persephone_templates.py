@@ -13,7 +13,7 @@ def get_prospect_user_template_with_data(payload: dict) -> dict:
 def get_user_identifier_data_schema_template_with_data(payload: dict) -> dict:
     return {
         "user_email": payload.get("email"),
-        "cpf": payload.get("cpf"),
+        "cpf": payload.get("identifier_document").get("cpf"),
         "cel_phone": payload.get("cel_phone"),
     }
 
@@ -36,8 +36,6 @@ def get_user_authentication_template_with_data(payload: dict) -> dict:
 def get_user_complementary_data_schema_template_with_data(payload: dict) -> dict:
     return {
         "user_email": payload.get("email"),
-        "is_us_person": payload.get("is_us_person"),
-        "us_tin": payload.get("us_tin"),
         "is_cvm_qualified_investor": payload.get("is_cvm_qualified_investor"),
         "marital": payload.get("marital"),
     }
@@ -100,10 +98,12 @@ def get_user_set_electronic_signature_schema_template_with_data(payload: dict) -
 
 
 def get_user_update_register_schema_template_with_data(
-    email: str, modified_register_data: dict, update_customer_registration_data: dict
+    unique_id: str,
+    modified_register_data: dict,
+    update_customer_registration_data: dict,
 ) -> dict:
     return {
-        "user_email": email,
+        "unique_id": unique_id,
         "modified_register_data": modified_register_data,
         "update_customer_registration_data": update_customer_registration_data,
     }
@@ -146,7 +146,7 @@ def get_table_response_template_with_data(payload: dict) -> dict:
         "stone_age_id": payload.get("proposal_id"),
         "user_id": payload.get("email"),
         "status": payload.get("status"),
-        "cpf": payload.get("cpf"),
+        "cpf": payload.get("identifier_document").get("cpf"),
     }
 
 

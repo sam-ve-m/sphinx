@@ -112,7 +112,7 @@ def test_save_valid_user_file(
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     assert (
         file_repository.save_user_file(
-            file_type=UserFileType.SELF, content="data", user_email="test@validator"
+            file_type=UserFileType.SELFIE, content="data", user_email="test@validator"
         )
         == "validator/te/test@validator/user_selfie/user_selfie.jpg"
     )
@@ -125,7 +125,7 @@ def test_save_user_file_with_invalid_user_path(
     file_repository.resolve_user_path = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
         file_repository.save_user_file(
-            file_type=UserFileType.SELF, content="data", user_email="test@validator"
+            file_type=UserFileType.SELFIE, content="data", user_email="test@validator"
         )
 
 
@@ -136,13 +136,13 @@ def test_save_user_file_with_invalid_file_extension(
     file_repository.get_file_extension_by_type = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
         file_repository.save_user_file(
-            file_type=UserFileType.SELF, content="data", user_email="test@validator"
+            file_type=UserFileType.SELFIE, content="data", user_email="test@validator"
         )
 
 
 def test_resolve_path() -> None:
     path = FileRepository.resolve_user_path(
-        user_email="marco@lionx.com.br", file_type=UserFileType.SELF
+        user_email="marco@lionx.com.br", file_type=UserFileType.SELFIE
     )
     assert path == "lionx.com.br/ma/marco@lionx.com.br/user_selfie/"
 
@@ -334,7 +334,7 @@ def test_get_file_extension_by_type_valid(
     new_file_repository_valid_mocked_validate_bucket_name,
 ) -> None:
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    result = file_repository.get_file_extension_by_type(file_type=UserFileType.SELF)
+    result = file_repository.get_file_extension_by_type(file_type=UserFileType.SELFIE)
     assert result == ".jpg"
 
 

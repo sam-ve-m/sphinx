@@ -12,8 +12,8 @@ class UserRepository(MongoDbBaseRepository):
             collection=config("MONGODB_USER_COLLECTION"),
         )
 
-    def is_user_using_suitability_or_refuse_term(self, user_email: str) -> str:
-        user = self.find_one({"_id": user_email})
+    def is_user_using_suitability_or_refuse_term(self, unique_id: str) -> str:
+        user = self.find_one({"unique_id": unique_id})
         suitability = user.get("suitability")
         term_refusal = user["terms"].get("term_refusal")
 

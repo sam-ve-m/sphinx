@@ -7,8 +7,10 @@ from copy import deepcopy
 from fastapi import status
 
 # SPHINX
+from src.domain.sinacor.connected_person import ConnectedPerson
+from src.domain.sinacor.person_type import PersonType
 from src.core.interfaces.services.user.interface import IUser
-
+from src.domain.enums.caf.status import CAFStatus
 from src.services.authentications.service import AuthenticationService
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 from src.services.builders.user.customer_registration import CustomerRegistrationBuilder
@@ -27,7 +29,7 @@ from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.services.sinacor.service import SinacorService
 from nidavellir.src.uru import Sindri
 
-from src.domain.model_decorator.generate_id import generate_id, hash_field
+from src.domain.model_decorator.generate_id import generate_unique_id, hash_field
 from src.services.jwts.service import JwtService
 from src.services.persephone.templates.persephone_templates import (
     get_prospect_user_template_with_data,
@@ -59,11 +61,11 @@ class UserService(IUser):
         social_client=ValhallaService.get_social_client(),
         jwt_handler=JwtService,
     ) -> dict:
-        user = generate_id("email", user, must_remove=False)
+        user = generate_unique_id("email", user)
         has_pin = user.get("pin")
         if has_pin:
             user = hash_field(key="pin", payload=user)
-        if user_repository.find_one({"_id": user.get("_id")}) is not None:
+        if user_repository.find_one({"email": user.get("email")}) is not None:
             raise BadRequestError("common.register_exists")
         user.update({"created_at": datetime.now()})
         UserService.add_user_control_metadata(payload=user)
@@ -113,13 +115,13 @@ class UserService(IUser):
         token_service=JwtService,
         client_register=ClientRegisterRepository(),
     ) -> dict:
-        old = user_repository.find_one({"_id": payload.get("email")})
+        old = user_repository.find_one({"unique_id": payload.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
 
         if (
             client_register.client_is_allowed_to_cancel_registration(
-                user_cpf=int(old.get("cpf")), bmf_account=int(old.get("bmf_account"))
+                user_cpf=int(old.get("identifier_document").get("cpf")), bmf_account=int(old.get("bmf_account"))
             )
             is False
         ):
@@ -136,7 +138,7 @@ class UserService(IUser):
     def change_password(payload: dict, user_repository=UserRepository()) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         new_pin = payload.get("new_pin")
-        old = user_repository.find_one({"_id": thebes_answer.get("email")})
+        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
@@ -284,7 +286,7 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         new_view = payload.get("new_view")
-        old = user_repository.find_one({"_id": thebes_answer.get("email")})
+        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
@@ -305,7 +307,7 @@ class UserService(IUser):
         authentication_service=AuthenticationService,
         jwt_handler=JwtService,
     ) -> dict:
-        entity = user_repository.find_one({"_id": payload.get("email")})
+        entity = user_repository.find_one({"unique_id": payload.get("unique_id")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -326,7 +328,7 @@ class UserService(IUser):
 
     @staticmethod
     def logout_all(payload: dict, user_repository=UserRepository()) -> dict:
-        old = user_repository.find_one({"_id": payload.get("email")})
+        old = user_repository.find_one({"unique_id": payload.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
@@ -400,9 +402,9 @@ class UserService(IUser):
         )
 
         file_path = file_repository.save_user_file(
-            file_type=UserFileType.SELF,
+            file_type=UserFileType.SELFIE,
             content=payload.get("file_or_base64"),
-            user_email=thebes_answer.get("email"),
+            unique_id=thebes_answer.get("unique_id"),
         )
 
         sent_to_persephone = persephone_client.run(
@@ -430,30 +432,31 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        old = user_repository.find_one({"_id": thebes_answer.get("email")})
-        if type(old) is not dict:
+        user_data = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        if type(user_data) is not dict:
             raise BadRequestError("common.register_not_exists")
         file_type = payload.get("file_type")
-        new = deepcopy(old)
-        UserService.fill_term_signed(
-            payload=new,
+        term_update = UserService.fill_term_signed(
             file_type=file_type.value,
             version=file_repository.get_current_term_version(file_type=file_type),
         )
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.TERM_QUEUE.value,
-            payload=get_user_signed_term_template_with_data(
-                payload=new, file_type=file_type.value
-            ),
-            schema_key="signed_term_schema",
-        )
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.TERM_QUEUE.value,
+        #     payload=get_user_signed_term_template_with_data(
+        #         payload=new, file_type=file_type.value
+        #     ),
+        #     schema_key="signed_term_schema",
+        # )
+        sent_to_persephone = True
         if (
-            sent_to_persephone and user_repository.update_one(old=old, new=new)
+            sent_to_persephone and user_repository.update_one(old={"unique_id": thebes_answer.get("unique_id")}, new=term_update)
         ) is False:
             raise InternalServerError("common.unable_to_process")
+        user_data = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         jwt_payload_data, control_data = ThebesHallBuilder(
-            user_data=new, ttl=525600
+            user_data=user_data, ttl=525600
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
@@ -464,6 +467,7 @@ class UserService(IUser):
             {
                 "scope": {"view_type": "default", "features": ["default", "realtime"]},
                 "is_active_user": False,
+                "must_do_first_login": True,
                 "use_magic_link": True,
                 "token_valid_after": datetime.utcnow(),
                 "terms": {
@@ -478,14 +482,15 @@ class UserService(IUser):
         )
 
     @staticmethod
-    def fill_term_signed(payload: dict, file_type: str, version: int) -> None:
-        if payload.get("terms") is None:
-            payload["terms"] = dict()
-        payload["terms"][file_type] = {
-            "version": version,
-            "date": datetime.now(),
-            "is_deprecated": False,
+    def fill_term_signed(file_type: str, version: int) -> dict:
+        terms_update = {
+            f"terms.{file_type}": {
+                "version": version,
+                "date": datetime.now(),
+                "is_deprecated": False,
+            }
         }
+        return terms_update
 
     @staticmethod
     def get_signed_term(
@@ -523,41 +528,49 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         user_identifier_data = payload.get("user_identifier")
+        cpf = user_identifier_data.get("cpf")
+        user_by_cpf = user_repository.find_one({"identifier_document.cpf": cpf})
 
-        user_by_cpf = user_repository.find_one({"cpf": user_identifier_data.get("cpf")})
-
-        if user_by_cpf is not None:
+        if user_by_cpf:
             raise BadRequestError("common.register_exists")
 
         UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_identifier_data_step"
         )
 
-        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        current_user = user_repository.find_one(
+            {"unique_id": thebes_answer.get("unique_id")}
+        )
+
+        user_identifier_data = payload["user_identifier"]
 
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
 
         current_user_with_identifier_data = dict(current_user)
+        current_user_with_identifier_data.update(user_identifier_data)
 
-        UserService.add_user_identifier_data_on_current_user(
-            payload=current_user_with_identifier_data,
-            user_identifier_data=user_identifier_data,
-        )
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
+        #     payload=get_user_identifier_data_schema_template_with_data(
+        #         payload=current_user_with_identifier_data
+        #     ),
+        #     schema_key="user_identifier_data_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
 
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
-            payload=get_user_identifier_data_schema_template_with_data(
-                payload=current_user_with_identifier_data
-            ),
-            schema_key="user_identifier_data_schema",
-        )
-        if sent_to_persephone is False:
-            raise InternalServerError("common.process_issue")
+        del user_identifier_data['cpf']
+        user_identifier_data.update({
+            "identifier_document": {
+                "cpf": cpf
+            }
+        })
 
         user_updated = user_repository.update_one(
-            old=current_user, new=current_user_with_identifier_data
+            old=current_user, new=user_identifier_data
         )
         if user_updated is False:
             raise InternalServerError("common.process_issue")
@@ -566,13 +579,6 @@ class UserService(IUser):
             "status_code": status.HTTP_200_OK,
             "message_key": "requests.updated",
         }
-
-    @staticmethod
-    def add_user_identifier_data_on_current_user(
-        payload: dict, user_identifier_data: dict
-    ) -> None:
-        payload["cpf"] = user_identifier_data.get("cpf")
-        payload["cel_phone"] = user_identifier_data.get("cel_phone")
 
     @staticmethod
     def user_complementary_data(
@@ -584,30 +590,49 @@ class UserService(IUser):
             payload=payload, onboard_step="user_complementary_step"
         )
         thebes_answer = payload.get("x-thebes-answer")
-        current_user = user_repository.find_one({"_id": thebes_answer.get("email")})
+        current_user = user_repository.find_one(
+            {"unique_id": thebes_answer.get("unique_id")}
+        )
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
         user_complementary_data = payload.get("user_complementary")
 
+        complementary_data_for_user_update = (
+            UserService.get_user_complementary_data_for_user_update(
+                user_complementary_data=user_complementary_data
+            )
+        )
         current_user_with_complementary_data = deepcopy(current_user)
-        UserService.add_user_complementary_data_on_current_user(
-            payload=current_user_with_complementary_data,
-            user_complementary_data=user_complementary_data,
-        )
+        current_user_with_complementary_data.update(complementary_data_for_user_update)
 
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.USER_COMPLEMENTARY_DATA.value,
-            payload=get_user_complementary_data_schema_template_with_data(
-                payload=current_user_with_complementary_data
-            ),
-            schema_key="user_complementary_data_schema",
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_COMPLEMENTARY_DATA.value,
+        #     payload=get_user_complementary_data_schema_template_with_data(
+        #         payload=current_user_with_complementary_data
+        #     ),
+        #     schema_key="user_complementary_data_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
+
+        # TODO: CREATE CONNECTED PERSON, enum and add um update ?
+        # TODO: In this code chunk we will add a tag that represents the status from Bureau validation
+        complementary_data_for_user_update.update(
+            {
+                "connected_person": ConnectedPerson.NON_CONNECTED_PERSON.value,
+                "bureau_status": CAFStatus.APPROVED.value,
+                "is_bureau_data_validated": False,
+                "client_type": 1,
+                "person_type": PersonType.PHYSICAL_PERSON.value,
+                "investor_type": 101,
+                "cosif_tax_classification": 21
+            }
         )
-        if sent_to_persephone is False:
-            raise InternalServerError("common.process_issue")
 
         user_was_updated = user_repository.update_one(
-            old=current_user, new=current_user_with_complementary_data
+            old=current_user, new=complementary_data_for_user_update
         )
         if user_was_updated is False:
             raise InternalServerError("common.process_issue")
@@ -618,23 +643,16 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def add_user_complementary_data_on_current_user(
-        payload: dict, user_complementary_data
-    ):
-        payload["is_us_person"] = user_complementary_data.get("is_us_person")
-        payload["us_tin"] = user_complementary_data.get("us_tin")
-        payload["is_cvm_qualified_investor"] = user_complementary_data.get(
-            "is_cvm_qualified_investor"
-        )
-        payload["marital"] = {
-            "status": user_complementary_data.get("marital_status"),
-            "spouse": user_complementary_data.get("spouse"),
+    def get_user_complementary_data_for_user_update(user_complementary_data: dict):
+        return {
+            "marital": {
+                "status": user_complementary_data.get("marital_status"),
+                "spouse": user_complementary_data.get("spouse"),
+            }
         }
 
     @staticmethod
-    def fill_account_data_on_user_document(
-        payload: dict, stone_age_user_data: dict
-    ):
+    def fill_account_data_on_user_document(payload: dict, stone_age_user_data: dict):
         # TODO: REMOVING STONE
         if payload.get("provided_by_bureaux") is None:
             payload["provided_by_bureaux"] = dict()
@@ -654,13 +672,13 @@ class UserService(IUser):
     ) -> dict:
         onboarding_step_builder = OnboardingStepBuilder()
         thebes_answer = payload.get("x-thebes-answer")
-        jwt_user_email = thebes_answer.get("email")
+        jwt_user_unique_id = thebes_answer["unique_id"]
 
         user_file_exists = file_repository.get_user_file(
-            file_type=UserFileType.SELF, user_email=jwt_user_email
+            file_type=UserFileType.SELFIE, unique_id=jwt_user_unique_id
         )
 
-        current_user = user_repository.find_one({"_id": jwt_user_email})
+        current_user = user_repository.find_one({"unique_id": jwt_user_unique_id})
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -669,6 +687,8 @@ class UserService(IUser):
             .user_identifier_step(current_user=current_user)
             .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
+            .user_document_validator(current_user=current_user)
+            .user_data_validation(current_user=current_user)
             .user_electronic_signature(current_user=current_user)
             .build()
         )
@@ -689,28 +709,30 @@ class UserService(IUser):
         encrypted_electronic_signature = PasswordEncrypt.encrypt_password(
             electronic_signature
         )
-        old = user_repository.find_one({"_id": thebes_answer.get("email")})
+        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         if old.get("electronic_signature"):
             raise BadRequestError("user.electronic_signature.already_set")
-        new = deepcopy(old)
-        new["electronic_signature"] = encrypted_electronic_signature
-        new["is_blocked_electronic_signature"] = False
-        new["electronic_signature_wrong_attempts"] = 0
+        new_data = {
+            "electronic_signature": encrypted_electronic_signature,
+            "is_blocked_electronic_signature": False,
+            "electronic_signature_wrong_attempts": 0
+        }
 
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
-            payload=get_user_set_electronic_signature_schema_template_with_data(
-                payload=new
-            ),
-            schema_key="user_set_electronic_signature_schema",
-        )
-        if sent_to_persephone is False:
-            raise InternalServerError("common.process_issue")
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
+        #     payload=get_user_set_electronic_signature_schema_template_with_data(
+        #         payload=new
+        #     ),
+        #     schema_key="user_set_electronic_signature_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
 
-        if user_repository.update_one(old=old, new=new) is False:
+        if user_repository.update_one(old=old, new=new_data) is False:
             raise InternalServerError("common.process_issue")
 
         return {
@@ -725,7 +747,7 @@ class UserService(IUser):
         authentication_service=AuthenticationService,
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        entity = user_repository.find_one({"_id": thebes_answer.get("email")})
+        entity = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -761,29 +783,33 @@ class UserService(IUser):
         user_repository=UserRepository(),
     ):
         thebes_answer = payload.get("x-thebes-answer")
-        email = thebes_answer.get("email")
-        customer_registration_data = user_repository.find_one({"_id": email})
+        unique_id = thebes_answer.get("unique_id")
+        customer_registration_data = user_repository.find_one({"unique_id": unique_id})
         if customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
-
         customer_registration_data_built = (
             CustomerRegistrationBuilder(customer_registration_data)
             .personal_name()
+            .personal_nick_name()
             .personal_birth_date()
-            .personal_parentage()
             .personal_gender()
+            .personal_parentage()
             .personal_email()
             .personal_phone()
-            .personal_patrimony()
-            .personal_us_tin()
+            .personal_nationality()
             .personal_occupation_activity()
             .personal_company_name()
+            .personal_company_cnpj()
+            .personal_patrimony()
+            .personal_income_tax_type()
+            .personal_income()
+            .personal_tax_residences()
             .marital_status()
             .marital_spouse_name()
             .marital_spouse_cpf()
-            .marital_cpf()
             .marital_nationality()
             .documents_cpf()
+            .documents_identity_type()
             .documents_identity_number()
             .documents_expedition_date()
             .documents_issuer()
@@ -795,7 +821,9 @@ class UserService(IUser):
             .address_neighborhood()
             .address_zip_code()
             .address_state()
+            .address_phone()
         ).build()
+
 
         return {
             "status_code": status.HTTP_200_OK,
@@ -808,11 +836,16 @@ class UserService(IUser):
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ):
-        email: str = payload.get("x-thebes-answer", {}).get("email")
+        UserService.onboarding_step_validator(
+            payload=payload, onboard_step="user_data_validation"
+        )
+        unique_id: str = payload.get("x-thebes-answer").get("unique_id")
         update_customer_registration_data: dict = payload.get(
             "customer_registration_data"
         )
-        old_customer_registration_data = user_repository.find_one({"_id": email})
+        old_customer_registration_data = user_repository.find_one(
+            {"unique_id": unique_id}
+        )
         if old_customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -820,20 +853,30 @@ class UserService(IUser):
             UpdateCustomerRegistrationBuilder(
                 old_personal_data=old_customer_registration_data,
                 new_personal_data=update_customer_registration_data,
-                email=email,
+                unique_id=unique_id,
             )
             .personal_name()
-            .person_us_tin()
+            .personal_nick_name()
             .personal_phone()
             .personal_patrimony()
+            .personal_income_tax_type()
+            .personal_income()
             .personal_occupation_activity()
             .personal_occupation_cnpj()
             .personal_company_name()
+            .personal_nationality()
+            .personal_tax_residences()
+            .personal_email()
+            .personal_gender()
+            .personal_father_name()
+            .personal_mother_name()
+            .personal_birth_date()
             .marital_status()
             .marital_cpf()
             .marital_nationality()
             .marital_spouse_name()
             .documents_cpf()
+            .documents_identity_type()
             .documents_identity_number()
             .documents_expedition_date()
             .documents_issuer()
@@ -842,15 +885,15 @@ class UserService(IUser):
             .address_street_name()
             .address_city()
             .address_number()
-            .address_id_city()
             .address_zip_code()
             .address_neighborhood()
             .address_state()
+            .address_phone()
         ).build()
 
         user_update_register_schema = (
             get_user_update_register_schema_template_with_data(
-                email=email,
+                unique_id=unique_id,
                 modified_register_data=modified_register_data,
                 update_customer_registration_data=update_customer_registration_data,
             )
@@ -858,18 +901,33 @@ class UserService(IUser):
 
         Sindri.dict_to_primitive_types(user_update_register_schema)
 
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
-            payload=user_update_register_schema,
-            schema_key="user_update_register_data_schema",
-        )
-        if sent_to_persephone is False:
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
+        #     payload=user_update_register_schema,
+        #     schema_key="user_update_register_data_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
+
+        del new_customer_registration_data["_id"]
+
+        if not user_repository.update_one(
+            old={"unique_id": unique_id},
+            new=new_customer_registration_data
+        ):
             raise InternalServerError("common.process_issue")
 
         SinacorService.save_or_update_client_data(
             user_data=new_customer_registration_data
         )
+
+        if not user_repository.update_one(
+            old={"unique_id": unique_id},
+            new={"is_bureau_data_validated": True}
+        ):
+            raise InternalServerError("common.process_issue")
 
         return {
             "status_code": status.HTTP_200_OK,
