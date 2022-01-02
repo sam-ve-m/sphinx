@@ -269,12 +269,15 @@ class ClientRegisterBuilder:
 
     def add_cd_ddd_celular1(self, user_data: dict):
         # TODO: celphone format validate
-        self._fields_added.update({"CD_DDD_CELULAR1": int(user_data["cel_phone"][:2])})
+        self._fields_added.update({"CD_DDD_CELULAR1": int(user_data["phone"][:2])})
         return self
 
     def add_cd_ddd_tel(self, user_data: dict):
+        phone = user_data["address"].get("phone")
+        if not phone:
+            phone = user_data["phone"]
         self._fields_added.update(
-            {"CD_DDD_TEL": int(user_data["address"]["phone"][:2])}
+            {"CD_DDD_TEL": int(phone[:2])}
         )
         return self
 
@@ -287,7 +290,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_nr_celular1(self, user_data: dict):
-        self._fields_added.update({"NR_CELULAR1": user_data["cel_phone"][2:]})
+        self._fields_added.update({"NR_CELULAR1": user_data["phone"][2:]})
         return self
 
     def add_nm_cidade(self, user_data: dict, sinacor_types_repository=SinacorTypesRepository()):
@@ -306,8 +309,11 @@ class ClientRegisterBuilder:
         return self
 
     def add_nr_telefone(self, user_data: dict):
+        phone = user_data["address"].get("phone")
+        if not phone:
+            phone = user_data["phone"]
         self._fields_added.update(
-            {"NR_TELEFONE": int(user_data["address"]["phone"][2:])}
+            {"NR_TELEFONE": int(phone[2:])}
         )
         return self
 

@@ -432,30 +432,31 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
-        if type(old) is not dict:
+        user_data = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        if type(user_data) is not dict:
             raise BadRequestError("common.register_not_exists")
         file_type = payload.get("file_type")
-        new = deepcopy(old)
-        UserService.fill_term_signed(
-            payload=new,
+        term_update = UserService.fill_term_signed(
             file_type=file_type.value,
             version=file_repository.get_current_term_version(file_type=file_type),
         )
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.TERM_QUEUE.value,
-            payload=get_user_signed_term_template_with_data(
-                payload=new, file_type=file_type.value
-            ),
-            schema_key="signed_term_schema",
-        )
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.TERM_QUEUE.value,
+        #     payload=get_user_signed_term_template_with_data(
+        #         payload=new, file_type=file_type.value
+        #     ),
+        #     schema_key="signed_term_schema",
+        # )
+        sent_to_persephone = True
         if (
-            sent_to_persephone and user_repository.update_one(old=old, new=new)
+            sent_to_persephone and user_repository.update_one(old={"unique_id": thebes_answer.get("unique_id")}, new=term_update)
         ) is False:
             raise InternalServerError("common.unable_to_process")
+        user_data = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         jwt_payload_data, control_data = ThebesHallBuilder(
-            user_data=new, ttl=525600
+            user_data=user_data, ttl=525600
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
@@ -481,14 +482,15 @@ class UserService(IUser):
         )
 
     @staticmethod
-    def fill_term_signed(payload: dict, file_type: str, version: int) -> None:
-        if payload.get("terms") is None:
-            payload["terms"] = dict()
-        payload["terms"][file_type] = {
-            "version": version,
-            "date": datetime.now(),
-            "is_deprecated": False,
+    def fill_term_signed(file_type: str, version: int) -> dict:
+        terms_update = {
+            f"terms.{file_type}": {
+                "version": version,
+                "date": datetime.now(),
+                "is_deprecated": False,
+            }
         }
+        return terms_update
 
     @staticmethod
     def get_signed_term(
@@ -712,23 +714,25 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
         if old.get("electronic_signature"):
             raise BadRequestError("user.electronic_signature.already_set")
-        new = deepcopy(old)
-        new["electronic_signature"] = encrypted_electronic_signature
-        new["is_blocked_electronic_signature"] = False
-        new["electronic_signature_wrong_attempts"] = 0
+        new_data = {
+            "electronic_signature": encrypted_electronic_signature,
+            "is_blocked_electronic_signature": False,
+            "electronic_signature_wrong_attempts": 0
+        }
 
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
-            payload=get_user_set_electronic_signature_schema_template_with_data(
-                payload=new
-            ),
-            schema_key="user_set_electronic_signature_schema",
-        )
-        if sent_to_persephone is False:
-            raise InternalServerError("common.process_issue")
+        # TODO: BACK WITH THAT
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
+        #     payload=get_user_set_electronic_signature_schema_template_with_data(
+        #         payload=new
+        #     ),
+        #     schema_key="user_set_electronic_signature_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
 
-        if user_repository.update_one(old=old, new=new) is False:
+        if user_repository.update_one(old=old, new=new_data) is False:
             raise InternalServerError("common.process_issue")
 
         return {

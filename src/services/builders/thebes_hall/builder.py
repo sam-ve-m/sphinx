@@ -137,7 +137,7 @@ class ThebesHallBuilder:
         self._control_data.update(
             {
                 "using_suitability_or_refuse_term": self.user_repository.is_user_using_suitability_or_refuse_term(
-                    user_email=self._user_data.get("email")
+                    unique_id=self._user_data.get("unique_id")
                 )
             }
         )
@@ -183,7 +183,7 @@ class ThebesHallBuilder:
             self._jwt_payload_data.update({"accounts": dict()})
         if self._jwt_payload_data["accounts"].get("US") is None:
             self._jwt_payload_data["accounts"].update({"US": dict()})
-        self._jwt_payload_data["accounts"]["US"].update({"dw_account": "123"})
+        self._jwt_payload_data["accounts"]["US"].update({"dw_account": None})
         return self
 
     def add_bovespa_account(self):
@@ -226,6 +226,5 @@ class ThebesHallBuilder:
     def add_client_has_us_trade_allowed(
         self,
     ):
-        # TODO
-        self._jwt_payload_data.update({"client_has_us_trade_allowed": True})
+        self._jwt_payload_data.update({"client_has_us_trade_allowed": False})
         return self

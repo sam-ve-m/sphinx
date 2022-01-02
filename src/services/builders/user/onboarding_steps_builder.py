@@ -39,8 +39,8 @@ class OnboardingStepBuilder:
         return self
 
     def user_identifier_step(self, current_user: dict):
-        user_cpf = current_user.get('identifier_document').get("cpf")
-        user_cel_phone = current_user.get("cel_phone")
+        user_cpf = current_user.get('identifier_document', {}).get("cpf")
+        user_cel_phone = current_user.get("phone")
         if (
             user_cpf is not None
             and user_cel_phone is not None
@@ -118,7 +118,7 @@ class OnboardingStepBuilder:
             and self.__onboarding_steps["current_onboarding_step"]
             == "user_electronic_signature"
         ):
-            self.__onboarding_steps["user_electronic_s]ignature"] = True
+            self.__onboarding_steps["user_electronic_signature"] = True
         return self
 
     def is_finished(self):

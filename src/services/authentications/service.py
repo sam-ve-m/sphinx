@@ -211,7 +211,7 @@ class AuthenticationService(IAuthentication):
         user_sincad_status_from_database = user.get("sincad")
         user_sinacor_status_from_database = user.get("sinacor")
         user_bmf_account_from_database = user.get("bmf_account")
-        user_cpf_from_database = user.get("identifier_document").get("cpf")
+        user_cpf_from_database = user.get("identifier_document", {}).get("cpf")
 
         if not all(
             [

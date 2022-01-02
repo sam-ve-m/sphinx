@@ -503,7 +503,7 @@ class UserAddressDataValidation(BaseModel):
     street_name: StreetNameSource
     number: AddressNumberSource
     zip_code: ZipCodeSource
-    phone: PhoneSource
+    phone: Optional[PhoneSource]
 
     @classmethod
     def validate_contry_state_city(cls, country: str, state: str, id_city: int) -> bool:
@@ -515,28 +515,26 @@ class UserAddressDataValidation(BaseModel):
 
     @root_validator()
     def validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        country = values.get("country")
-        state = values.get("state")
-        city = values.get("city")
-        neighborhood = values.get("neighborhood")
-        street_name = values.get("street_name")
-        number = values.get("number")
-        zip_code = values.get("zip_code")
-        if all([country, state, city, neighborhood, street_name, number, zip_code]):
-            is_valid = cls.validate_contry_state_city(
-                country.get("value"),
-                state.get("value"),
-                city.get("value"),
-            )
-            if not is_valid:
-                raise ValueError(
-                    f"The combination of values {country}, {state}, {city} does not match"
-                )
-        else:
-            raise ValueError(
-                f"Some values are missing country: {country}, state: {state}, city: {city}, neighborhood: {neighborhood}, street_name: {street_name}, number: {number}, zip_code: {zip_code}"
-            )
+        CountrySource(**values.get("country"))
+        StateSource(**values.get("state"))
+        CountySource(**values.get("city"))
+        NeighborhoodSource(**values.get("neighborhood"))
+        StreetNameSource(**values.get("street_name"))
+        AddressNumberSource(**values.get("number"))
+        ZipCodeSource(**values.get("zip_code"))
 
+        country = values.get("country").get("value")
+        state = values.get("state").get("value")
+        city = values.get("city").get("value")
+        is_valid = cls.validate_contry_state_city(
+            country,
+            state,
+            city,
+        )
+        if not is_valid:
+            raise ValueError(
+                f"The combination of values {country}, {state}, {city} does not match"
+            )
         return values
 
 

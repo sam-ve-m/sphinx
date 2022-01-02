@@ -99,7 +99,7 @@ class Cpf(BaseModel):
 
 
 class CelPhone(BaseModel):
-    cel_phone: constr(min_length=11, max_length=11)
+    phone: constr(min_length=11, max_length=11)
 
 
 class Nationality(BaseModel):

@@ -73,7 +73,7 @@ class SuitabilityService(ISuitability):
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
         unique_id: str = thebes_answer.get("unique_id")
-        suitability_submission_date = datetime.utcnow()
+        suitability_submission_date = datetime.now()
         (
             answers,
             score,

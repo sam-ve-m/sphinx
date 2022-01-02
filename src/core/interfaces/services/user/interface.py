@@ -113,7 +113,7 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def fill_term_signed(payload: dict, file_type: str, version: int) -> None:
+    def fill_term_signed(file_type: str, version: int) -> dict:
         pass
 
     @staticmethod
