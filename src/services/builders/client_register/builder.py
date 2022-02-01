@@ -88,7 +88,9 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cpfcgc(self, user_data: dict):
-        self._fields_added.update({"CD_CPFCGC": int(user_data["identifier_document"]["cpf"])})
+        self._fields_added.update(
+            {"CD_CPFCGC": int(user_data["identifier_document"]["cpf"])}
+        )
         return self
 
     def add_dt_nasc_fund(self, user_data: dict):
@@ -276,9 +278,7 @@ class ClientRegisterBuilder:
         phone = user_data["address"].get("phone")
         if not phone:
             phone = user_data["phone"]
-        self._fields_added.update(
-            {"CD_DDD_TEL": int(phone[:2])}
-        )
+        self._fields_added.update({"CD_DDD_TEL": int(phone[:2])})
         return self
 
     def add_in_ende(self, value=AddressType.RESIDENTIAL.value):
@@ -293,8 +293,12 @@ class ClientRegisterBuilder:
         self._fields_added.update({"NR_CELULAR1": user_data["phone"][2:]})
         return self
 
-    def add_nm_cidade(self, user_data: dict, sinacor_types_repository=SinacorTypesRepository()):
-        name = sinacor_types_repository.get_county_name_by_id(id=user_data["address"]["city"])
+    def add_nm_cidade(
+        self, user_data: dict, sinacor_types_repository=SinacorTypesRepository()
+    ):
+        name = sinacor_types_repository.get_county_name_by_id(
+            id=user_data["address"]["city"]
+        )
         self._fields_added.update({"NM_CIDADE": name})
         return self
 
@@ -312,9 +316,7 @@ class ClientRegisterBuilder:
         phone = user_data["address"].get("phone")
         if not phone:
             phone = user_data["phone"]
-        self._fields_added.update(
-            {"NR_TELEFONE": int(phone[2:])}
-        )
+        self._fields_added.update({"NR_TELEFONE": int(phone[2:])})
         return self
 
     def add_sg_estado(self, user_data: dict):
@@ -444,9 +446,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_num_seq_muni_end1(self, user_data: dict):
-        self._fields_added.update(
-            {"NUM_SEQ_MUNI_END1": user_data["address"]["city"]}
-        )
+        self._fields_added.update({"NUM_SEQ_MUNI_END1": user_data["address"]["city"]})
         return self
 
     def add_num_tipo_con(self, value=None):

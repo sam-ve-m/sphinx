@@ -213,16 +213,17 @@ class AuthenticationService(IAuthentication):
         user_bmf_account_from_database = user.get("bmf_account")
         user_cpf_from_database = user.get("identifier_document", {}).get("cpf")
 
-        if not all(
-            [
-                user_solutiontech_status_from_database,
-                user_sincad_status_from_database,
-                user_sinacor_status_from_database,
-                user_bmf_account_from_database,
-                user_cpf_from_database,
-            ]
-        ):
-            return {}
+        # TODO: POQ ESTA AKI:?
+        # if not all(
+        #     [
+        #         user_solutiontech_status_from_database,
+        #         user_sincad_status_from_database,
+        #         user_sinacor_status_from_database,
+        #         user_bmf_account_from_database,
+        #         user_cpf_from_database,
+        #     ]
+        # ):
+        #     return {}
 
         client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,

@@ -89,7 +89,6 @@ def is_cnpj_valid(cnpj: Union[int, str]) -> bool:
     # Remove some unwanted characters
     cnpj = re.sub("[^0-9]", "", cnpj)
 
-
     sum = 0
     weight = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
 

@@ -19,12 +19,6 @@ class AuthenticationController:
         )
 
     @staticmethod
-    def get_thebes_hall(thebes_answer_from_request_or_error: dict):
-        return AuthenticationService.get_thebes_hall(
-            thebes_answer_from_request_or_error=thebes_answer_from_request_or_error
-        )
-
-    @staticmethod
     def validate_electronic_signature(change_electronic_signature_request: dict):
         return AuthenticationService.create_electronic_signature_jwt(
             change_electronic_signature_request=change_electronic_signature_request

@@ -108,7 +108,7 @@ def get_document_type(request: Request):
     )
 
 
-@router.get("/client_register_enums/county", tags=["client_register_enums"])
+@router.get("/client_register_enums/city", tags=["client_register_enums"])
 def get_county(request: Request, country_state: CountryState = Depends(CountryState)):
     return BaseController.run(
         ClientRegisterEnumsController.get_county,

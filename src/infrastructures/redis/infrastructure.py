@@ -16,6 +16,7 @@ class RedisInfrastructure:
                 host=config("REDIS_HOST"),
                 port=config("REDIS_PORT"),
                 db=config("REDIS_DB"),
+                username=config("REDIS_USER"),
                 password=config("REDIS_PASSWORD"),
             )
         return cls.redis

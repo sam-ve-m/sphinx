@@ -84,9 +84,6 @@ class SinacorService:
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
         )
-        database_and_bureau_dtvm_client_data_merged.update(
-            {"is_bureau_data_validated": True}
-        )
 
         user_is_updated = user_repository.update_one(
             old={"unique_id": database_and_bureau_dtvm_client_data_merged["unique_id"]},
@@ -95,7 +92,6 @@ class SinacorService:
 
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
-
 
     @staticmethod
     def _add_third_party_operator_information(
@@ -137,7 +133,9 @@ class SinacorService:
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
         )
 
-        cpf_client = database_and_bureau_dtvm_client_data_merged.get("identifier_document").get("cpf")
+        cpf_client = database_and_bureau_dtvm_client_data_merged.get(
+            "identifier_document"
+        ).get("cpf")
         client_register_repository.register_validated_users(user_cpf=cpf_client)
 
         return database_and_bureau_dtvm_client_data_merged
@@ -159,12 +157,16 @@ class SinacorService:
         database_and_bureau_dtvm_client_data_merged: dict,
     ):
         client_register_repository.cleanup_temp_tables(
-            user_cpf=database_and_bureau_dtvm_client_data_merged["identifier_document"]["cpf"]
+            user_cpf=database_and_bureau_dtvm_client_data_merged["identifier_document"][
+                "cpf"
+            ]
         )
 
         sinacor_user_control_data = (
             client_register_repository.get_user_control_data_if_user_already_exists(
-                user_cpf=database_and_bureau_dtvm_client_data_merged["identifier_document"]["cpf"]
+                user_cpf=database_and_bureau_dtvm_client_data_merged[
+                    "identifier_document"
+                ]["cpf"]
             )
         )
 
@@ -186,7 +188,9 @@ class SinacorService:
         client_register_repository: ClientRegisterRepository,
     ) -> dict:
 
-        client_cpf = database_and_bureau_dtvm_client_data_merged.get("identifier_document").get("cpf")
+        client_cpf = database_and_bureau_dtvm_client_data_merged.get(
+            "identifier_document"
+        ).get("cpf")
 
         database_and_bureau_dtvm_client_data_merged.update(
             {"sinacor": SinacorClientStatus.CREATED.value}
@@ -279,7 +283,9 @@ class SinacorService:
 
         if is_update is False:
             has_error = client_register_repository.validate_user_data_errors(
-                user_cpf=database_and_bureau_dtvm_client_data_merged["identifier_document"]["cpf"]
+                user_cpf=database_and_bureau_dtvm_client_data_merged[
+                    "identifier_document"
+                ]["cpf"]
             )
             if has_error:
                 raise BadRequestError("bureau.error.fail")

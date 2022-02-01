@@ -39,7 +39,7 @@ class OnboardingStepBuilder:
         return self
 
     def user_identifier_step(self, current_user: dict):
-        user_cpf = current_user.get('identifier_document', {}).get("cpf")
+        user_cpf = current_user.get("identifier_document", {}).get("cpf")
         user_cel_phone = current_user.get("phone")
         if (
             user_cpf is not None

@@ -173,29 +173,29 @@ class ThebesHallBuilder:
     def add_br_accounts(self):
         if self._jwt_payload_data.get("accounts") is None:
             self._jwt_payload_data.update({"accounts": dict()})
-        if self._jwt_payload_data["accounts"].get("BR") is None:
-            self._jwt_payload_data["accounts"].update({"BR": dict()})
+        if self._jwt_payload_data["accounts"].get("br") is None:
+            self._jwt_payload_data["accounts"].update({"br": dict()})
         (self.add_bovespa_account().add_bmf_account())
         return self
 
     def add_us_accounts(self):
         if self._jwt_payload_data.get("accounts") is None:
             self._jwt_payload_data.update({"accounts": dict()})
-        if self._jwt_payload_data["accounts"].get("US") is None:
-            self._jwt_payload_data["accounts"].update({"US": dict()})
-        self._jwt_payload_data["accounts"]["US"].update({"dw_account": None})
+        if self._jwt_payload_data["accounts"].get("us") is None:
+            self._jwt_payload_data["accounts"].update({"us": dict()})
+        self._jwt_payload_data["accounts"]["us"].update({"dw_account": None})
         return self
 
     def add_bovespa_account(self):
         if bovespa_account := self._user_data.get("bovespa_account"):
-            self._jwt_payload_data["accounts"]["BR"].update(
+            self._jwt_payload_data["accounts"]["br"].update(
                 {"bovespa_account": bovespa_account}
             )
         return self
 
     def add_bmf_account(self):
         if bmf_account := self._user_data.get("bmf_account"):
-            self._jwt_payload_data["accounts"]["BR"].update(
+            self._jwt_payload_data["accounts"]["br"].update(
                 {"bmf_account": bmf_account}
             )
         return self

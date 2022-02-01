@@ -8,7 +8,6 @@ from src.repositories.cache.redis import RepositoryRedis
 
 
 class SinacorTypesRepository(OracleBaseRepository):
-
     def get_county_name_by_id(self, id: int) -> Optional[str]:
         sql = f"""
             SELECT NOME_MUNI
@@ -168,7 +167,7 @@ class SinacorTypesRepository(OracleBaseRepository):
         """
         tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
-            fields=["initials", "description"], values=tuple_result
+            fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
@@ -179,7 +178,7 @@ class SinacorTypesRepository(OracleBaseRepository):
         """
         tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
-            fields=["initials", "description"], values=tuple_result
+            fields=["code", "description"], values=tuple_result
         )
         return dict_result
 

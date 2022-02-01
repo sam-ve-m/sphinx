@@ -121,7 +121,8 @@ class UserService(IUser):
 
         if (
             client_register.client_is_allowed_to_cancel_registration(
-                user_cpf=int(old.get("identifier_document").get("cpf")), bmf_account=int(old.get("bmf_account"))
+                user_cpf=int(old.get("identifier_document").get("cpf")),
+                bmf_account=int(old.get("bmf_account")),
             )
             is False
         ):
@@ -432,7 +433,9 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        user_data = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        user_data = user_repository.find_one(
+            {"unique_id": thebes_answer.get("unique_id")}
+        )
         if type(user_data) is not dict:
             raise BadRequestError("common.register_not_exists")
         file_type = payload.get("file_type")
@@ -451,10 +454,15 @@ class UserService(IUser):
         # )
         sent_to_persephone = True
         if (
-            sent_to_persephone and user_repository.update_one(old={"unique_id": thebes_answer.get("unique_id")}, new=term_update)
+            sent_to_persephone
+            and user_repository.update_one(
+                old={"unique_id": thebes_answer.get("unique_id")}, new=term_update
+            )
         ) is False:
             raise InternalServerError("common.unable_to_process")
-        user_data = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        user_data = user_repository.find_one(
+            {"unique_id": thebes_answer.get("unique_id")}
+        )
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
         ).build()
@@ -562,12 +570,8 @@ class UserService(IUser):
         # if sent_to_persephone is False:
         #     raise InternalServerError("common.process_issue")
 
-        del user_identifier_data['cpf']
-        user_identifier_data.update({
-            "identifier_document": {
-                "cpf": cpf
-            }
-        })
+        del user_identifier_data["cpf"]
+        user_identifier_data.update({"identifier_document": {"cpf": cpf}})
 
         user_updated = user_repository.update_one(
             old=current_user, new=user_identifier_data
@@ -627,7 +631,7 @@ class UserService(IUser):
                 "client_type": 1,
                 "person_type": PersonType.PHYSICAL_PERSON.value,
                 "investor_type": 101,
-                "cosif_tax_classification": 21
+                "cosif_tax_classification": 21,
             }
         )
 
@@ -717,7 +721,7 @@ class UserService(IUser):
         new_data = {
             "electronic_signature": encrypted_electronic_signature,
             "is_blocked_electronic_signature": False,
-            "electronic_signature_wrong_attempts": 0
+            "electronic_signature_wrong_attempts": 0,
         }
 
         # TODO: BACK WITH THAT
@@ -824,7 +828,6 @@ class UserService(IUser):
             .address_phone()
         ).build()
 
-
         return {
             "status_code": status.HTTP_200_OK,
             "payload": customer_registration_data_built,
@@ -914,8 +917,7 @@ class UserService(IUser):
         del new_customer_registration_data["_id"]
 
         if not user_repository.update_one(
-            old={"unique_id": unique_id},
-            new=new_customer_registration_data
+            old={"unique_id": unique_id}, new=new_customer_registration_data
         ):
             raise InternalServerError("common.process_issue")
 
@@ -924,8 +926,7 @@ class UserService(IUser):
         )
 
         if not user_repository.update_one(
-            old={"unique_id": unique_id},
-            new={"is_bureau_data_validated": True}
+            old={"unique_id": unique_id}, new={"is_bureau_data_validated": True}
         ):
             raise InternalServerError("common.process_issue")
 

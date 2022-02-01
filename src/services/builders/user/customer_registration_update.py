@@ -45,7 +45,9 @@ class UpdateCustomerRegistrationBuilder:
         )
 
     def _get_new_value(self, sub_partition: str, field_name: str) -> Optional[any]:
-        if source := self.__new_personal_data.get(sub_partition, {}).get(field_name, {}):
+        if source := self.__new_personal_data.get(sub_partition, {}).get(
+            field_name, {}
+        ):
             return source.get("value")
 
     def personal_name(self):
@@ -68,7 +70,9 @@ class UpdateCustomerRegistrationBuilder:
         old_birth_date = self.__old_personal_data.get("birth_date")
         if new_birth_date := self._get_new_value("personal", "birth_date"):
             self._update_modified_data(
-                levels=("birth_date",), old_field=old_birth_date, new_filed=new_birth_date
+                levels=("birth_date",),
+                old_field=old_birth_date,
+                new_filed=new_birth_date,
             )
         return self
 
@@ -84,7 +88,9 @@ class UpdateCustomerRegistrationBuilder:
         old_father_name = self.__old_personal_data.get("father_name")
         if new_father_name := self._get_new_value("personal", "father_name"):
             self._update_modified_data(
-                levels=("father_name",), old_field=old_father_name, new_filed=new_father_name
+                levels=("father_name",),
+                old_field=old_father_name,
+                new_filed=new_father_name,
             )
         return self
 
@@ -92,7 +98,9 @@ class UpdateCustomerRegistrationBuilder:
         old_mother_name = self.__old_personal_data.get("mother_name")
         if new_mother_name := self._get_new_value("personal", "mother_name"):
             self._update_modified_data(
-                levels=("mother_name",), old_field=old_mother_name, new_filed=new_mother_name
+                levels=("mother_name",),
+                old_field=old_mother_name,
+                new_filed=new_mother_name,
             )
         return self
 
@@ -126,7 +134,9 @@ class UpdateCustomerRegistrationBuilder:
             "activity"
         )
 
-        if new_occupation_activity := self._get_new_value("personal", "occupation_activity"):
+        if new_occupation_activity := self._get_new_value(
+            "personal", "occupation_activity"
+        ):
             self._update_modified_data(
                 levels=("occupation", "activity"),
                 old_field=old_occupation_activity,
@@ -138,8 +148,8 @@ class UpdateCustomerRegistrationBuilder:
     def personal_occupation_cnpj(self):
         old_occupation_cnpj = (
             self.__old_personal_data.get("occupation", {})
-                .get("company", {})
-                .get("cnpj")
+            .get("company", {})
+            .get("cnpj")
         )
 
         if new_occupation_cnpj := self._get_new_value("personal", "company_cnpj"):
@@ -154,8 +164,8 @@ class UpdateCustomerRegistrationBuilder:
     def personal_company_name(self):
         old_company_name = (
             self.__old_personal_data.get("occupation", {})
-                .get("company", {})
-                .get("name")
+            .get("company", {})
+            .get("name")
         )
 
         if new_company_name := self._get_new_value("personal", "company_name"):
@@ -180,7 +190,9 @@ class UpdateCustomerRegistrationBuilder:
         return self
 
     def personal_income_tax_type(self):
-        old_patrimony = self.__old_personal_data.get("assets", {}).get("income_tax_type")
+        old_patrimony = self.__old_personal_data.get("assets", {}).get(
+            "income_tax_type"
+        )
 
         if new_patrimony := self._get_new_value("personal", "income_tax_type"):
             self._update_modified_data(
@@ -210,7 +222,7 @@ class UpdateCustomerRegistrationBuilder:
         self._update_modified_data(
             levels=("assets", "date"),
             old_field=old_date,
-            new_filed=datetime.now().replace(hour=0, minute=0, second=0)
+            new_filed=datetime.now().replace(hour=0, minute=0, second=0),
         )
 
     def personal_tax_residences(self):
@@ -240,7 +252,7 @@ class UpdateCustomerRegistrationBuilder:
         if spouse:
             old_marital_cpf = spouse.get("cpf")
             if new_marital_spouse := self._get_new_value("marital", "spouse"):
-                new_marital_cpf = new_marital_spouse.get('cpf').get('value')
+                new_marital_cpf = new_marital_spouse.get("cpf").get("value")
                 self._update_modified_data(
                     levels=("marital", "spouse", "cpf"),
                     old_field=old_marital_cpf,
@@ -254,7 +266,9 @@ class UpdateCustomerRegistrationBuilder:
         if spouse:
             old_marital_nationality = spouse.get("nationality")
             if new_marital_spouse := self._get_new_value("marital", "spouse"):
-                new_marital_nationality = new_marital_spouse.get('nationality', {}).get('value')
+                new_marital_nationality = new_marital_spouse.get("nationality", {}).get(
+                    "value"
+                )
                 self._update_modified_data(
                     levels=("marital", "spouse", "nationality"),
                     old_field=old_marital_nationality,
@@ -267,7 +281,9 @@ class UpdateCustomerRegistrationBuilder:
         if spouse:
             old_spouse_name = spouse.get("name")
             if new_marital_spouse := self._get_new_value("marital", "spouse"):
-                new_marital_spouse_name = new_marital_spouse.get('name', {}).get('value')
+                new_marital_spouse_name = new_marital_spouse.get("name", {}).get(
+                    "value"
+                )
                 self._update_modified_data(
                     levels=("marital", "spouse", "name"),
                     old_field=old_spouse_name,
@@ -279,7 +295,9 @@ class UpdateCustomerRegistrationBuilder:
         old_cpf = self.__old_personal_data.get("cpf")
         if new_cpf := self._get_new_value("documents", "document_cpf"):
             self._update_modified_data(
-                levels=("identifier_document", "cpf"), old_field=old_cpf, new_filed=new_cpf
+                levels=("identifier_document", "cpf"),
+                old_field=old_cpf,
+                new_filed=new_cpf,
             )
         return self
 
@@ -290,7 +308,9 @@ class UpdateCustomerRegistrationBuilder:
             .get("type")
         )
 
-        if new_document_identity_type := self._get_new_value("documents", "identity_tpe"):
+        if new_document_identity_type := self._get_new_value(
+            "documents", "identity_tpe"
+        ):
             self._update_modified_data(
                 levels=("identifier_document", "document_data", "type"),
                 old_field=old_document_identity_type,
@@ -447,9 +467,7 @@ class UpdateCustomerRegistrationBuilder:
         return self
 
     def address_phone(self):
-        old_address_zip_code = self.__old_personal_data.get("address", {}).get(
-            "phone"
-        )
+        old_address_zip_code = self.__old_personal_data.get("address", {}).get("phone")
 
         if new_address_zip_code := self._get_new_value("address", "phone"):
             self._update_modified_data(
@@ -467,4 +485,3 @@ class UpdateCustomerRegistrationBuilder:
             "source": "user",
         }
         return self.__update_buffer, modified_register
-
