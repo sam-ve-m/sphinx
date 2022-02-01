@@ -225,15 +225,14 @@ class AuthenticationService(IAuthentication):
         # ):
         #     return {}
 
-        client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
+        client_map_requirements_to_allow_trade_from_database = AuthenticationService._get_client_map_requirements_to_allow_trade(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             user_sincad_status_from_database=user_sincad_status_from_database,
-            user_sinacor_status_from_database=user_sinacor_status_from_database,
+            user_sinacor_status_from_database=user_sinacor_status_from_database
         )
 
-        user_has_valid_solutiontech_status_in_database = AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
-            user_solutiontech_status_from_database=user_solutiontech_status_from_database
-        )
+        user_has_valid_solutiontech_status_in_database = AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
+            user_solutiontech_status_from_database=user_solutiontech_status_from_database)
 
         if user_has_valid_solutiontech_status_in_database:
             user_solutiontech_status_from_check_status_request = solutiontech.check_if_client_is_synced_with_solutiontech(
@@ -241,10 +240,10 @@ class AuthenticationService(IAuthentication):
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             )
 
-            client_has_trade_allowed_status_with_database_user = AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
-                client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
+            client_map_requirements_to_allow_trade_from_database = AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
+                client_map_requirements_to_allow_trade_from_database=client_map_requirements_to_allow_trade_from_database,
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
-                user_solutiontech_status_from_check_status_request=user_solutiontech_status_from_check_status_request,
+                user_solutiontech_status_from_check_status_request=user_solutiontech_status_from_check_status_request
             )
 
         user_is_already_sync_with_sincad = (
@@ -260,7 +259,7 @@ class AuthenticationService(IAuthentication):
             )
 
             AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
-                client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
+                client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_trade_from_database,
                 sincad_status_from_sinacor=sincad_status_from_sinacor,
                 user_sincad_status_from_database=user_sincad_status_from_database,
             )
@@ -271,15 +270,15 @@ class AuthenticationService(IAuthentication):
         )
 
         AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
-            client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
+            client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_trade_from_database,
             sinacor_status_from_sinacor=sinacor_status_from_sinacor,
             user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
-        return client_has_trade_allowed_status_with_database_user
+        return client_map_requirements_to_allow_trade_from_database
 
     @staticmethod
-    def _get_client_has_trade_allowed_status_with_database_user(
+    def _get_client_map_requirements_to_allow_trade(
         user_solutiontech_status_from_database: str,
         user_sincad_status_from_database: bool,
         user_sinacor_status_from_database: bool,
@@ -303,7 +302,7 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def _update_client_has_trade_allowed_status_with_solutiontech_status_response(
-        client_has_trade_allowed_status_with_database_user: dict,
+        client_map_requirements_to_allow_trade_from_database: dict,
         user_solutiontech_status_from_database: str,
         user_solutiontech_status_from_check_status_request: str,
     ):
@@ -313,14 +312,14 @@ class AuthenticationService(IAuthentication):
             != user_solutiontech_status_from_check_status_request
         )
 
-        client_has_trade_allowed_status_with_database_user["solutiontech"][
+        client_map_requirements_to_allow_trade_from_database["solutiontech"][
             "status"
         ] = user_solutiontech_status_from_check_status_request
-        client_has_trade_allowed_status_with_database_user["solutiontech"][
+        client_map_requirements_to_allow_trade_from_database["solutiontech"][
             "status_changed"
         ] = solutiontech_status_changed
 
-        return client_has_trade_allowed_status_with_database_user
+        return client_map_requirements_to_allow_trade_from_database
 
     @staticmethod
     def _update_client_has_trade_allowed_status_with_sincad_status_response(
@@ -361,7 +360,7 @@ class AuthenticationService(IAuthentication):
         return client_has_trade_allowed_status_with_database_user
 
     @staticmethod
-    def check_if_user_has_valid_solutiontech_status_in_database(
+    def _check_if_user_has_valid_solutiontech_status_in_database(
         user_solutiontech_status_from_database: str,
     ):
         user_has_valid_solutiontech_status_in_database = (

@@ -385,17 +385,13 @@ def test_thebes_hall_was_sent_to_persephone(
 
 def test_update_client_has_trade_allowed_status_with_solutiontech_status_response_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database="t1",
-            user_sincad_status_from_database=True,
-            user_sinacor_status_from_database=True,
-        )
+        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
+                                                                          user_sincad_status_from_database=True,
+                                                                          user_sinacor_status_from_database=True)
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
-        client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
-        user_solutiontech_status_from_database="t1",
-        user_solutiontech_status_from_check_status_request="t2",
-    )
+        client_map_requirements_to_allow_trade_from_database=client_has_trade_allowed_status_with_database_user,
+        user_solutiontech_status_from_database="t1", user_solutiontech_status_from_check_status_request="t2")
     assert (
         client_has_trade_allowed_status_with_database_user["solutiontech"]["status"]
         == "t2"
@@ -410,17 +406,13 @@ def test_update_client_has_trade_allowed_status_with_solutiontech_status_respons
 
 def test_update_client_has_trade_allowed_status_with_solutiontech_status_response_dont_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database="t1",
-            user_sincad_status_from_database=True,
-            user_sinacor_status_from_database=True,
-        )
+        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
+                                                                          user_sincad_status_from_database=True,
+                                                                          user_sinacor_status_from_database=True)
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
-        client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
-        user_solutiontech_status_from_database="t1",
-        user_solutiontech_status_from_check_status_request="t1",
-    )
+        client_map_requirements_to_allow_trade_from_database=client_has_trade_allowed_status_with_database_user,
+        user_solutiontech_status_from_database="t1", user_solutiontech_status_from_check_status_request="t1")
     assert (
         client_has_trade_allowed_status_with_database_user["solutiontech"]["status"]
         == "t1"
@@ -435,11 +427,9 @@ def test_update_client_has_trade_allowed_status_with_solutiontech_status_respons
 
 def test_update_client_has_trade_allowed_status_with_sincad_status_response_change_to_true():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database="t1",
-            user_sincad_status_from_database=False,
-            user_sinacor_status_from_database=True,
-        )
+        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
+                                                                          user_sincad_status_from_database=False,
+                                                                          user_sinacor_status_from_database=True)
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -457,11 +447,9 @@ def test_update_client_has_trade_allowed_status_with_sincad_status_response_chan
 
 def test_update_client_has_trade_allowed_status_with_sincad_status_response_change_to_false():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database="t1",
-            user_sincad_status_from_database=True,
-            user_sinacor_status_from_database=False,
-        )
+        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
+                                                                          user_sincad_status_from_database=True,
+                                                                          user_sinacor_status_from_database=False)
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -479,11 +467,9 @@ def test_update_client_has_trade_allowed_status_with_sincad_status_response_chan
 
 def test_update_client_has_trade_allowed_status_with_sincad_status_response_dont_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database="t1",
-            user_sincad_status_from_database=True,
-            user_sinacor_status_from_database=True,
-        )
+        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
+                                                                          user_sincad_status_from_database=True,
+                                                                          user_sinacor_status_from_database=True)
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -501,11 +487,9 @@ def test_update_client_has_trade_allowed_status_with_sincad_status_response_dont
 
 def test_update_client_has_trade_allowed_status_with_sinacor_status_response_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database="t1",
-            user_sincad_status_from_database=False,
-            user_sinacor_status_from_database=False,
-        )
+        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
+                                                                          user_sincad_status_from_database=False,
+                                                                          user_sinacor_status_from_database=False)
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -523,11 +507,9 @@ def test_update_client_has_trade_allowed_status_with_sinacor_status_response_cha
 
 def test_update_client_has_trade_allowed_status_with_sinacor_status_response_dont_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
-            user_solutiontech_status_from_database="t1",
-            user_sincad_status_from_database=True,
-            user_sinacor_status_from_database=True,
-        )
+        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
+                                                                          user_sincad_status_from_database=True,
+                                                                          user_sinacor_status_from_database=True)
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -544,23 +526,20 @@ def test_update_client_has_trade_allowed_status_with_sinacor_status_response_don
 
 
 def test_check_if_user_has_valid_solutiontech_status_in_database_send_status():
-    assert AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
-        user_solutiontech_status_from_database=SolutiontechClientImportStatus.SEND.value
-    )
+    assert AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
+        user_solutiontech_status_from_database=SolutiontechClientImportStatus.SEND.value)
 
 
 def test_check_if_user_has_valid_solutiontech_status_in_database_failed_status():
-    assert AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
-        user_solutiontech_status_from_database=SolutiontechClientImportStatus.SEND.value
-    )
+    assert AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
+        user_solutiontech_status_from_database=SolutiontechClientImportStatus.SEND.value)
 
 
 def test_check_if_user_has_valid_solutiontech_status_in_database_sync_status():
     assert (
-        AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
-            user_solutiontech_status_from_database=SolutiontechClientImportStatus.SYNC.value
-        )
-        is False
+            AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
+                user_solutiontech_status_from_database=SolutiontechClientImportStatus.SYNC.value)
+            is False
     )
 
 
