@@ -5,7 +5,6 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 RUN ln -sf /usr/bin/pip3 /usr/bin/pip
 
 EXPOSE 8000
-RUN mkdir -p /opt/envs/sphinx.lionx.com.br
 RUN mkdir -p /opt/envs/sphinx.lionx.com.br/
 RUN mkdir -p /opt/envs/heimdall.lionx.com.br/
 RUN mkdir -p /opt/envs/mist.lionx.com.br/
@@ -15,7 +14,8 @@ RUN touch /opt/envs/mist.lionx.com.br/.env
 WORKDIR /app/sphinx
 COPY . /app/sphinx/
 
-RUN pip install -r /app/sphinx/requirements.txt --trusted-host 18.231.147.30
+RUN pip install -r /app/sphinx/requirements.txt
+RUN pip install cx_oracle
 COPY ./instantclient /opt/instantclient/
 RUN cd /opt/instantclient
 RUN ls -al /opt/instantclient
