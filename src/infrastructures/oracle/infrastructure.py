@@ -2,11 +2,11 @@
 from typing import List
 
 # STANDARD LIBS
-from contextlib import contextmanager
+from contextlib import asynccontextmanager
 import logging
 
 # OUTSIDE LIBRARIES
-import cx_Oracle
+import cx_Oracle_async
 
 # SPHINX
 from src.infrastructures.env_config import config
@@ -17,27 +17,27 @@ class OracleInfrastructure:
     pool = None
 
     @classmethod
-    def _get_pool(cls):
+    async def _get_pool(cls):
         if cls.pool is None:
-            cls.pool = cx_Oracle.SessionPool(
+            cls.pool = await cx_Oracle_async.SessionPool(
                 user=config("ORACLE_USER"),
                 password=config("ORACLE_PASSWORD"),
                 min=2,
                 max=100,
                 increment=1,
-                dsn=cx_Oracle.makedsn(
+                dsn=await cx_Oracle_async.makedsn(
                     config("ORACLE_BASE_DSN"),
                     config("ORACLE_PORT"),
                     service_name=config("ORACLE_SERVICE"),
                 ),
                 encoding=config("ORACLE_ENCODING"),
-                getmode=cx_Oracle.SPOOL_ATTRVAL_WAIT,
+                getmode=await cx_Oracle_async.SPOOL_ATTRVAL_WAIT,
             )
         return cls.pool
 
-    @contextmanager
-    def get_connection(self):
-        pool = OracleInfrastructure._get_pool()
-        connection = pool.acquire()
+    @asynccontextmanager
+    async def get_connection(self):
+        pool = await OracleInfrastructure._get_pool()
+        connection = pool.acquire()# TODO falar com o marco sobre essa duvida
         yield connection
         pool.release(connection)

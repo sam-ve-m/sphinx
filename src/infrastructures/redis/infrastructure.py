@@ -1,22 +1,24 @@
 # OUTSIDE LIBRARIES
-from redis import Redis
+import aioredis
 
 # SPHINX
 from src.infrastructures.env_config import config
 
 
 class RedisInfrastructure:
-
     redis = None
 
     @classmethod
-    def _get_redis(cls):
+    async def get_redis(cls):
         if cls.redis is None:
-            cls.redis = Redis(
-                host=config("REDIS_HOST"),
-                port=config("REDIS_PORT"),
-                db=config("REDIS_DB"),
-                username=config("REDIS_USER"),
-                password=config("REDIS_PASSWORD"),
+            url = "redis://{}:{}@{}:{}?db={}".format(
+                config("KEY_REDIS_USER"),
+                config("KEY_REDIS_PASSWORD"),
+                config("KEY_REDIS_HOST"),
+                config("KEY_REDIS_PORT"),
+                config("KEY_REDIS_DB")
             )
+            cls.redis = aioredis(url)
+
         return cls.redis
+
