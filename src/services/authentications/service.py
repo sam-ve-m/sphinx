@@ -246,11 +246,11 @@ class AuthenticationService(IAuthentication):
                 user_solutiontech_status_from_check_status_request=user_solutiontech_status_from_check_status_request
             )
 
-        user_is_already_sync_with_sincad = (
+        user_is_not_already_sync_with_sincad = (
             user_sincad_status_from_database
             is SincadClientImportStatus.NOT_SYNCED.value
         )
-        if user_is_already_sync_with_sincad:
+        if user_is_not_already_sync_with_sincad:
             sincad_status_from_sinacor = (
                 AuthenticationService.sinacor_is_synced_with_sincad(
                     user_cpf=user_cpf_from_database,

@@ -625,7 +625,7 @@ class UserService(IUser):
         # TODO: In this code chunk we will add a tag that represents the status from Bureau validation
         complementary_data_for_user_update.update(
             {
-                "connected_person": ConnectedPerson.NON_CONNECTED_PERSON.value,
+                "connected_person": False,
                 "bureau_status": CAFStatus.APPROVED.value,
                 "is_bureau_data_validated": False,
                 "client_type": 1,
@@ -840,7 +840,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ):
         UserService.onboarding_step_validator(
-            payload=payload, onboard_step="user_data_validation"
+            payload=payload, onboard_step="finished"
         )
         unique_id: str = payload.get("x-thebes-answer").get("unique_id")
         update_customer_registration_data: dict = payload.get(

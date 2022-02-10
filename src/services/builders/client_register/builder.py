@@ -63,7 +63,7 @@ from src.domain.sinacor.brokerage_discount_percentage import (
 from src.domain.sinacor.home_execution_brokerage_note_issuance_indicator import (
     HomeExecutionBrokerageNoteIssuanceIndicator,
 )
-
+from src.domain.sinacor.connected_person import ConnectedPerson
 
 class ClientRegisterBuilder:
     def __init__(self):
@@ -106,7 +106,12 @@ class ClientRegisterBuilder:
         return self
 
     def add_in_pess_vinc(self, user_data: dict):
-        self._fields_added.update({"IN_PESS_VINC": user_data["connected_person"]})
+        value = (
+            ConnectedPerson.CONNECTED_PERSON.value
+            if user_data["connected_person"]
+            else ConnectedPerson.NON_CONNECTED_PERSON.value
+        )
+        self._fields_added.update({"IN_PESS_VINC": value})
         return self
 
     def add_nm_cliente(self, user_data: dict):

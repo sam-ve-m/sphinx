@@ -74,7 +74,7 @@ class BirthDateSource(Source):
 
 
 class CelPhoneSource(Source):
-    value: constr(min_length=11, max_length=11)
+    value: constr(min_length=11, max_length=12)
 
 
 class PhoneSource(Source):
@@ -199,7 +199,7 @@ class IdCitySource(Source):
 
 
 class ZipCodeSource(Source):
-    value: int
+    value: str
 
 
 class PhoneNumberSource(Source):
@@ -276,7 +276,7 @@ class IncomeTaxTypeSource(Source):
 
 
 class ConnectedPersonSource(Source):
-    value: ConnectedPerson
+    value: bool
 
 
 class ClientTypeSource(Source):
@@ -562,7 +562,7 @@ class UserPersonalDataUpdate(BaseModel):
     patrimony: Optional[PatrimonySource]
     income_tax_type: Optional[IncomeTaxTypeSource]
     income: Optional[IncomeSource]
-    tax_residences: Optional[List[TaxResidenceSource]]
+    tax_residences: Optional[TaxResidenceSource]
 
 
 class UserDocumentsDataUpdate(BaseModel):
@@ -586,7 +586,7 @@ class UserAddressDataUpdate(BaseModel):
 
 
 class UpdateCustomerRegistrationData(BaseModel):
-    personal: Optional[UserAddressDataUpdate]
+    personal: Optional[UserPersonalDataUpdate]
     marital: Optional[UserMaritalDataSource]
-    documents: Optional[UserAddressDataUpdate]
+    documents: Optional[UserDocumentsDataUpdate]
     address: Optional[UserAddressDataUpdate]
