@@ -94,6 +94,7 @@ class ThebesHallBuilder:
                 ],
             )
             .add_client_has_us_trade_allowed()
+            .add_client_profile()
             .add_terms()
         )
 
@@ -227,4 +228,8 @@ class ThebesHallBuilder:
         self,
     ):
         self._jwt_payload_data.update({"client_has_us_trade_allowed": False})
+        return self
+
+    def add_client_profile(self):
+        self._jwt_payload_data.update({"client_profile": self._user_data.get("client_profile", 0)})
         return self

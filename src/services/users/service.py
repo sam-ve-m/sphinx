@@ -82,12 +82,12 @@ class UserService(IUser):
         if (sent_to_persephone and was_user_inserted) is False:
             raise InternalServerError("common.process_issue")
 
-        was_user_created_on_social_network = social_client.create_social_network_user(
-            msg={"email": user.get("email"), "name": user.get("nick_name")}
-        )
-
-        if not was_user_created_on_social_network:
-            raise InternalServerError("common.process_issue")
+        # was_user_created_on_social_network = social_client.create_social_network_user(
+        #     msg={"email": user.get("email"), "name": user.get("nick_name")}
+        # )
+        #
+        # if not was_user_created_on_social_network:
+        #     raise InternalServerError("common.process_issue")
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user, ttl=10

@@ -1,4 +1,4 @@
-from valhalla_client.main import SocialNetworkQueue
+# from valhalla_client.main import SocialNetworkQueue
 from kafka import KafkaProducer
 import logging
 
@@ -10,9 +10,9 @@ class ValhallaService:
 
     @classmethod
     def get_social_client(cls):
-        if cls.social_client is None:
-            cls.social_client = SocialNetworkQueue(
-                logger=logging.getLogger(config("LOG_NAME")),
-                producer=KafkaProducer(bootstrap_servers=config("VALHALLA_QUEUE_HOST")),
-            )
+        # if cls.social_client is None:
+        #     cls.social_client = SocialNetworkQueue(
+        #         logger=logging.getLogger(config("LOG_NAME")),
+        #         producer=KafkaProducer(bootstrap_servers=config("VALHALLA_QUEUE_HOST")),
+        #     )
         return cls.social_client
