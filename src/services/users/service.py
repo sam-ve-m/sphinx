@@ -53,7 +53,7 @@ from src.services.valhalla.service import ValhallaService
 
 class UserService(IUser):
     @staticmethod
-    def create(
+    async def create(
         user: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
@@ -64,11 +64,11 @@ class UserService(IUser):
         user = generate_unique_id("email", user)
         has_pin = user.get("pin")
         if has_pin:
-            user = hash_field(key="pin", payload=user)
-        if user_repository.find_one({"email": user.get("email")}) is not None:
+            user = await hash_field(key="pin", payload=user)
+        if await user_repository.find_one({"email": user.get("email")}) is not None:
             raise BadRequestError("common.register_exists")
         user.update({"created_at": datetime.now()})
-        UserService.add_user_control_metadata(payload=user)
+        await UserService.add_user_control_metadata(payload=user)
 
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
@@ -78,7 +78,7 @@ class UserService(IUser):
         )
 
         was_user_inserted = user_repository.insert(user)
-
+        print(was_user_inserted)
         if (sent_to_persephone and was_user_inserted) is False:
             raise InternalServerError("common.process_issue")
 
@@ -89,7 +89,7 @@ class UserService(IUser):
         if not was_user_created_on_social_network:
             raise InternalServerError("common.process_issue")
 
-        jwt_payload_data, control_data = ThebesHallBuilder(
+        jwt_payload_data, control_data = await ThebesHallBuilder(
             user_data=user, ttl=10
         ).build()
         payload_jwt = jwt_handler.generate_token(jwt_payload_data=jwt_payload_data)
@@ -104,23 +104,23 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def create_admin(payload: dict) -> None:
+    async def create_admin(payload: dict) -> None:
         payload.update({"is_admin": True})
-        UserService.create(user=payload)
+        await UserService.create(user=payload)
 
     @staticmethod
-    def delete(
+    async def delete(
         payload: dict,
         user_repository=UserRepository(),
         token_service=JwtService,
         client_register=ClientRegisterRepository(),
     ) -> dict:
-        old = user_repository.find_one({"unique_id": payload.get("unique_id")})
+        old = await user_repository.find_one({"unique_id": payload.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
 
         if (
-            client_register.client_is_allowed_to_cancel_registration(
+            await client_register.client_is_allowed_to_cancel_registration(
                 user_cpf=int(old.get("identifier_document").get("cpf")),
                 bmf_account=int(old.get("bmf_account")),
             )
@@ -130,22 +130,22 @@ class UserService(IUser):
 
         new = deepcopy(old)
         new.update({"is_active_client": False})
-        if user_repository.update_one(old=old, new=new) is False:
+        if await user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
 
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": None}}
 
     @staticmethod
-    def change_password(payload: dict, user_repository=UserRepository()) -> dict:
+    async def change_password(payload: dict, user_repository=UserRepository()) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         new_pin = payload.get("new_pin")
-        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        old = await user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
         new["pin"] = new_pin
         new = hash_field(key="pin", payload=new)
-        if user_repository.update_one(old=old, new=new) is False:
+        if await user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
@@ -153,7 +153,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def reset_electronic_signature(
+    async def reset_electronic_signature(
         payload: dict,
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
@@ -166,13 +166,13 @@ class UserService(IUser):
 
         new_electronic_signature = payload.get("new_electronic_signature")
 
-        user_from_database = user_repository.find_one(
+        user_from_database = await user_repository.find_one(
             {"_id": thebes_answer.get("email")}
         )
         if user_from_database is None:
             raise BadRequestError("common.register_not_exists")
 
-        encrypted_electronic_signature = PasswordEncrypt.encrypt_password(
+        encrypted_electronic_signature = await PasswordEncrypt.encrypt_password(
             new_electronic_signature
         )
         user_from_database_to_update = deepcopy(user_from_database)
@@ -213,7 +213,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def change_electronic_signature(
+    async def change_electronic_signature(
         payload: dict,
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
@@ -222,7 +222,7 @@ class UserService(IUser):
         current_electronic_signature = payload.get("current_electronic_signature")
         new_electronic_signature = payload.get("new_electronic_signature")
 
-        user_from_database = user_repository.find_one(
+        user_from_database = await user_repository.find_one(
             {"_id": thebes_answer.get("email")}
         )
         if user_from_database is None:
@@ -234,10 +234,10 @@ class UserService(IUser):
         user_has_electronic_signature_blocked = is_blocked_electronic_signature is True
         if user_has_electronic_signature_blocked:
             raise UnauthorizedError("user.electronic_signature_is_blocked")
-        encrypted_current_electronic_signature = PasswordEncrypt.encrypt_password(
+        encrypted_current_electronic_signature = await PasswordEncrypt.encrypt_password(
             current_electronic_signature
         )
-        encrypted_new_electronic_signature = PasswordEncrypt.encrypt_password(
+        encrypted_new_electronic_signature = await PasswordEncrypt.encrypt_password(
             new_electronic_signature
         )
         encrypted_electronic_signature_from_database = user_from_database.get(
@@ -260,7 +260,7 @@ class UserService(IUser):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
-            payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
+            payload=await get_user_change_or_reset_electronic_signature_schema_template_with_data(
                 previous_state=user_from_database,
                 new_state=user_from_database_to_update,
             ),
@@ -269,7 +269,7 @@ class UserService(IUser):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-        user_was_updated = user_repository.update_one(
+        user_was_updated = await user_repository.update_one(
             old=user_from_database, new=user_from_database_to_update
         )
 
@@ -282,33 +282,33 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def change_view(
+    async def change_view(
         payload: dict, user_repository=UserRepository(), token_service=JwtService
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         new_view = payload.get("new_view")
-        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        old = await user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
         new["scope"] = dict(old.get("scope"))
         new["scope"]["view_type"] = new_view
-        if user_repository.update_one(old=old, new=new) is False:
+        if await user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.unable_to_process")
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
-    def forgot_password(
+    async def forgot_password(
         payload: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
         jwt_handler=JwtService,
     ) -> dict:
-        entity = user_repository.find_one({"unique_id": payload.get("unique_id")})
+        entity = await user_repository.find_one({"unique_id": payload.get("unique_id")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -316,10 +316,10 @@ class UserService(IUser):
             user_data=entity, ttl=10
         ).build()
         jwt_payload_data.update({"forgot_password": True})
-        payload_jwt = jwt_handler.generate_token(jwt_payload_data=jwt_payload_data)
-        authentication_service.send_authentication_email(
+        payload_jwt = await jwt_handler.generate_token(jwt_payload_data=jwt_payload_data)
+        await authentication_service.send_authentication_email(
             email=entity.get("email"),
-            payload_jwt=payload_jwt,
+            payload_jwt=await payload_jwt,
             body="email.body.forgot_password",
         )
         return {
@@ -328,13 +328,13 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def logout_all(payload: dict, user_repository=UserRepository()) -> dict:
-        old = user_repository.find_one({"unique_id": payload.get("unique_id")})
+    async def logout_all(payload: dict, user_repository=UserRepository()) -> dict:
+        old = await user_repository.find_one({"unique_id": payload.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
         new.update({"token_valid_after": datetime.now(), "use_magic_link": True})
-        if user_repository.update_one(old=old, new=new) is False:
+        if await user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_200_OK,
@@ -342,7 +342,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def add_feature(
+    async def add_feature(
         payload: dict, user_repository=UserRepository(), token_service=JwtService
     ) -> dict:
         old = payload.get("x-thebes-answer")
@@ -359,14 +359,14 @@ class UserService(IUser):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {
             "status_code": status_code,
             "payload": {"jwt": jwt},
         }
 
     @staticmethod
-    def delete_feature(
+    async def delete_feature(
         payload: dict, user_repository=UserRepository(), token_service=JwtService
     ) -> dict:
         old = payload.get("x-thebes-answer")
@@ -376,7 +376,7 @@ class UserService(IUser):
         if payload.get("feature") in new_scope.get("features"):
             new_scope.get("features").remove(payload.get("feature"))
             new.update({"scope": new_scope})
-            if user_repository.update_one(old=old, new=new) is False:
+            if await user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
             response.update({"status_code": status.HTTP_200_OK})
         else:
@@ -385,14 +385,14 @@ class UserService(IUser):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         response.update({"jwt": jwt})
 
         return response
 
     @staticmethod
-    def save_user_selfie(
+    async def save_user_selfie(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
         persephone_client=PersephoneService.get_client(),
@@ -425,7 +425,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def sign_term(
+    async def sign_term(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
         user_repository=UserRepository(),
@@ -433,15 +433,15 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        user_data = user_repository.find_one(
+        user_data = await user_repository.find_one(
             {"unique_id": thebes_answer.get("unique_id")}
         )
         if type(user_data) is not dict:
             raise BadRequestError("common.register_not_exists")
         file_type = payload.get("file_type")
-        term_update = UserService.fill_term_signed(
+        term_update = await UserService.fill_term_signed(
             file_type=file_type.value,
-            version=file_repository.get_current_term_version(file_type=file_type),
+            version=await file_repository.get_current_term_version(file_type=file_type),
         )
         # TODO: BACK WITH THAT
         # sent_to_persephone = persephone_client.run(
@@ -455,22 +455,22 @@ class UserService(IUser):
         sent_to_persephone = True
         if (
             sent_to_persephone
-            and user_repository.update_one(
+            and await user_repository.update_one(
                 old={"unique_id": thebes_answer.get("unique_id")}, new=term_update
             )
         ) is False:
             raise InternalServerError("common.unable_to_process")
-        user_data = user_repository.find_one(
+        user_data = await user_repository.find_one(
             {"unique_id": thebes_answer.get("unique_id")}
         )
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
-    def add_user_control_metadata(payload: dict) -> None:
+    async def add_user_control_metadata(payload: dict) -> None:
         payload.update(
             {
                 "scope": {"view_type": "default", "features": ["default", "realtime"]},
@@ -490,7 +490,7 @@ class UserService(IUser):
         )
 
     @staticmethod
-    def fill_term_signed(file_type: str, version: int) -> dict:
+    async def fill_term_signed(file_type: str, version: int) -> dict:
         terms_update = {
             f"terms.{file_type}": {
                 "version": version,
@@ -501,7 +501,7 @@ class UserService(IUser):
         return terms_update
 
     @staticmethod
-    def get_signed_term(
+    async def get_signed_term(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
     ) -> dict:
@@ -519,7 +519,7 @@ class UserService(IUser):
                 "message_key": "user.files.term_not_signed",
             }
         try:
-            link = file_repository.get_term_file_by_version(
+            link = await file_repository.get_term_file_by_version(
                 file_type=file_type, version=version
             )
             return {"status_code": status.HTTP_200_OK, "payload": {"link": link}}
@@ -529,7 +529,7 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def user_identifier_data(
+    async def user_identifier_data(
         payload: dict,
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
@@ -537,16 +537,16 @@ class UserService(IUser):
         thebes_answer = payload.get("x-thebes-answer")
         user_identifier_data = payload.get("user_identifier")
         cpf = user_identifier_data.get("cpf")
-        user_by_cpf = user_repository.find_one({"identifier_document.cpf": cpf})
+        user_by_cpf = await user_repository.find_one({"identifier_document.cpf": cpf})
 
         if user_by_cpf:
             raise BadRequestError("common.register_exists")
 
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_identifier_data_step"
         )
 
-        current_user = user_repository.find_one(
+        current_user = await user_repository.find_one(
             {"unique_id": thebes_answer.get("unique_id")}
         )
 
@@ -573,7 +573,7 @@ class UserService(IUser):
         del user_identifier_data["cpf"]
         user_identifier_data.update({"identifier_document": {"cpf": cpf}})
 
-        user_updated = user_repository.update_one(
+        user_updated = await user_repository.update_one(
             old=current_user, new=user_identifier_data
         )
         if user_updated is False:
@@ -585,16 +585,16 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def user_complementary_data(
+    async def user_complementary_data(
         payload: dict,
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_complementary_step"
         )
         thebes_answer = payload.get("x-thebes-answer")
-        current_user = user_repository.find_one(
+        current_user = await user_repository.find_one(
             {"unique_id": thebes_answer.get("unique_id")}
         )
         if current_user is None:
@@ -602,7 +602,7 @@ class UserService(IUser):
         user_complementary_data = payload.get("user_complementary")
 
         complementary_data_for_user_update = (
-            UserService.get_user_complementary_data_for_user_update(
+            await UserService.get_user_complementary_data_for_user_update(
                 user_complementary_data=user_complementary_data
             )
         )
@@ -647,7 +647,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def get_user_complementary_data_for_user_update(user_complementary_data: dict):
+    async def get_user_complementary_data_for_user_update(user_complementary_data: dict):
         return {
             "marital": {
                 "status": user_complementary_data.get("marital_status"),
@@ -669,7 +669,7 @@ class UserService(IUser):
         payload["provided_by_bureaux"]["concluded_at"] = datetime.now()
 
     @staticmethod
-    def get_onboarding_user_current_step(
+    async def get_onboarding_user_current_step(
         payload: dict,
         user_repository=UserRepository(),
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_USERS_SELF")),
@@ -678,11 +678,11 @@ class UserService(IUser):
         thebes_answer = payload.get("x-thebes-answer")
         jwt_user_unique_id = thebes_answer["unique_id"]
 
-        user_file_exists = file_repository.get_user_file(
+        user_file_exists = await file_repository.get_user_file(
             file_type=UserFileType.SELFIE, unique_id=jwt_user_unique_id
         )
 
-        current_user = user_repository.find_one({"unique_id": jwt_user_unique_id})
+        current_user = await user_repository.find_one({"unique_id": jwt_user_unique_id})
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -700,20 +700,20 @@ class UserService(IUser):
         return {"status_code": status.HTTP_200_OK, "payload": onboarding_steps}
 
     @staticmethod
-    def set_user_electronic_signature(
+    async def set_user_electronic_signature(
         payload: dict,
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_electronic_signature"
         )
         thebes_answer = payload.get("x-thebes-answer")
         electronic_signature = payload.get("electronic_signature")
-        encrypted_electronic_signature = PasswordEncrypt.encrypt_password(
+        encrypted_electronic_signature = await PasswordEncrypt.encrypt_password(
             electronic_signature
         )
-        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        old = await user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         if old.get("electronic_signature"):
@@ -736,7 +736,7 @@ class UserService(IUser):
         # if sent_to_persephone is False:
         #     raise InternalServerError("common.process_issue")
 
-        if user_repository.update_one(old=old, new=new_data) is False:
+        if await user_repository.update_one(old=old, new=new_data) is False:
             raise InternalServerError("common.process_issue")
 
         return {
@@ -745,13 +745,13 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def forgot_electronic_signature(
+    async def forgot_electronic_signature(
         payload: dict,
         user_repository=UserRepository(),
         authentication_service=AuthenticationService,
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        entity = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        entity = await user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -760,8 +760,8 @@ class UserService(IUser):
         ).build()
         jwt_payload_data.update({"forgot_electronic_signature": True})
 
-        payload_jwt = JwtService.generate_token(jwt_payload_data=jwt_payload_data)
-        authentication_service.send_authentication_email(
+        payload_jwt = await JwtService.generate_token(jwt_payload_data=jwt_payload_data)
+        await authentication_service.send_authentication_email(
             email=entity.get("email"),
             payload_jwt=payload_jwt,
             body="email.body.forgot_electronic_signature",
@@ -772,7 +772,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def onboarding_step_validator(payload: dict, onboard_step: str):
+    async def onboarding_step_validator(payload: dict, onboard_step: str):
         onboarding_steps = UserService.get_onboarding_user_current_step(payload)
         payload_from_onboarding_steps = onboarding_steps.get("payload")
         current_onboarding_step = payload_from_onboarding_steps.get(
@@ -782,13 +782,13 @@ class UserService(IUser):
             raise BadRequestError("user.invalid_on_boarding_step")
 
     @staticmethod
-    def get_customer_registration_data(
+    async def get_customer_registration_data(
         payload: dict,
         user_repository=UserRepository(),
     ):
         thebes_answer = payload.get("x-thebes-answer")
         unique_id = thebes_answer.get("unique_id")
-        customer_registration_data = user_repository.find_one({"unique_id": unique_id})
+        customer_registration_data = await user_repository.find_one({"unique_id": unique_id})
         if customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
         customer_registration_data_built = (
@@ -834,19 +834,19 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def update_customer_registration_data(
+    async def update_customer_registration_data(
         payload: dict,
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ):
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_data_validation"
         )
         unique_id: str = payload.get("x-thebes-answer").get("unique_id")
         update_customer_registration_data: dict = payload.get(
             "customer_registration_data"
         )
-        old_customer_registration_data = user_repository.find_one(
+        old_customer_registration_data = await user_repository.find_one(
             {"unique_id": unique_id}
         )
         if old_customer_registration_data is None:
@@ -916,7 +916,7 @@ class UserService(IUser):
 
         del new_customer_registration_data["_id"]
 
-        if not user_repository.update_one(
+        if not await user_repository.update_one(
             old={"unique_id": unique_id}, new=new_customer_registration_data
         ):
             raise InternalServerError("common.process_issue")
@@ -925,7 +925,7 @@ class UserService(IUser):
             user_data=new_customer_registration_data
         )
 
-        if not user_repository.update_one(
+        if not await user_repository.update_one(
             old={"unique_id": unique_id}, new={"is_bureau_data_validated": True}
         ):
             raise InternalServerError("common.process_issue")

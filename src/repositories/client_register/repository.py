@@ -109,7 +109,7 @@ class ClientRegisterRepository(OracleBaseRepository):
 
         return is_married
 
-    def get_builder(
+    async def get_builder(
         self,
         user_data: dict,
         sinacor_user_control_data: Optional[tuple],
@@ -172,19 +172,19 @@ class ClientRegisterRepository(OracleBaseRepository):
             logging.error(msg=message)
             raise InternalServerError("internal_error")
 
-        return callback(
+        return await callback(
             user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
         )
 
-    def client_is_allowed_to_cancel_registration(self, user_cpf: int, bmf_account: int):
-        is_client_blocked = self._is_client_blocked(user_cpf)
-        client_has_value_blocked = self._client_has_value_blocked(bmf_account)
-        client_has_receivables = self._client_has_receivables(bmf_account)
-        client_has_options_blocked = self._client_has_options_blocked(bmf_account)
-        client_has_options_receivables = self._client_has_options_receivables(
+    async def client_is_allowed_to_cancel_registration(self, user_cpf: int, bmf_account: int):
+        is_client_blocked = await self._is_client_blocked(user_cpf)
+        client_has_value_blocked = await self._client_has_value_blocked(bmf_account)
+        client_has_receivables = await self._client_has_receivables(bmf_account)
+        client_has_options_blocked = await self._client_has_options_blocked(bmf_account)
+        client_has_options_receivables = await self._client_has_options_receivables(
             bmf_account
         )
-        client_has_values_in_bank_account = self._client_has_values_in_bank_account(
+        client_has_values_in_bank_account = await self._client_has_values_in_bank_account(
             bmf_account
         )
         return (
@@ -201,37 +201,37 @@ class ClientRegisterRepository(OracleBaseRepository):
             is False
         )
 
-    def _is_client_blocked(self, user_cpf: int):
+    async def _is_client_blocked(self, user_cpf: int):
         result = self.query(
             sql=f"SELECT 1 from TSCCLIGER WHERE CD_CPFCGC = {user_cpf} and IN_SITUAC = 'BL'"
         )
         return len(result) > 0
 
-    def _client_has_value_blocked(self, bmf_account: int):
+    async def _client_has_value_blocked(self, bmf_account: int):
         result = self.query(
             sql=f"SELECT 1 from TCCSALDO_BLOQ WHERE COD_CLI = {bmf_account} and VAL_BLOQ > 0"
         )
         return len(result) > 0
 
-    def _client_has_receivables(self, bmf_account: int):
+    async def _client_has_receivables(self, bmf_account: int):
         result = self.query(
             sql=f"SELECT 1 from TCCMOVTO WHERE CD_CLIENTE = {bmf_account} and DT_LIQUIDACAO >= SYSDATE"
         )
         return len(result) > 0
 
-    def _client_has_options_blocked(self, bmf_account: int):
+    async def _client_has_options_blocked(self, bmf_account: int):
         result = self.query(
             sql=f"SELECT 1 from VCFPOSICAO WHERE COD_CLI = {bmf_account} and QTDE_BLQD is not null and QTDE_BLQD > 0"
         )
         return len(result) > 0
 
-    def _client_has_options_receivables(self, bmf_account: int):
+    async def _client_has_options_receivables(self, bmf_account: int):
         result = self.query(
             sql=f"SELECT 1 from VCFPOSICAO where COD_CLI = {bmf_account} and tipo_merc in ('OPC','OPV') and data_venc >= SYSDATE"
         )
         return len(result) > 0
 
-    def _client_has_values_in_bank_account(self, bmf_account: int):
+    async def _client_has_values_in_bank_account(self, bmf_account: int):
         result = self.query(
             sql=f"select 1 from tccsaldo WHERE CD_CLIENTE = {bmf_account} and VL_TOTAL > 0"
         )

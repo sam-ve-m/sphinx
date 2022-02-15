@@ -62,7 +62,7 @@ def get_user_quiz_response_from_stoneage_schema_template_with_data(
     }
 
 
-def get_user_change_or_reset_electronic_signature_schema_template_with_data(
+async def get_user_change_or_reset_electronic_signature_schema_template_with_data(
     previous_state: dict, new_state: dict
 ) -> dict:
     return {

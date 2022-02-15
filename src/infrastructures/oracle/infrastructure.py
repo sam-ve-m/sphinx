@@ -38,6 +38,6 @@ class OracleInfrastructure:
     @asynccontextmanager
     async def get_connection(self):
         pool = await OracleInfrastructure._get_pool()
-        connection = pool.acquire()# TODO falar com o marco sobre essa duvida
+        connection = pool.acquire()
         yield connection
         pool.release(connection)

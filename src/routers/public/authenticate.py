@@ -16,8 +16,8 @@ router = PublicRouter.instance()
 
 
 @router.post("/login", tags=["authentication"])
-def login(user_credentials: Login, request: Request):
-    return BaseController.run(
+async def login(user_credentials: Login, request: Request):
+    return await BaseController.run(
         AuthenticationController.login, dict(user_credentials), request
     )
 

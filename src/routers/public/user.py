@@ -12,10 +12,10 @@ router = PublicRouter.instance()
 
 
 @router.post("/user", tags=["user"])
-def create_user(user: UserSimple, request: Request):
-    return BaseController.run(UserController.create, dict(user), request)
+async def create_user(user: UserSimple, request: Request):
+    return await BaseController.run(UserController.create, dict(user), request)
 
 
 @router.get("/user/forgot_password", tags=["user"])
-def forgot_password(request: Request, user: Email = Depends(Email)):
-    return BaseController.run(UserController.forgot_password, user.dict(), request)
+async def forgot_password(request: Request, user: Email = Depends(Email)):
+    return await BaseController.run(UserController.forgot_password, user.dict(), request)

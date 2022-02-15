@@ -11,7 +11,7 @@ from src.infrastructures.redis.infrastructure import RedisInfrastructure
 
 class RepositoryRedis(RedisInfrastructure, IRedis):
     @staticmethod
-    def set(key: str, value: dict, ttl: int = 0) -> None:
+    async def set(key: str, value: dict, ttl: int = 0) -> None:
         redis = RepositoryRedis._get_redis()
         """ttl in secounds"""
         if ttl > 0:
@@ -26,7 +26,7 @@ class RepositoryRedis(RedisInfrastructure, IRedis):
         return
 
     @staticmethod
-    def get(key: str) -> Optional[dict]:
+    async def get(key: str) -> Optional[dict]:
         redis = RepositoryRedis._get_redis()
         if type(key) != str:
             raise InternalServerError("cache.error.key")

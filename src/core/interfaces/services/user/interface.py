@@ -140,7 +140,7 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def send_quiz_responses(
+    async def send_quiz_responses(
         payload: dict,
         user_repository,
         stone_age,
@@ -150,7 +150,7 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def user_quiz(
+    async def user_quiz(
         payload: dict,
         stone_age,
         user_repository,

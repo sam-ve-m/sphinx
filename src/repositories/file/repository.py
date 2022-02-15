@@ -82,7 +82,7 @@ class FileRepository(S3Infrastructure, IFile):
         # week link validation
         return value
 
-    def get_user_file(self, file_type: UserFileType, unique_id: str):
+    async def get_user_file(self, file_type: UserFileType, unique_id: str):
         prefix = self.resolve_user_path(unique_id=unique_id, file_type=file_type)
         file_name = file_type.value
         file_extension = self.get_file_extension_by_type(file_type=file_type)
@@ -126,11 +126,11 @@ class FileRepository(S3Infrastructure, IFile):
         )
         return
 
-    def get_term_file(
+    async def get_term_file(
         self, file_type: TermsFileType, cache=RepositoryRedis, ttl: int = 3600
     ) -> Union[str, dict]:
         cache_key = f"get_term_file:{file_type.value}"
-        cached_value = cache.get(key=cache_key)
+        cached_value = await cache.get(key=cache_key)
         if cached_value:
             return cached_value
         path = self.resolve_term_path(file_type=file_type)
@@ -147,14 +147,14 @@ class FileRepository(S3Infrastructure, IFile):
                 Params={"Bucket": self.bucket_name, "Key": file_path},
                 ExpiresIn=ttl,
             )
-            cache.set(key=cache_key, value=value, ttl=ttl)
+            await cache.set(key=cache_key, value=value, ttl=ttl)
             return value
 
-    def get_terms_version(
+    async def get_terms_version(
         self, term_types=TermsFileType, cache=RepositoryRedis, ttl: int = 3600
     ) -> dict:
         cache_key = "all_terms_version"
-        value = cache.get(key=cache_key)
+        value = await cache.get(key=cache_key)
         if value is None:
             value = dict()
             for file_type in term_types:
@@ -165,15 +165,15 @@ class FileRepository(S3Infrastructure, IFile):
                         )
                     }
                 )
-            cache.set(key=cache_key, value=value)
+            await cache.set(key=cache_key, value=value)
         return value
 
-    def get_term_file_by_version(
+    async def get_term_file_by_version(
         self, file_type: TermsFileType, version: int, ttl: int = 3600
     ) -> str:
-        file_name = self.generate_term_file_name(name=file_type.value, version=version)
-        path = self.resolve_term_path(file_type=file_type)
-        file_extension = self.get_file_extension_by_type(file_type=file_type)
+        file_name = await self.generate_term_file_name(name=file_type.value, version=version)
+        path = await self.resolve_term_path(file_type=file_type)
+        file_extension = await self.get_file_extension_by_type(file_type=file_type)
         s3_client = FileRepository._get_client()
         value = s3_client.generate_presigned_url(
             "get_object",
@@ -216,11 +216,11 @@ class FileRepository(S3Infrastructure, IFile):
         return content
 
     @staticmethod
-    def resolve_user_path(unique_id: str, file_type: UserFileType) -> str:
+    async def resolve_user_path(unique_id: str, file_type: UserFileType) -> str:
         return f"{unique_id}/{file_type.value}/"
 
     @staticmethod
-    def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
+    async def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
 
         valid_files = list()
         for file_enum in [UserFileType, TermsFileType]:
@@ -230,20 +230,20 @@ class FileRepository(S3Infrastructure, IFile):
         return FileRepository.file_extension_by_type.get(file_type.value)
 
     @staticmethod
-    def generate_term_file_name(name: str, version: int):
+    async def generate_term_file_name(name: str, version: int):
         if version is None or name is None:
             raise InternalServerError("files.params.invalid")
         return f"{name}_v{version}"
 
     @staticmethod
-    def resolve_term_path(file_type: TermsFileType) -> str:
+    async def resolve_term_path(file_type: TermsFileType) -> str:
         return f"{file_type.value}/"
 
-    def get_current_term_version(self, file_type: TermsFileType) -> int:
+    async def get_current_term_version(self, file_type: TermsFileType) -> int:
         s3_client = FileRepository._get_client()
         objects = s3_client.list_objects(
             Bucket=self.bucket_name,
-            Prefix=FileRepository.resolve_term_path(file_type=file_type),
+            Prefix=await FileRepository.resolve_term_path(file_type=file_type),
             Delimiter="/",
         )
         content = objects.get("Contents")

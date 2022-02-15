@@ -25,7 +25,7 @@ class OnboardingStepBuilder:
         ]
         self.bureau_status = None
 
-    def user_suitability_step(self, current_user):
+    async def user_suitability_step(self, current_user):
         user_suitability_profile = current_user.get("suitability")
         terms = current_user.get("terms")
         has_signed_refusal_term = terms.get("term_refusal")
@@ -129,7 +129,7 @@ class OnboardingStepBuilder:
             self.__onboarding_steps["finished"] = True
             self.__onboarding_steps["current_onboarding_step"] = self.bureau_status
 
-    def build(self) -> dict:
+    async def build(self) -> dict:
         self.is_finished()
         onboarding_steps = self.__onboarding_steps
         return onboarding_steps

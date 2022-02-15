@@ -144,14 +144,14 @@ class AuthenticationService(IAuthentication):
         )
 
     @staticmethod
-    def thebes_hall(
+    async def thebes_hall(
         device_and_thebes_answer_from_request: dict,
         user_repository=UserRepository(),
         token_service=JwtService,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request["x-thebes-answer"]
-        user_data = user_repository.find_one(
+        user_data = await user_repository.find_one(
             {"unique_id": x_thebes_answer["unique_id"]}
         )
         if user_data is None:
@@ -169,14 +169,14 @@ class AuthenticationService(IAuthentication):
                 user_data_update.update({key: value["status"]})
 
         if must_update:
-            if user_repository.update_one(old=user_data, new=user_data_update) is False:
+            if await user_repository.update_one(old=user_data, new=user_data_update) is False:
                 raise InternalServerError("common.process_issue")
             user_data.update(user_data_update)
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         # TODO: BACK WITH THAT
         # sent_to_persephone = persephone_client.run(

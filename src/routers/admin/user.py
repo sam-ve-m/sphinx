@@ -12,5 +12,5 @@ router = AdminRouter.instance()
 
 
 @router.post("/user_admin", tags=["user"])
-def create_admin(user: UserSimple, request: Request):
-    return BaseController.run(UserController.create_admin, dict(user), request)
+async def create_admin(user: UserSimple, request: Request):
+    return await BaseController.run(UserController.create_admin, dict(user), request)

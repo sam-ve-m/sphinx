@@ -8,7 +8,7 @@ def generate_unique_id(key: str, payload: dict) -> dict:
     return payload
 
 
-def hash_field(payload: Union[dict, str], key: str = None) -> dict:
+async def hash_field(payload: Union[dict, str], key: str = None) -> dict:
     _sha1 = sha1()
     if key:
         _sha1.update(str(payload[key]).encode())

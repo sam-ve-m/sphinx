@@ -13,7 +13,7 @@ class PasswordEncrypt(IPasswordEncrypt):
     mist = Mist(logger)
 
     @classmethod
-    def encrypt_password(cls, user_password: str):
+    async def encrypt_password(cls, user_password: str):
         payload, status = cls.mist.generate_encrypted_password(
             user_password=user_password
         )

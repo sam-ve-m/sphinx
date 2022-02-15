@@ -4,97 +4,97 @@ from src.services.users.service import UserService
 
 class UserController:
     @staticmethod
-    def create(user: dict):
-        return UserService.create(user=user)
+    async def create(user: dict):
+        return await UserService.create(user=user)
 
     @staticmethod
-    def create_admin(payload: dict):
-        return UserService.create_admin(payload=payload)
+    async def create_admin(payload: dict):
+        return await UserService.create_admin(payload=payload)
 
     @staticmethod
-    def update(payload: dict):
+    async def update(payload: dict):
         return UserService.update(payload=payload)
 
     @staticmethod
-    def delete(payload: dict):
-        return UserService.delete(payload=payload)
+    async def delete(payload: dict):
+        return await UserService.delete(payload=payload)
 
     @staticmethod
-    def change_password(payload: dict):
-        return UserService.change_password(payload=payload)
+    async def change_password(payload: dict):
+        return await UserService.change_password(payload=payload)
 
     @staticmethod
-    def forgot_password(payload: dict):
-        return UserService.forgot_password(payload=payload)
+    async def forgot_password(payload: dict):
+        return await UserService.forgot_password(payload=payload)
 
     @staticmethod
-    def change_view(payload: dict):
-        return UserService.change_view(payload=payload)
+    async def change_view(payload: dict):
+        return await UserService.change_view(payload=payload)
 
     @staticmethod
-    def logout_all(payload: dict):
-        return UserService.logout_all(payload=payload)
+    async def logout_all(payload: dict):
+        return await UserService.logout_all(payload=payload)
 
     @staticmethod
-    def add_feature(payload: dict):
-        return UserService.add_feature(payload=payload)
+    async def add_feature(payload: dict):
+        return await UserService.add_feature(payload=payload)
 
     @staticmethod
-    def delete_feature(payload: dict):
-        return UserService.delete_feature(payload=payload)
+    async def delete_feature(payload: dict):
+        return await UserService.delete_feature(payload=payload)
 
     @staticmethod
-    def save_user_selfie(payload: dict):
-        return UserService.save_user_selfie(payload=payload)
+    async def save_user_selfie(payload: dict):
+        return await UserService.save_user_selfie(payload=payload)
 
     @staticmethod
-    def sign_term(payload: dict):
-        return UserService.sign_term(payload=payload)
+    async def sign_term(payload: dict):
+        return await UserService.sign_term(payload=payload)
 
     @staticmethod
-    def get_signed_term(payload: dict):
-        return UserService.get_signed_term(payload=payload)
+    async def get_signed_term(payload: dict):
+        return await UserService.get_signed_term(payload=payload)
 
     @staticmethod
-    def user_identifier_data(payload: dict):
-        return UserService.user_identifier_data(payload=payload)
+    async def user_identifier_data(payload: dict):
+        return await UserService.user_identifier_data(payload=payload)
 
     @staticmethod
-    def user_complementary_data(payload: dict):
-        return UserService.user_complementary_data(payload=payload)
+    async def user_complementary_data(payload: dict):
+        return await UserService.user_complementary_data(payload=payload)
 
     @staticmethod
-    def user_quiz(payload: dict):
-        return UserService.user_quiz(payload=payload)
+    async def user_quiz(payload: dict):
+        return await UserService.user_quiz(payload=payload)
 
     @staticmethod
-    def send_quiz_responses(payload: dict):
-        return UserService.send_quiz_responses(payload=payload)
+    async def send_quiz_responses(payload: dict):
+        return await UserService.send_quiz_responses(payload=payload)
 
     @staticmethod
-    def get_onboarding_user_current_step(payload: dict):
-        return UserService.get_onboarding_user_current_step(payload=payload)
+    async def get_onboarding_user_current_step(payload: dict):
+        return await UserService.get_onboarding_user_current_step(payload=payload)
 
     @staticmethod
-    def set_user_electronic_signature(payload: dict):
-        return UserService.set_user_electronic_signature(payload=payload)
+    async def set_user_electronic_signature(payload: dict):
+        return await UserService.set_user_electronic_signature(payload=payload)
 
     @staticmethod
-    def forgot_electronic_signature(payload: dict):
-        return UserService.forgot_electronic_signature(payload=payload)
+    async def forgot_electronic_signature(payload: dict):
+        return await UserService.forgot_electronic_signature(payload=payload)
 
     @staticmethod
-    def reset_electronic_signature(payload: dict):
-        return UserService.reset_electronic_signature(payload=payload)
+    async def reset_electronic_signature(payload: dict):
+        return await UserService.reset_electronic_signature(payload=payload)
 
     @staticmethod
-    def change_electronic_signature(payload: dict):
-        return UserService.change_electronic_signature(payload=payload)
+    async def change_electronic_signature(payload: dict):
+        return await UserService.change_electronic_signature(payload=payload)
 
     @staticmethod
-    def get_customer_registration_data(payload: dict):
-        return UserService.get_customer_registration_data(payload=payload)
+    async def get_customer_registration_data(payload: dict):
+        return await UserService.get_customer_registration_data(payload=payload)
 
     @staticmethod
-    def update_customer_registration_data(payload: dict):
-        return UserService.update_customer_registration_data(payload=payload)
+    async def update_customer_registration_data(payload: dict):
+        return await UserService.update_customer_registration_data(payload=payload)
