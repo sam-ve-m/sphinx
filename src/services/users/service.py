@@ -82,9 +82,12 @@ class UserService(IUser):
         if (sent_to_persephone and was_user_inserted) is False:
             raise InternalServerError("common.process_issue")
 
-        was_user_created_on_social_network = social_client.create_social_network_user(
-            msg={"email": user.get("email"), "name": user.get("nick_name")}
-        )
+        # was_user_created_on_social_network = social_client.create_social_network_user(
+        #     msg={"email": user.get("email"), "name": user.get("nick_name")}
+        # )
+        #
+        # if not was_user_created_on_social_network:
+        #     raise InternalServerError("common.process_issue")
 
         if not was_user_created_on_social_network:
             raise InternalServerError("common.process_issue")
@@ -625,7 +628,7 @@ class UserService(IUser):
         # TODO: In this code chunk we will add a tag that represents the status from Bureau validation
         complementary_data_for_user_update.update(
             {
-                "connected_person": ConnectedPerson.NON_CONNECTED_PERSON.value,
+                "connected_person": False,
                 "bureau_status": CAFStatus.APPROVED.value,
                 "is_bureau_data_validated": False,
                 "client_type": 1,
@@ -839,7 +842,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ):
-        await UserService.onboarding_step_validator(
+        UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_data_validation"
         )
         unique_id: str = payload.get("x-thebes-answer").get("unique_id")
