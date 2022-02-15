@@ -224,10 +224,15 @@ class SinacorService:
         )
         database_and_bureau_dtvm_client_data_merged.update(
             {
-                "default": {
-                    "br": {
-                        "bovespa_account": bovespa_account,
-                        "bmf_account": bmf_account
+                "portfolios": {
+                    "default": {
+                        "br": {
+                            "bovespa_account": bovespa_account,
+                            "bmf_account": bmf_account
+                        },
+                    },
+                    "vnc": {
+                        "br": []
                     }
                 }
             }
