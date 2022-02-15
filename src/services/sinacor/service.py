@@ -223,7 +223,14 @@ class SinacorService:
             {"solutiontech": sync_status}
         )
         database_and_bureau_dtvm_client_data_merged.update(
-            {"bovespa_account": bovespa_account, "bmf_account": bmf_account}
+            {
+                "default": {
+                    "br": {
+                        "bovespa_account": bovespa_account,
+                        "bmf_account": bmf_account
+                    }
+                }
+            }
         )
         database_and_bureau_dtvm_client_data_merged.update(
             {
