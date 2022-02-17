@@ -41,10 +41,6 @@ class Status(BaseModel):
     status: OutputStatus
 
 
-class ClientType(BaseModel):
-    client_type: str
-
-
 class Country(BaseModel):
     country: str
 
@@ -264,17 +260,6 @@ class DateOfAcquisition(Source):
             raise ValueError("Wrong timestamp supplied")
 
 
-class IncomeTaxTypeSource(Source):
-    value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinacorTypesRepository()
-        if sinacor_types_repository.validate_income_tax_type(value=e):
-            return e
-        raise ValueError("Income tax type not exists")
-
-
 class ConnectedPersonSource(Source):
     value: bool
 
@@ -292,28 +277,6 @@ class ClientTypeSource(Source):
 
 class PersonTypeSource(Source):
     value: PersonType
-
-
-class InvestorTypeTypeSource(Source):
-    value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinacorTypesRepository()
-        if sinacor_types_repository.validate_investor_type(value=e):
-            return e
-        raise ValueError("Investor type not exists")
-
-
-class CosifTaxClassificationSource(Source):
-    value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinacorTypesRepository()
-        if sinacor_types_repository.validate_cosif_tax_classification(value=e):
-            return e
-        raise ValueError("Cosif tax classification not exists")
 
 
 class CountySource(Source):
@@ -438,17 +401,6 @@ class RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
     value: bool
 
 
-class InvestorTypeSource(Source):
-    value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinacorTypesRepository()
-        if sinacor_types_repository.validate_investor_type(value=e):
-            return e
-        raise ValueError("InvestorType not exists in our investor type enum")
-
-
 class SpouseSource(BaseModel):
     name: NameSource
     cpf: CpfSource
@@ -482,7 +434,6 @@ class UserPersonalDataValidation(BaseModel):
     company_name: Optional[CompanyNameSource]
     company_cnpj: Optional[CnpjSource]
     patrimony: PatrimonySource
-    income_tax_type: IncomeTaxTypeSource
     income: IncomeSource
     tax_residences: Optional[TaxResidenceSource]
     birth_place_country: CountrySource
@@ -563,7 +514,6 @@ class UserPersonalDataUpdate(BaseModel):
     company_name: Optional[CompanyNameSource]
     company_cnpj: Optional[CnpjSource]
     patrimony: Optional[PatrimonySource]
-    income_tax_type: Optional[IncomeTaxTypeSource]
     income: Optional[IncomeSource]
     tax_residences: Optional[TaxResidenceSource]
     birth_place_country: Optional[CountrySource]

@@ -8,14 +8,6 @@ class ClientRegisterEnumsController:
         return SinaCorTypes.get_type_of_income_tax()
 
     @staticmethod
-    def get_client_type(payload: dict):
-        return SinaCorTypes.get_client_type()
-
-    @staticmethod
-    def get_investor_type(payload: dict):
-        return SinaCorTypes.get_investor_type()
-
-    @staticmethod
     def get_activity_type(payload: dict):
         return SinaCorTypes.get_activity_type()
 
@@ -26,10 +18,6 @@ class ClientRegisterEnumsController:
     @staticmethod
     def get_customer_qualification_type(payload: dict):
         return SinaCorTypes.get_customer_qualification_type()
-
-    @staticmethod
-    def get_cosif_tax_classification(payload: dict):
-        return SinaCorTypes.get_cosif_tax_classification()
 
     @staticmethod
     def get_marital_status(payload: dict):
@@ -118,7 +106,3 @@ class ClientRegisterEnumsController:
     @staticmethod
     def get_issuing_body_update(payload: dict):
         return SinaCorTypes.get_issuing_body_update()
-
-    @staticmethod
-    def get_income_tax_type_update(payload: dict):
-        return SinaCorTypes.get_income_tax_type_update()

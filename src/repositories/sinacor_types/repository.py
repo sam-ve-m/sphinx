@@ -36,28 +36,6 @@ class SinacorTypesRepository(OracleBaseRepository):
         )
         return dict_result
 
-    def get_client_type(self):
-        sql = """
-            SELECT TP_CLIENTE as code, DS_TIPO_CLIENTE as description
-            FROM TSCTIPCLI
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    def get_investor_type(self):
-        sql = """
-            SELECT TP_INVESTIDOR as code, DS_INVESTIDOR as description
-            FROM TSCTPINVESTIDOR
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
     def get_activity_type(self):
         sql = """
             SELECT CD_ATIV as code, DS_ATIV as description
@@ -84,17 +62,6 @@ class SinacorTypesRepository(OracleBaseRepository):
         sql = """
             SELECT CD_TIPO_FILI as code, DS_TIPO_FILI as description
             FROM TSCTIPFIL
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    def get_cosif_tax_classification(self):
-        sql = """
-            SELECT CD_COSIF as code, DS_COSIF as description
-            FROM TSCCOSIF
         """
         tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
@@ -329,14 +296,6 @@ class SinacorTypesRepository(OracleBaseRepository):
         """
         return self.base_validator(sql=sql)
 
-    def validate_income_tax_type(self, value: str) -> bool:
-        sql = f"""
-            SELECT 1
-            FROM TSCTIPIR
-            WHERE TP_IMP_RENDA = '{value}'
-        """
-        return self.base_validator(sql=sql)
-
     def is_unemployed(self, value: str, cnpj: str) -> bool:
         sql = f"""
             SELECT 1
@@ -363,22 +322,6 @@ class SinacorTypesRepository(OracleBaseRepository):
             SELECT 1
             FROM TSCTIPCLI
             WHERE TP_CLIENTE = {value}
-        """
-        return self.base_validator(sql=sql)
-
-    def validate_investor_type(self, value: str) -> bool:
-        sql = f"""
-            SELECT 1
-            FROM TSCTPINVESTIDOR
-            WHERE TP_INVESTIDOR = {value}
-        """
-        return self.base_validator(sql=sql)
-
-    def validate_cosif_tax_classification(self, value: str) -> bool:
-        sql = f"""
-            SELECT 1
-            FROM TSCCOSIF
-            WHERE CD_COSIF = {value}
         """
         return self.base_validator(sql=sql)
 

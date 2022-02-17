@@ -219,21 +219,6 @@ class UpdateCustomerRegistrationBuilder:
 
         return self
 
-    def personal_income_tax_type(self):
-        old_patrimony = self.__old_personal_data.get("assets", {}).get(
-            "income_tax_type"
-        )
-
-        if new_patrimony := self._get_new_value("personal", "income_tax_type"):
-            self._update_modified_data(
-                levels=("assets", "income_tax_type"),
-                old_field=old_patrimony,
-                new_filed=new_patrimony,
-            )
-            self.update_assets_update_date()
-
-        return self
-
     def personal_income(self):
         old_patrimony = self.__old_personal_data.get("assets", {}).get("income")
 

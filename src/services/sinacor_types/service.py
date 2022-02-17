@@ -18,20 +18,6 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_client_type(sinacor_types_repository=SinacorTypesRepository()):
-        return {
-            "status_code": status.HTTP_200_OK,
-            "payload": {"enums": sinacor_types_repository.get_client_type()},
-        }
-
-    @staticmethod
-    def get_investor_type(sinacor_types_repository=SinacorTypesRepository()):
-        return {
-            "status_code": status.HTTP_200_OK,
-            "payload": {"enums": sinacor_types_repository.get_investor_type()},
-        }
-
-    @staticmethod
     def get_activity_type(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
@@ -53,15 +39,6 @@ class SinaCorTypes:
             "status_code": status.HTTP_200_OK,
             "payload": {
                 "enums": sinacor_types_repository.get_customer_qualification_type()
-            },
-        }
-
-    @staticmethod
-    def get_cosif_tax_classification(sinacor_types_repository=SinacorTypesRepository()):
-        return {
-            "status_code": status.HTTP_200_OK,
-            "payload": {
-                "enums": sinacor_types_repository.get_cosif_tax_classification()
             },
         }
 
@@ -292,18 +269,6 @@ class SinaCorTypes:
     @staticmethod
     def get_issuing_body_update(sinacor_types_repository=SinacorTypesRepository()):
         activities = sinacor_types_repository.get_issuing_body()
-        activities_enum = [
-            {"code": activity["code"], "value": activity["description"].title()}
-            for activity in activities
-        ]
-        return {
-            "status_code": status.HTTP_200_OK,
-            "payload": {"enums": activities_enum},
-        }
-
-    @staticmethod
-    def get_income_tax_type_update(sinacor_types_repository=SinacorTypesRepository()):
-        activities = sinacor_types_repository.get_type_of_income_tax()
         activities_enum = [
             {"code": activity["code"], "value": activity["description"].title()}
             for activity in activities

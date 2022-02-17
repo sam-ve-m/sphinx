@@ -4,7 +4,7 @@ from fastapi import Request, Depends
 # SPHINX
 from src.controllers.base_controller import BaseController
 from src.domain.validators.client_register_validators import CountryState
-from src.domain.validators.bureau_validators import ClientType, Country
+from src.domain.validators.bureau_validators import Country
 from src.controllers.cliente_register_enums.controller import (
     ClientRegisterEnumsController,
 )
@@ -20,21 +20,6 @@ def get_type_of_income_tax(request: Request):
         payload={},
         request=request,
     )
-
-
-@router.get("/client_register_enums/client_type", tags=["client_register_enums"])
-def get_client_type(request: Request):
-    return BaseController.run(
-        ClientRegisterEnumsController.get_client_type, payload={}, request=request
-    )
-
-
-@router.get("/client_register_enums/investor_type", tags=["client_register_enums"])
-def get_investor_type(request: Request):
-    return BaseController.run(
-        ClientRegisterEnumsController.get_investor_type, payload={}, request=request
-    )
-
 
 @router.get("/client_register_enums/activity_type", tags=["client_register_enums"])
 def get_activity_type(request: Request):
@@ -60,17 +45,6 @@ def get_type_ability_person(request: Request):
 def get_customer_qualification_type(request: Request):
     return BaseController.run(
         ClientRegisterEnumsController.get_customer_qualification_type,
-        payload={},
-        request=request,
-    )
-
-
-@router.get(
-    "/client_register_enums/cosif_tax_classification", tags=["client_register_enums"]
-)
-def get_cosif_tax_classification(request: Request):
-    return BaseController.run(
-        ClientRegisterEnumsController.get_cosif_tax_classification,
         payload={},
         request=request,
     )
@@ -149,14 +123,6 @@ def get_customer_origin(request: Request):
 def get_customer_status(request: Request):
     return BaseController.run(
         ClientRegisterEnumsController.get_customer_status, payload={}, request=request
-    )
-
-
-@router.get("/client_register_enums/customer_status", tags=["client_register_enums"])
-def get_bmf_customer_type(client_type: ClientType, request: Request):
-    return BaseController.run(
-        ClientRegisterEnumsController.get_bmf_customer_type(payload=client_type.dict()),
-        request=request,
     )
 
 
