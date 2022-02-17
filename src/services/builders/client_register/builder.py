@@ -236,37 +236,17 @@ class ClientRegisterBuilder:
         self._fields_added.update({"NM_E_MAIL": user_data["email"]})
         return self
 
-    def add_nm_loc_nasc(self, user_data: dict):
-        birthplace = (
-            user_data.get("birthplace")
-            if user_data.get("birthplace") is not None
-            else {}
-        )
-        city = birthplace.get("city")
-        self._fields_added.update({"NM_LOC_NASC": city})
-        return self
-
     def add_nm_mae(self, user_data: dict):
         self._fields_added.update({"NM_MAE": user_data["mother_name"]})
         return self
 
     def add_sg_estado_nasc(self, user_data: dict):
-        birthplace = (
-            user_data.get("birthplace")
-            if user_data.get("birthplace") is not None
-            else {}
-        )
-        state = birthplace.get("state")
+        state = user_data.get("birth_place_state")
         self._fields_added.update({"SG_ESTADO_NASC": state})
         return self
 
     def add_sg_pais(self, user_data: dict):
-        birthplace = (
-            user_data.get("birthplace")
-            if user_data.get("birthplace") is not None
-            else {}
-        )
-        country = birthplace.get("country")
+        country = user_data.get("birth_place_country")
         self._fields_added.update({"SG_PAIS": country})
         return self
 
@@ -436,13 +416,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cod_cidade_nasc(self, user_data: dict):
-        birthplace = (
-            user_data.get("birthplace")
-            if user_data.get("birthplace") is not None
-            else {}
-        )
-        id_city = birthplace.get("id_city")
-
+        id_city = user_data.get("birth_place_city")
         self._fields_added.update({"COD_CIDADE_NASC": id_city})
         return self
 

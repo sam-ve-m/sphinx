@@ -66,7 +66,7 @@ class AuthenticationService(IAuthentication):
         # sent_to_persephone = persephone_client.run(
         #     topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
         #     partition=PersephoneQueue.USER_AUTHENTICATION.value,
-        #     payload=get_user_authentication_template_with_data(payload=new_user_data),
+        #     payload=get_user_authentication_template_with_data(payload=user_data),
         #     schema_key="user_authentication_schema",
         # )
         # if sent_to_persephone is False:

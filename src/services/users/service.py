@@ -2,6 +2,7 @@
 from datetime import datetime
 import logging
 from copy import deepcopy
+from typing import List
 
 # OUTSIDE LIBRARIES
 from fastapi import status
@@ -61,13 +62,13 @@ class UserService(IUser):
         social_client=ValhallaService.get_social_client(),
         jwt_handler=JwtService,
     ) -> dict:
+        if user_repository.find_one({"email": user.get("email")}) is not None:
+            raise BadRequestError("common.register_exists")
         user = generate_unique_id("email", user)
         has_pin = user.get("pin")
         if has_pin:
             user = hash_field(key="pin", payload=user)
-        if user_repository.find_one({"email": user.get("email")}) is not None:
-            raise BadRequestError("common.register_exists")
-        user.update({"created_at": datetime.now()})
+        user.update({"created_at": datetime.utcnow()})
         UserService.add_user_control_metadata(payload=user)
 
         sent_to_persephone = persephone_client.run(
@@ -399,7 +400,7 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         UserService.onboarding_step_validator(
-            payload=payload, onboard_step="user_selfie_step"
+            payload=payload, onboard_step=["user_selfie_step"]
         )
 
         file_path = file_repository.save_user_file(
@@ -467,7 +468,7 @@ class UserService(IUser):
             user_data=user_data, ttl=525600
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
-        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt, "control_data": control_data}}
 
     @staticmethod
     def add_user_control_metadata(payload: dict) -> None:
@@ -543,7 +544,7 @@ class UserService(IUser):
             raise BadRequestError("common.register_exists")
 
         UserService.onboarding_step_validator(
-            payload=payload, onboard_step="user_identifier_data_step"
+            payload=payload, onboard_step=["user_identifier_data_step"]
         )
 
         current_user = user_repository.find_one(
@@ -591,7 +592,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         UserService.onboarding_step_validator(
-            payload=payload, onboard_step="user_complementary_step"
+            payload=payload, onboard_step=["user_complementary_step"]
         )
         thebes_answer = payload.get("x-thebes-answer")
         current_user = user_repository.find_one(
@@ -706,7 +707,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         UserService.onboarding_step_validator(
-            payload=payload, onboard_step="user_electronic_signature"
+            payload=payload, onboard_step=["user_electronic_signature"]
         )
         thebes_answer = payload.get("x-thebes-answer")
         electronic_signature = payload.get("electronic_signature")
@@ -772,13 +773,13 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def onboarding_step_validator(payload: dict, onboard_step: str):
+    def onboarding_step_validator(payload: dict, onboard_step: List[str]):
         onboarding_steps = UserService.get_onboarding_user_current_step(payload)
         payload_from_onboarding_steps = onboarding_steps.get("payload")
         current_onboarding_step = payload_from_onboarding_steps.get(
             "current_onboarding_step"
         )
-        if current_onboarding_step != onboard_step:
+        if current_onboarding_step not in onboard_step:
             raise BadRequestError("user.invalid_on_boarding_step")
 
     @staticmethod
@@ -808,6 +809,9 @@ class UserService(IUser):
             .personal_income_tax_type()
             .personal_income()
             .personal_tax_residences()
+            .personal_birth_place_country()
+            .personal_birth_place_city()
+            .personal_birth_place_state()
             .marital_status()
             .marital_spouse_name()
             .marital_spouse_cpf()
@@ -840,7 +844,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ):
         UserService.onboarding_step_validator(
-            payload=payload, onboard_step="finished"
+            payload=payload, onboard_step=["finished", "user_data_validation"]
         )
         unique_id: str = payload.get("x-thebes-answer").get("unique_id")
         update_customer_registration_data: dict = payload.get(
@@ -874,6 +878,9 @@ class UserService(IUser):
             .personal_father_name()
             .personal_mother_name()
             .personal_birth_date()
+            .personal_birth_place_country()
+            .personal_birth_place_city()
+            .personal_birth_place_state()
             .marital_status()
             .marital_cpf()
             .marital_nationality()

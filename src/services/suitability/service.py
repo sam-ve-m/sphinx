@@ -125,7 +125,7 @@ class SuitabilityService(ISuitability):
 
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
-        return {"status_code": status.HTTP_201_CREATED, "payload": {"jwt": jwt}}
+        return {"status_code": status.HTTP_201_CREATED, "payload":  {"jwt": jwt, "control_data": control_data}}
 
     @staticmethod
     def get_user_profile(
