@@ -1,11 +1,11 @@
 # OUTSIDE LIBRARIES
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 
 # SPHINX
-from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
+from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
 
 
-class JwtRepository(MongoDBInfrastructure):
+class JwtRepository(MongoDbBaseRepository):
     def __init__(self):
         super().__init__(
             database=config("MONGODB_DATABASE_NAME"),

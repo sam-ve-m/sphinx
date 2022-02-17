@@ -7,15 +7,13 @@ from fastapi import status
 # SPHINX
 from src.repositories.view.repository import ViewRepository
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-from src.utils.genarate_id import generate_id, generate_list
-from src.interfaces.services.view.interface import IView
+from src.core.interfaces.services.view.interface import IView
 
 
 class ViewService(IView):
     @staticmethod
     def create(payload: dict, view_repository=ViewRepository()) -> dict:
-        payload = generate_id("name", payload)
-        payload = generate_list("features", payload)
+        payload.update({"_id": payload["name"], "features": list()})
         if view_repository.find_one(payload) is not None:
             raise BadRequestError("common.register_exists")
         if view_repository.insert(payload):
@@ -60,19 +58,35 @@ class ViewService(IView):
     def link_feature(payload: dict, view_repository=ViewRepository()) -> dict:
         feature_id = payload.get("feature_id")
         old = view_repository.find_one({"_id": payload.get("view_id")})
-        if old:
-            features = old.get("features")
-            if features is None:
+        if old and feature_id not in old.get("features"):
+            new = deepcopy(old)
+            new["features"].append(feature_id)
+            if view_repository.update_one(old=old, new=new):
+                return {
+                    "status_code": status.HTTP_200_OK,
+                    "message_key": "requests.updated",
+                }
+            else:
                 raise InternalServerError("common.process_issue")
-            if feature_id not in features:
-                new = deepcopy(old)
-                new.get("features").append(feature_id)
-                if view_repository.update_one(old=old, new=new) is False:
-                    raise InternalServerError("common.process_issue")
-            return {
-                "status_code": status.HTTP_200_OK,
-                "message_key": "requests.updated",
-            }
+        return {
+            "status_code": status.HTTP_304_NOT_MODIFIED,
+            "message_key": "requests.not_modified",
+        }
+
+    @staticmethod
+    def delink_feature(payload: dict, view_repository=ViewRepository()) -> dict:
+        feature_id = payload.get("feature_id")
+        old = view_repository.find_one({"_id": payload.get("view_id")})
+        if old and feature_id in old.get("features"):
+            new = deepcopy(old)
+            new["features"].remove(feature_id)
+            if view_repository.update_one(old=old, new=new):
+                return {
+                    "status_code": status.HTTP_200_OK,
+                    "message_key": "requests.updated",
+                }
+            else:
+                raise InternalServerError("common.process_issue")
         return {
             "status_code": status.HTTP_304_NOT_MODIFIED,
             "message_key": "requests.not_modified",

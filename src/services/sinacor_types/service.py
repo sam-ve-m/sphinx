@@ -2,42 +2,44 @@
 from fastapi import status
 
 # PERSEPHONE
-from src.repositories.sinacor_types.repository import SinaCorTypesRepository
-from src.repositories.sinacor_types.enum.person_gender import PersonGender
-from src.routers.validators.enum_template import MaritalStatusEnum
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
+from src.domain.sinacor.person_gender import PersonGender
+from src.domain.validators.marital_status_app_to_sphinx import (
+    MaritalStatusAppToSphinxEnum,
+)
 
 
 class SinaCorTypes:
     @staticmethod
-    def get_type_of_income_tax(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_type_of_income_tax(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_type_of_income_tax()},
         }
 
     @staticmethod
-    def get_client_type(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_client_type(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_client_type()},
         }
 
     @staticmethod
-    def get_investor_type(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_investor_type(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_investor_type()},
         }
 
     @staticmethod
-    def get_activity_type(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_activity_type(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_activity_type()},
         }
 
     @staticmethod
-    def get_type_ability_person(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_type_ability_person(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_type_ability_person()},
@@ -45,7 +47,7 @@ class SinaCorTypes:
 
     @staticmethod
     def get_customer_qualification_type(
-        sinacor_types_repository=SinaCorTypesRepository(),
+        sinacor_types_repository=SinacorTypesRepository(),
     ):
         return {
             "status_code": status.HTTP_200_OK,
@@ -55,7 +57,7 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_cosif_tax_classification(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_cosif_tax_classification(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {
@@ -64,35 +66,35 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_marital_status(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_marital_status(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_marital_status()},
         }
 
     @staticmethod
-    def get_nationality(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_nationality(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_nationality()},
         }
 
     @staticmethod
-    def get_document_issuing_body(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_document_issuing_body(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_document_issuing_body()},
         }
 
     @staticmethod
-    def get_document_type(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_document_type(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_document_type()},
         }
 
     @staticmethod
-    def get_county(payload: dict, sinacor_types_repository=SinaCorTypesRepository()):
+    def get_county(payload: dict, sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {
@@ -103,7 +105,7 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_state(payload: dict, sinacor_types_repository=SinaCorTypesRepository()):
+    def get_state(payload: dict, sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {
@@ -114,28 +116,28 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_country(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_country(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_country()},
         }
 
     @staticmethod
-    def get_marriage_regime(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_marriage_regime(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_marriage_regime()},
         }
 
     @staticmethod
-    def get_customer_origin(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_customer_origin(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_customer_origin()},
         }
 
     @staticmethod
-    def get_customer_status(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_customer_status(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_customer_status()},
@@ -143,7 +145,7 @@ class SinaCorTypes:
 
     @staticmethod
     def get_bmf_customer_type(
-        payload: dict, sinacor_types_repository=SinaCorTypesRepository()
+        payload: dict, sinacor_types_repository=SinacorTypesRepository()
     ):
         return {
             "status_code": status.HTTP_200_OK,
@@ -155,14 +157,14 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_economic_activity(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_economic_activity(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_economic_activity()},
         }
 
     @staticmethod
-    def get_account_type(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_account_type(sinacor_types_repository=SinacorTypesRepository()):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_account_type()},
@@ -181,24 +183,36 @@ class SinaCorTypes:
 
     @staticmethod
     def get_marital_status_update():
-        titles = {
-            "married": "Casado",
-            "divorced": "Divorciado",
-            "not_married": "Solteiro",
-            "stable_union": "União estável",
-            "widower": "Viúvo",
-        }
-        marital_status = [
-            {"code": gender.value, "value": titles.get(gender.value)}
-            for gender in list(MaritalStatusEnum)
+        marital_status_to_app = [
+            {
+                "code": MaritalStatusAppToSphinxEnum.SINGLE.value,
+                "description": "Solteiro (a)",
+            },
+            {
+                "code": MaritalStatusAppToSphinxEnum.WIDOWER.value,
+                "description": "Viuvo(a)",
+            },
+            {
+                "code": MaritalStatusAppToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
+                "description": "Casado(a)",
+            },
+            {
+                "code": MaritalStatusAppToSphinxEnum.DIVORCED.value,
+                "description": "Divorciado(a)",
+            },
+            {
+                "code": MaritalStatusAppToSphinxEnum.STABLE_UNION.value,
+                "description": "União Estável",
+            },
         ]
+
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {"enums": marital_status},
+            "payload": {"enums": marital_status_to_app},
         }
 
     @staticmethod
-    def get_nationality_update(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_nationality_update(sinacor_types_repository=SinacorTypesRepository()):
         nationalities = sinacor_types_repository.get_nationality()
         nationalities_enum = [
             {"code": nationality["code"], "value": nationality["description"].title()}
@@ -210,7 +224,7 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_country_update(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_country_update(sinacor_types_repository=SinacorTypesRepository()):
         countries = sinacor_types_repository.get_country()
         countries_enum = [
             {"code": country["initials"], "value": country["description"].title()}
@@ -223,7 +237,7 @@ class SinaCorTypes:
 
     @staticmethod
     def get_county_update(
-        payload: dict, sinacor_types_repository=SinaCorTypesRepository()
+        payload: dict, sinacor_types_repository=SinacorTypesRepository()
     ):
         counties = sinacor_types_repository.get_county(
             country=payload.get("country"), state=payload.get("state")
@@ -239,7 +253,7 @@ class SinaCorTypes:
 
     @staticmethod
     def get_state_update(
-        payload: dict, sinacor_types_repository=SinaCorTypesRepository()
+        payload: dict, sinacor_types_repository=SinacorTypesRepository()
     ):
         states = sinacor_types_repository.get_state(country=payload.get("country"))
         states_enum = [
@@ -252,7 +266,7 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_economic_activity_update(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_economic_activity_update(sinacor_types_repository=SinacorTypesRepository()):
         activities = sinacor_types_repository.get_economic_activity()
         activities_enum = [
             {"code": activity["code"], "value": activity["description"].title()}
@@ -264,8 +278,32 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_activity_type_update(sinacor_types_repository=SinaCorTypesRepository()):
+    def get_activity_type_update(sinacor_types_repository=SinacorTypesRepository()):
         activities = sinacor_types_repository.get_activity_type()
+        activities_enum = [
+            {"code": activity["code"], "value": activity["description"].title()}
+            for activity in activities
+        ]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"enums": activities_enum},
+        }
+
+    @staticmethod
+    def get_issuing_body_update(sinacor_types_repository=SinacorTypesRepository()):
+        activities = sinacor_types_repository.get_issuing_body()
+        activities_enum = [
+            {"code": activity["code"], "value": activity["description"].title()}
+            for activity in activities
+        ]
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"enums": activities_enum},
+        }
+
+    @staticmethod
+    def get_income_tax_type_update(sinacor_types_repository=SinacorTypesRepository()):
+        activities = sinacor_types_repository.get_type_of_income_tax()
         activities_enum = [
             {"code": activity["code"], "value": activity["description"].title()}
             for activity in activities

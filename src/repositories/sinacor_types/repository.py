@@ -1,13 +1,23 @@
 # STANDARD LIBS
-from typing import Type, List
+from typing import Type, List, Optional
 from hashlib import sha1
 
 # SPHINX
-from src.infrastructures.oracle.infrastructure import OracleInfrastructure
+from src.repositories.base_repository.oracle.base import OracleBaseRepository
 from src.repositories.cache.redis import RepositoryRedis
 
 
-class SinaCorTypesRepository(OracleInfrastructure):
+class SinacorTypesRepository(OracleBaseRepository):
+    def get_county_name_by_id(self, id: int) -> Optional[str]:
+        sql = f"""
+            SELECT NOME_MUNI
+            FROM TSCDXMUNICIPIO
+            WHERE NUM_SEQ_MUNI = {id}
+        """
+        tuple_result = self.query_with_cache(sql=sql)
+        if tuple_result:
+            return tuple_result[0][0]
+
     @staticmethod
     def tuples_to_dict_list(fields: List[str], values: List[tuple]):
         dicts_result = list()
@@ -20,7 +30,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT TP_IMP_RENDA as code, DS_IMP_RENDA as description
             FROM TSCTIPIR
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -31,7 +41,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT TP_CLIENTE as code, DS_TIPO_CLIENTE as description
             FROM TSCTIPCLI
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -42,7 +52,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT TP_INVESTIDOR as code, DS_INVESTIDOR as description
             FROM TSCTPINVESTIDOR
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -53,7 +63,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT CD_ATIV as code, DS_ATIV as description
             FROM TSCATIV
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -64,7 +74,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT CD_CAPAC as code, DS_CAPAC as description
             FROM TSCCAPAC
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -75,7 +85,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT CD_TIPO_FILI as code, DS_TIPO_FILI as description
             FROM TSCTIPFIL
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -86,7 +96,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT CD_COSIF as code, DS_COSIF as description
             FROM TSCCOSIF
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -97,7 +107,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT CD_EST_CIVIL as code, DS_EST_CIVIL as description
             FROM TSCESTCIV
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -108,7 +118,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT CD_NACION as code, DS_NACION as description
             FROM TSCNACION
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -119,7 +129,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT CD_ORG_EMIT as code, DS_ORG_EMIT as description
             FROM TSCOREMI
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -130,7 +140,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT CD_TIPO_DOC as code, DS_TIPO_DOC as description
             FROM TSCTIPDOC
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -138,12 +148,12 @@ class SinaCorTypesRepository(OracleInfrastructure):
 
     def get_county(self, country: str, state: str):
         sql = f"""
-            SELECT COD_MUNI as code, NOME_MUNI as description
+            SELECT NUM_SEQ_MUNI as code, NOME_MUNI as description
             FROM TSCDXMUNICIPIO
             WHERE SIGL_PAIS='{country}'
             AND SIGL_ESTADO='{state}'
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -155,9 +165,9 @@ class SinaCorTypesRepository(OracleInfrastructure):
             FROM TSCESTADO
             WHERE SG_PAIS='{country}'
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
-            fields=["initials", "description"], values=tuple_result
+            fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
@@ -166,9 +176,9 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT SG_PAIS as initials, NM_PAIS as description
             FROM TSCPAIS
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
-            fields=["initials", "description"], values=tuple_result
+            fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
@@ -177,7 +187,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT TP_REGCAS as code, DS_REGCAS as description
             FROM TSCREGCAS
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -188,7 +198,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT CD_ORIGEM as code, DS_ORIGEM as description
             FROM TSCCADORIGEM
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -199,7 +209,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT TP_SITUAC as code, DS_SITUAC as description
             FROM TSCTPSITUACAO
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -211,7 +221,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             FROM TSCTIPCLIBMF
             WHERE TIPO_CLIENT='{client_type}'
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -222,7 +232,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT COD_AECO as code, NOME_AECO as description
             FROM TSCDXAECO
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -233,7 +243,18 @@ class SinaCorTypesRepository(OracleInfrastructure):
             SELECT NUM_TIPO_CON as code, NOME_TIPO_CON as description
             FROM TSCDXTIPO_CON
         """
-        tuple_result = self.query(sql=sql)
+        tuple_result = self.query_with_cache(sql=sql)
+        dict_result = self.tuples_to_dict_list(
+            fields=["code", "description"], values=tuple_result
+        )
+        return dict_result
+
+    def get_issuing_body(self):
+        sql = """
+            SELECT CD_ORG_EMIT as code, DS_ORG_EMIT as description
+            FROM TSCOREMI
+        """
+        tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -249,7 +270,9 @@ class SinaCorTypesRepository(OracleInfrastructure):
             partial_value = self.query(sql=sql)
             value = {"value": partial_value}
             cache.set(key=key, value=value, ttl=86400)
-        return value.get("value")
+
+        value = value.get("value")
+        return value
 
     def base_validator(self, sql: str) -> bool:
         value = self.query_with_cache(sql=sql)
@@ -271,7 +294,10 @@ class SinaCorTypesRepository(OracleInfrastructure):
         """
         return self.base_validator(sql=sql)
 
-    def validate_state(self, value: str) -> bool:
+    def validate_state(
+        self,
+        value: str,
+    ) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCESTADO
@@ -299,7 +325,7 @@ class SinaCorTypesRepository(OracleInfrastructure):
         sql = f"""
             SELECT 1
             FROM TSCATIV
-            WHERE CD_ATIV = '{value}'
+            WHERE CD_ATIV = {value}
         """
         return self.base_validator(sql=sql)
 
@@ -311,14 +337,17 @@ class SinaCorTypesRepository(OracleInfrastructure):
         """
         return self.base_validator(sql=sql)
 
-    def is_others(self, value: str) -> bool:
+    def is_unemployed(self, value: str, cnpj: str) -> bool:
         sql = f"""
             SELECT 1
             FROM TSCATIV
             WHERE DS_ATIV = 'OUTROS'
             AND CD_ATIV = {value}
         """
-        return self.base_validator(sql=sql)
+        is_other = self.base_validator(sql=sql)
+        has_cnpj = cnpj is not None
+
+        return is_other and not has_cnpj
 
     def is_business_person(self, value: str) -> bool:
         sql = f"""
@@ -375,4 +404,22 @@ class SinaCorTypesRepository(OracleInfrastructure):
             FROM TSCREGCAS
             WHERE TP_REGCAS = {value}
         """
+        return self.base_validator(sql=sql)
+
+    def validate_marital_status(self, value: str) -> bool:
+        sql = f""" SELECT 1 FROM TSCESTCIV where CD_EST_CIVIL = {value}"""
+        return self.base_validator(sql=sql)
+
+    def validate_contry_state_city_and_id_city(
+        self, contry: str, state: str, city: str, id_city: int
+    ) -> bool:
+        sql = f"""SELECT 1 FROM TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
+        AND SIGL_ESTADO = '{state}' AND NOME_MUNI = '{city}' AND NUM_SEQ_MUNI = {id_city}"""
+        return self.base_validator(sql=sql)
+
+    def validate_contry_state_and_id_city(
+        self, contry: str, state: str, id_city: int
+    ) -> bool:
+        sql = f"""SELECT 1 FROM TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
+        AND SIGL_ESTADO = '{state}' AND NUM_SEQ_MUNI = {id_city}"""
         return self.base_validator(sql=sql)

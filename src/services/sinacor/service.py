@@ -1,6 +1,7 @@
 # STANDARD LIBS
 import datetime
-import json
+import logging
+
 from copy import deepcopy
 from fastapi import status
 
@@ -10,15 +11,12 @@ from src.domain.solutiontech.client_import_status import SolutiontechClientImpor
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
 from src.services.persephone.service import PersephoneService
-from src.utils.stone_age import StoneAge
-from src.utils.base_model_normalizer import normalize_enum_types
+from nidavellir.src.uru import Sindri
 from src.exceptions.exceptions import BadRequestError, InternalServerError
-from src.utils.solutiontech import Solutiontech
+from src.services.third_part_integration.solutiontech import Solutiontech
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
-from src.domain.persephone_queue import PersephoneQueue
-from src.utils.env_config import config
-from src.utils.persephone_templates import get_user_account_template_with_data
-from src.utils.json_encoder.date_encoder import DateEncoder
+from src.domain.persephone_queue.persephone_queue import PersephoneQueue
+from src.infrastructures.env_config import config
 
 
 class SinacorService:
@@ -29,21 +27,21 @@ class SinacorService:
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ):
-        dtvm_client_data_provided_by_bureau = payload.get("output")
-        successful = payload.get("successful")
-        error = payload.get("error")
-
-        if successful is False or error is not None:
-            raise BadRequestError("bureau.error.fail")
+        dtvm_client_data_provided_by_bureau = payload.get("data")
 
         user_database_document = user_repository.find_one(
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
         )
 
+        user_from_database_exists = user_database_document
+
+        if user_from_database_exists is None:
+            raise BadRequestError("common.register_exists")
+
         SinacorService._send_dtvm_client_data_to_persephone(
             persephone_client=persephone_client,
             dtvm_client_data=dtvm_client_data_provided_by_bureau,
-            user_email=user_database_document.get('email')
+            user_email=user_database_document.get("email"),
         )
 
         database_and_bureau_dtvm_client_data_merged = (
@@ -69,13 +67,15 @@ class SinacorService:
         user_data: dict,
         client_register_repository=ClientRegisterRepository(),
         user_repository=UserRepository(),
-    ):
+    ) -> dict:
 
         database_and_bureau_dtvm_client_data_merged = (
-            SinacorService._create_client_into_sinacor(
-                client_register_repository=client_register_repository,
-                database_and_bureau_dtvm_client_data_merged=user_data,
-            )
+            SinacorService._create_or_update_client_into_sinacor(client_register_repository=client_register_repository,
+                                                                 database_and_bureau_dtvm_client_data_merged=user_data)
+        )
+
+        SinacorService._add_third_party_operator_information(
+            database_and_bureau_dtvm_client_data_merged
         )
 
         database_and_bureau_dtvm_client_data_merged = SinacorService._add_dtvm_client_trade_metadata(
@@ -84,7 +84,7 @@ class SinacorService:
         )
 
         user_is_updated = user_repository.update_one(
-            old={"_id": database_and_bureau_dtvm_client_data_merged.get("email")},
+            old={"unique_id": database_and_bureau_dtvm_client_data_merged["unique_id"]},
             new=database_and_bureau_dtvm_client_data_merged,
         )
 
@@ -92,44 +92,62 @@ class SinacorService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def _create_client_into_sinacor(
+    def _add_third_party_operator_information(
+        database_and_bureau_dtvm_client_data_merged: dict,
+    ) -> dict:
+        database_and_bureau_dtvm_client_data_merged.update(
+            {
+                "can_be_managed_by_third_party_operator": False,
+                "is_managed_by_third_party_operator": False,
+                "third_party_operator": {
+                    "is_third_party_operator": False,
+                    "details": {},
+                    "third_party_operator_email": "string",
+                },
+            }
+        )
+
+    @classmethod
+    def _create_or_update_client_into_sinacor(
+        cls,
         client_register_repository: ClientRegisterRepository,
         database_and_bureau_dtvm_client_data_merged: dict,
     ):
 
-        sinacor_client_control_data = SinacorService._clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
+        sinacor_client_control_data = cls._clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
             client_register_repository=client_register_repository,
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
         )
 
-        SinacorService._insert_client_on_the_sinacor_temp_table(
+        cls._insert_client_on_the_sinacor_temp_table(
             client_register_repository=client_register_repository,
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
             sinacor_client_control_data=sinacor_client_control_data,
         )
 
-        SinacorService._check_sinacor_errors_if_is_not_update_client(
+        cls._check_sinacor_errors_if_is_not_update_client(
             client_register_repository=client_register_repository,
             sinacor_client_control_data=sinacor_client_control_data,
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
         )
 
-        cpf_client = database_and_bureau_dtvm_client_data_merged.get("cpf")
+        cpf_client = database_and_bureau_dtvm_client_data_merged.get(
+            "identifier_document"
+        ).get("cpf")
         client_register_repository.register_validated_users(user_cpf=cpf_client)
 
         return database_and_bureau_dtvm_client_data_merged
 
     @staticmethod
-    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict, user_email: str):
+    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict):
         sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
-            payload=json.loads(json.dumps(get_user_account_template_with_data(payload=dtvm_client_data, email=user_email), cls=DateEncoder)),
+            payload=dtvm_client_data,
             schema_key="user_bureau_callback_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
-
 
     @staticmethod
     def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
@@ -137,12 +155,16 @@ class SinacorService:
         database_and_bureau_dtvm_client_data_merged: dict,
     ):
         client_register_repository.cleanup_temp_tables(
-            user_cpf=database_and_bureau_dtvm_client_data_merged["cpf"]
+            user_cpf=database_and_bureau_dtvm_client_data_merged["identifier_document"][
+                "cpf"
+            ]
         )
 
         sinacor_user_control_data = (
             client_register_repository.get_user_control_data_if_user_already_exists(
-                user_cpf=database_and_bureau_dtvm_client_data_merged["cpf"]
+                user_cpf=database_and_bureau_dtvm_client_data_merged[
+                    "identifier_document"
+                ]["cpf"]
             )
         )
 
@@ -164,7 +186,9 @@ class SinacorService:
         client_register_repository: ClientRegisterRepository,
     ) -> dict:
 
-        client_cpf = database_and_bureau_dtvm_client_data_merged.get("cpf")
+        client_cpf = database_and_bureau_dtvm_client_data_merged.get(
+            "identifier_document"
+        ).get("cpf")
 
         database_and_bureau_dtvm_client_data_merged.update(
             {"sinacor": SinacorClientStatus.CREATED.value}
@@ -199,7 +223,19 @@ class SinacorService:
             {"solutiontech": sync_status}
         )
         database_and_bureau_dtvm_client_data_merged.update(
-            {"bovespa_account": bovespa_account, "bmf_account": bmf_account}
+            {
+                "portfolios": {
+                    "default": {
+                        "br": {
+                            "bovespa_account": bovespa_account,
+                            "bmf_account": bmf_account
+                        },
+                    },
+                    "vnc": {
+                        "br": []
+                    }
+                }
+            }
         )
         database_and_bureau_dtvm_client_data_merged.update(
             {
@@ -212,14 +248,18 @@ class SinacorService:
 
     @staticmethod
     def _build_bovespa_account_mask(account_prefix: int, account_digit: int):
-        number_of_account_prefix_digits = 9
         str_account_prefix = str(account_prefix)
-        str_account_prefix_filled_with_zeros = str_account_prefix.zfill(
-            number_of_account_prefix_digits
-        )
         str_account_digit = str(account_digit)
-        bovespa_account_mask = (
-            f"{str_account_prefix_filled_with_zeros}-{str_account_digit}"
+        bovespa_account_mask_without_prefix = (
+            f"{str_account_prefix}-{str_account_digit}"
+        )
+        if len(bovespa_account_mask_without_prefix) > 11:
+            raise InternalServerError(
+                f"Bovespa account to long '{bovespa_account_mask_without_prefix}'"
+            )
+        number_of_account_prefix_digits = 11
+        bovespa_account_mask = bovespa_account_mask_without_prefix.zfill(
+            number_of_account_prefix_digits
         )
         return bovespa_account_mask
 
@@ -252,8 +292,10 @@ class SinacorService:
         is_update = sinacor_client_control_data is not None
 
         if is_update is False:
-            has_error = client_register_repository.validate_user_data_erros(
-                user_cpf=database_and_bureau_dtvm_client_data_merged["cpf"]
+            has_error = client_register_repository.validate_user_data_errors(
+                user_cpf=database_and_bureau_dtvm_client_data_merged[
+                    "identifier_document"
+                ]["cpf"]
             )
             if has_error:
                 raise BadRequestError("bureau.error.fail")
@@ -263,12 +305,16 @@ class SinacorService:
         output: dict, user_database_document: dict
     ) -> dict:
         new = deepcopy(user_database_document)
-        output_normalized = StoneAge.get_only_values_from_user_data(user_data=output)
-        normalize_enum_types(output_normalized)
-        new.update({"register_analyses": output_normalized["decision"]})
-        del output_normalized["decision"]
-        del output_normalized["status"]
-        del output_normalized["email"]
-        del output_normalized["date_of_acquisition"]
+        output_normalized = dict()
+        # TODO REMOVE STONEAGE
+        # StoneAge.get_only_values_from_user_data(
+        #     user_data=output, new_user_data=output_normalized
+        # )
+        Sindri.dict_to_primitive_types(output_normalized)
+        # new.update({"register_analyses": output_normalized["decision"]})
+        # del output_normalized["decision"]
+        # del output_normalized["status"]
+        # del output_normalized["email"]
+        # del output_normalized["date_of_acquisition"]
         new.update(output_normalized)
         return new

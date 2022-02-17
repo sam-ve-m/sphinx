@@ -1,15 +1,19 @@
 # STANDARD LIBS
+import logging
 from typing import Type, Optional
 
 # SPHINX
-from src.infrastructures.oracle.infrastructure import OracleInfrastructure
-from src.repositories.client_register.builder import ClientRegisterBuilder
-from src.repositories.sinacor_types.repository import SinaCorTypesRepository
-from src.routers.validators.enum_template import MaritalStatusEnum
-from src.utils.env_config import config
+from src.exceptions.exceptions import InternalServerError
+from src.repositories.base_repository.oracle.base import OracleBaseRepository
+from src.services.builders.client_register.builder import ClientRegisterBuilder
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
+from src.domain.validators.marital_status_stone_age_to_sphinx import (
+    MaritalStatusStoneAgeToSphinxEnum,
+)
+from src.infrastructures.env_config import config
 
 
-class ClientRegisterRepository(OracleInfrastructure):
+class ClientRegisterRepository(OracleBaseRepository):
     def register_validated_users(self, user_cpf: str):
         values = {
             "cd_empresa": config("COMPANY_OPERATION_CODE"),
@@ -29,7 +33,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         error_temp = "DELETE FROM TSCERROH WHERE CD_CPFCGC = :cpf"
         self.execute(sql=error_temp, values={"cpf": str(user_cpf)})
 
-    def validate_user_data_erros(self, user_cpf: int) -> bool:
+    def validate_user_data_errors(self, user_cpf: int) -> bool:
         self._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
         return self._validate_errors_on_temp_tables(user_cpf=user_cpf)
 
@@ -95,25 +99,36 @@ class ClientRegisterRepository(OracleInfrastructure):
             return result[0]
         return None
 
+    def is_married(self, user_data: dict):
+        is_married = user_data["marital"]["status"] in [
+            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
+            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_NATURALIZED_BRAZILIAN.value,
+            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_FOREIGN.value,
+            MaritalStatusStoneAgeToSphinxEnum.STABLE_UNION.value,
+        ]
+
+        return is_married
+
     def get_builder(
         self,
         user_data: dict,
         sinacor_user_control_data: Optional[tuple],
-        sinacor_types_repository=SinaCorTypesRepository(),
+        sinacor_types_repository=SinacorTypesRepository(),
     ) -> Type[ClientRegisterBuilder]:
-        activity = user_data["occupation"]["activity"]
-        is_married = user_data["marital"]["status"] in [
-            MaritalStatusEnum.MARRIED.value,
-            MaritalStatusEnum.STABLE_UNION.value,
-        ]
-        is_business_person = sinacor_types_repository.is_business_person(value=activity)
-        is_not_employed_or_business_person = sinacor_types_repository.is_others(
-            value=activity
+        occupation = user_data["occupation"]
+        activity = occupation["activity"]
+        company = occupation.get("company", {})
+        cnpj = company.get("cnpj")
+
+        is_married = self.is_married(user_data=user_data)
+        is_unemployed = sinacor_types_repository.is_unemployed(
+            value=activity, cnpj=cnpj
         )
+        is_business_person = sinacor_types_repository.is_business_person(value=activity)
 
         callback_key = (
             is_married,
-            is_not_employed_or_business_person,
+            is_unemployed,
             is_business_person,
         )
 
@@ -122,12 +137,12 @@ class ClientRegisterRepository(OracleInfrastructure):
                 True,
                 True,
                 False,
-            ): ClientRegisterRepository._is_not_employed_or_business_and_married_person,
+            ): ClientRegisterRepository._is_unemployed_and_married_person,
             (
-                True,
                 False,
                 True,
-            ): ClientRegisterRepository._is_business_and_married_person,
+                False,
+            ): ClientRegisterRepository._is_unemployed_and_not_married_person,
             (
                 True,
                 False,
@@ -135,24 +150,31 @@ class ClientRegisterRepository(OracleInfrastructure):
             ): ClientRegisterRepository._is_employed_and_married_person,
             (
                 False,
+                False,
+                False,
+            ): ClientRegisterRepository._is_employed_and_not_married_person,
+            (
                 True,
                 False,
-            ): ClientRegisterRepository._is_not_employed_or_business_and_not_married_person,
+                True,
+            ): ClientRegisterRepository._is_business_and_married_person,
             (
                 False,
                 False,
                 True,
             ): ClientRegisterRepository._is_business_and_not_married_person,
-            (
-                False,
-                False,
-                False,
-            ): ClientRegisterRepository._is_employed_and_not_married_person,
         }
-        if callback := callbacks.get(callback_key):
-            return callback(
-                user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
-            )
+
+        callback = callbacks.get(callback_key)
+
+        if callback is None:
+            message = f"Sinacor builder callback not implemented. Parameters: (is_married: {is_married}, is_unemployed: {is_unemployed}, is_business_person: {is_business_person})"
+            logging.error(msg=message)
+            raise InternalServerError("internal_error")
+
+        return callback(
+            user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
+        )
 
     def client_is_allowed_to_cancel_registration(self, user_cpf: int, bmf_account: int):
         is_client_blocked = self._is_client_blocked(user_cpf)
@@ -216,7 +238,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return len(result) > 0
 
     @staticmethod
-    def _is_not_employed_or_business_and_not_married_person(
+    def _is_unemployed_and_not_married_person(
         user_data: dict, sinacor_user_control_data: Optional[tuple]
     ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
@@ -258,7 +280,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_cd_tipo_doc(user_data=user_data)
             .add_id_sexo(user_data=user_data)
             .add_nm_e_mail(user_data=user_data)
-            .add_nm_loc_nasc(user_data=user_data)
             .add_nm_mae(user_data=user_data)
             .add_sg_estado_nasc(user_data=user_data)
             .add_sg_pais(user_data=user_data)
@@ -295,9 +316,9 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_uf_estr1()
             .add_num_class_risc_cmtt()
             .add_desc_risc_cmtt()
-            .add_num_us_person()
-            .add_val_cfin()
-            .add_data_cfin()
+            .add_num_us_person(user_data=user_data)
+            .add_val_cfin(user_data=user_data)
+            .add_data_cfin(user_data=user_data)
         )
         return builder
 
@@ -344,7 +365,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_cd_tipo_doc(user_data=user_data)
             .add_id_sexo(user_data=user_data)
             .add_nm_e_mail(user_data=user_data)
-            .add_nm_loc_nasc(user_data=user_data)
             .add_nm_mae(user_data=user_data)
             .add_sg_estado_nasc(user_data=user_data)
             .add_sg_pais(user_data=user_data)
@@ -432,7 +452,6 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_cd_tipo_doc(user_data=user_data)
             .add_id_sexo(user_data=user_data)
             .add_nm_e_mail(user_data=user_data)
-            .add_nm_loc_nasc(user_data=user_data)
             .add_nm_mae(user_data=user_data)
             .add_sg_estado_nasc(user_data=user_data)
             .add_sg_pais(user_data=user_data)
@@ -477,7 +496,7 @@ class ClientRegisterRepository(OracleInfrastructure):
         return builder
 
     @staticmethod
-    def _is_not_employed_or_business_and_married_person(
+    def _is_unemployed_and_married_person(
         user_data: dict, sinacor_user_control_data: Optional[tuple]
     ) -> ClientRegisterBuilder:
         builder = ClientRegisterBuilder()
@@ -520,11 +539,10 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_id_sexo(user_data=user_data)
             .add_nm_conjuge(user_data=user_data)
             .add_nm_e_mail(user_data=user_data)
-            .add_nm_loc_nasc(user_data=user_data)
             .add_nm_mae(user_data=user_data)
             .add_sg_estado_nasc(user_data=user_data)
             .add_sg_pais(user_data=user_data)
-            .add_tp_regcas(user_data=user_data)
+            # .add_tp_regcas(valid_user_data=valid_user_data)
             .add_cd_cep(user_data=user_data)
             .add_cd_ddd_tel(user_data=user_data)
             .add_in_ende()
@@ -562,7 +580,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_val_cfin(user_data=user_data)
             .add_data_cfin(user_data=user_data)
             .add_cd_cpf_conjuge(user_data=user_data)
-            .add_dt_nasc_conjuge(user_data=user_data)
+            # .add_dt_nasc_conjuge(valid_user_data=valid_user_data)
         )
         return builder
 
@@ -610,11 +628,10 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_id_sexo(user_data=user_data)
             .add_nm_conjuge(user_data=user_data)
             .add_nm_e_mail(user_data=user_data)
-            .add_nm_loc_nasc(user_data=user_data)
             .add_nm_mae(user_data=user_data)
             .add_sg_estado_nasc(user_data=user_data)
             .add_sg_pais(user_data=user_data)
-            .add_tp_regcas(user_data=user_data)
+            # .add_tp_regcas(valid_user_data=valid_user_data)
             .add_cd_cep(user_data=user_data)
             .add_cd_ddd_tel(user_data=user_data)
             .add_in_ende()
@@ -653,7 +670,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_val_cfin(user_data=user_data)
             .add_data_cfin(user_data=user_data)
             .add_cd_cpf_conjuge(user_data=user_data)
-            .add_dt_nasc_conjuge(user_data=user_data)
+            # .add_dt_nasc_conjuge(valid_user_data=valid_user_data)
             .add_cd_cnpj_empresa(user_data=user_data)
         )
         return builder
@@ -702,11 +719,10 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_id_sexo(user_data=user_data)
             .add_nm_conjuge(user_data=user_data)
             .add_nm_e_mail(user_data=user_data)
-            .add_nm_loc_nasc(user_data=user_data)
             .add_nm_mae(user_data=user_data)
             .add_sg_estado_nasc(user_data=user_data)
             .add_sg_pais(user_data=user_data)
-            .add_tp_regcas(user_data=user_data)
+            # .add_tp_regcas(valid_user_data=valid_user_data)
             .add_cd_cep(user_data=user_data)
             .add_cd_ddd_tel(user_data=user_data)
             .add_in_ende()
@@ -744,6 +760,7 @@ class ClientRegisterRepository(OracleInfrastructure):
             .add_val_cfin(user_data=user_data)
             .add_data_cfin(user_data=user_data)
             .add_cd_cpf_conjuge(user_data=user_data)
-            .add_dt_nasc_conjuge(user_data=user_data)
+            .add_cd_cnpj_empresa(user_data=user_data)
+            # .add_dt_nasc_conjuge(valid_user_data=valid_user_data)
         )
         return builder

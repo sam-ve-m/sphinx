@@ -1,10 +1,10 @@
 # OUTSIDE LIBRARIES
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 from fastapi import status
 
 # SPHINX
 from src.repositories.file.repository import FileRepository
-from src.interfaces.services.term.interface import ITerm
+from src.core.interfaces.services.term.interface import ITerm
 from src.repositories.file.enum.term_file import TermsFileType
 
 
