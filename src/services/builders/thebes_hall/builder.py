@@ -111,7 +111,15 @@ class ThebesHallBuilder:
 
     def add_terms(self):
         self.terms_validator.run(user_data=self._user_data)
-        self._control_data.update({"terms": self._user_data["terms"]})
+        terms_map = list()
+        for name, value in self._user_data["terms"].items():
+            if not value:
+                value = {}
+            terms_map.append({
+                "name": name,
+                **value
+            })
+        self._control_data.update({"terms": terms_map})
         return self
 
     def add_suitability_months_past(self):
