@@ -15,10 +15,10 @@ from mist_client.src.domain.enums.mist_status_responses import MistStatusRespons
 
 class MiddlewareUtils:
     @staticmethod
-    def get_valid_user_from_database(
+    async def get_valid_user_from_database(
         token: dict, user_repository=UserRepository()
     ) -> Optional[dict]:
-        user_data = user_repository.find_one(query={"unique_id": token["unique_id"]})
+        user_data = await user_repository.find_one(query={"unique_id": token["unique_id"]})
         if user_data and user_data.get("is_active_user"):
             return user_data
 
@@ -37,10 +37,10 @@ class MiddlewareUtils:
             return False
 
     @staticmethod
-    def get_valid_admin_from_database(
+    async def get_valid_admin_from_database(
         token: dict, user_repository=UserRepository()
     ) -> Optional[dict]:
-        user_data = user_repository.find_one(query={"unique_id": token["unique_id"]})
+        user_data = await user_repository.find_one(query={"unique_id": token["unique_id"]})
         if user_data and user_data["is_active_user"] and user_data.get("is_admin"):
             return user_data
 

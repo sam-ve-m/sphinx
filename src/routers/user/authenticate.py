@@ -11,14 +11,14 @@ router = UserRouter.instance()
 
 
 @router.put("/thebes_hall", tags=["authentication"])
-def thebes_hall(device_information: DeviceInformationOptional, request: Request):
+async def thebes_hall(device_information: DeviceInformationOptional, request: Request):
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
 
     device_and_thebes_answer_from_request = {
         "device_information": device_information.dict(),
         "x-thebes-answer": jwt_data,
     }
-    return BaseController.run(
+    return await BaseController.run(
         AuthenticationController.thebes_hall,
         device_and_thebes_answer_from_request,
         request,

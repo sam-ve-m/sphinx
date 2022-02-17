@@ -31,8 +31,8 @@ class ThebesHallBuilder:
         self.user_repository = user_repository
         self.terms_validator = terms_validator
 
-    async def build(self) -> Tuple[dict, dict]:
-        build_strategy = await self._get_strategy()
+    def build(self) -> Tuple[dict, dict]:
+        build_strategy = self._get_strategy()
         build_strategy()
 
         Sindri.dict_to_primitive_types(values=self._jwt_payload_data)
@@ -53,8 +53,8 @@ class ThebesHallBuilder:
 
         return build_strategies
 
-    async def _get_strategy(self):
-        build_strategies = await self._get_build_strategies()
+    def _get_strategy(self):
+        build_strategies = self._get_build_strategies()
         is_active_user = self._user_data.get("is_active_user")
         is_active_client = self._user_data.get("is_active_client")
         build_strategy = build_strategies.get((is_active_user, is_active_client))
@@ -64,7 +64,7 @@ class ThebesHallBuilder:
 
         return build_strategy
 
-    async def _build_user_jwt(self):
+    def _build_user_jwt(self):
         (
             self.add_expiration_date_and_created_at()
             .add_unique_id()
@@ -109,7 +109,7 @@ class ThebesHallBuilder:
         )
         return self
 
-    async def add_terms(self):
+    def add_terms(self):
         self.terms_validator.run(user_data=self._user_data)
         self._control_data.update({"terms": self._user_data["terms"]})
         return self

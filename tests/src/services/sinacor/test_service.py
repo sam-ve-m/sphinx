@@ -68,7 +68,7 @@ def _validate_builder_response(callback, dict_to_validate: dict) -> bool:
         return False
 
 
-def test_check_sinacor_errors_if_is_not_update_client_is_not_update():
+async def test_check_sinacor_errors_if_is_not_update_client_is_not_update():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.validate_user_data_errors = MagicMock(
         return_value=False

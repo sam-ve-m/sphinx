@@ -23,7 +23,7 @@ async def login(user_credentials: Login, request: Request):
 
 
 @router.get("/thebes_gate", tags=["authentication"])
-def answer(request: Request):
+async def answer(request: Request):
     try:
         jwt_data = JwtService.get_thebes_answer_from_request(request=request)
     except Exception as e:
@@ -40,7 +40,7 @@ def answer(request: Request):
             ),
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    return BaseController.run(
+    return await BaseController.run(
         AuthenticationController.thebes_gate,
         jwt_data,
         request,

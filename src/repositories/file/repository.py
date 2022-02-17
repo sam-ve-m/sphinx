@@ -104,7 +104,7 @@ class FileRepository(S3Infrastructure, IFile):
 
         return exists_self
 
-    def save_term_file(
+    async def save_term_file(
         self, file_type: TermsFileType, content: Union[str, bytes]
     ) -> None:
 
@@ -133,7 +133,7 @@ class FileRepository(S3Infrastructure, IFile):
         cached_value = await cache.get(key=cache_key)
         if cached_value:
             return cached_value
-        path = self.resolve_term_path(file_type=file_type)
+        path = await self.resolve_term_path(file_type=file_type)
         try:
             file_path = self._get_last_saved_file_from_folder(path=path)
         except InternalServerError:
@@ -150,22 +150,23 @@ class FileRepository(S3Infrastructure, IFile):
             await cache.set(key=cache_key, value=value, ttl=ttl)
             return value
 
-    async def get_terms_version(
+    def get_terms_version(
         self, term_types=TermsFileType, cache=RepositoryRedis, ttl: int = 3600
     ) -> dict:
-        cache_key = "all_terms_version"
-        value = await cache.get(key=cache_key)
-        if value is None:
-            value = dict()
-            for file_type in term_types:
-                value.update(
-                    {
-                        file_type.value: self.get_current_term_version(
-                            file_type=file_type
-                        )
-                    }
-                )
-            await cache.set(key=cache_key, value=value)
+        #TODO: Remove this comments
+        # cache_key = "all_terms_version"
+        # value = await cache.get(key=cache_key)
+        # if value is None:
+        value = dict()
+        for file_type in term_types:
+            value.update(
+                {
+                    file_type.value: self.get_current_term_version(
+                        file_type=file_type
+                    )
+                }
+            )
+        # await cache.set(key=cache_key, value=value)
         return value
 
     async def get_term_file_by_version(
@@ -236,14 +237,14 @@ class FileRepository(S3Infrastructure, IFile):
         return f"{name}_v{version}"
 
     @staticmethod
-    async def resolve_term_path(file_type: TermsFileType) -> str:
+    def resolve_term_path(file_type: TermsFileType) -> str:
         return f"{file_type.value}/"
 
-    async def get_current_term_version(self, file_type: TermsFileType) -> int:
+    def get_current_term_version(self, file_type: TermsFileType) -> int:
         s3_client = FileRepository._get_client()
         objects = s3_client.list_objects(
             Bucket=self.bucket_name,
-            Prefix=await FileRepository.resolve_term_path(file_type=file_type),
+            Prefix=FileRepository.resolve_term_path(file_type=file_type),
             Delimiter="/",
         )
         content = objects.get("Contents")

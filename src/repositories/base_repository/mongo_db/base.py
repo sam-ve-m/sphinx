@@ -1,4 +1,5 @@
 # STANDARD LIBS
+import asyncio
 from typing import Optional
 import logging
 from datetime import datetime
@@ -17,15 +18,20 @@ from src.domain.model_decorator.generate_id import hash_field
 
 class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
     def __init__(self, database: str, collection: str) -> None:
-        mongo_client = MongoDbBaseRepository._get_client()
         self.base_identifier = f"{database}:{collection}"
-        self.database = mongo_client[database]
-        self.collection = self.database[collection]
+        self.database_name = database
+        self.collection_name = collection
 
-    def insert(self, data: dict) -> bool:
+    async def get_collection(self):
+        mongo_client = MongoDbBaseRepository._get_client()
+        database = mongo_client[self.database_name]
+        collection = database[self.collection_name]
+        return collection
+
+    async def insert(self, data: dict) -> bool:
         try:
-            print("here", data)
-            result = self.collection.insert_one(data)
+            collection = await self.get_collection()
+            result = await collection.insert_one(data)
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
@@ -34,17 +40,20 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
 
     async def insert_many(self, data: list) -> bool:
         try:
-            await self.collection.insert_many(data)
+            collection = await self.get_collection()
+            await collection.insert_many(data)
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
+            # TODO: Verificar esse return
             return False
 
     async def find_one(
         self, query: dict, ttl: int = 0, cache=RepositoryRedis
     ) -> Optional[dict]:
         try:
+            collection = await self.get_collection()
             data = None
 
             has_ttl = ttl > 0  # pragma: no cover
@@ -52,7 +61,7 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
                 data = await self._get_from_cache(query=query, cache=cache)
 
             if not data:  # pragma: no cover
-                data = await self.collection.find_one(query).to_list()
+                data = await collection.find_one(query)
 
             if has_ttl and data is not None:  # pragma: no cover
                 await self._save_cache(query=query, cache=cache, ttl=ttl, data=data)
@@ -62,33 +71,39 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            return
+            raise Exception("internal_error")
 
     async def find_more_than_equal_one(self, query: dict) -> Optional[Cursor]:
         try:
-            return await self.collection.find(query)
+            collection = await self.get_collection()
+            result = await collection.find(query)
+            return result
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            return None
+            raise Exception("internal_error")
 
     async def find_all(self) -> Optional[Cursor]:
         try:
-            return await self.collection.find().to_list()
+            collection = await self.get_collection()
+            result = await collection.find().to_list()
+            return result
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            return
+            raise Exception("internal_error")
 
     async def find_one_with_specific_columns(
         self, query: dict, query_limit: dict
     ) -> Optional[dict]:
         try:
-            return await self.collection.find_one(query, query_limit)
+            collection = await self.get_collection()
+            result = await collection.find_one(query, query_limit)
+            return result
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            return None
+            raise Exception("internal_error")
 
     async def update_one(self, old, new, ttl=60, cache=RepositoryRedis) -> bool:
         if not old or len(old) == 0:
@@ -97,8 +112,9 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
         if not new or len(new) == 0:
             return False
         try:
+            collection = await self.get_collection()
             Sindri.dict_to_primitive_types(new, types_to_ignore=[datetime])
-            await self.collection.update_one(old, {"$set": new})
+            await collection.update_one(old, {"$set": new})
             if new.get("email"):
                 await self._save_cache(
                     query={"_id": new.get("email")}, cache=cache, ttl=ttl, data=new
@@ -108,11 +124,13 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
+            #TODO: Verificar esse return
             return False
 
     async def delete_one(self, entity, ttl=0, cache=RepositoryRedis) -> bool:
         try:
-            await self.collection.delete_one(entity)
+            collection = await self.get_collection()
+            await collection.delete_one(entity)
             # TODO need to delete user cache ???
             if entity.get("email"):  # pragma: no cover
                 await self._delete_cache(query={"_id": entity.get("email")}, cache=cache)
@@ -120,18 +138,20 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
+            #TODO: Verificar esse return
             return False
 
     async def _get_from_cache(self, query: dict, cache=RepositoryRedis):
         if query is None:
-            return
+            return None
 
         query_hash = hash_field(payload=query)
+
+        #TODO: Check this await to redis sync
         cache_value = await cache.get(key=f"{self.base_identifier}:{query_hash}")
         if cache_value:
             return cache_value
-
-        return
+        return None
 
     async def _save_cache(self, data: dict, query: dict, cache=RepositoryRedis, ttl: int = 0):
 
@@ -148,5 +168,5 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
 
     @staticmethod
     async def _delete_cache(query: dict, cache=RepositoryRedis):
-        query_hash = hash_field(payload=query)
-        cache.delete(query_hash)
+        query_hash = await hash_field(payload=query)
+        await cache.delete(query_hash)

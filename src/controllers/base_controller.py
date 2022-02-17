@@ -25,7 +25,7 @@ class BaseController(IController):
         lang = i18n.get_language_from_request(request=request)
         try:
             response_metadata = await callback(payload)
-            payload = BaseController.create_response_payload(
+            payload = await BaseController.create_response_payload(
                 response_metadata=response_metadata, lang=lang
             )
             return Response(
@@ -33,41 +33,41 @@ class BaseController(IController):
                 status_code=response_metadata.get("status_code"),
             )
         except UnauthorizedError as e:
-            return BaseController.compile_error_response(
+            return await BaseController.compile_error_response(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 message=i18n.get_translate(str(e), locale=lang),
             )
         except ForbiddenError as e:
-            return BaseController.compile_error_response(
+            return await BaseController.compile_error_response(
                 status_code=status.HTTP_403_FORBIDDEN,
                 message=i18n.get_translate(str(e), locale=lang),
             )
         except BadRequestError as e:
-            return BaseController.compile_error_response(
+            return await BaseController.compile_error_response(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 message=i18n.get_translate(str(e), locale=lang),
             )
         except InternalServerError as e:
-            return BaseController.compile_error_response(
+            return await BaseController.compile_error_response(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message=i18n.get_translate(str(e), locale=lang),
             )
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            return BaseController.compile_error_response(
+            return await BaseController.compile_error_response(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message=i18n.get_translate("internal_error", locale=lang),
             )
 
     @staticmethod
-    def compile_error_response(status_code: status, message: str):
+    async def compile_error_response(status_code: status, message: str):
         return Response(
             content=json.dumps({"detail": [{"msg": message}]}), status_code=status_code
         )
 
     @staticmethod
-    def create_response_payload(response_metadata: dict, lang: str) -> dict:
+    async def create_response_payload(response_metadata: dict, lang: str) -> dict:
         payload = dict()
         if "message_key" in response_metadata:
             payload.update(

@@ -37,13 +37,13 @@ from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 
 class AuthenticationService(IAuthentication):
     @staticmethod
-    def thebes_gate(
+    async def thebes_gate(
         thebes_answer_from_request_or_error: dict,
         user_repository=UserRepository(),
         token_service=JwtService,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        user_data = user_repository.find_one(
+        user_data = await user_repository.find_one(
             {"unique_id": thebes_answer_from_request_or_error.get("unique_id")}
         )
         if user_data is None:
@@ -58,7 +58,7 @@ class AuthenticationService(IAuthentication):
                 "must_do_first_login": False,
                 "scope": {"view_type": "default", "features": ["default", "realtime"]},
             }
-            if user_repository.update_one(old=user_data, new=update_data) is False:
+            if await user_repository.update_one(old=user_data, new=update_data) is False:
                 raise InternalServerError("common.process_issue")
             user_data.update(update_data)
 
@@ -83,12 +83,12 @@ class AuthenticationService(IAuthentication):
         return response
 
     @staticmethod
-    def login(
+    async def login(
         user_credentials: dict,
         user_repository=UserRepository(),
         token_service=JwtService,
     ) -> dict:
-        user_data = user_repository.find_one({"email": user_credentials["email"]})
+        user_data = await user_repository.find_one({"email": user_credentials["email"]})
         if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -158,7 +158,7 @@ class AuthenticationService(IAuthentication):
             raise BadRequestError("common.register_not_exists")
 
         br_third_part_synchronization_status = (
-            AuthenticationService._dtvm_client_has_br_trade_allowed(user=user_data)
+            await AuthenticationService._dtvm_client_has_br_trade_allowed(user=user_data)
         )
 
         user_data_update = {}
@@ -176,7 +176,7 @@ class AuthenticationService(IAuthentication):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
         ).build()
-        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         # TODO: BACK WITH THAT
         # sent_to_persephone = persephone_client.run(
@@ -201,7 +201,7 @@ class AuthenticationService(IAuthentication):
         }
 
     @staticmethod
-    def _dtvm_client_has_br_trade_allowed(
+    async def _dtvm_client_has_br_trade_allowed(
         user: dict,
         client_register_repository=ClientRegisterRepository(),
         solutiontech=Solutiontech,
@@ -252,7 +252,7 @@ class AuthenticationService(IAuthentication):
         )
         if user_is_not_already_sync_with_sincad:
             sincad_status_from_sinacor = (
-                AuthenticationService.sinacor_is_synced_with_sincad(
+                await AuthenticationService.sinacor_is_synced_with_sincad(
                     user_cpf=user_cpf_from_database,
                     client_register_repository=client_register_repository,
                 )
@@ -264,7 +264,7 @@ class AuthenticationService(IAuthentication):
                 user_sincad_status_from_database=user_sincad_status_from_database,
             )
 
-        sinacor_status_from_sinacor = AuthenticationService.client_sinacor_is_blocked(
+        sinacor_status_from_sinacor = await AuthenticationService.client_sinacor_is_blocked(
             user_cpf=user_cpf_from_database,
             client_register_repository=client_register_repository,
         )
@@ -373,17 +373,17 @@ class AuthenticationService(IAuthentication):
         return user_has_valid_solutiontech_status_in_database
 
     @staticmethod
-    def sinacor_is_synced_with_sincad(
+    async def sinacor_is_synced_with_sincad(
         user_cpf: int, client_register_repository=ClientRegisterRepository()
     ) -> bool:
-        sincad_status = client_register_repository.get_sincad_status(user_cpf=user_cpf)
+        sincad_status = await client_register_repository.get_sincad_status(user_cpf=user_cpf)
         return sincad_status and sincad_status[0] in ["ACE", "ECM"]
 
     @staticmethod
-    def client_sinacor_is_blocked(
+    async def client_sinacor_is_blocked(
         user_cpf: int, client_register_repository=ClientRegisterRepository()
     ) -> bool:
-        sincad_status = client_register_repository.get_sinacor_status(user_cpf=user_cpf)
+        sincad_status = await client_register_repository.get_sinacor_status(user_cpf=user_cpf)
         return sincad_status and sincad_status[0] in ["A"]
 
     @staticmethod

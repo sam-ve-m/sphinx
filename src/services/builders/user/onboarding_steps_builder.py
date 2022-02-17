@@ -25,7 +25,7 @@ class OnboardingStepBuilder:
         ]
         self.bureau_status = None
 
-    async def user_suitability_step(self, current_user):
+    def user_suitability_step(self, current_user):
         user_suitability_profile = current_user.get("suitability")
         terms = current_user.get("terms")
         has_signed_refusal_term = terms.get("term_refusal")

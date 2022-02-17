@@ -22,4 +22,4 @@ async def create_quiz_suitability(suitability: Suitability, request: Request):
         "suitability": suitability.dict(),
     }
 
-    return BaseController.run(SuitabilityController.create_quiz, payload, request)
+    return await BaseController.run(SuitabilityController.create_quiz, payload, request)

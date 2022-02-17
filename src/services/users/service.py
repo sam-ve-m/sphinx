@@ -1,4 +1,5 @@
 # STANDARD LIBS
+import asyncio
 from datetime import datetime
 import logging
 from copy import deepcopy
@@ -65,22 +66,25 @@ class UserService(IUser):
         has_pin = user.get("pin")
         if has_pin:
             user = await hash_field(key="pin", payload=user)
-        if await user_repository.find_one({"email": user.get("email")}) is not None:
+        user_from_database = await user_repository.find_one({"email": user.get("email")})
+        has_user_from_database = user_from_database is not None
+
+        if has_user_from_database:
             raise BadRequestError("common.register_exists")
+
         user.update({"created_at": datetime.now()})
         await UserService.add_user_control_metadata(payload=user)
 
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
-            payload=get_prospect_user_template_with_data(payload=user),
-            schema_key="prospect_user_schema",
-        )
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
+        #     payload=get_prospect_user_template_with_data(payload=user),
+        #     schema_key="prospect_user_schema",
+        # )
 
-        was_user_inserted = user_repository.insert(user)
-        print(was_user_inserted)
-        if (sent_to_persephone and was_user_inserted) is False:
-            raise InternalServerError("common.process_issue")
+        was_user_inserted = await user_repository.insert(user)
+        # if (sent_to_persephone and was_user_inserted) is False:
+        #     raise InternalServerError("common.process_issue")
 
         # was_user_created_on_social_network = social_client.create_social_network_user(
         #     msg={"email": user.get("email"), "name": user.get("nick_name")}
@@ -88,11 +92,11 @@ class UserService(IUser):
         #
         # if not was_user_created_on_social_network:
         #     raise InternalServerError("common.process_issue")
+        #
+        # if not was_user_created_on_social_network:
+        #     raise InternalServerError("common.process_issue")
 
-        if not was_user_created_on_social_network:
-            raise InternalServerError("common.process_issue")
-
-        jwt_payload_data, control_data = await ThebesHallBuilder(
+        jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user, ttl=10
         ).build()
         payload_jwt = jwt_handler.generate_token(jwt_payload_data=jwt_payload_data)
@@ -205,7 +209,7 @@ class UserService(IUser):
         ):
             raise InternalServerError("common.process_issue")
 
-        jwt_payload_data, control_data = ThebesHallBuilder(
+        jwt_payload_data, control_data = await ThebesHallBuilder(
             user_data=user_from_database_to_update, ttl=525600
         ).build()
         jwt = JwtService.generate_token(jwt_payload_data=jwt_payload_data)
@@ -298,10 +302,10 @@ class UserService(IUser):
         new["scope"]["view_type"] = new_view
         if await user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.unable_to_process")
-        jwt_payload_data, control_data = ThebesHallBuilder(
+        jwt_payload_data, control_data = await ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
-        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -315,14 +319,14 @@ class UserService(IUser):
         if entity is None:
             raise BadRequestError("common.register_not_exists")
 
-        jwt_payload_data, control_data = ThebesHallBuilder(
+        jwt_payload_data, control_data = await ThebesHallBuilder(
             user_data=entity, ttl=10
         ).build()
         jwt_payload_data.update({"forgot_password": True})
-        payload_jwt = await jwt_handler.generate_token(jwt_payload_data=jwt_payload_data)
-        await authentication_service.send_authentication_email(
+        payload_jwt = jwt_handler.generate_token(jwt_payload_data=jwt_payload_data)
+        authentication_service.send_authentication_email(
             email=entity.get("email"),
-            payload_jwt=await payload_jwt,
+            payload_jwt=payload_jwt,
             body="email.body.forgot_password",
         )
         return {
@@ -359,10 +363,10 @@ class UserService(IUser):
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
             status_code = status.HTTP_200_OK
-        jwt_payload_data, control_data = ThebesHallBuilder(
+        jwt_payload_data, control_data = await ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
-        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {
             "status_code": status_code,
             "payload": {"jwt": jwt},
@@ -385,10 +389,10 @@ class UserService(IUser):
         else:
             response.update({"status_code": status.HTTP_304_NOT_MODIFIED})
 
-        jwt_payload_data, control_data = ThebesHallBuilder(
+        jwt_payload_data, control_data = await ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
-        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         response.update({"jwt": jwt})
 
@@ -401,7 +405,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_selfie_step"
         )
 
@@ -444,7 +448,7 @@ class UserService(IUser):
         file_type = payload.get("file_type")
         term_update = await UserService.fill_term_signed(
             file_type=file_type.value,
-            version=await file_repository.get_current_term_version(file_type=file_type),
+            version=file_repository.get_current_term_version(file_type=file_type),
         )
         # TODO: BACK WITH THAT
         # sent_to_persephone = persephone_client.run(
@@ -466,10 +470,10 @@ class UserService(IUser):
         user_data = await user_repository.find_one(
             {"unique_id": thebes_answer.get("unique_id")}
         )
-        jwt_payload_data, control_data = ThebesHallBuilder(
+        jwt_payload_data, control_data = await ThebesHallBuilder(
             user_data=user_data, ttl=525600
         ).build()
-        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -763,8 +767,8 @@ class UserService(IUser):
         ).build()
         jwt_payload_data.update({"forgot_electronic_signature": True})
 
-        payload_jwt = await JwtService.generate_token(jwt_payload_data=jwt_payload_data)
-        await authentication_service.send_authentication_email(
+        payload_jwt = JwtService.generate_token(jwt_payload_data=jwt_payload_data)
+        authentication_service.send_authentication_email(
             email=entity.get("email"),
             payload_jwt=payload_jwt,
             body="email.body.forgot_electronic_signature",
@@ -842,7 +846,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ):
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_data_validation"
         )
         unique_id: str = payload.get("x-thebes-answer").get("unique_id")
@@ -924,7 +928,7 @@ class UserService(IUser):
         ):
             raise InternalServerError("common.process_issue")
 
-        SinacorService.save_or_update_client_data(
+        await SinacorService.save_or_update_client_data(
             user_data=new_customer_registration_data
         )
 

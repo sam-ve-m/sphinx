@@ -29,7 +29,7 @@ class IRepository(ABC):
         pass
 
     @abstractmethod
-    def find_all(self) -> Optional[Cursor]:
+    async def find_all(self) -> Optional[Cursor]:
         pass
 
     @abstractmethod

@@ -9,7 +9,7 @@ class RedisInfrastructure:
     redis = None
 
     @classmethod
-    async def get_redis(cls):
+    def _get_redis(cls):
         if cls.redis is None:
             url = "redis://{}:{}@{}:{}?db={}".format(
                 config("KEY_REDIS_USER"),
@@ -18,7 +18,7 @@ class RedisInfrastructure:
                 config("KEY_REDIS_PORT"),
                 config("KEY_REDIS_DB")
             )
-            cls.redis = aioredis(url)
+            cls.redis = aioredis.from_url(url)
 
         return cls.redis
 

@@ -15,9 +15,9 @@ from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 
 
 class OracleBaseRepository(OracleInfrastructure, IOracle):
-    def query(self, sql: str) -> list:
+    async def query(self, sql: str) -> list:
         try:
-            with self.get_connection() as connection:
+            async with self.get_connection() as connection:
                 with connection.cursor() as cursor:
                     cursor.execute(sql)
                     rows = cursor.fetchall()
@@ -63,6 +63,12 @@ class OracleBaseRepository(OracleInfrastructure, IOracle):
             (error,) = e.args
             logger = logging.getLogger(config("LOG_NAME"))
             message = f"Oracle-Error-Code: {error.code}. Oracle-Error-Message: {error.message} - Sql: {sql} - Oracle-ex: {e}"
+            logger.error(message, exc_info=True)
+            raise InternalServerError("common.process_issue")
+
+        except Exception as e:
+            logger = logging.getLogger(config("LOG_NAME"))
+            message = f"Exception: {e}. Oracle-Error-Base-Exception Sql: {sql}"
             logger.error(message, exc_info=True)
             raise InternalServerError("common.process_issue")
 

@@ -21,7 +21,7 @@ from src.infrastructures.env_config import config
 
 class SinacorService:
     @staticmethod
-    def process_callback(
+    async def process_callback(
         payload: dict,
         client_register_repository=ClientRegisterRepository(),
         user_repository=UserRepository(),
@@ -29,7 +29,7 @@ class SinacorService:
     ):
         dtvm_client_data_provided_by_bureau = payload.get("data")
 
-        user_database_document = user_repository.find_one(
+        user_database_document = await user_repository.find_one(
             {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
         )
 
@@ -51,7 +51,7 @@ class SinacorService:
             )
         )
 
-        SinacorService.save_or_update_client_data(
+        await SinacorService.save_or_update_client_data(
             user_data=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
             user_repository=user_repository,
@@ -63,14 +63,14 @@ class SinacorService:
         }
 
     @staticmethod
-    def save_or_update_client_data(
+    async def save_or_update_client_data(
         user_data: dict,
         client_register_repository=ClientRegisterRepository(),
         user_repository=UserRepository(),
     ) -> dict:
 
         database_and_bureau_dtvm_client_data_merged = (
-            SinacorService._create_or_update_client_into_sinacor(client_register_repository=client_register_repository,
+            await SinacorService._create_or_update_client_into_sinacor(client_register_repository=client_register_repository,
                                                                  database_and_bureau_dtvm_client_data_merged=user_data)
         )
 
@@ -78,7 +78,7 @@ class SinacorService:
             database_and_bureau_dtvm_client_data_merged
         )
 
-        database_and_bureau_dtvm_client_data_merged = SinacorService._add_dtvm_client_trade_metadata(
+        database_and_bureau_dtvm_client_data_merged = await SinacorService._add_dtvm_client_trade_metadata(
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
         )
@@ -108,7 +108,7 @@ class SinacorService:
         )
 
     @classmethod
-    def _create_or_update_client_into_sinacor(
+    async def _create_or_update_client_into_sinacor(
         cls,
         client_register_repository: ClientRegisterRepository,
         database_and_bureau_dtvm_client_data_merged: dict,
@@ -125,7 +125,7 @@ class SinacorService:
             sinacor_client_control_data=sinacor_client_control_data,
         )
 
-        cls._check_sinacor_errors_if_is_not_update_client(
+        await cls._check_sinacor_errors_if_is_not_update_client(
             client_register_repository=client_register_repository,
             sinacor_client_control_data=sinacor_client_control_data,
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
@@ -150,7 +150,7 @@ class SinacorService:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
+    async def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
         client_register_repository: ClientRegisterRepository,
         database_and_bureau_dtvm_client_data_merged: dict,
     ):
@@ -161,7 +161,7 @@ class SinacorService:
         )
 
         sinacor_user_control_data = (
-            client_register_repository.get_user_control_data_if_user_already_exists(
+            await client_register_repository.get_user_control_data_if_user_already_exists(
                 user_cpf=database_and_bureau_dtvm_client_data_merged[
                     "identifier_document"
                 ]["cpf"]
@@ -181,7 +181,7 @@ class SinacorService:
         return SolutiontechClientImportStatus.FAILED.value
 
     @staticmethod
-    def _add_dtvm_client_trade_metadata(
+    async def _add_dtvm_client_trade_metadata(
         database_and_bureau_dtvm_client_data_merged: dict,
         client_register_repository: ClientRegisterRepository,
     ) -> dict:
@@ -202,7 +202,7 @@ class SinacorService:
             )
 
         sinacor_user_control_data = (
-            client_register_repository.get_user_control_data_if_user_already_exists(
+            await client_register_repository.get_user_control_data_if_user_already_exists(
                 user_cpf=client_cpf
             )
         )
@@ -210,7 +210,7 @@ class SinacorService:
         account_prefix = sinacor_user_control_data[0]
         account_digit = sinacor_user_control_data[1]
 
-        bovespa_account = SinacorService._build_bovespa_account_mask(
+        bovespa_account = await SinacorService._build_bovespa_account_mask(
             account_prefix=account_prefix, account_digit=account_digit
         )
         bmf_account = SinacorService._build_bmf_account(account_prefix=account_prefix)
@@ -247,7 +247,7 @@ class SinacorService:
         return database_and_bureau_dtvm_client_data_merged
 
     @staticmethod
-    def _build_bovespa_account_mask(account_prefix: int, account_digit: int):
+    async def _build_bovespa_account_mask(account_prefix: int, account_digit: int):
         str_account_prefix = str(account_prefix)
         str_account_digit = str(account_digit)
         bovespa_account_mask_without_prefix = (
@@ -284,7 +284,7 @@ class SinacorService:
         )
 
     @staticmethod
-    def _check_sinacor_errors_if_is_not_update_client(
+    async def _check_sinacor_errors_if_is_not_update_client(
         client_register_repository: ClientRegisterRepository,
         sinacor_client_control_data: dict,
         database_and_bureau_dtvm_client_data_merged: dict,
@@ -292,7 +292,7 @@ class SinacorService:
         is_update = sinacor_client_control_data is not None
 
         if is_update is False:
-            has_error = client_register_repository.validate_user_data_errors(
+            has_error = await client_register_repository.validate_user_data_errors(
                 user_cpf=database_and_bureau_dtvm_client_data_merged[
                     "identifier_document"
                 ]["cpf"]

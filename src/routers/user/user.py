@@ -155,7 +155,7 @@ async def get_onboarding_user_current_step(
 
 
 @router.put("/user/electronic_signature", tags=["user"])
-def set_user_electronic_signature(
+async def set_user_electronic_signature(
     electronic_signature: ElectronicSignature, request: Request
 ):
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
@@ -164,7 +164,7 @@ def set_user_electronic_signature(
         "x-thebes-answer": jwt_data,
         "electronic_signature": electronic_signature.dict().get("electronic_signature"),
     }
-    return BaseController.run(
+    return await BaseController.run(
         UserController.set_user_electronic_signature, payload, request
     )
 
