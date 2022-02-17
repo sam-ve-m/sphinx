@@ -76,6 +76,36 @@ class UpdateCustomerRegistrationBuilder:
             )
         return self
 
+    def personal_birth_place_country(self):
+        old_birth_place_country = self.__old_personal_data.get("birth_place_country")
+        if new_birth_place_country := self._get_new_value("personal", "birth_place_country"):
+            self._update_modified_data(
+                levels=("birth_place_country",),
+                old_field=old_birth_place_country,
+                new_filed=new_birth_place_country,
+            )
+        return self
+
+    def personal_birth_place_city(self):
+        old_birth_place_city = self.__old_personal_data.get("birth_place_city")
+        if new_birth_place_city := self._get_new_value("personal", "birth_place_city"):
+            self._update_modified_data(
+                levels=("birth_place_city",),
+                old_field=old_birth_place_city,
+                new_filed=new_birth_place_city,
+            )
+        return self
+
+    def personal_birth_place_state(self):
+        old_birth_place_state = self.__old_personal_data.get("birth_place_state")
+        if new_birth_place_state := self._get_new_value("personal", "birth_place_state"):
+            self._update_modified_data(
+                levels=("birth_place_state",),
+                old_field=old_birth_place_state,
+                new_filed=new_birth_place_state,
+            )
+        return self
+
     def personal_gender(self):
         old_gender = self.__old_personal_data.get("gender")
         if new_gender := self._get_new_value("personal", "gender"):

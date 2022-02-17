@@ -153,8 +153,23 @@ class CustomerRegistrationBuilder:
         return self
 
     def personal_tax_residences(self):
-        cpf = self.__personal_data.get("tax_residences")
-        self.__buffer["personal"].update({"tax_residences": cpf})
+        tax_residences = self.__personal_data.get("tax_residences")
+        self.__buffer["personal"].update({"tax_residences": tax_residences})
+        return self
+
+    def personal_birth_place_country(self):
+        birth_place_country = self.__personal_data.get("birth_place_country")
+        self.__buffer["personal"].update({"birth_place_country": birth_place_country})
+        return self
+
+    def personal_birth_place_city(self):
+        birth_place_city = self.__personal_data.get("birth_place_city")
+        self.__buffer["personal"].update({"birth_place_city": birth_place_city})
+        return self
+
+    def personal_birth_place_state(self):
+        birth_place_state = self.__personal_data.get("birth_place_state")
+        self.__buffer["personal"].update({"birth_place_state": birth_place_state})
         return self
 
     def documents_state(self):

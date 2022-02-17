@@ -66,7 +66,7 @@ class AuthenticationService(IAuthentication):
         # sent_to_persephone = persephone_client.run(
         #     topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
         #     partition=PersephoneQueue.USER_AUTHENTICATION.value,
-        #     payload=get_user_authentication_template_with_data(payload=new_user_data),
+        #     payload=get_user_authentication_template_with_data(payload=user_data),
         #     schema_key="user_authentication_schema",
         # )
         # if sent_to_persephone is False:
@@ -210,20 +210,19 @@ class AuthenticationService(IAuthentication):
         user_solutiontech_status_from_database = user.get("solutiontech")
         user_sincad_status_from_database = user.get("sincad")
         user_sinacor_status_from_database = user.get("sinacor")
-        user_bmf_account_from_database = user.get("bmf_account")
+        user_bmf_account_from_database = user.get('portfolios', {}).get("default", {}).get("br", {}).get("bmf_account")
         user_cpf_from_database = user.get("identifier_document", {}).get("cpf")
 
-        # TODO: POQ ESTA AKI:?
-        # if not all(
-        #     [
-        #         user_solutiontech_status_from_database,
-        #         user_sincad_status_from_database,
-        #         user_sinacor_status_from_database,
-        #         user_bmf_account_from_database,
-        #         user_cpf_from_database,
-        #     ]
-        # ):
-        #     return {}
+        if not all(
+            [
+                user_solutiontech_status_from_database,
+                user_sincad_status_from_database,
+                user_sinacor_status_from_database,
+                user_bmf_account_from_database,
+                user_cpf_from_database,
+            ]
+        ):
+            return {}
 
         client_map_requirements_to_allow_trade_from_database = AuthenticationService._get_client_map_requirements_to_allow_trade(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
