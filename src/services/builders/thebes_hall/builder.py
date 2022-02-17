@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Tuple
 
 # SPHINX
+from src.domain.investor_type.type import InvestorType
 from src.repositories.user.repository import UserRepository
 from src.services.builders.thebes_hall.validators.suitability import (
     Suitability as SuitabilityValidator,
@@ -18,13 +19,14 @@ from src.domain.solutiontech.client_import_status import SolutiontechClientImpor
 
 class ThebesHallBuilder:
     def __init__(
-        self,
-        user_data: dict,
-        ttl: int,
-        user_repository=UserRepository(),
-        terms_validator=TermsValidator(),
+            self,
+            user_data: dict,
+            ttl: int,
+            user_repository=UserRepository(),
+            terms_validator=TermsValidator(),
     ):
         self._jwt_payload_data = dict()
+        self._jwt_payload_user_data = dict()
         self._control_data = dict()
         self._user_data = user_data
         self._ttl = ttl
@@ -34,7 +36,9 @@ class ThebesHallBuilder:
     def build(self) -> Tuple[dict, dict]:
         build_strategy = self._get_strategy()
         build_strategy()
-
+        self._jwt_payload_data.update({
+            "user": self._jwt_payload_user_data
+        })
         Sindri.dict_to_primitive_types(values=self._jwt_payload_data)
         return self._jwt_payload_data, self._control_data
 
@@ -67,35 +71,35 @@ class ThebesHallBuilder:
     def _build_user_jwt(self):
         (
             self.add_expiration_date_and_created_at()
-            .add_unique_id()
-            .add_scope()
-            .add_nick_name()
-            .add_terms()
-            .add_last_modified_date_months_past()
+                .add_unique_id()
+                .add_scope()
+                .add_nick_name()
+                .add_terms()
+                .add_last_modified_date_months_past()
         )
 
     def _build_client_jwt(self):
         (
             self.add_expiration_date_and_created_at()
-            .add_unique_id()
-            .add_nick_name()
-            .add_scope()
-            .add_is_blocked_electronic_signature()
-            .add_register_analyses()
-            .add_br_accounts()
-            .add_us_accounts()
-            .add_using_suitability_or_refuse_term()
-            .add_last_modified_date_months_past()
-            .add_suitability_months_past()
-            .add_client_has_br_trade_allowed(
+                .add_unique_id()
+                .add_nick_name()
+                .add_scope()
+                .add_is_blocked_electronic_signature()
+                .add_register_analyses()
+                .add_br_accounts()
+                .add_us_accounts()
+                .add_using_suitability_or_refuse_term()
+                .add_last_modified_date_months_past()
+                .add_suitability_months_past()
+                .add_client_has_br_trade_allowed(
                 suitability_months_past=self._control_data["suitability_months_past"],
                 last_modified_date_months_past=self._control_data[
                     "last_modified_date_months_past"
                 ],
             )
-            .add_client_has_us_trade_allowed()
-            .add_client_profile()
-            .add_terms()
+                .add_client_has_us_trade_allowed()
+                .add_client_profile()
+                .add_terms()
         )
 
     def add_expiration_date_and_created_at(self):
@@ -153,11 +157,11 @@ class ThebesHallBuilder:
         return self
 
     def add_nick_name(self):
-        self._jwt_payload_data.update({"nick_name": self._user_data.get("nick_name")})
+        self._jwt_payload_user_data.update({"nick_name": self._user_data.get("nick_name")})
         return self
 
     def add_unique_id(self):
-        self._jwt_payload_data.update({"unique_id": self._user_data.get("unique_id")})
+        self._jwt_payload_user_data.update({"unique_id": self._user_data.get("unique_id")})
         return self
 
     def add_scope(self):
@@ -180,39 +184,37 @@ class ThebesHallBuilder:
         return self
 
     def add_br_accounts(self):
-        if self._jwt_payload_data.get("accounts") is None:
-            self._jwt_payload_data.update({"accounts": dict()})
-        if self._jwt_payload_data["accounts"].get("br") is None:
-            self._jwt_payload_data["accounts"].update({"br": dict()})
+        if self._jwt_payload_user_data.get("portfolios") is None:
+            self._jwt_payload_user_data.update({"portfolios": dict()})
+        if self._jwt_payload_user_data["portfolios"].get("br") is None:
+            self._jwt_payload_user_data["portfolios"].update({"br": dict()})
         (self.add_bovespa_account().add_bmf_account())
         return self
 
     def add_us_accounts(self):
-        if self._jwt_payload_data.get("accounts") is None:
-            self._jwt_payload_data.update({"accounts": dict()})
-        if self._jwt_payload_data["accounts"].get("us") is None:
-            self._jwt_payload_data["accounts"].update({"us": dict()})
-        self._jwt_payload_data["accounts"]["us"].update({"dw_account": None})
+        if self._jwt_payload_user_data.get("portfolios") is None:
+            self._jwt_payload_user_data.update({"portfolios": dict()})
+        if self._jwt_payload_user_data["portfolios"].get("us") is None:
+            self._jwt_payload_user_data["portfolios"].update({"us": dict()})
+        self._jwt_payload_user_data["portfolios"]["us"].update({"_": None})
         return self
 
     def add_bovespa_account(self):
-        if bovespa_account := self._user_data.get("bovespa_account"):
-            self._jwt_payload_data["accounts"]["br"].update(
-                {"bovespa_account": bovespa_account}
-            )
+        self._jwt_payload_user_data["portfolios"]["br"].update(
+            {"bovespa_account": self._user_data.get("portfolios", {}).get("default", {}).get("br", {}).get("bovespa_account")}
+        )
         return self
 
     def add_bmf_account(self):
-        if bmf_account := self._user_data.get("bmf_account"):
-            self._jwt_payload_data["accounts"]["br"].update(
-                {"bmf_account": bmf_account}
-            )
+        self._jwt_payload_user_data["portfolios"]["br"].update(
+            {"bmf_account": self._user_data.get("portfolios", {}).get("default", {}).get("br", {}).get("bmf_account")}
+        )
         return self
 
     def add_client_has_br_trade_allowed(
-        self, suitability_months_past: int, last_modified_date_months_past: int
+            self, suitability_months_past: int, last_modified_date_months_past: int
     ):
-        self._jwt_payload_data.update({"client_has_br_trade_allowed": False})
+        self._jwt_payload_user_data.update({"client_has_br_trade_allowed": False})
         solutiontech = self._user_data.get("solutiontech")
         sincad = self._user_data.get("sincad")
         sinacor = self._user_data.get("sinacor")
@@ -225,19 +227,19 @@ class ThebesHallBuilder:
                 is_active_client,
                 suitability_months_past < 24,
                 last_modified_date_months_past < 24,
-            ]
+                ]
         )
-        self._jwt_payload_data.update(
+        self._jwt_payload_user_data.update(
             {"client_has_br_trade_allowed": client_has_trade_allowed}
         )
         return self
 
     def add_client_has_us_trade_allowed(
-        self,
+            self,
     ):
-        self._jwt_payload_data.update({"client_has_us_trade_allowed": False})
+        self._jwt_payload_user_data.update({"client_has_us_trade_allowed": False})
         return self
 
     def add_client_profile(self):
-        self._jwt_payload_data.update({"client_profile": self._user_data.get("client_profile", 0)})
+        self._jwt_payload_user_data.update({"client_profile": self._user_data.get("client_profile",  InvestorType.INVESTOR)})
         return self

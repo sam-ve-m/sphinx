@@ -1,4 +1,4 @@
-from src.domain.enums.caf.status import CAFStatus
+from src.domain.caf.status import CAFStatus
 
 
 class OnboardingStepBuilder:
