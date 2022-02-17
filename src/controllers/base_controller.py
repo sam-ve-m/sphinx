@@ -31,6 +31,9 @@ class BaseController(IController):
             return Response(
                 content=json.dumps(payload, cls=Sindri),
                 status_code=response_metadata.get("status_code"),
+                headers={
+                    "Content-type": "application/json"
+                }
             )
         except UnauthorizedError as e:
             return await BaseController.compile_error_response(
@@ -63,7 +66,10 @@ class BaseController(IController):
     @staticmethod
     async def compile_error_response(status_code: status, message: str):
         return Response(
-            content=json.dumps({"detail": [{"msg": message}]}), status_code=status_code
+            content=json.dumps({"detail": [{"msg": message}]}), status_code=status_code,
+            headers={
+                "Content-type": "application/json"
+            }
         )
 
     @staticmethod

@@ -485,6 +485,9 @@ class UserPersonalDataValidation(BaseModel):
     income_tax_type: IncomeTaxTypeSource
     income: IncomeSource
     tax_residences: Optional[TaxResidenceSource]
+    birth_place_country: CountrySource
+    birth_place_state: StateSource
+    birth_place_city: CountySource
 
 
 class UserDocumentsDataValidation(BaseModel):
@@ -563,6 +566,9 @@ class UserPersonalDataUpdate(BaseModel):
     income_tax_type: Optional[IncomeTaxTypeSource]
     income: Optional[IncomeSource]
     tax_residences: Optional[TaxResidenceSource]
+    birth_place_country: Optional[CountrySource]
+    birth_place_state: Optional[StateSource]
+    birth_place_city: Optional[CountySource]
 
 
 class UserDocumentsDataUpdate(BaseModel):
