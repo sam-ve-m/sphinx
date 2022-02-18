@@ -47,38 +47,6 @@ class SinacorTypesRepository(OracleBaseRepository):
         )
         return dict_result
 
-    def get_type_ability_person(self):
-        sql = """
-            SELECT CD_CAPAC as code, DS_CAPAC as description
-            FROM TSCCAPAC
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    def get_customer_qualification_type(self):
-        sql = """
-            SELECT CD_TIPO_FILI as code, DS_TIPO_FILI as description
-            FROM TSCTIPFIL
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    def get_marital_status(self):
-        sql = """
-            SELECT CD_EST_CIVIL as code, DS_EST_CIVIL as description
-            FROM TSCESTCIV
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
 
     def get_nationality(self):
         sql = """
@@ -149,66 +117,10 @@ class SinacorTypesRepository(OracleBaseRepository):
         )
         return dict_result
 
-    def get_marriage_regime(self):
-        sql = """
-            SELECT TP_REGCAS as code, DS_REGCAS as description
-            FROM TSCREGCAS
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    def get_customer_origin(self):
-        sql = """
-            SELECT CD_ORIGEM as code, DS_ORIGEM as description
-            FROM TSCCADORIGEM
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    def get_customer_status(self):
-        sql = """
-            SELECT TP_SITUAC as code, DS_SITUAC as description
-            FROM TSCTPSITUACAO
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    def get_bmf_customer_type(self, client_type: str):
-        sql = f"""
-            SELECT TP_CLIENTE_BMF as code, DS_TIPO_CLIENTE as description
-            FROM TSCTIPCLIBMF
-            WHERE TIPO_CLIENT='{client_type}'
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
     def get_economic_activity(self):
         sql = """
             SELECT COD_AECO as code, NOME_AECO as description
             FROM TSCDXAECO
-        """
-        tuple_result = self.query_with_cache(sql=sql)
-        dict_result = self.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    def get_account_type(self):
-        sql = """
-            SELECT NUM_TIPO_CON as code, NOME_TIPO_CON as description
-            FROM TSCDXTIPO_CON
         """
         tuple_result = self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
