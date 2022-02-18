@@ -622,13 +622,8 @@ class UserService(IUser):
         # TODO: In this code chunk we will add a tag that represents the status from Bureau validation
         complementary_data_for_user_update.update(
             {
-                "connected_person": False,
                 "bureau_status": CAFStatus.APPROVED.value,
                 "is_bureau_data_validated": False,
-                "client_type": 1,
-                "person_type": PersonType.PHYSICAL_PERSON.value,
-                "investor_type": 101,
-                "cosif_tax_classification": 21,
             }
         )
 
@@ -802,7 +797,6 @@ class UserService(IUser):
             .personal_company_name()
             .personal_company_cnpj()
             .personal_patrimony()
-            .personal_income_tax_type()
             .personal_income()
             .personal_tax_residences()
             .personal_birth_place_country()
@@ -842,7 +836,7 @@ class UserService(IUser):
         UserService.onboarding_step_validator(
             payload=payload, onboard_step=["finished", "user_data_validation"]
         )
-        unique_id: str = payload.get["x-thebes-answer"]["user"].get("unique_id")
+        unique_id: str = payload["x-thebes-answer"]['user']['unique_id']
         update_customer_registration_data: dict = payload.get(
             "customer_registration_data"
         )
@@ -862,7 +856,6 @@ class UserService(IUser):
             .personal_nick_name()
             .personal_phone()
             .personal_patrimony()
-            .personal_income_tax_type()
             .personal_income()
             .personal_occupation_activity()
             .personal_occupation_cnpj()

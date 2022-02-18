@@ -70,8 +70,10 @@ class SinacorService:
     ) -> dict:
 
         database_and_bureau_dtvm_client_data_merged = (
-            SinacorService._create_or_update_client_into_sinacor(client_register_repository=client_register_repository,
-                                                                 database_and_bureau_dtvm_client_data_merged=user_data)
+            SinacorService._create_or_update_client_into_sinacor(
+                client_register_repository=client_register_repository,
+                database_and_bureau_dtvm_client_data_merged=user_data
+            )
         )
 
         SinacorService._add_third_party_operator_information(

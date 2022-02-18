@@ -55,11 +55,6 @@ class CustomerRegistrationBuilder:
         self.__buffer["personal"].update({"patrimony": patrimony})
         return self
 
-    def personal_income_tax_type(self):
-        patrimony = self.__personal_data.get("assets", {}).get("income_tax_type")
-        self.__buffer["personal"].update({"income_tax_type": patrimony})
-        return self
-
     def personal_income(self):
         patrimony = self.__personal_data.get("assets", {}).get("income")
         self.__buffer["personal"].update({"income": patrimony})
