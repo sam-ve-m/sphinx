@@ -42,7 +42,7 @@ def logout(device_information: DeviceInformationOptional, request: Request):
 
 
 @router.post("/validate_electronic_signature", tags=["authentication"])
-def change_electronic_signature(electronic_signature: SignatureCheck, request: Request):
+async def change_electronic_signature(electronic_signature: SignatureCheck, request: Request):
     electronic_signature = electronic_signature.dict()
     jwt_data = JwtService.get_thebes_answer_from_request(request=request)
 
@@ -50,7 +50,7 @@ def change_electronic_signature(electronic_signature: SignatureCheck, request: R
         "electronic_signature": electronic_signature,
         "email": jwt_data["email"],
     }
-    return BaseController.run(
+    return await BaseController.run(
         AuthenticationController.validate_electronic_signature,
         change_electronic_signature_request,
         request,

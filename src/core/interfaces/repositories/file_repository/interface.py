@@ -54,7 +54,7 @@ class IFile(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
+    async def get_file_extension_by_type(file_type: Enum) -> Optional[str]:
         pass
 
     @abstractmethod

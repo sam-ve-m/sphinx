@@ -83,11 +83,13 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
             logger.error(e, exc_info=True)
             raise Exception("internal_error")
 
-    async def find_all(self) -> Optional[Cursor]:
+    async def find_all(self, sort: tuple = None, limit: int = None) -> Optional[Cursor]:
         try:
             collection = await self.get_collection()
-            result = await collection.find().to_list()
-            return result
+            query = collection.find()#.to_list(limit)
+            if sort:
+                query.sort(*sort)
+            return await query.to_list(limit)
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)

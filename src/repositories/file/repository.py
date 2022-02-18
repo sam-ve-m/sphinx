@@ -42,15 +42,15 @@ class FileRepository(S3Infrastructure, IFile):
             raise InternalServerError("files.bucket.invalid_name")
         return bucket_name
 
-    def save_user_file(
+    async def save_user_file(
         self,
         file_type: UserFileType,
         content: Union[str, bytes],
         unique_id: str,
     ) -> str:
-        path = self.resolve_user_path(unique_id=unique_id, file_type=file_type)
+        path = await self.resolve_user_path(unique_id=unique_id, file_type=file_type)
         file_name = file_type.value
-        file_extension = self.get_file_extension_by_type(file_type=file_type)
+        file_extension = await self.get_file_extension_by_type(file_type=file_type)
         if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
         fully_qualified_path = f"{path}{file_name}{file_extension}"
@@ -62,14 +62,14 @@ class FileRepository(S3Infrastructure, IFile):
         )
         return fully_qualified_path
 
-    def get_user_selfie(
+    async def get_user_selfie(
         self,
         file_type: UserFileType,
         unique_id: str,
     ) -> Union[str, dict]:
-        path = self.resolve_user_path(unique_id=unique_id, file_type=file_type)
+        path = await self.resolve_user_path(unique_id=unique_id, file_type=file_type)
         file_name = file_type.value
-        file_extension = self.get_file_extension_by_type(file_type=file_type)
+        file_extension = await self.get_file_extension_by_type(file_type=file_type)
         if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
         fully_qualified_path = f"{path}{file_name}{file_extension}"
@@ -83,9 +83,9 @@ class FileRepository(S3Infrastructure, IFile):
         return value
 
     async def get_user_file(self, file_type: UserFileType, unique_id: str):
-        prefix = self.resolve_user_path(unique_id=unique_id, file_type=file_type)
+        prefix = await self.resolve_user_path(unique_id=unique_id, file_type=file_type)
         file_name = file_type.value
-        file_extension = self.get_file_extension_by_type(file_type=file_type)
+        file_extension = await self.get_file_extension_by_type(file_type=file_type)
         if not prefix or not file_name or not file_extension:
             raise InternalServerError("files.error")
 
@@ -115,7 +115,7 @@ class FileRepository(S3Infrastructure, IFile):
         file_name = self.generate_term_file_name(
             name=file_type.value, version=new_version
         )
-        file_extension = self.get_file_extension_by_type(file_type=file_type)
+        file_extension = await self.get_file_extension_by_type(file_type=file_type)
         if not path or not file_name or not file_extension:
             raise InternalServerError("files.error")
         s3_client = FileRepository._get_client()
@@ -173,7 +173,7 @@ class FileRepository(S3Infrastructure, IFile):
         self, file_type: TermsFileType, version: int, ttl: int = 3600
     ) -> str:
         file_name = await self.generate_term_file_name(name=file_type.value, version=version)
-        path = await self.resolve_term_path(file_type=file_type)
+        path = self.resolve_term_path(file_type=file_type)
         file_extension = await self.get_file_extension_by_type(file_type=file_type)
         s3_client = FileRepository._get_client()
         value = s3_client.generate_presigned_url(

@@ -44,7 +44,7 @@ class SuitabilityService(ISuitability):
         if not suitability:
             raise InternalServerError("suitability.error.not_found")
 
-        version = SuitabilityService.__get_suitability_version()
+        version = await SuitabilityService.__get_suitability_version()
         suitability_submission_date = datetime.utcnow()
         suitability.update({"date": suitability_submission_date, "version": version})
         await SuitabilityService.__insert_new_suitability(
@@ -150,9 +150,8 @@ class SuitabilityService(ISuitability):
         suitability_repository=SuitabilityRepository(),
     ) -> int:
         try:
-            last_suitability = list(
-                await suitability_repository.find_all().sort("_id", -1).limit(1)
-            )
+            last_suitability = await suitability_repository.find_all(sort=("_id", -1), limit=1)
+
         except (TypeError, AttributeError):
             raise InternalServerError("common.process_issue")
 
@@ -215,7 +214,7 @@ class SuitabilityService(ISuitability):
     ) -> Union[Tuple[List[dict], int, int], Exception]:
         try:
             _answers = list(
-                await suitability_answers_repository.find_all().sort("_id", -1).limit(1)
+                await suitability_answers_repository.find_all(sort=("_id", -1), limit=1)
             )
         except (TypeError, AttributeError):
             raise InternalServerError("common.process_issue")

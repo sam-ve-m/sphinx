@@ -63,7 +63,7 @@ class UserService(IUser):
         social_client=ValhallaService.get_social_client(),
         jwt_handler=JwtService,
     ) -> dict:
-        if user_repository.find_one({"email": user.get("email")}) is not None:
+        if await user_repository.find_one({"email": user.get("email")}) is not None:
             raise BadRequestError("common.register_exists")
         user = generate_unique_id("email", user)
         has_pin = user.get("pin")
@@ -322,7 +322,7 @@ class UserService(IUser):
         if entity is None:
             raise BadRequestError("common.register_not_exists")
 
-        jwt_payload_data, control_data = await ThebesHallBuilder(
+        jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=entity, ttl=10
         ).build()
         jwt_payload_data.update({"forgot_password": True})
@@ -366,7 +366,7 @@ class UserService(IUser):
             if user_repository.update_one(old=old, new=new) is False:
                 raise InternalServerError("common.process_issue")
             status_code = status.HTTP_200_OK
-        jwt_payload_data, control_data = await ThebesHallBuilder(
+        jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
@@ -392,7 +392,7 @@ class UserService(IUser):
         else:
             response.update({"status_code": status.HTTP_304_NOT_MODIFIED})
 
-        jwt_payload_data, control_data = await ThebesHallBuilder(
+        jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
@@ -408,11 +408,11 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_selfie_step"
         )
 
-        file_path = file_repository.save_user_file(
+        file_path = await file_repository.save_user_file(
             file_type=UserFileType.SELFIE,
             content=payload.get("file_or_base64"),
             unique_id=thebes_answer.get("unique_id"),
@@ -473,7 +473,7 @@ class UserService(IUser):
         user_data = await user_repository.find_one(
             {"unique_id": thebes_answer.get("unique_id")}
         )
-        jwt_payload_data, control_data = await ThebesHallBuilder(
+        jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
@@ -552,7 +552,7 @@ class UserService(IUser):
         if user_by_cpf:
             raise BadRequestError("common.register_exists")
 
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_identifier_data_step"
         )
 
@@ -600,7 +600,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_complementary_step"
         )
         thebes_answer = payload.get("x-thebes-answer")
@@ -696,7 +696,7 @@ class UserService(IUser):
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
 
-        onboarding_steps = (
+        onboarding_steps = await (
             onboarding_step_builder.user_suitability_step(current_user=current_user)
             .user_identifier_step(current_user=current_user)
             .user_selfie_step(user_file_exists=user_file_exists)
@@ -715,7 +715,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="user_electronic_signature"
         )
         thebes_answer = payload.get("x-thebes-answer")
@@ -782,8 +782,8 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def onboarding_step_validator(payload: dict, onboard_step: str):
-        onboarding_steps = UserService.get_onboarding_user_current_step(payload)
+    async def onboarding_step_validator(payload: dict, onboard_step: str):
+        onboarding_steps = await UserService.get_onboarding_user_current_step(payload)
         payload_from_onboarding_steps = onboarding_steps.get("payload")
         current_onboarding_step = payload_from_onboarding_steps.get(
             "current_onboarding_step"
@@ -801,7 +801,7 @@ class UserService(IUser):
         customer_registration_data = await user_repository.find_one({"unique_id": unique_id})
         if customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
-        customer_registration_data_built = (
+        customer_registration_data_built = await (
             CustomerRegistrationBuilder(customer_registration_data)
             .personal_name()
             .personal_nick_name()
@@ -852,7 +852,7 @@ class UserService(IUser):
         user_repository=UserRepository(),
         persephone_client=PersephoneService.get_client(),
     ):
-        UserService.onboarding_step_validator(
+        await UserService.onboarding_step_validator(
             payload=payload, onboard_step="finished"
         )
         unique_id: str = payload.get("x-thebes-answer").get("unique_id")
@@ -865,7 +865,7 @@ class UserService(IUser):
         if old_customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        new_customer_registration_data, modified_register_data = (
+        new_customer_registration_data, modified_register_data = await (
             UpdateCustomerRegistrationBuilder(
                 old_personal_data=old_customer_registration_data,
                 new_personal_data=update_customer_registration_data,

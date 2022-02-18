@@ -160,7 +160,7 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_onboarding_user_current_step(
+    async def get_onboarding_user_current_step(
         payload: dict, user_repository, file_repository
     ) -> dict:
         pass

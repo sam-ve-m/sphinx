@@ -149,7 +149,7 @@ async def get_onboarding_user_current_step(
     payload = {
         "x-thebes-answer": jwt_data,
     }
-    return BaseController.run(
+    return await BaseController.run(
         UserController.get_onboarding_user_current_step, payload, request
     )
 

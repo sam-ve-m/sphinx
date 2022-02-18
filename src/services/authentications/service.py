@@ -386,7 +386,7 @@ class AuthenticationService(IAuthentication):
         return sincad_status and sincad_status[0] in ["A"]
 
     @staticmethod
-    def create_electronic_signature_jwt(
+    async def create_electronic_signature_jwt(
         change_electronic_signature_request: dict,
         persephone_client=PersephoneService.get_client(),
         jwt_service=JwtService,
