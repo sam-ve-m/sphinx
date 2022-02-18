@@ -72,7 +72,7 @@ class SuitabilityService(ISuitability):
         token_service=JwtService,
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
-        unique_id: str = thebes_answer.get("unique_id")
+        unique_id: str = thebes_answer["user"].get("unique_id")
         suitability_submission_date = datetime.now()
         (
             answers,

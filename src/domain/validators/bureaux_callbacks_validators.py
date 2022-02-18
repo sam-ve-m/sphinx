@@ -36,7 +36,6 @@ from src.domain.validators.bureau_validators import (
     EducationCourseSource,
     IsPoliticallyExposedPerson,
     DateOfAcquisition,
-    IncomeTaxTypeSource,
     ConnectedPersonSource,
     ClientTypeSource,
     PersonTypeSource,
@@ -126,7 +125,6 @@ class Occupation(BaseModel):
 class Assets(BaseModel):
     patrimony: PatrimonySource
     income: IncomeSource
-    income_tax_type: IncomeTaxTypeSource
     date: AssetsDateSource
 
 
@@ -184,10 +182,6 @@ class Data(Decision, Status):
     name: NameSource
     cpf: CpfSource
     self_link: SelfLinkSource
-    person_type: PersonTypeSource
-    client_type: ClientTypeSource
-    investor_type: InvestorTypeSource
-    cosif_tax_classification: CosifTaxClassificationSource
     gender: GenderSource
     birth_date: BirthDateSource
     birthplace: Birthplace
@@ -198,7 +192,6 @@ class Data(Decision, Status):
     assets: Assets
     education: Education
     politically_exposed_person: PoliticallyExposedPerson
-    connected_person: ConnectedPersonSource
     midia_person: MidiaPersonSource
     person_related_to_market_influencer: PersonRelatedToMarketInfluencerSource
     court_orders: CourtOrdersSource

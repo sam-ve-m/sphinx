@@ -3,6 +3,10 @@ from datetime import datetime
 from typing import Optional
 
 # SPHINX
+from src.domain.investor_type.type import InvestorType
+from src.domain.sinacor.cosif_tax_classification import CosifTaxClassification
+from src.domain.sinacor.income_tax_type import IncomeTaxType
+from src.domain.sinacor.person_type import PersonType
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.domain.sinacor.broker_type_of_brokerage import BrokerTypeOfBrokerage
 from src.domain.sinacor.sinacor_identifier_document_types import (
@@ -84,7 +88,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_dt_atualiz(self):
-        self._fields_added.update({"DT_ATUALIZ": datetime.now()})
+        self._fields_added.update({"DT_ATUALIZ": datetime.utcnow()})
         return self
 
     def add_cd_cpfcgc(self, user_data: dict):
@@ -101,16 +105,11 @@ class ClientRegisterBuilder:
         self._fields_added.update({"CD_CON_DEP": value})
         return self
 
-    def add_in_irsdiv(self, user_data: dict):
-        self._fields_added.update({"IN_IRSDIV": user_data["assets"]["income_tax_type"]})
+    def add_in_irsdiv(self, value: int = IncomeTaxType.ISENTO.value):
+        self._fields_added.update({"IN_IRSDIV": value})
         return self
 
-    def add_in_pess_vinc(self, user_data: dict):
-        value = (
-            ConnectedPerson.CONNECTED_PERSON.value
-            if user_data["connected_person"]
-            else ConnectedPerson.NON_CONNECTED_PERSON.value
-        )
+    def add_in_pess_vinc(self, value: str = ConnectedPerson.NON_CONNECTED_PERSON.value):
         self._fields_added.update({"IN_PESS_VINC": value})
         return self
 
@@ -118,16 +117,16 @@ class ClientRegisterBuilder:
         self._fields_added.update({"NM_CLIENTE": user_data["name"]})
         return self
 
-    def add_tp_cliente(self, user_data: dict):
-        self._fields_added.update({"TP_CLIENTE": user_data["client_type"]})
+    def add_tp_cliente(self, value: int = ClientTypeOfExchangeActivity.NORMAL.value):
+        self._fields_added.update({"TP_CLIENTE": value})
         return self
 
-    def add_tp_pessoa(self, user_data: dict):
-        self._fields_added.update({"TP_PESSOA": user_data["person_type"]})
+    def add_tp_pessoa(self, value: str = PersonType.PHYSICAL_PERSON.value):
+        self._fields_added.update({"TP_PESSOA": value})
         return self
 
-    def add_tp_investidor(self, user_data: dict):
-        self._fields_added.update({"TP_INVESTIDOR": user_data["investor_type"]})
+    def add_tp_investidor(self, value: int = InvestorTypeOfExchangeActivity.PHYSICAL_PERSON.value):
+        self._fields_added.update({"TP_INVESTIDOR": value})
         return self
 
     def add_in_situac_cliger(self, value=ClientStatusBasicRegistration.ACTIVATE.value):
@@ -138,13 +137,13 @@ class ClientRegisterBuilder:
         self._fields_added.update({"CD_ATIV": user_data["occupation"]["activity"]})
         return self
 
-    def add_cd_cosif(self, user_data: dict):
-        self._fields_added.update({"CD_COSIF": user_data["cosif_tax_classification"]})
+    def add_cd_cosif(self, value: int = CosifTaxClassification.DEFAULT.value):
+        self._fields_added.update({"CD_COSIF": value})
         return self
 
-    def add_cd_cosif_ci(self, user_data: dict):
+    def add_cd_cosif_ci(self, value: int = CosifTaxClassification.DEFAULT.value):
         self._fields_added.update(
-            {"CD_COSIF_CI": user_data["cosif_tax_classification"]}
+            {"CD_COSIF_CI": value}
         )
         return self
 
@@ -723,7 +722,6 @@ class ClientRegisterBuilder:
         return self
 
     def add_pc_corcor_prin_cs(self, value=BrokerageDiscountPercentage.DEFAULT.value):
-        # TODO: Define with operation table
         self._fields_added.update({"PC_CORCOR_PRIN_CS": value})
         return self
 
@@ -871,11 +869,11 @@ class ClientRegisterBuilder:
         self._fields_added.update({"TXT_EMAIL_TD": user_data["email"]})
         return self
 
-    def add_val_lim_neg_td(self, value: float = 0.0):
+    def add_val_lim_neg_td(self, value: float = 0):
         self._fields_added.update({"VAL_LIM_NEG_TD": value})
         return self
 
-    def add_val_taxa_agnt_td(self, value: float = 0.0):
+    def add_val_taxa_agnt_td(self, value: float = 0):
         self._fields_added.update({"VAL_TAXA_AGNT_TD": value})
         return self
 

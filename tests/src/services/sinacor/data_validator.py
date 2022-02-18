@@ -37,11 +37,6 @@ class FirstLevelJsonUserMergedDataValidator(BaseModel):
     assets: dict
     education: dict
     politically_exposed_person: dict
-    connected_person: str
-    person_type: str
-    client_type: int
-    investor_type: int
-    cosif_tax_classification: int
     self_link: str
     irs_sharing: bool
     father_name: str

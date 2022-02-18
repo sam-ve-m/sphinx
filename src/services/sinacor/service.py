@@ -140,14 +140,15 @@ class SinacorService:
 
     @staticmethod
     def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict):
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
-            payload=dtvm_client_data,
-            schema_key="user_bureau_callback_schema",
-        )
-        if sent_to_persephone is False:
-            raise InternalServerError("common.process_issue")
+        pass
+        # sent_to_persephone = persephone_client.run(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
+        #     payload=dtvm_client_data,
+        #     schema_key="user_bureau_callback_schema",
+        # )
+        # if sent_to_persephone is False:
+        #     raise InternalServerError("common.process_issue")
 
     @staticmethod
     async def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
