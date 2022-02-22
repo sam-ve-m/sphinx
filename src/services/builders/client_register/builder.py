@@ -6,6 +6,7 @@ from typing import Optional
 from src.domain.investor_type.type import InvestorType
 from src.domain.sinacor.cosif_tax_classification import CosifTaxClassification
 from src.domain.sinacor.income_tax_type import IncomeTaxType
+from src.domain.sinacor.person_gender_sinacor import PersonGenderSinacor
 from src.domain.sinacor.person_type import PersonType
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.domain.sinacor.broker_type_of_brokerage import BrokerTypeOfBrokerage
@@ -105,7 +106,7 @@ class ClientRegisterBuilder:
         self._fields_added.update({"CD_CON_DEP": value})
         return self
 
-    def add_in_irsdiv(self, value: int = IncomeTaxType.ISENTO.value):
+    def add_in_irsdiv(self, value: int = IncomeTaxType.IDENTIFICADO.value):
         self._fields_added.update({"IN_IRSDIV": value})
         return self
 
@@ -219,7 +220,12 @@ class ClientRegisterBuilder:
         return self
 
     def add_id_sexo(self, user_data: dict):
-        self._fields_added.update({"ID_SEXO": user_data["gender"]})
+        if user_data["gender"] in [sinacor_gender.value for sinacor_gender in list(PersonGenderSinacor)]:
+            gender = user_data["gender"]
+        else:
+            gender = user_data.get("gender_from_bureux", PersonGenderSinacor.FEMININE.value)
+
+        self._fields_added.update({"ID_SEXO": gender})
         return self
 
     def add_in_rec_divi(self, value=ReceiptDividendsByStockExchange.YES.value):
@@ -431,7 +437,7 @@ class ClientRegisterBuilder:
         self._fields_added.update({"NUM_TIPO_CON": value})
         return self
 
-    def add_cod_tipo_colt(self, value=CollateralizationTypeCode.INVESTOR.value):
+    def add_cod_tipo_colt(self, value=CollateralizationTypeCode.PARTICIPANT.value):
         self._fields_added.update({"COD_TIPO_COLT": value})
         return self
 

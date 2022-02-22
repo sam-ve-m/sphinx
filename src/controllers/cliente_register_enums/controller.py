@@ -4,26 +4,6 @@ from src.services.sinacor_types.service import SinaCorTypes
 
 class ClientRegisterEnumsController:
     @staticmethod
-    def get_type_of_income_tax(payload: dict):
-        return SinaCorTypes.get_type_of_income_tax()
-
-    @staticmethod
-    def get_activity_type(payload: dict):
-        return SinaCorTypes.get_activity_type()
-
-    @staticmethod
-    def get_nationality(payload: dict):
-        return SinaCorTypes.get_nationality()
-
-    @staticmethod
-    def get_document_issuing_body(payload: dict):
-        return SinaCorTypes.get_document_issuing_body()
-
-    @staticmethod
-    def get_document_type(payload: dict):
-        return SinaCorTypes.get_document_type()
-
-    @staticmethod
     def get_county(payload: dict):
         return SinaCorTypes.get_county(payload=payload)
 
@@ -32,8 +12,28 @@ class ClientRegisterEnumsController:
         return SinaCorTypes.get_state(payload=payload)
 
     @staticmethod
+    def get_nationality(payload: dict):
+        return SinaCorTypes.get_nationality()
+
+    @staticmethod
+    def get_document_type(payload: dict):
+        return SinaCorTypes.get_document_type()
+
+    @staticmethod
     def get_country(payload: dict):
         return SinaCorTypes.get_country()
+
+    @staticmethod
+    def get_activity_type(payload: dict):
+        return SinaCorTypes.get_activity_type()
+
+    @staticmethod
+    def get_document_issuing_body(payload: dict):
+        return SinaCorTypes.get_document_issuing_body()
+
+    @staticmethod
+    def all_in_one(payload: dict):
+        return SinaCorTypes.all_in_one()
 
     @staticmethod
     def get_gender_update(payload: dict):

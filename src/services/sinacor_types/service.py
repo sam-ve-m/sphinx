@@ -10,12 +10,6 @@ from src.domain.validators.marital_status_app_to_sphinx import (
 
 
 class SinaCorTypes:
-    @staticmethod
-    def get_type_of_income_tax(sinacor_types_repository=SinacorTypesRepository()):
-        return {
-            "status_code": status.HTTP_200_OK,
-            "payload": {"enums": sinacor_types_repository.get_type_of_income_tax()},
-        }
 
     @staticmethod
     def get_activity_type(sinacor_types_repository=SinacorTypesRepository()):
@@ -36,6 +30,20 @@ class SinaCorTypes:
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": sinacor_types_repository.get_document_issuing_body()},
+        }
+
+
+    @staticmethod
+    def all_in_one(sinacor_types_repository=SinacorTypesRepository()):
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {
+                "activity_type": sinacor_types_repository.get_activity_type(),
+                "nationality": sinacor_types_repository.get_nationality(),
+                "document_issuing_body": sinacor_types_repository.get_document_issuing_body(),
+                "document_type": sinacor_types_repository.get_document_type(),
+                "country": sinacor_types_repository.get_country()
+            },
         }
 
     @staticmethod
@@ -77,8 +85,10 @@ class SinaCorTypes:
     @staticmethod
     def get_gender():
         genders = [
-            {"code": gender.value, "value": gender.name.title()}
-            for gender in list(PersonGender)
+            {"code": PersonGender.MASCULINE.value, "value": "Masculino"},
+            {"code": PersonGender.FEMININE.value, "value": "Feminino"},
+            {"code": PersonGender.OTHERS.value, "value": "Outro"},
+            {"code": PersonGender.NOT_INFORMED.value, "value": "Não desejo informar"},
         ]
         return {
             "status_code": status.HTTP_200_OK,
