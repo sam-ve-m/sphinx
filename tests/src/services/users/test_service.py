@@ -637,7 +637,7 @@ def test_get_onboarding_current_steps_with_none_steps_completed_expect_all_steps
     FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
-    file_repository.get_user_file = MagicMock(return_value=True)
+    file_repository.user_file_exists = MagicMock(return_value=True)
 
     user_repository.find_one = MagicMock(return_value=onboarding_unstarted_client_data)
 
@@ -665,7 +665,7 @@ def test_get_onboarding_current_steps_with_suitability_step_completed_expect_onl
     FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
-    file_repository.get_user_file = MagicMock(return_value=False)
+    file_repository.user_file_exists = MagicMock(return_value=False)
 
     user_repository.find_one = MagicMock(
         return_value=onboarding_suitability_step_client_data
@@ -697,7 +697,7 @@ def test_get_onboarding_current_steps_with_user_identifier_data_step_completed_e
     FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
-    file_repository.get_user_file = MagicMock(return_value=False)
+    file_repository.user_file_exists = MagicMock(return_value=False)
 
     user_repository.find_one = MagicMock(
         return_value=onboarding_user_identifier_data_step_client_data
@@ -731,7 +731,7 @@ def test_get_onboarding_current_steps_with_user_selfie_step_completed_expect_use
     FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
-    file_repository.get_user_file = MagicMock(return_value=True)
+    file_repository.user_file_exists = MagicMock(return_value=True)
 
     user_repository.find_one = MagicMock(
         return_value=onboarding_user_identifier_data_step_client_data
@@ -767,7 +767,7 @@ def test_get_onboarding_current_steps_with_user_complementary_step_completed_exp
     FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
-    file_repository.get_user_file = MagicMock(return_value=True)
+    file_repository.user_file_exists = MagicMock(return_value=True)
 
     user_repository.find_one = MagicMock(
         return_value=onboarding_user_complementary_data_step_client_data
@@ -805,7 +805,7 @@ def test_get_onboarding_current_steps_with_all_steps_completed_expect_true_fille
     FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
-    file_repository.get_user_file = MagicMock(return_value=True)
+    file_repository.user_file_exists = MagicMock(return_value=True)
 
     user_repository.find_one = MagicMock(return_value=onboarding_complete_client_data)
 
@@ -834,7 +834,7 @@ def test_get_onboarding_current_steps_with_not_exists_user_expect_bad_request_er
     FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
     file_repository = FileRepository(bucket_name=stub_bucket_name)
     file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
-    file_repository.get_user_file = MagicMock(return_value=False)
+    file_repository.user_file_exists = MagicMock(return_value=False)
 
     user_repository.find_one = MagicMock(return_value=None)
     payload = get_x_thebes_answer_with_client_data()

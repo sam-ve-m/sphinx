@@ -25,7 +25,7 @@ async def login(user_credentials: Login, request: Request):
 @router.get("/thebes_gate", tags=["authentication"])
 async def answer(request: Request):
     try:
-        jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+        jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
     except Exception as e:
         logger = logging.getLogger(config("LOG_NAME"))
         logger.error(e, exc_info=True)

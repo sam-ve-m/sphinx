@@ -43,13 +43,8 @@ class AuthenticationService(IAuthentication):
         token_service=JwtService,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
-<<<<<<< HEAD
         user_data = await user_repository.find_one(
-            {"unique_id": thebes_answer_from_request_or_error.get("unique_id")}
-=======
-        user_data = user_repository.find_one(
             {"unique_id": thebes_answer_from_request_or_error["user"].get("unique_id")}
->>>>>>> develop
         )
         if user_data is None:
             raise BadRequestError("common.register_not_exists")
@@ -156,13 +151,9 @@ class AuthenticationService(IAuthentication):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request["x-thebes-answer"]
-<<<<<<< HEAD
         user_data = await user_repository.find_one(
-            {"unique_id": x_thebes_answer["unique_id"]}
-=======
-        user_data = user_repository.find_one(
             {"unique_id": x_thebes_answer["user"]["unique_id"]}
->>>>>>> develop
+
         )
         if user_data is None:
             raise BadRequestError("common.register_not_exists")

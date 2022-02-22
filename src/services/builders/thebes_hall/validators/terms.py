@@ -1,5 +1,10 @@
+# Standards
+import asyncio
+
 # OUTSIDE LIBRARIES
 from src.infrastructures.env_config import config
+import nest_asyncio
+nest_asyncio.apply()
 
 # SPHINX
 from src.core.interfaces.services.builders.thebes_hall.validators.interface import (
@@ -13,7 +18,9 @@ class Terms(IValidator):
     def run(
         user_data: dict, file_repository=FileRepository(config("AWS_BUCKET_TERMS"))
     ) -> dict:
-        terms_version = file_repository.get_terms_version()
+        current_event_loop = asyncio.get_running_loop()
+        task = current_event_loop.create_task(file_repository.get_terms_version())
+        terms_version = current_event_loop.run_until_complete(task)
         if user_terms := user_data.get("terms"):
             for user_term, values in user_terms.items():
                 if values and values["version"] < terms_version.get(user_term):

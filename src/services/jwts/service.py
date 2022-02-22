@@ -65,7 +65,7 @@ class JwtService:
         return thebes_answer
 
     @staticmethod
-    def get_thebes_answer_from_request(request: Request) -> dict:
+    async def get_thebes_answer_from_request(request: Request) -> dict:
         jwt = JwtService.get_jwt_from_request(request=request)
         if jwt is None:
             raise UnauthorizedError("Token not supplied")

@@ -36,9 +36,9 @@ class ViewId(BaseModel):
     view_id: constr(min_length=1)
 
     @validator("view_id", always=True, allow_reuse=True)
-    def validate_view_id(cls, e):
+    async def validate_view_id(cls, e):
         view_repository = ViewRepository()
-        if view_repository.find_one({"_id": e}, ttl=60):
+        if await view_repository.find_one({"_id": e}, ttl=60):
             return e
         raise ValueError("view not exists")
 
@@ -47,9 +47,9 @@ class FeatureId(BaseModel):
     feature_id: constr(min_length=1)
 
     @validator("feature_id", always=True, allow_reuse=True)
-    def validate_feature_id(cls, e):
+    async def validate_feature_id(cls, e):
         feature_repository = FeatureRepository()
-        if feature_repository.find_one({"_id": e}, ttl=60):
+        if await feature_repository.find_one({"_id": e}, ttl=60):
             return e
         raise ValueError("feature not exists")
 

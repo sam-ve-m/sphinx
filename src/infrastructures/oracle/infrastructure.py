@@ -19,25 +19,24 @@ class OracleInfrastructure:
     @classmethod
     async def _get_pool(cls):
         if cls.pool is None:
-            cls.pool = await cx_Oracle_async.SessionPool(
+            cls.pool = await cx_Oracle_async.create_pool(
                 user=config("ORACLE_USER"),
                 password=config("ORACLE_PASSWORD"),
                 min=2,
                 max=100,
                 increment=1,
-                dsn=await cx_Oracle_async.makedsn(
+                dsn=cx_Oracle_async.makedsn(
                     config("ORACLE_BASE_DSN"),
                     config("ORACLE_PORT"),
                     service_name=config("ORACLE_SERVICE"),
                 ),
                 encoding=config("ORACLE_ENCODING"),
-                getmode=await cx_Oracle_async.SPOOL_ATTRVAL_WAIT,
             )
         return cls.pool
 
     @asynccontextmanager
     async def get_connection(self):
         pool = await OracleInfrastructure._get_pool()
-        connection = pool.acquire()
-        yield connection
-        pool.release(connection)
+        async with pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                yield cursor

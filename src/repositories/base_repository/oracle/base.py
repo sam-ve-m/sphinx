@@ -17,12 +17,11 @@ from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 class OracleBaseRepository(OracleInfrastructure, IOracle):
     async def query(self, sql: str) -> list:
         try:
-            async with self.get_connection() as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(sql)
-                    rows = cursor.fetchall()
-                    rows = self._normalize_encode(rows=rows)
-                    return rows
+            async with self.get_connection() as cursor:
+                await cursor.execute(sql)
+                rows = await cursor.fetchall()
+                rows = self._normalize_encode(rows=rows)
+                return rows
 
         except cx_Oracle.DataError as e:
             (error,) = e.args

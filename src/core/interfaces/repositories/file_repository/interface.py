@@ -11,10 +11,6 @@ from src.repositories.file.enum.user_file import UserFileType
 
 
 class IFile(ABC):
-    @staticmethod
-    @abstractmethod
-    def validate_bucket_name(bucket_name: str) -> str:
-        pass
 
     @abstractmethod
     def save_user_file(

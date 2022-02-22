@@ -1,6 +1,9 @@
 # STANDARD LIBS
+import asyncio
 from typing import Type, List, Optional
 from hashlib import sha1
+import nest_asyncio
+nest_asyncio.apply()
 
 # SPHINX
 from src.repositories.base_repository.oracle.base import OracleBaseRepository
@@ -8,13 +11,13 @@ from src.repositories.cache.redis import RepositoryRedis
 
 
 class SinacorTypesRepository(OracleBaseRepository):
-    def get_county_name_by_id(self, id: int) -> Optional[str]:
+    async def get_county_name_by_id(self, id: int) -> Optional[str]:
         sql = f"""
             SELECT NOME_MUNI
             FROM TSCDXMUNICIPIO
             WHERE NUM_SEQ_MUNI = {id}
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         if tuple_result:
             return tuple_result[0][0]
 
@@ -25,115 +28,115 @@ class SinacorTypesRepository(OracleBaseRepository):
             dicts_result.append(dict(zip(fields, value)))
         return dicts_result
 
-    def get_type_of_income_tax(self):
+    async def get_type_of_income_tax(self):
         sql = """
             SELECT TP_IMP_RENDA as code, DS_IMP_RENDA as description
             FROM TSCTIPIR
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
-    def get_activity_type(self):
+    async def get_activity_type(self):
         sql = """
             SELECT CD_ATIV as code, DS_ATIV as description
             FROM TSCATIV
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
 
-    def get_nationality(self):
+    async def get_nationality(self):
         sql = """
             SELECT CD_NACION as code, DS_NACION as description
             FROM TSCNACION
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
-    def get_document_issuing_body(self):
+    async def get_document_issuing_body(self):
         sql = """
             SELECT CD_ORG_EMIT as code, DS_ORG_EMIT as description
             FROM TSCOREMI
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
-    def get_document_type(self):
+    async def get_document_type(self):
         sql = """
             SELECT CD_TIPO_DOC as code, DS_TIPO_DOC as description
             FROM TSCTIPDOC
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
-    def get_county(self, country: str, state: str):
+    async def get_county(self, country: str, state: str):
         sql = f"""
             SELECT NUM_SEQ_MUNI as code, NOME_MUNI as description
             FROM TSCDXMUNICIPIO
             WHERE SIGL_PAIS='{country}'
             AND SIGL_ESTADO='{state}'
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
-    def get_state(self, country: str):
+    async def get_state(self, country: str):
         sql = f"""
             SELECT SG_ESTADO as initials, NM_ESTADO as description
             FROM TSCESTADO
             WHERE SG_PAIS='{country}'
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
-    def get_country(self):
+    async def get_country(self):
         sql = """
             SELECT SG_PAIS as initials, NM_PAIS as description
             FROM TSCPAIS
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
-    def get_economic_activity(self):
+    async def get_economic_activity(self):
         sql = """
             SELECT COD_AECO as code, NOME_AECO as description
             FROM TSCDXAECO
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
         return dict_result
 
-    def get_issuing_body(self):
+    async def get_issuing_body(self):
         sql = """
             SELECT CD_ORG_EMIT as code, DS_ORG_EMIT as description
             FROM TSCOREMI
         """
-        tuple_result = self.query_with_cache(sql=sql)
+        tuple_result = await self.query_with_cache(sql=sql)
         dict_result = self.tuples_to_dict_list(
             fields=["code", "description"], values=tuple_result
         )
@@ -146,7 +149,7 @@ class SinacorTypesRepository(OracleBaseRepository):
         key = f"sinacor_types:{partial_key}"
         value = await cache.get(key=key)
         if not value:
-            partial_value = self.query(sql=sql)
+            partial_value = await self.query(sql=sql)
             value = {"value": partial_value}
             await cache.set(key=key, value=value, ttl=86400)
 
@@ -154,7 +157,9 @@ class SinacorTypesRepository(OracleBaseRepository):
         return value
 
     def base_validator(self, sql: str) -> bool:
-        value = self.query_with_cache(sql=sql)
+        current_event_loop = asyncio.get_running_loop()
+        task = current_event_loop.create_task(self.query_with_cache(sql=sql))
+        value = current_event_loop.run_until_complete(task)
         return len(value) == 1 and value[0][0] == 1
 
     def validate_country(self, value: str) -> bool:

@@ -120,7 +120,7 @@ class UserService(IUser):
         token_service=JwtService,
         client_register=ClientRegisterRepository(),
     ) -> dict:
-        old = user_repository.find_one({"unique_id": payload.get("unique_id")})
+        old = await user_repository.find_one({"unique_id": payload.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -144,7 +144,7 @@ class UserService(IUser):
     async def change_password(payload: dict, user_repository=UserRepository()) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         new_pin = payload.get("new_pin")
-        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        old = await user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
@@ -207,7 +207,7 @@ class UserService(IUser):
         ):
             raise InternalServerError("common.process_issue")
 
-        jwt_payload_data, control_data = await ThebesHallBuilder(
+        jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_from_database_to_update, ttl=525600
         ).build()
         jwt = JwtService.generate_token(jwt_payload_data=jwt_payload_data)
@@ -292,7 +292,7 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         new_view = payload.get("new_view")
-        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        old = await user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
@@ -300,7 +300,7 @@ class UserService(IUser):
         new["scope"]["view_type"] = new_view
         if await user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.unable_to_process")
-        jwt_payload_data, control_data = await ThebesHallBuilder(
+        jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
@@ -313,7 +313,7 @@ class UserService(IUser):
         authentication_service=AuthenticationService,
         jwt_handler=JwtService,
     ) -> dict:
-        entity = user_repository.find_one({"unique_id": payload.get("unique_id")})
+        entity = await user_repository.find_one({"unique_id": payload.get("unique_id")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -333,8 +333,8 @@ class UserService(IUser):
         }
 
     @staticmethod
-    def logout_all(payload: dict, user_repository=UserRepository()) -> dict:
-        old = user_repository.find_one({"unique_id": payload.get("unique_id")})
+    async def logout_all(payload: dict, user_repository=UserRepository()) -> dict:
+        old = await user_repository.find_one({"unique_id": payload.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
@@ -438,15 +438,15 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        user_data = user_repository.find_one(
-            {"unique_id": thebes_answer.get("unique_id")}
+        user_data = await user_repository.find_one(
+            {"unique_id": thebes_answer["user"]["unique_id"]}
         )
         if type(user_data) is not dict:
             raise BadRequestError("common.register_not_exists")
         file_type = payload.get("file_type")
         term_update = await UserService.fill_term_signed(
             file_type=file_type.value,
-            version=file_repository.get_current_term_version(file_type=file_type),
+            version=await file_repository.get_current_term_version(file_type=file_type),
         )
         # TODO: BACK WITH THAT
         # sent_to_persephone = persephone_client.run(
@@ -458,15 +458,13 @@ class UserService(IUser):
         #     schema_key="signed_term_schema",
         # )
         sent_to_persephone = True
-        if (
-            sent_to_persephone
-            and user_repository.update_one(
-                old={"unique_id": thebes_answer.get("unique_id")}, new=term_update
+        was_updated = await user_repository.update_one(
+                old={"unique_id": thebes_answer["user"]["unique_id"]}, new=term_update
             )
-        ) is False:
+        if (sent_to_persephone and was_updated) is False:
             raise InternalServerError("common.unable_to_process")
-        user_data = user_repository.find_one(
-            {"unique_id": thebes_answer.get("unique_id")}
+        user_data = await user_repository.find_one(
+            {"unique_id": thebes_answer["user"]["unique_id"]}
         )
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
@@ -551,8 +549,8 @@ class UserService(IUser):
             payload=payload, onboard_step="user_identifier_data_step"
         )
 
-        current_user = user_repository.find_one(
-            {"unique_id": thebes_answer.get("unique_id")}
+        current_user = await user_repository.find_one(
+            {"unique_id": thebes_answer['user']["unique_id"]}
         )
 
         user_identifier_data = payload["user_identifier"]
@@ -599,8 +597,8 @@ class UserService(IUser):
             payload=payload, onboard_step="user_complementary_step"
         )
         thebes_answer = payload.get("x-thebes-answer")
-        current_user = user_repository.find_one(
-            {"unique_id": thebes_answer.get("unique_id")}
+        current_user = await user_repository.find_one(
+            {"unique_id": thebes_answer["user"]["unique_id"]}
         )
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
@@ -635,7 +633,7 @@ class UserService(IUser):
             }
         )
 
-        user_was_updated = user_repository.update_one(
+        user_was_updated = await user_repository.update_one(
             old=current_user, new=complementary_data_for_user_update
         )
         if user_was_updated is False:
@@ -678,9 +676,8 @@ class UserService(IUser):
         thebes_answer = payload.get("x-thebes-answer")
         jwt_user_unique_id = thebes_answer["user"]["unique_id"]
 
-        user_file_exists = await file_repository.get_user_file(
-            file_type=UserFileType.SELFIE, unique_id=jwt_user_unique_id
-        )
+        user_file_exists = await file_repository.user_file_exists(file_type=UserFileType.SELFIE,
+                                                                  unique_id=jwt_user_unique_id)
 
         current_user = await user_repository.find_one({"unique_id": jwt_user_unique_id})
         if current_user is None:
@@ -713,7 +710,7 @@ class UserService(IUser):
         encrypted_electronic_signature = await PasswordEncrypt.encrypt_password(
             electronic_signature
         )
-        old = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        old = await user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         if old.get("electronic_signature"):
@@ -751,7 +748,7 @@ class UserService(IUser):
         authentication_service=AuthenticationService,
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        entity = user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        entity = await user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
         if entity is None:
             raise BadRequestError("common.register_not_exists")
 
@@ -787,11 +784,11 @@ class UserService(IUser):
         user_repository=UserRepository(),
     ):
         thebes_answer = payload.get("x-thebes-answer")
-        unique_id = thebes_answer.get("unique_id")
-        customer_registration_data = user_repository.find_one({"unique_id": unique_id})
+        unique_id = thebes_answer["user"]["unique_id"]
+        customer_registration_data = await user_repository.find_one({"unique_id": unique_id})
         if customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
-        customer_registration_data_built = await (
+        customer_registration_data_built = (
             CustomerRegistrationBuilder(customer_registration_data)
             .personal_name()
             .personal_nick_name()
