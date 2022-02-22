@@ -501,15 +501,15 @@ class UserService(IUser):
     def get_signed_term(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
+        user_repository=UserRepository(),
     ) -> dict:
-        file_type = payload.get("file_type")
         try:
-            version = (
-                payload.get("x-thebes-answer")
-                .get("terms")
-                .get(file_type.value)
-                .get("version")
+            file_type = payload.get("file_type")
+            thebes_answer = payload.get("x-thebes-answer")
+            user_data = user_repository.find_one(
+                {"unique_id": thebes_answer["user"].get("unique_id")}
             )
+            version = user_data["terms"][file_type.value]["version"]
         except Exception:
             return {
                 "status_code": status.HTTP_200_OK,
