@@ -147,7 +147,7 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
         if query is None:
             return None
 
-        query_hash = hash_field(payload=query)
+        query_hash = await hash_field(payload=query)
 
         #TODO: Check this await to redis sync
         cache_value = await cache.get(key=f"{self.base_identifier}:{query_hash}")
@@ -161,7 +161,7 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
         # ttl = (ttl == 0) and 60 or ttl
         ttl = 60 if ttl == 0 else ttl  # pragma: no cover
 
-        query_hash = hash_field(payload=query)
+        query_hash = await hash_field(payload=query)
         await cache.set(
             key=f"{self.base_identifier}:{query_hash}",
             value=data,

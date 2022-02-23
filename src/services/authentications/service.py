@@ -121,7 +121,7 @@ class AuthenticationService(IAuthentication):
                     "status_code": status.HTTP_200_OK,
                     "message_key": "user.need_pin",
                 }
-            if hash_field(payload=pin) != user_data["pin"]:
+            if await hash_field(payload=pin) != user_data["pin"]:
                 raise UnauthorizedError("user.pin_error")
 
             jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)

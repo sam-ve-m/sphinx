@@ -13,12 +13,19 @@ from src.routers.routes_registers.third_part import ThirdPartRouter
 router = ThirdPartRouter.instance()
 
 
-@router.get("/client_register_enums/type_of_income_tax", tags=["client_register_enums"])
-def get_type_of_income_tax(request: Request):
+@router.get("/client_register_enums/city", tags=["client_register_enums"])
+def get_county(request: Request, country_state: CountryState = Depends(CountryState)):
     return BaseController.run(
-        ClientRegisterEnumsController.get_type_of_income_tax,
-        payload={},
+        ClientRegisterEnumsController.get_county,
+        payload=country_state.dict(),
         request=request,
+    )
+
+
+@router.get("/client_register_enums/state", tags=["client_register_enums"])
+def get_state(request: Request, country: Country = Depends(Country)):
+    return BaseController.run(
+        ClientRegisterEnumsController.get_state, payload=country.dict(), request=request
     )
 
 
@@ -33,22 +40,6 @@ def get_nationality(request: Request):
 def get_document_type(request: Request):
     return BaseController.run(
         ClientRegisterEnumsController.get_document_type, payload={}, request=request
-    )
-
-
-@router.get("/client_register_enums/city", tags=["client_register_enums"])
-def get_county(request: Request, country_state: CountryState = Depends(CountryState)):
-    return BaseController.run(
-        ClientRegisterEnumsController.get_county,
-        payload=country_state.dict(),
-        request=request,
-    )
-
-
-@router.get("/client_register_enums/state", tags=["client_register_enums"])
-def get_state(request: Request, country: Country = Depends(Country)):
-    return BaseController.run(
-        ClientRegisterEnumsController.get_state, payload=country.dict(), request=request
     )
 
 
@@ -70,4 +61,11 @@ def get_activity_type(request: Request):
 def get_activity_type(request: Request):
     return BaseController.run(
         ClientRegisterEnumsController.get_document_issuing_body, payload={}, request=request
+    )
+
+
+@router.get("/client_register_enums/all_in_one", tags=["client_register_enums"])
+def get_activity_type(request: Request):
+    return BaseController.run(
+        ClientRegisterEnumsController.all_in_one, payload={}, request=request
     )

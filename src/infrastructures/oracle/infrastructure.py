@@ -40,3 +40,4 @@ class OracleInfrastructure:
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 yield cursor
+                await conn.commit()

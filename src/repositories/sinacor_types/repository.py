@@ -11,13 +11,16 @@ from src.repositories.cache.redis import RepositoryRedis
 
 
 class SinacorTypesRepository(OracleBaseRepository):
-    async def get_county_name_by_id(self, id: int) -> Optional[str]:
+
+    def get_county_name_by_id(self, id: int) -> Optional[str]:
         sql = f"""
             SELECT NOME_MUNI
             FROM TSCDXMUNICIPIO
             WHERE NUM_SEQ_MUNI = {id}
         """
-        tuple_result = await self.query_with_cache(sql=sql)
+        current_event_loop = asyncio.get_running_loop()
+        task = current_event_loop.create_task(self.query_with_cache(sql=sql))
+        tuple_result = current_event_loop.run_until_complete(task)
         if tuple_result:
             return tuple_result[0][0]
 

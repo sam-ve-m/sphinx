@@ -149,7 +149,7 @@ class UserService(IUser):
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
         new["pin"] = new_pin
-        new = hash_field(key="pin", payload=new)
+        new = await hash_field(key="pin", payload=new)
         if await user_repository.update_one(old=old, new=new) is False:
             raise InternalServerError("common.process_issue")
         return {
@@ -404,7 +404,7 @@ class UserService(IUser):
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         await UserService.onboarding_step_validator(
-            payload=payload, onboard_step="user_selfie_step"
+            payload=payload, onboard_step=["user_selfie_step"]
         )
 
         file_path = await file_repository.save_user_file(
@@ -507,15 +507,15 @@ class UserService(IUser):
     async def get_signed_term(
         payload: dict,
         file_repository=FileRepository(bucket_name=config("AWS_BUCKET_TERMS")),
+        user_repository=UserRepository(),
     ) -> dict:
-        file_type = payload.get("file_type")
         try:
-            version = (
-                payload.get("x-thebes-answer")
-                .get("terms")
-                .get(file_type.value)
-                .get("version")
+            file_type = payload.get("file_type")
+            thebes_answer = payload.get("x-thebes-answer")
+            user_data = user_repository.find_one(
+                {"unique_id": thebes_answer["user"].get("unique_id")}
             )
+            version = user_data["terms"][file_type.value]["version"]
         except Exception:
             return {
                 "status_code": status.HTTP_200_OK,
@@ -546,7 +546,7 @@ class UserService(IUser):
             raise BadRequestError("common.register_exists")
 
         await UserService.onboarding_step_validator(
-            payload=payload, onboard_step="user_identifier_data_step"
+            payload=payload, onboard_step=["user_identifier_data_step"]
         )
 
         current_user = await user_repository.find_one(
@@ -594,7 +594,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         await UserService.onboarding_step_validator(
-            payload=payload, onboard_step="user_complementary_step"
+            payload=payload, onboard_step=["user_complementary_step"]
         )
         thebes_answer = payload.get("x-thebes-answer")
         current_user = await user_repository.find_one(
@@ -703,14 +703,14 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ) -> dict:
         await UserService.onboarding_step_validator(
-            payload=payload, onboard_step="user_electronic_signature"
+            payload=payload, onboard_step=["user_electronic_signature"]
         )
         thebes_answer = payload.get("x-thebes-answer")
         electronic_signature = payload.get("electronic_signature")
         encrypted_electronic_signature = await PasswordEncrypt.encrypt_password(
             electronic_signature
         )
-        old = await user_repository.find_one({"unique_id": thebes_answer.get("unique_id")})
+        old = await user_repository.find_one({"unique_id": thebes_answer["user"].get("unique_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         if old.get("electronic_signature"):
@@ -741,6 +741,7 @@ class UserService(IUser):
             "message_key": "requests.updated",
         }
 
+
     @staticmethod
     async def forgot_electronic_signature(
         payload: dict,
@@ -769,7 +770,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    async def onboarding_step_validator(payload: dict, onboard_step: str):
+    async def onboarding_step_validator(payload: dict, onboard_step: List[str]):
         onboarding_steps = await UserService.get_onboarding_user_current_step(payload)
         payload_from_onboarding_steps = onboarding_steps.get("payload")
         current_onboarding_step = payload_from_onboarding_steps.get(
@@ -839,7 +840,7 @@ class UserService(IUser):
         persephone_client=PersephoneService.get_client(),
     ):
         await UserService.onboarding_step_validator(
-            payload=payload, onboard_step="finished"
+            payload=payload, onboard_step=["finished", "user_data_validation"]
         )
         unique_id: str = payload["x-thebes-answer"]['user']['unique_id']
         update_customer_registration_data: dict = payload.get(
@@ -851,7 +852,7 @@ class UserService(IUser):
         if old_customer_registration_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        new_customer_registration_data, modified_register_data = await (
+        new_customer_registration_data, modified_register_data = (
             UpdateCustomerRegistrationBuilder(
                 old_personal_data=old_customer_registration_data,
                 new_personal_data=update_customer_registration_data,

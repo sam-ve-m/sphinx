@@ -70,8 +70,10 @@ class SinacorService:
     ) -> dict:
 
         database_and_bureau_dtvm_client_data_merged = (
-            await SinacorService._create_or_update_client_into_sinacor(client_register_repository=client_register_repository,
-                                                                 database_and_bureau_dtvm_client_data_merged=user_data)
+            await SinacorService._create_or_update_client_into_sinacor(
+                client_register_repository=client_register_repository,
+                database_and_bureau_dtvm_client_data_merged=user_data
+            )
         )
 
         SinacorService._add_third_party_operator_information(
@@ -114,12 +116,12 @@ class SinacorService:
         database_and_bureau_dtvm_client_data_merged: dict,
     ):
 
-        sinacor_client_control_data = cls._clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
+        sinacor_client_control_data = await cls._clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
             client_register_repository=client_register_repository,
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
         )
 
-        cls._insert_client_on_the_sinacor_temp_table(
+        await cls._insert_client_on_the_sinacor_temp_table(
             client_register_repository=client_register_repository,
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
             sinacor_client_control_data=sinacor_client_control_data,
@@ -134,7 +136,7 @@ class SinacorService:
         cpf_client = database_and_bureau_dtvm_client_data_merged.get(
             "identifier_document"
         ).get("cpf")
-        client_register_repository.register_validated_users(user_cpf=cpf_client)
+        await client_register_repository.register_validated_users(user_cpf=cpf_client)
 
         return database_and_bureau_dtvm_client_data_merged
 
@@ -155,7 +157,7 @@ class SinacorService:
         client_register_repository: ClientRegisterRepository,
         database_and_bureau_dtvm_client_data_merged: dict,
     ):
-        client_register_repository.cleanup_temp_tables(
+        await client_register_repository.cleanup_temp_tables(
             user_cpf=database_and_bureau_dtvm_client_data_merged["identifier_document"][
                 "cpf"
             ]
@@ -270,17 +272,17 @@ class SinacorService:
         return bmf_account
 
     @staticmethod
-    def _insert_client_on_the_sinacor_temp_table(
+    async def _insert_client_on_the_sinacor_temp_table(
         client_register_repository: ClientRegisterRepository,
         database_and_bureau_dtvm_client_data_merged: dict,
         sinacor_client_control_data,
     ):
-        builder = client_register_repository.get_builder(
+        builder = await client_register_repository.get_builder(
             user_data=database_and_bureau_dtvm_client_data_merged,
             sinacor_user_control_data=sinacor_client_control_data,
         )
 
-        client_register_repository.register_user_data_in_register_users_temp_table(
+        await client_register_repository.register_user_data_in_register_users_temp_table(
             builder=builder
         )
 

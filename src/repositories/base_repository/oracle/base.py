@@ -83,12 +83,10 @@ class OracleBaseRepository(OracleInfrastructure, IOracle):
             new_rows.append(tuple(new_row))
         return new_rows
 
-    def execute(self, sql, values) -> None:
+    async def execute(self, sql, values) -> None:
         try:
-            with self.get_connection() as connection:
-                with connection.cursor() as cursor:
-                    cursor.execute(sql, values)
-                    connection.commit()
+            async with self.get_connection() as cursor:
+                await cursor.execute(sql, values)
 
         except cx_Oracle.DataError as e:
             (error,) = e.args

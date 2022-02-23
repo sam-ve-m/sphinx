@@ -14,7 +14,7 @@ from src.infrastructures.env_config import config
 
 
 class ClientRegisterRepository(OracleBaseRepository):
-    def register_validated_users(self, user_cpf: str):
+    async def register_validated_users(self, user_cpf: str):
         values = {
             "cd_empresa": config("COMPANY_OPERATION_CODE"),
             "cd_usuario": "1",
@@ -22,19 +22,19 @@ class ClientRegisterRepository(OracleBaseRepository):
             "cd_cliente_padrao": "1",
             "cpf": str(user_cpf),
         }
-        self.execute(
+        await self.execute(
             sql="call PROC_IMPCLIH_V2_LIONX.EXECIMPH(:cd_empresa, :cd_usuario, :tp_ocorrencia, :cd_cliente_padrao, :cpf)",
             values=values,
         )
 
     async def cleanup_temp_tables(self, user_cpf: str):
         client_temp = "DELETE FROM TSCIMPCLIH WHERE CD_CPFCGC = :cpf"
-        self.execute(sql=client_temp, values={"cpf": str(user_cpf)})
+        await self.execute(sql=client_temp, values={"cpf": str(user_cpf)})
         error_temp = "DELETE FROM TSCERROH WHERE CD_CPFCGC = :cpf"
-        self.execute(sql=error_temp, values={"cpf": str(user_cpf)})
+        await self.execute(sql=error_temp, values={"cpf": str(user_cpf)})
 
     async def validate_user_data_errors(self, user_cpf: int) -> bool:
-        self._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
+        await self._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
         return await self._validate_errors_on_temp_tables(user_cpf=user_cpf)
 
     async def _validate_errors_on_temp_tables(self, user_cpf: int) -> bool:
@@ -46,19 +46,19 @@ class ClientRegisterRepository(OracleBaseRepository):
         result = await self.query(sql=sql)
         return len(result) > 0
 
-    def _run_data_validator_in_register_user_tmp_table(self, user_cpf: int) -> int:
-        self.execute(
+    async def _run_data_validator_in_register_user_tmp_table(self, user_cpf: int) -> int:
+        await self.execute(
             sql="call PROC_CLIECOH_V2_LIONX.EXECCONH(:s, :cpf)",
             values={"s": "S", "cpf": str(user_cpf)},
         )
 
-    def register_user_data_in_register_users_temp_table(
+    async def register_user_data_in_register_users_temp_table(
         self, builder: Type[ClientRegisterBuilder]
     ):
         client_register = builder.build()
         fields = client_register.keys()
         sql = f"INSERT INTO TSCIMPCLIH({','.join(fields)}) VALUES(:{',:'.join(fields)})"
-        self.execute(sql=sql, values=client_register)
+        await self.execute(sql=sql, values=client_register)
 
     async def get_user_control_data_if_user_already_exists(self, user_cpf: int):
         verify_user_data_sql = f"SELECT 1 FROM TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
@@ -172,7 +172,7 @@ class ClientRegisterRepository(OracleBaseRepository):
             logging.error(msg=message)
             raise InternalServerError("internal_error")
 
-        return await callback(
+        return callback(
             user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
         )
 
