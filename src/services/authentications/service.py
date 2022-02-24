@@ -62,14 +62,14 @@ class AuthenticationService(IAuthentication):
                 raise InternalServerError("common.process_issue")
             user_data.update(update_data)
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
-        #     partition=PersephoneQueue.USER_AUTHENTICATION.value,
-        #     payload=get_user_authentication_template_with_data(payload=user_data),
-        #     schema="user_authentication_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+            partition=PersephoneQueue.USER_AUTHENTICATION.value,
+            payload=get_user_authentication_template_with_data(payload=user_data),
+            schema="user_authentication_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
@@ -176,21 +176,21 @@ class AuthenticationService(IAuthentication):
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
-        #     partition=PersephoneQueue.USER_THEBES_HALL.value,
-        #     payload=get_user_thebes_hall_schema_template_with_data(
-        #         unique_id=unique_id,
-        #         jwt=jwt,
-        #         jwt_payload_data=jwt_payload_data,
-        #         device_information=device_and_thebes_answer_from_request.get(
-        #             "device_information"
-        #         ),
-        #     ),
-        #     schema="user_thebes_hall_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+            partition=PersephoneQueue.USER_THEBES_HALL.value,
+            payload=get_user_thebes_hall_schema_template_with_data(
+                unique_id=unique_id,
+                jwt=jwt,
+                jwt_payload_data=jwt_payload_data,
+                device_information=device_and_thebes_answer_from_request.get(
+                    "device_information"
+                ),
+            ),
+            schema="user_thebes_hall_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         return {
             "status_code": status.HTTP_200_OK,

@@ -69,14 +69,14 @@ class UserService(IUser):
         user.update({"created_at": datetime.utcnow()})
         UserService.add_user_control_metadata(payload=user)
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
-        #     payload=get_prospect_user_template_with_data(payload=user),
-        #     schema="prospect_user_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
+            payload=get_prospect_user_template_with_data(payload=user),
+            schema="prospect_user_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         was_user_inserted = user_repository.insert(user)
 
@@ -185,17 +185,17 @@ class UserService(IUser):
         user_from_database_to_update["is_blocked_electronic_signature"] = False
         user_from_database_to_update["electronic_signature_wrong_attempts"] = 0
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
-        #     payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
-        #         previous_state=user_from_database,
-        #         new_state=user_from_database_to_update,
-        #     ),
-        #     schema="user_change_or_reset_electronic_signature_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
+            payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
+                previous_state=user_from_database,
+                new_state=user_from_database_to_update,
+            ),
+            schema="user_change_or_reset_electronic_signature_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         if (
             user_repository.update_one(
@@ -262,17 +262,17 @@ class UserService(IUser):
             "electronic_signature"
         ] = encrypted_new_electronic_signature
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
-        #     payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
-        #         previous_state=user_from_database,
-        #         new_state=user_from_database_to_update,
-        #     ),
-        #     schema="user_change_or_reset_electronic_signature_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
+            payload=get_user_change_or_reset_electronic_signature_schema_template_with_data(
+                previous_state=user_from_database,
+                new_state=user_from_database_to_update,
+            ),
+            schema="user_change_or_reset_electronic_signature_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         user_was_updated = user_repository.update_one(
             old={"unique_id": unique_id}, new=user_from_database_to_update
@@ -414,14 +414,14 @@ class UserService(IUser):
             unique_id=unique_id
         )
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_SELFIE.value,
-        #     payload=get_user_selfie_schema_template_with_data(
-        #         file_path=file_path, unique_id=unique_id
-        #     ),
-        #     schema="user_selfie_schema",
-        # )
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_SELFIE.value,
+            payload=get_user_selfie_schema_template_with_data(
+                file_path=file_path, unique_id=unique_id
+            ),
+            schema="user_selfie_schema",
+        )
 
         return {
             "status_code": status.HTTP_200_OK,
@@ -449,21 +449,21 @@ class UserService(IUser):
             version=term_version,
         )
         thebes_answer_user = thebes_answer["user"]
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.TERM_QUEUE.value,
-        #     payload=get_user_signed_term_template_with_data(
-        #         term_version=term_version, payload=thebes_answer_user, file_type=file_type.value
-        #     ),
-        #     schema="signed_term_schema",
-        # )
-        # if (
-        #     sent_to_persephone
-        #     and user_repository.update_one(
-        #         old={"unique_id": thebes_answer_user["unique_id"]}, new=term_update
-        #     )
-        # ) is False:
-        #     raise InternalServerError("common.unable_to_process")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.TERM_QUEUE.value,
+            payload=get_user_signed_term_template_with_data(
+                term_version=term_version, payload=thebes_answer_user, file_type=file_type.value
+            ),
+            schema="signed_term_schema",
+        )
+        if (
+            sent_to_persephone
+            and user_repository.update_one(
+                old={"unique_id": thebes_answer_user["unique_id"]}, new=term_update
+            )
+        ) is False:
+            raise InternalServerError("common.unable_to_process")
         user_data = user_repository.find_one(
             {"unique_id": thebes_answer["user"].get("unique_id")}
         )
@@ -562,16 +562,16 @@ class UserService(IUser):
         current_user_with_identifier_data = dict(current_user)
         current_user_with_identifier_data.update(user_identifier_data)
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
-        #     payload=get_user_identifier_data_schema_template_with_data(
-        #         payload=current_user_with_identifier_data
-        #     ),
-        #     schema="user_identifier_data_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
+            payload=get_user_identifier_data_schema_template_with_data(
+                payload=current_user_with_identifier_data
+            ),
+            schema="user_identifier_data_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         del user_identifier_data["cpf"]
         user_identifier_data.update({"identifier_document": {"cpf": cpf}})
@@ -612,16 +612,16 @@ class UserService(IUser):
         current_user_with_complementary_data = deepcopy(current_user)
         current_user_with_complementary_data.update(complementary_data_for_user_update)
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_COMPLEMENTARY_DATA.value,
-        #     payload=get_user_complementary_data_schema_template_with_data(
-        #         payload=current_user_with_complementary_data
-        #     ),
-        #     schema="user_complementary_data_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_COMPLEMENTARY_DATA.value,
+            payload=get_user_complementary_data_schema_template_with_data(
+                payload=current_user_with_complementary_data
+            ),
+            schema="user_complementary_data_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         # TODO: CREATE CONNECTED PERSON, enum and add um update ?
         # TODO: In this code chunk we will add a tag that represents the status from Bureau validation
@@ -722,16 +722,16 @@ class UserService(IUser):
             "electronic_signature_wrong_attempts": 0,
         }
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
-        #     payload=get_user_set_electronic_signature_schema_template_with_data(
-        #         payload=new_data, unique_id=unique_id
-        #     ),
-        #     schema="user_set_electronic_signature_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
+            payload=get_user_set_electronic_signature_schema_template_with_data(
+                payload=new_data, unique_id=unique_id
+            ),
+            schema="user_set_electronic_signature_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         if user_repository.update_one(old=old, new=new_data) is False:
             raise InternalServerError("common.process_issue")
@@ -906,14 +906,14 @@ class UserService(IUser):
 
         Sindri.dict_to_primitive_types(user_update_register_schema)
 
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
-        #     payload=user_update_register_schema,
-        #     schema="user_update_register_data_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
+            payload=user_update_register_schema,
+            schema="user_update_register_data_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         del new_customer_registration_data["_id"]
 

@@ -79,30 +79,30 @@ class SuitabilityService(ISuitability):
             score,
             suitability_version,
         ) = SuitabilityService.__get_last_suitability_answers_metadata()
-        # sent_to_persephone = persephone_client.run(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.SUITABILITY_QUEUE.value,
-        #     payload=get_user_suitability_template_with_data(
-        #         payload=get_user_fill_suitability(
-        #             answers=answers,
-        #             score=score,
-        #             unique_id=unique_id,
-        #             suitability_version=suitability_version,
-        #         )
-        #     ),
-        #     schema="suitability_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
-        # (
-        #     SuitabilityService.__update_suitability_score_and_submission_date_in_user_db(
-        #         user_repository=user_repository,
-        #         unique_id=unique_id,
-        #         score=score,
-        #         suitability_version=suitability_version,
-        #         submission_date=suitability_submission_date,
-        #     )
-        # )
+        sent_to_persephone = persephone_client.run(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.SUITABILITY_QUEUE.value,
+            payload=get_user_suitability_template_with_data(
+                payload=get_user_fill_suitability(
+                    answers=answers,
+                    score=score,
+                    unique_id=unique_id,
+                    suitability_version=suitability_version,
+                )
+            ),
+            schema="suitability_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+        (
+            SuitabilityService.__update_suitability_score_and_submission_date_in_user_db(
+                user_repository=user_repository,
+                unique_id=unique_id,
+                score=score,
+                suitability_version=suitability_version,
+                submission_date=suitability_submission_date,
+            )
+        )
         (
             SuitabilityService.__insert_suitability_answers_in_user_profile_db(
                 suitability_user_profile_repository=suitability_user_profile_repository,
