@@ -1,6 +1,16 @@
 FROM python:3.8 AS builder
 COPY requirements.txt .
 
+ARG oci_nexus_password
+
+RUN mkdir -p ~/.pip/
+RUN touch ~/.pip/pip.conf
+
+RUN echo "[global]" >> ~/.pip/pip.conf
+RUN echo "timeout = 60" >> ~/.pip/pip.conf
+RUN echo "extra-index-url =" >> ~/.pip/pip.conf
+RUN echo "    https://backend:${oci_nexus_password}@nexus.sigame.com.br/repository/pypi/simple" >> ~/.pip/pip.conf
+
 RUN pip install wheel
 RUN pip install --user -r requirements.txt
 
