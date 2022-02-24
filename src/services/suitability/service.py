@@ -19,7 +19,7 @@ from src.core.interfaces.services.suitability.interface import ISuitability
 from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 from src.services.persephone.templates.persephone_templates import (
-    get_user_suitability_template_with_data,
+    get_user_suitability_template_with_data, get_user_fill_suitability,
 )
 from src.services.persephone.service import PersephoneService
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
@@ -72,41 +72,37 @@ class SuitabilityService(ISuitability):
         token_service=JwtService,
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
-        unique_id: str = thebes_answer["user"].get("unique_id")
+        unique_id: str = thebes_answer["user"]["unique_id"]
         suitability_submission_date = datetime.now()
         (
             answers,
             score,
             suitability_version,
         ) = SuitabilityService.__get_last_suitability_answers_metadata()
-        # TODO: BACK WITH THAT
         # sent_to_persephone = persephone_client.run(
         #     topic=config("PERSEPHONE_TOPIC_USER"),
         #     partition=PersephoneQueue.SUITABILITY_QUEUE.value,
         #     payload=get_user_suitability_template_with_data(
-        #         payload={
-        #             "answers": answers,
-        #             "score": score,
-        #             "suitability_version": suitability_version,
-        #             "suitability_submission_date": int(
-        #                 suitability_submission_date.timestamp()
-        #             ),
-        #             "email": user_email,
-        #         }
+        #         payload=get_user_fill_suitability(
+        #             answers=answers,
+        #             score=score,
+        #             unique_id=unique_id,
+        #             suitability_version=suitability_version,
+        #         )
         #     ),
-        #     schema_key="suitability_schema",
+        #     schema="suitability_schema",
         # )
         # if sent_to_persephone is False:
         #     raise InternalServerError("common.process_issue")
-        (
-            SuitabilityService.__update_suitability_score_and_submission_date_in_user_db(
-                user_repository=user_repository,
-                unique_id=unique_id,
-                score=score,
-                suitability_version=suitability_version,
-                submission_date=suitability_submission_date,
-            )
-        )
+        # (
+        #     SuitabilityService.__update_suitability_score_and_submission_date_in_user_db(
+        #         user_repository=user_repository,
+        #         unique_id=unique_id,
+        #         score=score,
+        #         suitability_version=suitability_version,
+        #         submission_date=suitability_submission_date,
+        #     )
+        # )
         (
             SuitabilityService.__insert_suitability_answers_in_user_profile_db(
                 suitability_user_profile_repository=suitability_user_profile_repository,
