@@ -14,7 +14,7 @@ class PasswordEncrypt(IPasswordEncrypt):
 
     @classmethod
     async def encrypt_password(cls, user_password: str):
-        payload, status = cls.mist.generate_encrypted_password(
+        payload, status = await cls.mist.generate_encrypted_password(
             user_password=user_password
         )
         if status != MistStatusResponses.SUCCESS:

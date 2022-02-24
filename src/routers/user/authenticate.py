@@ -31,7 +31,7 @@ async def logout(device_information: DeviceInformationOptional, request: Request
 
     device_jwt_and_thebes_answer_from_request = {
         "jwt": JwtService.get_jwt_from_request(request=request),
-        "email": jwt_data["email"],
+        "jwt_user": jwt_data["user"],
         "device_information": device_information.dict(),
     }
     return await BaseController.run(
@@ -48,7 +48,7 @@ async def change_electronic_signature(electronic_signature: SignatureCheck, requ
 
     change_electronic_signature_request = {
         "electronic_signature": electronic_signature,
-        "email": jwt_data["email"],
+        "jwt_user": jwt_data["user"],
     }
     return await BaseController.run(
         AuthenticationController.validate_electronic_signature,

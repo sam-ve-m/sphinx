@@ -56,8 +56,8 @@ class CustomerRegistrationBuilder:
         return self
 
     def personal_income(self):
-        patrimony = self.__personal_data.get("assets", {}).get("income")
-        self.__buffer["personal"].update({"income": patrimony})
+        income = self.__personal_data.get("assets", {}).get("income")
+        self.__buffer["personal"].update({"income": income})
         return self
 
     def personal_occupation_activity(self):
