@@ -73,7 +73,7 @@ class JwtService:
         return payload
 
     @classmethod
-    def generate_session_jwt(cls, electronic_signature: dict, unique_id: str):
+    async def generate_session_jwt(cls, electronic_signature: dict, unique_id: str):
         session_dict = {
             "unique_id": unique_id,
             "password": electronic_signature.get("signature"),

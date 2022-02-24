@@ -79,7 +79,7 @@ class SuitabilityService(ISuitability):
             score,
             suitability_version,
         ) = await SuitabilityService.__get_last_suitability_answers_metadata()
-       sent_to_persephone = persephone_client.run(
+        sent_to_persephone = persephone_client.run(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.SUITABILITY_QUEUE.value,
             payload=get_user_suitability_template_with_data(

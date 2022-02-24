@@ -86,7 +86,7 @@ class UserService(IUser):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-        was_user_inserted = user_repository.insert(user)
+        was_user_inserted = await user_repository.insert(user)
 
         if was_user_inserted is False:
             raise InternalServerError("common.process_issue")
