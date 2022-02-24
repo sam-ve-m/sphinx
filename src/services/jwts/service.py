@@ -73,13 +73,13 @@ class JwtService:
         return payload
 
     @classmethod
-    def generate_session_jwt(cls, electronic_signature: dict, email: str):
+    def generate_session_jwt(cls, electronic_signature: dict, unique_id: str):
         session_dict = {
-            "email": email,
+            "unique_id": unique_id,
             "password": electronic_signature.get("signature"),
             "signatureExpireTime": electronic_signature.get("signature_expire_time"),
         }
-        payload, status = cls.mist.generate_jwt(jwt=session_dict)
+        payload, status = cls.mist.sync_generate_jwt(jwt=session_dict)
         if status != MistStatusResponses.SUCCESS:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(str(payload), exc_info=True)

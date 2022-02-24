@@ -142,7 +142,7 @@ class SinacorService:
 
     @staticmethod
     def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict):
-        pass
+        # TODO: REMOVE THIS IS FROM STONEAGE
         # sent_to_persephone = persephone_client.run(
         #     topic=config("PERSEPHONE_TOPIC_USER"),
         #     partition=PersephoneQueue.KYC_TABLE_QUEUE.value,
@@ -151,6 +151,7 @@ class SinacorService:
         # )
         # if sent_to_persephone is False:
         #     raise InternalServerError("common.process_issue")
+        pass
 
     @staticmethod
     def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(

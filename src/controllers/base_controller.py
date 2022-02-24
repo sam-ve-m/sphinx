@@ -29,7 +29,7 @@ class BaseController(IController):
                 response_metadata=response_metadata, lang=lang
             )
             return Response(
-                content=json.dumps(payload, cls=Sindri),
+                content=json.dumps(payload, default=Sindri.resolver),
                 status_code=response_metadata.get("status_code"),
                 headers={
                     "Content-type": "application/json"
