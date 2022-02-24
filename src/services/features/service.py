@@ -25,14 +25,14 @@ class FeatureService(IFeature):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def update(payload: dict, feature_repository=FeatureRepository()) -> dict:
+    async def update(payload: dict, feature_repository=FeatureRepository()) -> dict:
         display_name = payload.get("model").get("display_name")
-        old = feature_repository.find_one({"_id": payload.get("feature_id")})
+        old = await feature_repository.find_one({"_id": payload.get("feature_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
         new["display_name"] = display_name
-        if feature_repository.update_one(old=old, new=new):
+        if await feature_repository.update_one(old=old, new=new):
             return {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.updated",

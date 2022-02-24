@@ -25,7 +25,7 @@ class AuthenticationController:
         )
 
     @staticmethod
-    def logout(device_jwt_and_thebes_answer_from_request: dict):
-        return AuthenticationService.logout(
+    async def logout(device_jwt_and_thebes_answer_from_request: dict):
+        return await AuthenticationService.logout(
             device_jwt_and_thebes_answer_from_request=device_jwt_and_thebes_answer_from_request
         )

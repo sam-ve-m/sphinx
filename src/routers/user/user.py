@@ -64,13 +64,13 @@ async def change_user_password(pin: PIN, request: Request):
         "x-thebes-answer": jwt_data,
         "new_pin": pin.dict()["pin"],
     }
-    return BaseController.run(UserController.change_password, payload, request)
+    return await BaseController.run(UserController.change_password, payload, request)
 
 
 @router.put("/user/logout_all", tags=["user"])
 async def logout_all(request: Request):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
-    return BaseController.run(UserController.logout_all, jwt_data, request)
+    return await BaseController.run(UserController.logout_all, jwt_data, request)
 
 
 @router.put("/user/views", tags=["user"])
@@ -80,7 +80,7 @@ async def change_user_view(view: View, request: Request):
         "x-thebes-answer": jwt_data,
         "new_view": view.dict()["views"],
     }
-    return BaseController.run(UserController.change_view, payload, request)
+    return await BaseController.run(UserController.change_view, payload, request)
 
 
 @router.put("/user/purchase", tags=["user"])
@@ -91,7 +91,7 @@ async def add_features_to_user(feature: Feature, request: Request):
         "x-thebes-answer": jwt_data,
         "feature": feature.dict()["feature"],
     }
-    return BaseController.run(UserController.add_feature, dict(payload), request)
+    return await BaseController.run(UserController.add_feature, dict(payload), request)
 
 
 @router.delete("/user/purchase", tags=["user"])
@@ -136,7 +136,7 @@ async def get_assigned_term(
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
     payload = file_type.dict()
     payload.update({"x-thebes-answer": jwt_data})
-    return BaseController.run(UserController.get_signed_term, payload, request)
+    return await BaseController.run(UserController.get_signed_term, payload, request)
 
 
 @router.get("/user/onboarding_user_current_step", tags=["user"])
@@ -176,7 +176,7 @@ async def forgot_electronic_signature(request: Request):
         "x-thebes-answer": jwt_data,
     }
 
-    return BaseController.run(
+    return await BaseController.run(
         UserController.forgot_electronic_signature, payload, request
     )
 
@@ -192,7 +192,7 @@ async def reset_electronic_signature(
         "new_electronic_signature": electronic_signature.dict()["electronic_signature"],
     }
 
-    return BaseController.run(
+    return await BaseController.run(
         UserController.reset_electronic_signature, payload, request
     )
 
@@ -214,7 +214,7 @@ async def change_electronic_signature(
         ),
     }
 
-    return BaseController.run(
+    return await BaseController.run(
         UserController.change_electronic_signature, payload, request
     )
 

@@ -33,7 +33,7 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def update(payload: dict, user_repository: UserRepository) -> None:
+    async def update(payload: dict, user_repository: UserRepository) -> None:
         pass
 
     @staticmethod

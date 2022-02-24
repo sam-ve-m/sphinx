@@ -25,14 +25,14 @@ class ViewService(IView):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def update(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def update(payload: dict, view_repository=ViewRepository()) -> dict:
         display_name = payload.get("model").get("display_name")
-        old = view_repository.find_one({"_id": payload.get("view_id")})
+        old = await view_repository.find_one({"_id": payload.get("view_id")})
         if old is None:
             raise BadRequestError("common.register_not_exists")
         new = deepcopy(old)
         new["display_name"] = display_name
-        if view_repository.update_one(old=old, new=new):
+        if await view_repository.update_one(old=old, new=new):
             return {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.updated",
@@ -55,13 +55,13 @@ class ViewService(IView):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def link_feature(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def link_feature(payload: dict, view_repository=ViewRepository()) -> dict:
         feature_id = payload.get("feature_id")
-        old = view_repository.find_one({"_id": payload.get("view_id")})
+        old = await view_repository.find_one({"_id": payload.get("view_id")})
         if old and feature_id not in old.get("features"):
             new = deepcopy(old)
             new["features"].append(feature_id)
-            if view_repository.update_one(old=old, new=new):
+            if await view_repository.update_one(old=old, new=new):
                 return {
                     "status_code": status.HTTP_200_OK,
                     "message_key": "requests.updated",
@@ -74,13 +74,13 @@ class ViewService(IView):
         }
 
     @staticmethod
-    def delink_feature(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def delink_feature(payload: dict, view_repository=ViewRepository()) -> dict:
         feature_id = payload.get("feature_id")
-        old = view_repository.find_one({"_id": payload.get("view_id")})
+        old = await view_repository.find_one({"_id": payload.get("view_id")})
         if old and feature_id in old.get("features"):
             new = deepcopy(old)
             new["features"].remove(feature_id)
-            if view_repository.update_one(old=old, new=new):
+            if await view_repository.update_one(old=old, new=new):
                 return {
                     "status_code": status.HTTP_200_OK,
                     "message_key": "requests.updated",
@@ -93,8 +93,8 @@ class ViewService(IView):
         }
 
     @staticmethod
-    def get_view(payload: dict, view_repository=ViewRepository()) -> dict:
-        view = view_repository.find_one({"_id": payload.get("view_id")})
+    async def get_view(payload: dict, view_repository=ViewRepository()) -> dict:
+        view = await view_repository.find_one({"_id": payload.get("view_id")})
         if view is None:
             raise BadRequestError("common.register_not_exists")
         return {"status_code": status.HTTP_200_OK, "payload": view}

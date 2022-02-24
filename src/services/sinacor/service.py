@@ -85,7 +85,7 @@ class SinacorService:
             client_register_repository=client_register_repository,
         )
 
-        user_is_updated = user_repository.update_one(
+        user_is_updated = await user_repository.update_one(
             old={"unique_id": database_and_bureau_dtvm_client_data_merged["unique_id"]},
             new=database_and_bureau_dtvm_client_data_merged,
         )

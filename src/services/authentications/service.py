@@ -423,7 +423,7 @@ class AuthenticationService(IAuthentication):
         }
 
     @staticmethod
-    def logout(
+    async def logout(
         device_jwt_and_thebes_answer_from_request: dict,
         persephone_client=PersephoneService.get_client(),
     ) -> dict:

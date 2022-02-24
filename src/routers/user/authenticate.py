@@ -34,7 +34,7 @@ async def logout(device_information: DeviceInformationOptional, request: Request
         "email": jwt_data["email"],
         "device_information": device_information.dict(),
     }
-    return BaseController.run(
+    return await BaseController.run(
         AuthenticationController.logout,
         device_jwt_and_thebes_answer_from_request,
         request,

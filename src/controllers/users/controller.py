@@ -13,7 +13,7 @@ class UserController:
 
     @staticmethod
     async def update(payload: dict):
-        return UserService.update(payload=payload)
+        return await UserService.update(payload=payload)
 
     @staticmethod
     async def delete(payload: dict):
