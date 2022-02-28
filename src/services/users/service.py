@@ -753,6 +753,7 @@ class UserService(IUser):
         jwt_payload_data.update({"forgot_electronic_signature": True})
 
         payload_jwt = JwtService.generate_token(jwt_payload_data=jwt_payload_data)
+
         authentication_service.send_authentication_email(
             email=entity.get("email"),
             payload_jwt=payload_jwt,

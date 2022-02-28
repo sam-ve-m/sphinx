@@ -26,8 +26,8 @@ from src.services.persephone.service import PersephoneService
 from src.services.persephone.templates.persephone_templates import (
     get_user_thebes_hall_schema_template_with_data,
     get_create_electronic_signature_session_schema_template_with_data,
-    get_user_authentication_template_with_data,
     get_user_logout_template_with_data,
+    get_user_authentication_template_with_data
 )
 from src.services.third_part_integration.solutiontech import Solutiontech
 
@@ -85,7 +85,7 @@ class AuthenticationService(IAuthentication):
     async def login(
         user_credentials: dict,
         user_repository=UserRepository(),
-        token_service=JwtService,
+        token_service=JwtService
     ) -> dict:
         user_data = await user_repository.find_one({"email": user_credentials["email"]})
         if user_data is None:
