@@ -14,13 +14,17 @@ from src.infrastructures.env_config import config
 from src.infrastructures.oracle.infrastructure import OracleInfrastructure
 
 
-class OracleBaseRepository(OracleInfrastructure, IOracle):
-    async def query(self, sql: str) -> list:
+class OracleBaseRepository(IOracle):
+
+    infra = OracleInfrastructure
+
+    @classmethod
+    async def query(cls, sql: str) -> list:
         try:
-            async with self.get_connection() as cursor:
+            async with cls.infra.get_connection() as cursor:
                 await cursor.execute(sql)
                 rows = await cursor.fetchall()
-                rows = self._normalize_encode(rows=rows)
+                rows = cls._normalize_encode(rows=rows)
                 return rows
 
         except cx_Oracle.DataError as e:
@@ -83,9 +87,10 @@ class OracleBaseRepository(OracleInfrastructure, IOracle):
             new_rows.append(tuple(new_row))
         return new_rows
 
-    async def execute(self, sql, values) -> None:
+    @classmethod
+    async def execute(cls, sql, values) -> None:
         try:
-            async with self.get_connection() as cursor:
+            async with cls.infra.get_connection() as cursor:
                 await cursor.execute(sql, values)
 
         except cx_Oracle.DataError as e:

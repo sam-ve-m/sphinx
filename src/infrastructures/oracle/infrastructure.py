@@ -1,9 +1,7 @@
 # OUTSIDE LIBRARIES
-from typing import List
 
 # STANDARD LIBS
 from contextlib import asynccontextmanager
-import logging
 
 # OUTSIDE LIBRARIES
 import cx_Oracle_async

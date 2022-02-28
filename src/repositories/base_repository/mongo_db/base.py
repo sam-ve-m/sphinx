@@ -1,5 +1,4 @@
 # STANDARD LIBS
-import asyncio
 from typing import Optional
 import logging
 from datetime import datetime
@@ -16,55 +15,58 @@ from src.repositories.cache.redis import RepositoryRedis
 from src.domain.model_decorator.generate_id import hash_field
 
 
-class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
-    def __init__(self, database: str, collection: str) -> None:
-        self.base_identifier = f"{database}:{collection}"
-        self.database_name = database
-        self.collection_name = collection
+class MongoDbBaseRepository(IRepository):
 
-    async def get_collection(self):
-        mongo_client = MongoDbBaseRepository._get_client()
-        database = mongo_client[self.database_name]
-        collection = database[self.collection_name]
+    infra = MongoDBInfrastructure
+    cache = RepositoryRedis
+    database = None
+    collection = None
+
+    @classmethod
+    def get_base_identifier(cls):
+        if not (cls.database and cls.collection):
+            raise Exception(
+                "The gods think you are a foolish guy because you don't know what you want. Try again!"
+            )
+        return f"{cls.database}:{cls.collection}"
+
+    @classmethod
+    async def get_collection(cls):
+        if not (cls.database and cls.collection):
+            raise Exception(
+                "The gods think you are a foolish guy because you don't know what you want. Try again!"
+            )
+        mongo_client = cls.infra.get_client()
+        database = mongo_client[cls.database]
+        collection = database[cls.collection]
         return collection
 
-    async def insert(self, data: dict) -> bool:
+    @classmethod
+    async def insert(cls, data: dict) -> bool:
         try:
-            collection = await self.get_collection()
-            result = await collection.insert_one(data)
+            collection = await cls.get_collection()
+            await collection.insert_one(data)
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
             return False
 
-    async def insert_many(self, data: list) -> bool:
+    @classmethod
+    async def find_one(cls, query: dict, ttl: int = 0) -> Optional[dict]:
         try:
-            collection = await self.get_collection()
-            await collection.insert_many(data)
-            return True
-        except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-            # TODO: Verificar esse return
-            return False
-
-    async def find_one(
-        self, query: dict, ttl: int = 0, cache=RepositoryRedis
-    ) -> Optional[dict]:
-        try:
-            collection = await self.get_collection()
+            collection = await cls.get_collection()
             data = None
 
             has_ttl = ttl > 0  # pragma: no cover
             if has_ttl:  # pragma: no cover
-                data = await self._get_from_cache(query=query, cache=cache)
+                data = await cls._get_from_cache(query=query)
 
             if not data:  # pragma: no cover
                 data = await collection.find_one(query)
 
             if has_ttl and data is not None:  # pragma: no cover
-                await self._save_cache(query=query, cache=cache, ttl=ttl, data=data)
+                await cls._save_cache(query=query, ttl=ttl, data=data)
 
             return data
 
@@ -73,20 +75,11 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
             logger.error(e, exc_info=True)
             raise Exception("internal_error")
 
-    async def find_more_than_equal_one(self, query: dict) -> Optional[Cursor]:
+    @classmethod
+    async def find_all(cls, sort: tuple = None, limit: int = None) -> Optional[Cursor]:
         try:
-            collection = await self.get_collection()
-            result = await collection.find(query)
-            return result
-        except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-            raise Exception("internal_error")
-
-    async def find_all(self, sort: tuple = None, limit: int = None) -> Optional[Cursor]:
-        try:
-            collection = await self.get_collection()
-            query = collection.find()#.to_list(limit)
+            collection = await cls.get_collection()
+            query = collection.find()
             if sort:
                 query.sort(*sort)
             return await query.to_list(limit)
@@ -95,80 +88,64 @@ class MongoDbBaseRepository(MongoDBInfrastructure, IRepository):
             logger.error(e, exc_info=True)
             raise Exception("internal_error")
 
-    async def find_one_with_specific_columns(
-        self, query: dict, query_limit: dict
-    ) -> Optional[dict]:
-        try:
-            collection = await self.get_collection()
-            result = await collection.find_one(query, query_limit)
-            return result
-        except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
-            raise Exception("internal_error")
-
-    async def update_one(self, old, new, ttl=60, cache=RepositoryRedis) -> bool:
+    @classmethod
+    async def update_one(cls, old, new, ttl=60) -> bool:
         if not old or len(old) == 0:
             return False
 
         if not new or len(new) == 0:
             return False
+
         try:
-            collection = await self.get_collection()
+            collection = await cls.get_collection()
             Sindri.dict_to_primitive_types(new, types_to_ignore=[datetime])
             await collection.update_one(old, {"$set": new})
-            if new.get("email"):
-                await self._save_cache(
-                    query={"_id": new.get("email")}, cache=cache, ttl=ttl, data=new
-                )
-
+            if unique_id := new.get("unique_id"):
+                await cls._save_cache(query={"unique_id": unique_id}, ttl=ttl, data=new)
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            #TODO: Verificar esse return
             return False
 
-    async def delete_one(self, entity, ttl=0, cache=RepositoryRedis) -> bool:
+    @classmethod
+    async def delete_one(cls, entity, ttl=0) -> bool:
         try:
-            collection = await self.get_collection()
+            collection = await cls.get_collection()
             await collection.delete_one(entity)
-            # TODO need to delete user cache ???
-            if entity.get("email"):  # pragma: no cover
-                await self._delete_cache(query={"_id": entity.get("email")}, cache=cache)
+            if unique_id := entity.get("unique_id"):  # pragma: no cover
+                await cls._delete_cache(query={"unique_id": unique_id})
             return True
         except Exception as e:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(e, exc_info=True)
-            #TODO: Verificar esse return
             return False
 
-    async def _get_from_cache(self, query: dict, cache=RepositoryRedis):
+    @classmethod
+    async def _get_from_cache(cls, query: dict):
         if query is None:
             return None
-
         query_hash = await hash_field(payload=query)
-
-        #TODO: Check this await to redis sync
-        cache_value = await cache.get(key=f"{self.base_identifier}:{query_hash}")
+        base_identifier = cls.get_base_identifier()
+        cache_value = await cls.cache.get(key=f"{base_identifier}:{query_hash}")
         if cache_value:
             return cache_value
         return None
 
-    async def _save_cache(self, data: dict, query: dict, cache=RepositoryRedis, ttl: int = 0):
+    @classmethod
+    async def _save_cache(cls, data: dict, query: dict, ttl: int = 0):
 
-        # TODO shall have default time  ???
-        # ttl = (ttl == 0) and 60 or ttl
         ttl = 60 if ttl == 0 else ttl  # pragma: no cover
 
         query_hash = await hash_field(payload=query)
-        await cache.set(
-            key=f"{self.base_identifier}:{query_hash}",
+        base_identifier = cls.get_base_identifier()
+        await cls.cache.set(
+            key=f"{base_identifier}:{query_hash}",
             value=data,
             ttl=ttl,
         )
 
-    @staticmethod
-    async def _delete_cache(query: dict, cache=RepositoryRedis):
+    @classmethod
+    async def _delete_cache(cls, query: dict):
         query_hash = await hash_field(payload=query)
-        await cache.delete(query_hash)
+        await cls.cache.delete(key=query_hash)

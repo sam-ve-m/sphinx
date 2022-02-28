@@ -12,11 +12,11 @@ from src.core.interfaces.services.view.interface import IView
 
 class ViewService(IView):
     @staticmethod
-    def create(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def create(payload: dict, view_repository=ViewRepository) -> dict:
         payload.update({"_id": payload["name"], "features": list()})
-        if view_repository.find_one(payload) is not None:
+        if await view_repository.find_one(payload) is not None:
             raise BadRequestError("common.register_exists")
-        if view_repository.insert(payload):
+        if await view_repository.insert(payload):
             return {
                 "status_code": status.HTTP_201_CREATED,
                 "message_key": "requests.created",
@@ -25,7 +25,7 @@ class ViewService(IView):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    async def update(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def update(payload: dict, view_repository=ViewRepository) -> dict:
         display_name = payload.get("model").get("display_name")
         old = await view_repository.find_one({"_id": payload.get("view_id")})
         if old is None:
@@ -41,12 +41,12 @@ class ViewService(IView):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    def delete(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def delete(payload: dict, view_repository=ViewRepository) -> dict:
         view_id = payload.get("view_id")
-        old = view_repository.find_one({"_id": view_id})
+        old = await view_repository.find_one({"_id": view_id})
         if old is None:
             raise BadRequestError("common.register_not_exists")
-        if view_repository.delete_one({"_id": view_id}):
+        if await view_repository.delete_one({"_id": view_id}):
             return {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.deleted",
@@ -55,7 +55,7 @@ class ViewService(IView):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    async def link_feature(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def link_feature(payload: dict, view_repository=ViewRepository) -> dict:
         feature_id = payload.get("feature_id")
         old = await view_repository.find_one({"_id": payload.get("view_id")})
         if old and feature_id not in old.get("features"):
@@ -74,7 +74,7 @@ class ViewService(IView):
         }
 
     @staticmethod
-    async def delink_feature(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def delink_feature(payload: dict, view_repository=ViewRepository) -> dict:
         feature_id = payload.get("feature_id")
         old = await view_repository.find_one({"_id": payload.get("view_id")})
         if old and feature_id in old.get("features"):
@@ -93,8 +93,16 @@ class ViewService(IView):
         }
 
     @staticmethod
-    async def get_view(payload: dict, view_repository=ViewRepository()) -> dict:
+    async def get_view(payload: dict, view_repository=ViewRepository) -> dict:
         view = await view_repository.find_one({"_id": payload.get("view_id")})
         if view is None:
             raise BadRequestError("common.register_not_exists")
         return {"status_code": status.HTTP_200_OK, "payload": view}
+
+    @staticmethod
+    async def get(payload: dict, view_repository=ViewRepository) -> dict:
+        views = await view_repository.find_all()
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"views": views},
+        }

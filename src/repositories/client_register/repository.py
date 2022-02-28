@@ -46,14 +46,14 @@ class ClientRegisterRepository(OracleBaseRepository):
         result = await self.query(sql=sql)
         return len(result) > 0
 
-    async def _run_data_validator_in_register_user_tmp_table(self, user_cpf: int) -> int:
+    async def _run_data_validator_in_register_user_tmp_table(self, user_cpf: int):
         await self.execute(
             sql="call PROC_CLIECOH_V2_LIONX.EXECCONH(:s, :cpf)",
             values={"s": "S", "cpf": str(user_cpf)},
         )
 
     async def register_user_data_in_register_users_temp_table(
-        self, builder: Type[ClientRegisterBuilder]
+        self, builder: ClientRegisterBuilder
     ):
         client_register = builder.build()
         fields = client_register.keys()
@@ -99,7 +99,8 @@ class ClientRegisterRepository(OracleBaseRepository):
             return result[0]
         return None
 
-    def is_married(self, user_data: dict):
+    @staticmethod
+    def is_married(user_data: dict):
         is_married = user_data["marital"]["status"] in [
             MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
             MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_NATURALIZED_BRAZILIAN.value,
@@ -114,7 +115,7 @@ class ClientRegisterRepository(OracleBaseRepository):
         user_data: dict,
         sinacor_user_control_data: Optional[tuple],
         sinacor_types_repository=SinacorTypesRepository(),
-    ) -> Type[ClientRegisterBuilder]:
+    ) -> ClientRegisterBuilder:
         occupation = user_data["occupation"]
         activity = occupation["activity"]
         company = occupation.get("company", {})
@@ -176,7 +177,9 @@ class ClientRegisterRepository(OracleBaseRepository):
             user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
         )
 
-    async def client_is_allowed_to_cancel_registration(self, user_cpf: int, bmf_account: int):
+    async def client_is_allowed_to_cancel_registration(
+        self, user_cpf: int, bmf_account: int
+    ):
         is_client_blocked = await self._is_client_blocked(user_cpf)
         client_has_value_blocked = await self._client_has_value_blocked(bmf_account)
         client_has_receivables = await self._client_has_receivables(bmf_account)
@@ -184,8 +187,8 @@ class ClientRegisterRepository(OracleBaseRepository):
         client_has_options_receivables = await self._client_has_options_receivables(
             bmf_account
         )
-        client_has_values_in_bank_account = await self._client_has_values_in_bank_account(
-            bmf_account
+        client_has_values_in_bank_account = (
+            await self._client_has_values_in_bank_account(bmf_account)
         )
         return (
             any(

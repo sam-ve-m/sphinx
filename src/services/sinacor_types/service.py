@@ -10,80 +10,84 @@ from src.domain.validators.marital_status_app_to_sphinx import (
 
 
 class SinaCorTypes:
-
     @staticmethod
-    def get_activity_type(sinacor_types_repository=SinacorTypesRepository()):
+    async def get_activity_type(sinacor_types_repository=SinacorTypesRepository):
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {"enums": sinacor_types_repository.get_activity_type()},
+            "payload": {"enums": await sinacor_types_repository.get_activity_type()},
         }
 
     @staticmethod
-    def get_nationality(sinacor_types_repository=SinacorTypesRepository()):
+    async def get_nationality(sinacor_types_repository=SinacorTypesRepository):
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {"enums": sinacor_types_repository.get_nationality()},
+            "payload": {"enums": await sinacor_types_repository.get_nationality()},
         }
 
     @staticmethod
-    def get_document_issuing_body(sinacor_types_repository=SinacorTypesRepository()):
-        return {
-            "status_code": status.HTTP_200_OK,
-            "payload": {"enums": sinacor_types_repository.get_document_issuing_body()},
-        }
-
-
-    @staticmethod
-    def all_in_one(sinacor_types_repository=SinacorTypesRepository()):
+    async def get_document_issuing_body(
+        sinacor_types_repository=SinacorTypesRepository,
+    ):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {
-                "activity_type": sinacor_types_repository.get_activity_type(),
-                "nationality": sinacor_types_repository.get_nationality(),
-                "document_issuing_body": sinacor_types_repository.get_document_issuing_body(),
-                "document_type": sinacor_types_repository.get_document_type(),
-                "country": sinacor_types_repository.get_country()
+                "enums": await sinacor_types_repository.get_document_issuing_body()
             },
         }
 
     @staticmethod
-    def get_document_type(sinacor_types_repository=SinacorTypesRepository()):
-        return {
-            "status_code": status.HTTP_200_OK,
-            "payload": {"enums": sinacor_types_repository.get_document_type()},
-        }
-
-    @staticmethod
-    def get_county(payload: dict, sinacor_types_repository=SinacorTypesRepository()):
+    async def all_in_one(sinacor_types_repository=SinacorTypesRepository):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {
-                "enums": sinacor_types_repository.get_county(
+                "activity_type": await sinacor_types_repository.get_activity_type(),
+                "nationality": await sinacor_types_repository.get_nationality(),
+                "document_issuing_body": await sinacor_types_repository.get_document_issuing_body(),
+                "document_type": await sinacor_types_repository.get_document_type(),
+                "country": await sinacor_types_repository.get_country(),
+            },
+        }
+
+    @staticmethod
+    async def get_document_type(sinacor_types_repository=SinacorTypesRepository):
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"enums": await sinacor_types_repository.get_document_type()},
+        }
+
+    @staticmethod
+    async def get_county(
+        payload: dict, sinacor_types_repository=SinacorTypesRepository
+    ):
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {
+                "enums": await sinacor_types_repository.get_county(
                     country=payload.get("country"), state=payload.get("state")
                 )
             },
         }
 
     @staticmethod
-    def get_state(payload: dict, sinacor_types_repository=SinacorTypesRepository()):
+    async def get_state(payload: dict, sinacor_types_repository=SinacorTypesRepository):
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {
-                "enums": sinacor_types_repository.get_state(
+                "enums": await sinacor_types_repository.get_state(
                     country=payload.get("country")
                 )
             },
         }
 
     @staticmethod
-    def get_country(sinacor_types_repository=SinacorTypesRepository()):
+    async def get_country(sinacor_types_repository=SinacorTypesRepository):
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {"enums": sinacor_types_repository.get_country()},
+            "payload": {"enums": await sinacor_types_repository.get_country()},
         }
 
     @staticmethod
-    def get_gender():
+    async def get_gender():
         genders = [
             {"code": PersonGender.MASCULINE.value, "value": "Masculino"},
             {"code": PersonGender.FEMININE.value, "value": "Feminino"},
@@ -96,7 +100,7 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_marital_status_update():
+    async def get_marital_status_update():
         marital_status_to_app = [
             {
                 "code": MaritalStatusAppToSphinxEnum.SINGLE.value,
@@ -126,8 +130,8 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_nationality_update(sinacor_types_repository=SinacorTypesRepository()):
-        nationalities = sinacor_types_repository.get_nationality()
+    async def get_nationality_update(sinacor_types_repository=SinacorTypesRepository):
+        nationalities = await sinacor_types_repository.get_nationality()
         nationalities_enum = [
             {"code": nationality["code"], "value": nationality["description"].title()}
             for nationality in nationalities
@@ -138,8 +142,8 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_country_update(sinacor_types_repository=SinacorTypesRepository()):
-        countries = sinacor_types_repository.get_country()
+    async def get_country_update(sinacor_types_repository=SinacorTypesRepository):
+        countries = await sinacor_types_repository.get_country()
         countries_enum = [
             {"code": country["code"], "value": country["description"].title()}
             for country in countries
@@ -150,10 +154,10 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_county_update(
-        payload: dict, sinacor_types_repository=SinacorTypesRepository()
+    async def get_county_update(
+        payload: dict, sinacor_types_repository=SinacorTypesRepository
     ):
-        counties = sinacor_types_repository.get_county(
+        counties = await sinacor_types_repository.get_county(
             country=payload.get("country"), state=payload.get("state")
         )
         counties_enum = [
@@ -166,10 +170,12 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_state_update(
-        payload: dict, sinacor_types_repository=SinacorTypesRepository()
+    async def get_state_update(
+        payload: dict, sinacor_types_repository=SinacorTypesRepository
     ):
-        states = sinacor_types_repository.get_state(country=payload.get("country"))
+        states = await sinacor_types_repository.get_state(
+            country=payload.get("country")
+        )
         states_enum = [
             {"code": state["code"], "value": state["description"].title()}
             for state in states
@@ -180,8 +186,10 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_economic_activity_update(sinacor_types_repository=SinacorTypesRepository()):
-        activities = sinacor_types_repository.get_economic_activity()
+    async def get_economic_activity_update(
+        sinacor_types_repository=SinacorTypesRepository,
+    ):
+        activities = await sinacor_types_repository.get_economic_activity()
         activities_enum = [
             {"code": activity["code"], "value": activity["description"].title()}
             for activity in activities
@@ -192,8 +200,8 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_activity_type_update(sinacor_types_repository=SinacorTypesRepository()):
-        activities = sinacor_types_repository.get_activity_type()
+    async def get_activity_type_update(sinacor_types_repository=SinacorTypesRepository):
+        activities = await sinacor_types_repository.get_activity_type()
         activities_enum = [
             {"code": activity["code"], "value": activity["description"].title()}
             for activity in activities
@@ -204,8 +212,8 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def get_issuing_body_update(sinacor_types_repository=SinacorTypesRepository()):
-        activities = sinacor_types_repository.get_issuing_body()
+    async def get_issuing_body_update(sinacor_types_repository=SinacorTypesRepository):
+        activities = await sinacor_types_repository.get_issuing_body()
         activities_enum = [
             {"code": activity["code"], "value": activity["description"].title()}
             for activity in activities

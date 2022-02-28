@@ -16,7 +16,9 @@ async def crate_user_profile_suitability(request: Request):
 
     payload = {"x-thebes-answer": jwt_data}
 
-    return await BaseController.run(SuitabilityController.create_profile, payload, request)
+    return await BaseController.run(
+        SuitabilityController.create_profile, payload, request
+    )
 
 
 @router.get("/suitability/profile", tags=["suitability"])
@@ -25,4 +27,6 @@ async def get_user_profile_suitability(request: Request):
 
     payload = {"x-thebes-answer": jwt_data}
 
-    return await BaseController.run(SuitabilityController.get_user_profile, payload, request)
+    return await BaseController.run(
+        SuitabilityController.get_user_profile, payload, request
+    )

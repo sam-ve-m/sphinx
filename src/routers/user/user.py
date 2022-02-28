@@ -28,25 +28,33 @@ router = UserRouter.instance()
 
 
 @router.put("/user/identifier_data", tags=["user"])
-async def update_user_identifier_data(user_identifier: UserIdentifierData, request: Request):
+async def update_user_identifier_data(
+    user_identifier: UserIdentifierData, request: Request
+):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     payload = {
         "x-thebes-answer": jwt_data,
         "user_identifier": user_identifier.dict(),
     }
-    return await BaseController.run(UserController.user_identifier_data, payload, request)
+    return await BaseController.run(
+        UserController.user_identifier_data, payload, request
+    )
 
 
 @router.put("/user/complementary_data", tags=["user"])
-async def update_user_complementary_data(user_identifier: UserMaritalData, request: Request):
+async def update_user_complementary_data(
+    user_identifier: UserMaritalData, request: Request
+):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     payload = {
         "x-thebes-answer": jwt_data,
         "user_complementary": user_identifier.dict(),
     }
-    return await BaseController.run(UserController.user_complementary_data, payload, request)
+    return await BaseController.run(
+        UserController.user_complementary_data, payload, request
+    )
 
 
 @router.delete("/user", tags=["user"])
@@ -102,7 +110,9 @@ async def remove_features_to_user(feature: Feature, request: Request):
         "x-thebes-answer": jwt_data,
         "feature": feature.dict()["feature"],
     }
-    return await BaseController.run(UserController.delete_feature, dict(payload), request)
+    return await BaseController.run(
+        UserController.delete_feature, dict(payload), request
+    )
 
 
 @router.post("/user/selfie", tags=["user"], include_in_schema=True)

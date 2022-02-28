@@ -25,10 +25,15 @@ class Solutiontech:
         )
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"{base_url_solutiontech}{solutiontech_verify_dtvm_client}", params={"codCliente": user_bmf_code}) as response:
+                async with session.get(
+                    f"{base_url_solutiontech}{solutiontech_verify_dtvm_client}",
+                    params={"codCliente": user_bmf_code},
+                ) as response:
                     if response.status == 200:
                         response_message = await response.text()
-                        maped_response = Solutiontech.response_message_map.get(response_message)
+                        maped_response = Solutiontech.response_message_map.get(
+                            response_message
+                        )
                         if maped_response:
                             return maped_response
         except Exception as e:
@@ -49,10 +54,10 @@ class Solutiontech:
             headers = {"content-type": "application/json"}
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                        f"{base_url_solutiontech}{solutiontech_sync_dtvm_client}",
-                        params={"codCliente": user_bmf_code},
-                        data=json.dumps({"codCliente": user_bmf_code}),
-                        headers=headers
+                    f"{base_url_solutiontech}{solutiontech_sync_dtvm_client}",
+                    params={"codCliente": user_bmf_code},
+                    data=json.dumps({"codCliente": user_bmf_code}),
+                    headers=headers,
                 ) as response:
                     if response.status == 200:
                         response_json = json.loads(await response.text())

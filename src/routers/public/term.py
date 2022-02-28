@@ -11,9 +11,9 @@ router = PublicRouter.instance()
 
 @router.get("/term", tags=["term"])
 async def get_term_file(request: Request, file_type: TermFile = Depends(TermFile)):
-    return BaseController.run(TermsController.get_term, file_type.dict(), request)
+    return await BaseController.run(TermsController.get_term, file_type.dict(), request)
 
 
 @router.get("/terms", tags=["terms"])
 async def get_term_file(request: Request):
-    return BaseController.run(TermsController.get_terms, {}, request)
+    return await BaseController.run(TermsController.get_terms, {}, request)

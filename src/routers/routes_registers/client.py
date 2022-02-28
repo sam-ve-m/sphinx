@@ -15,7 +15,9 @@ class ClientRouter(RoutesRegister):
     async def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
         allowed_client = False
         try:
-            if token := await middleware_utils.get_token_if_token_is_valid(request=request):
+            if token := await middleware_utils.get_token_if_token_is_valid(
+                request=request
+            ):
                 if valid_client := await middleware_utils.get_valid_user_from_database(
                     token=token
                 ):

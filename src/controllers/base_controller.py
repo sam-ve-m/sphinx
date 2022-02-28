@@ -21,7 +21,9 @@ from nidavellir.src.uru import Sindri
 
 class BaseController(IController):
     @staticmethod
-    async def run(callback: callable, payload: Optional[dict], request: Request) -> Response:
+    async def run(
+        callback: callable, payload: Optional[dict], request: Request
+    ) -> Response:
         lang = i18n.get_language_from_request(request=request)
         try:
             response_metadata = await callback(payload)
@@ -31,9 +33,7 @@ class BaseController(IController):
             return Response(
                 content=json.dumps(payload, default=Sindri.resolver),
                 status_code=response_metadata.get("status_code"),
-                headers={
-                    "Content-type": "application/json"
-                }
+                headers={"Content-type": "application/json"},
             )
         except UnauthorizedError as e:
             return await BaseController.compile_error_response(
@@ -66,10 +66,9 @@ class BaseController(IController):
     @staticmethod
     async def compile_error_response(status_code: status, message: str):
         return Response(
-            content=json.dumps({"detail": [{"msg": message}]}), status_code=status_code,
-            headers={
-                "Content-type": "application/json"
-            }
+            content=json.dumps({"detail": [{"msg": message}]}),
+            status_code=status_code,
+            headers={"Content-type": "application/json"},
         )
 
     @staticmethod

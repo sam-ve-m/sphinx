@@ -85,13 +85,15 @@ class RoutesRegister(ABC):
         pass
 
     @classmethod
-    async def has_permission(cls, request: Request, middleware_utils=MiddlewareUtils) -> bool:
+    async def has_permission(
+        cls, request: Request, middleware_utils=MiddlewareUtils
+    ) -> bool:
         permissions_mapped = cls._instance.get_permission_by_route(
             route=request.url.path
         )
         if permissions_mapped is None:
             return True
-        token = middleware_utils.get_token_if_token_is_valid(request)
+        token = await middleware_utils.get_token_if_token_is_valid(request)
         if token is None:
             return True
         user = await middleware_utils.get_valid_user_from_database(token=token)

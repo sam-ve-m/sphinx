@@ -46,7 +46,7 @@ def get_new_stub_request_user_with_mist_header_wrong():
 
 
 def test_is_user_token_valid_error():
-    user_data = {"token_valid_after": datetime.now().strftime("%Y-%m-%d")}
+    user_data = {"token_valid_after": datetime.utcnow().strftime("%Y-%m-%d")}
     jwt_data = {"created_at": "2020-12-01"}
     token_valid = MiddlewareUtils.is_user_token_life_time_valid(
         user_data=user_data, token=jwt_data

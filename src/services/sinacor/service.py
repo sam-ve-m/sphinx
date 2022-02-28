@@ -1,22 +1,19 @@
 # STANDARD LIBS
 import datetime
-import logging
-
 from copy import deepcopy
+
 from fastapi import status
+from nidavellir.src.uru import Sindri
 
 # SPHINX
 from src.domain.sinacor.client_sinacor_status import SinacorClientStatus
+from src.domain.sincad.client_sync_status import SincadClientImportStatus
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
+from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
 from src.services.persephone.service import PersephoneService
-from nidavellir.src.uru import Sindri
-from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.services.third_part_integration.solutiontech import Solutiontech
-from src.domain.sincad.client_sync_status import SincadClientImportStatus
-from src.domain.persephone_queue.persephone_queue import PersephoneQueue
-from src.infrastructures.env_config import config
 
 
 class SinacorService:
@@ -67,12 +64,11 @@ class SinacorService:
         user_data: dict,
         client_register_repository=ClientRegisterRepository(),
         user_repository=UserRepository(),
-    ) -> dict:
-
+    ):
         database_and_bureau_dtvm_client_data_merged = (
             await SinacorService._create_or_update_client_into_sinacor(
                 client_register_repository=client_register_repository,
-                database_and_bureau_dtvm_client_data_merged=user_data
+                database_and_bureau_dtvm_client_data_merged=user_data,
             )
         )
 
@@ -96,7 +92,7 @@ class SinacorService:
     @staticmethod
     def _add_third_party_operator_information(
         database_and_bureau_dtvm_client_data_merged: dict,
-    ) -> dict:
+    ):
         database_and_bureau_dtvm_client_data_merged.update(
             {
                 "can_be_managed_by_third_party_operator": False,
@@ -163,12 +159,10 @@ class SinacorService:
             ]
         )
 
-        sinacor_user_control_data = (
-            await client_register_repository.get_user_control_data_if_user_already_exists(
-                user_cpf=database_and_bureau_dtvm_client_data_merged[
-                    "identifier_document"
-                ]["cpf"]
-            )
+        sinacor_user_control_data = await client_register_repository.get_user_control_data_if_user_already_exists(
+            user_cpf=database_and_bureau_dtvm_client_data_merged["identifier_document"][
+                "cpf"
+            ]
         )
 
         return sinacor_user_control_data
@@ -204,10 +198,8 @@ class SinacorService:
                 }
             )
 
-        sinacor_user_control_data = (
-            await client_register_repository.get_user_control_data_if_user_already_exists(
-                user_cpf=client_cpf
-            )
+        sinacor_user_control_data = await client_register_repository.get_user_control_data_if_user_already_exists(
+            user_cpf=client_cpf
         )
 
         account_prefix = sinacor_user_control_data[0]
@@ -231,18 +223,16 @@ class SinacorService:
                     "default": {
                         "br": {
                             "bovespa_account": bovespa_account,
-                            "bmf_account": bmf_account
+                            "bmf_account": bmf_account,
                         },
                     },
-                    "vnc": {
-                        "br": []
-                    }
+                    "vnc": {"br": []},
                 }
             }
         )
         database_and_bureau_dtvm_client_data_merged.update(
             {
-                "last_modified_date": {"concluded_at": datetime.datetime.now()},
+                "last_modified_date": {"concluded_at": datetime.datetime.utcnow()},
                 "is_active_client": True,
             }
         )

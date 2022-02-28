@@ -42,7 +42,9 @@ async def logout(device_information: DeviceInformationOptional, request: Request
 
 
 @router.post("/validate_electronic_signature", tags=["authentication"])
-async def change_electronic_signature(electronic_signature: SignatureCheck, request: Request):
+async def change_electronic_signature(
+    electronic_signature: SignatureCheck, request: Request
+):
     electronic_signature = electronic_signature.dict()
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 

@@ -13,10 +13,10 @@ def get_prospect_user_template_with_data(payload: dict) -> dict:
 
 def get_user_identifier_data_schema_template_with_data(payload: dict) -> dict:
     return {
-        "unique_id": payload.get("unique_id"),
-        "cpf": payload.get("cpf"),
-        "cel_phone": payload.get("phone"),
-        "tax_residences": payload.get("tax_residences")
+        "unique_id": payload["unique_id"],
+        "cpf": payload["cpf"],
+        "cel_phone": payload["phone"],
+        "tax_residences": payload["tax_residences"],
     }
 
 
@@ -42,9 +42,7 @@ def get_user_complementary_data_schema_template_with_data(payload: dict) -> dict
     }
 
 
-def unique_id(
-    output: dict, email: str, device_information: dict
-) -> dict:
+def unique_id(output: dict, email: str, device_information: dict) -> dict:
     return {
         "unique_id": unique_id,
         "output": output,
@@ -67,7 +65,7 @@ def get_user_change_or_reset_electronic_signature_schema_template_with_data(
     previous_state: dict, new_state: dict
 ) -> dict:
     return {
-        "unique_id": new_state.get("unique_id"),
+        "unique_id": previous_state.get("unique_id"),
         "previous_electronic_signature": previous_state.get("electronic_signature"),
         "previous_is_blocked_electronic_signature": previous_state.get(
             "is_blocked_electronic_signature"
@@ -85,7 +83,9 @@ def get_user_change_or_reset_electronic_signature_schema_template_with_data(
     }
 
 
-def get_user_set_electronic_signature_schema_template_with_data(payload: dict, unique_id: str) -> dict:
+def get_user_set_electronic_signature_schema_template_with_data(
+    payload: dict, unique_id: str
+) -> dict:
     return {
         "unique_id": unique_id,
         "electronic_signature": payload.get("electronic_signature"),
@@ -131,7 +131,9 @@ def get_create_electronic_signature_session_schema_template_with_data(
     }
 
 
-def get_user_signed_term_template_with_data(term_version: int, payload: dict, file_type: str) -> dict:
+def get_user_signed_term_template_with_data(
+    term_version: int, payload: dict, file_type: str
+) -> dict:
     return {
         "unique_id": payload.get("unique_id"),
         "term_type": file_type,
@@ -161,7 +163,9 @@ def get_user_suitability_template_with_data(payload: dict) -> dict:
     }
 
 
-def get_user_fill_suitability(answers: dict, score: float, suitability_version: int, unique_id: str) -> dict:
+def get_user_fill_suitability(
+    answers: dict, score: float, suitability_version: int, unique_id: str
+) -> dict:
     return {
         "answers": answers,
         "score": score,
@@ -187,4 +191,8 @@ def get_user_account_template_with_data(payload: dict, unique_id: str) -> dict:
 def get_user_logout_template_with_data(
     jwt: dict, unique_id: str, device_information: dict
 ) -> dict:
-    return {"unique_id": unique_id, "jwt": jwt, "device_information": device_information}
+    return {
+        "unique_id": unique_id,
+        "jwt": jwt,
+        "device_information": device_information,
+    }

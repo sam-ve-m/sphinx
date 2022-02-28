@@ -23,11 +23,12 @@ class JwtService:
     logger = logging.getLogger(config("LOG_NAME"))
     heimdall = Heimdall(logger=logging.getLogger(config("LOG_NAME")))
     mist = Mist(logger=logging.getLogger(config("LOG_NAME")))
+    jwt_repository = JwtRepository()
 
-    @staticmethod
-    def insert_one(jwt: str, email: str, jwt_repository=JwtRepository()) -> None:
+    @classmethod
+    async def insert_one(cls, jwt: str, email: str) -> None:
         try:
-            jwt_repository.insert({"jwt": jwt, "email": email})
+            await cls.jwt_repository.insert({"jwt": jwt, "email": email})
         except Exception:
             raise InternalServerError("common.process_issue")
 
@@ -47,8 +48,8 @@ class JwtService:
             raise InternalServerError("common.process_issue")
 
     @classmethod
-    def decrypt_payload(cls, encrypted_payload: str) -> Optional[dict]:
-        payload, status = cls.heimdall.decode_payload(jwt=encrypted_payload)
+    async def decrypt_payload(cls, encrypted_payload: str) -> Optional[dict]:
+        payload, status = await cls.heimdall.decode_payload(jwt=encrypted_payload)
         if status != HeimdallStatusResponses.SUCCESS:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(str(payload), exc_info=True)
@@ -64,12 +65,12 @@ class JwtService:
                 break
         return thebes_answer
 
-    @staticmethod
-    async def get_thebes_answer_from_request(request: Request) -> dict:
+    @classmethod
+    async def get_thebes_answer_from_request(cls, request: Request) -> dict:
         jwt = JwtService.get_jwt_from_request(request=request)
         if jwt is None:
             raise UnauthorizedError("Token not supplied")
-        payload = dict(JwtService.decrypt_payload(jwt))
+        payload = dict(await cls.decrypt_payload(jwt))
         return payload
 
     @classmethod
@@ -79,7 +80,7 @@ class JwtService:
             "password": electronic_signature.get("signature"),
             "signatureExpireTime": electronic_signature.get("signature_expire_time"),
         }
-        payload, status = await cls.mist.generate_jwt(jwt=session_dict)
+        payload, status = await cls.mist.generate_jwt(jwt_values=session_dict)
         if status != MistStatusResponses.SUCCESS:
             logger = logging.getLogger(config("LOG_NAME"))
             logger.error(str(payload), exc_info=True)

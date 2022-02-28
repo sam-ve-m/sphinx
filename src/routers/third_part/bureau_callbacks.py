@@ -1,10 +1,7 @@
 # OUTSIDE LIBRARIES
-from fastapi import Request
 
 # SPHINX
 from src.routers.routes_registers.third_part import ThirdPartRouter
-from src.controllers.base_controller import BaseController
-from src.controllers.bureau_callbacks.bureau_callback import BureauCallbackController
 
 router = ThirdPartRouter.instance()
 

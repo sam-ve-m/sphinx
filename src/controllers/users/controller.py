@@ -12,20 +12,12 @@ class UserController:
         return await UserService.create_admin(payload=payload)
 
     @staticmethod
-    async def update(payload: dict):
-        return await UserService.update(payload=payload)
-
-    @staticmethod
     async def delete(payload: dict):
         return await UserService.delete(payload=payload)
 
     @staticmethod
     async def change_password(payload: dict):
         return await UserService.change_password(payload=payload)
-
-    @staticmethod
-    async def forgot_password(payload: dict):
-        return await UserService.forgot_password(payload=payload)
 
     @staticmethod
     async def change_view(payload: dict):
@@ -62,14 +54,6 @@ class UserController:
     @staticmethod
     async def user_complementary_data(payload: dict):
         return await UserService.user_complementary_data(payload=payload)
-
-    @staticmethod
-    async def user_quiz(payload: dict):
-        return await UserService.user_quiz(payload=payload)
-
-    @staticmethod
-    async def send_quiz_responses(payload: dict):
-        return await UserService.send_quiz_responses(payload=payload)
 
     @staticmethod
     async def get_onboarding_user_current_step(payload: dict):

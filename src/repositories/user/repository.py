@@ -1,5 +1,4 @@
 # OUTSIDE LIBRARIES
-import asyncio
 
 from src.infrastructures.env_config import config
 
@@ -8,16 +7,13 @@ from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
 
 
 class UserRepository(MongoDbBaseRepository):
-    def __init__(self):
-        # running_loop = asyncio.get_running_loop()
-        super().__init__(
-            database=config("MONGODB_DATABASE_NAME"),
-            collection=config("MONGODB_USER_COLLECTION"),
-        )
+
+    database = config("MONGODB_DATABASE_NAME")
+    collection = config("MONGODB_USER_COLLECTION")
 
     async def is_user_using_suitability_or_refuse_term(self, unique_id: str) -> str:
         user = await self.find_one({"unique_id": unique_id})
-        suitability = await user.get("suitability")
+        suitability = user.get("suitability")
         term_refusal = user["terms"].get("term_refusal")
 
         has_suitability = suitability is not None

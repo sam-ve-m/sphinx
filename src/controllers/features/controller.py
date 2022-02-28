@@ -13,3 +13,7 @@ class FeatureController:
     @staticmethod
     def delete(payload: dict):
         return FeatureService.delete(payload=payload)
+
+    @staticmethod
+    def get(payload: dict):
+        return FeatureService.get(payload=payload)

@@ -1,5 +1,4 @@
 # STANDARD LIBS
-from enum import Enum
 
 # OUTSIDE LIBRARIES
 from unittest.mock import MagicMock

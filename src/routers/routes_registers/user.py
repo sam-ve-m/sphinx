@@ -15,8 +15,12 @@ class UserRouter(RoutesRegister):
     async def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
         allowed_user = False
         try:
-            if token := await middleware_utils.get_token_if_token_is_valid(request=request):
-                if valid_user := await middleware_utils.get_valid_user_from_database(token=token):
+            if token := await middleware_utils.get_token_if_token_is_valid(
+                request=request
+            ):
+                if valid_user := await middleware_utils.get_valid_user_from_database(
+                    token=token
+                ):
                     allowed_user = middleware_utils.is_user_token_life_time_valid(
                         user_data=valid_user, token=token
                     )

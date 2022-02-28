@@ -1,8 +1,4 @@
 # from valhalla_client.main import SocialNetworkQueue
-from kafka import KafkaProducer
-import logging
-
-from src.infrastructures.env_config import config
 
 
 class ValhallaService:

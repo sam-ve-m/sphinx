@@ -3,10 +3,8 @@ from src.services.authentications.service import AuthenticationService
 
 class AuthenticationController:
     @staticmethod
-    async def thebes_gate(thebes_answer_from_request_or_error: dict):
-        return await AuthenticationService.thebes_gate(
-            thebes_answer_from_request_or_error=thebes_answer_from_request_or_error
-        )
+    async def thebes_gate(thebes_answer: dict):
+        return await AuthenticationService.thebes_gate(thebes_answer=thebes_answer)
 
     @staticmethod
     async def login(user_credentials: dict):

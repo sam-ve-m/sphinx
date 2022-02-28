@@ -13,10 +13,11 @@ class AdminRouter(RoutesRegister):
 
     @staticmethod
     async def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
-        return True
         allowed_admin = False
         try:
-            if token := await middleware_utils.get_token_if_token_is_valid(request=request):
+            if token := await middleware_utils.get_token_if_token_is_valid(
+                request=request
+            ):
                 if valid_admin := await middleware_utils.get_valid_admin_from_database(
                     token=token
                 ):

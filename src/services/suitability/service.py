@@ -1,13 +1,16 @@
 # STANDARD LIBS
 from datetime import datetime
 from typing import List, Tuple, Union
-from copy import deepcopy
 
 # OUTSIDE LIBRARIES
 from fastapi import status
 
+from src.core.interfaces.services.suitability.interface import ISuitability
+from src.domain.persephone_queue.persephone_queue import PersephoneQueue
+
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError
+from src.infrastructures.env_config import config
 from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
 from src.repositories.suitability.repository import (
     SuitabilityRepository,
@@ -15,16 +18,14 @@ from src.repositories.suitability.repository import (
     SuitabilityAnswersRepository,
 )
 from src.repositories.user.repository import UserRepository
-from src.core.interfaces.services.suitability.interface import ISuitability
 from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
-from src.services.persephone.templates.persephone_templates import (
-    get_user_suitability_template_with_data, get_user_fill_suitability,
-)
-from src.services.persephone.service import PersephoneService
-from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.services.jwts.service import JwtService
-from src.infrastructures.env_config import config
+from src.services.persephone.service import PersephoneService
+from src.services.persephone.templates.persephone_templates import (
+    get_user_suitability_template_with_data,
+    get_user_fill_suitability,
+)
 
 
 class SuitabilityService(ISuitability):
@@ -73,7 +74,7 @@ class SuitabilityService(ISuitability):
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
         unique_id: str = thebes_answer["user"].get("unique_id")
-        suitability_submission_date = datetime.now()
+        suitability_submission_date = datetime.utcnow()
         (
             answers,
             score,
@@ -121,7 +122,10 @@ class SuitabilityService(ISuitability):
 
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
-        return {"status_code": status.HTTP_201_CREATED, "payload":  {"jwt": jwt, "control_data": control_data}}
+        return {
+            "status_code": status.HTTP_201_CREATED,
+            "payload": {"jwt": jwt, "control_data": control_data},
+        }
 
     @staticmethod
     async def get_user_profile(
@@ -130,7 +134,7 @@ class SuitabilityService(ISuitability):
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
         user_email: str = thebes_answer.get("email")
-        user_profile = SuitabilityService.__get_last_user_profile(
+        user_profile = await SuitabilityService.__get_last_user_profile(
             suitability_user_profile_repository=suitability_user_profile_repository,
             email=user_email,
         )
@@ -146,7 +150,9 @@ class SuitabilityService(ISuitability):
         suitability_repository=SuitabilityRepository(),
     ) -> int:
         try:
-            last_suitability = await suitability_repository.find_all(sort=("_id", -1), limit=1)
+            last_suitability = await suitability_repository.find_all(
+                sort=("_id", -1), limit=1
+            )
 
         except (TypeError, AttributeError):
             raise InternalServerError("common.process_issue")

@@ -89,4 +89,3 @@ def get_economic_activity(request: Request):
         payload={},
         request=request,
     )
-

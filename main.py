@@ -1,11 +1,10 @@
-import asyncio
-
 import uvicorn
 from fastapi import FastAPI
-from src.infrastructures.env_config import config
 
 # SPHINX
 from fastapi.middleware.cors import CORSMiddleware
+
+from src.infrastructures.env_config import config
 from src.routers.routes_registers import (
     UserRouter,
     ThirdPartRouter,
@@ -17,9 +16,7 @@ from src.routers.routes_registers import (
 # This import is extremely important for load all routes
 from src.routers import *
 
-app = FastAPI(
-    root_path=config('ROOT_PATH')
-)
+app = FastAPI(root_path=config("ROOT_PATH"))
 
 UserRouter.apply_middleware(app)
 app.include_router(UserRouter.instance())
@@ -52,5 +49,5 @@ if __name__ == "__main__":
         access_log=True,
         log_config="./log.ini",
         log_level="info",
-        root_path=config('ROOT_PATH')
+        root_path=config("ROOT_PATH"),
     )

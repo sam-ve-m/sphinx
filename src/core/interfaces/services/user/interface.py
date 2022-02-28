@@ -33,11 +33,6 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    async def update(payload: dict, user_repository: UserRepository) -> None:
-        pass
-
-    @staticmethod
-    @abstractmethod
     def delete(
         payload: dict,
         user_repository: UserRepository,
@@ -55,15 +50,6 @@ class IUser(ABC):
     @abstractmethod
     def change_view(
         payload: dict, user_repository: UserRepository, token_service: JwtService
-    ) -> dict:
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def forgot_password(
-        payload: dict,
-        user_repository: UserRepository,
-        authentication_service: AuthenticationService,
     ) -> dict:
         pass
 
@@ -108,11 +94,6 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def add_user_control_metadata(payload: dict) -> None:
-        pass
-
-    @staticmethod
-    @abstractmethod
     def fill_term_signed(file_type: str, version: int) -> dict:
         pass
 
@@ -135,26 +116,6 @@ class IUser(ABC):
     @abstractmethod
     def user_complementary_data(
         payload: dict, user_repository, persephone_client: Type[PersephoneService]
-    ) -> dict:
-        pass
-
-    @staticmethod
-    @abstractmethod
-    async def send_quiz_responses(
-        payload: dict,
-        user_repository,
-        stone_age,
-        persephone_client: Type[PersephoneService],
-    ) -> dict:
-        pass
-
-    @staticmethod
-    @abstractmethod
-    async def user_quiz(
-        payload: dict,
-        stone_age,
-        user_repository,
-        persephone_client: Type[PersephoneService],
     ) -> dict:
         pass
 
