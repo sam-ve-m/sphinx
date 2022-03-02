@@ -3,7 +3,6 @@ from fastapi import Request, Depends
 
 # SPHINX
 from src.domain.validators.base import (
-    PIN,
     ElectronicSignature,
     ChangeElectronicSignature,
     View,
@@ -62,17 +61,6 @@ async def delete_user(request: Request):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     return BaseController.run(UserController.delete, jwt_data, request)
-
-
-@router.put("/user/change_password", tags=["user"])
-async def change_user_password(pin: PIN, request: Request):
-    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
-
-    payload = {
-        "x-thebes-answer": jwt_data,
-        "new_pin": pin.dict()["pin"],
-    }
-    return await BaseController.run(UserController.change_password, payload, request)
 
 
 @router.put("/user/logout_all", tags=["user"])

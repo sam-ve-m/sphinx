@@ -138,25 +138,6 @@ class UserService(IUser):
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": None}}
 
     @staticmethod
-    async def change_password(payload: dict, user_repository=UserRepository) -> dict:
-        thebes_answer = payload.get("x-thebes-answer")
-        new_pin = payload.get("new_pin")
-        old = await user_repository.find_one(
-            {"unique_id": thebes_answer["user"].get("unique_id")}
-        )
-        if old is None:
-            raise BadRequestError("common.register_not_exists")
-        new = deepcopy(old)
-        new["pin"] = new_pin
-        new = await hash_field(key="pin", payload=new)
-        if await user_repository.update_one(old=old, new=new) is False:
-            raise InternalServerError("common.process_issue")
-        return {
-            "status_code": status.HTTP_200_OK,
-            "message_key": "requests.updated",
-        }
-
-    @staticmethod
     async def reset_electronic_signature(
         payload: dict,
         user_repository=UserRepository,

@@ -48,7 +48,6 @@ class SinaCorTypes:
             },
         }
 
-
     @staticmethod
     async def get_document_type(sinacor_types_repository=SinacorTypesRepository):
         return {

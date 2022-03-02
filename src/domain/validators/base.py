@@ -68,14 +68,6 @@ class View(BaseModel):
     display_name: constr(min_length=1)
 
 
-class OptionalPIN(BaseModel):
-    pin: Optional[constr(min_length=6, max_length=6)]
-
-
-class PIN(BaseModel):
-    pin: constr(min_length=6, max_length=6)
-
-
 class ElectronicSignature(BaseModel):
     electronic_signature: constr(regex=signature_regex)
 

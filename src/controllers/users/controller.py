@@ -16,10 +16,6 @@ class UserController:
         return await UserService.delete(payload=payload)
 
     @staticmethod
-    async def change_password(payload: dict):
-        return await UserService.change_password(payload=payload)
-
-    @staticmethod
     async def change_view(payload: dict):
         return await UserService.change_view(payload=payload)
 
