@@ -33,7 +33,7 @@ class ClientRegisterEnumsController:
 
     @staticmethod
     async def all_in_one(payload: dict):
-        return SinaCorTypes.all_in_one()
+        return await SinaCorTypes.all_in_one()
 
     @staticmethod
     async def get_gender_update(payload: dict):
