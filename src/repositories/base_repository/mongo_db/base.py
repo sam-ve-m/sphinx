@@ -5,7 +5,7 @@ from datetime import datetime
 
 # OUTSIDE LIBRARIES
 from pymongo.cursor import Cursor
-from nidavellir.src.uru import Sindri
+from nidavellir import Sindri
 
 # Sphinx
 from src.infrastructures.env_config import config

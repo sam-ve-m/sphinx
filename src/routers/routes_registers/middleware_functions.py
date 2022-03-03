@@ -10,7 +10,7 @@ from fastapi import Request
 from src.infrastructures.env_config import config
 from src.repositories.user.repository import UserRepository
 from src.services.jwts.service import JwtService
-from mist_client.src.domain.enums.mist_status_responses import MistStatusResponses
+from mist_client import MistStatusResponses
 
 
 class MiddlewareUtils:

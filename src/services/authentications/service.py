@@ -22,7 +22,6 @@ from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 from src.services.email_builder.email import HtmlModifier
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
 from src.services.jwts.service import JwtService
-from src.services.persephone.service import PersephoneService
 from src.services.persephone.templates.persephone_templates import (
     get_user_thebes_hall_schema_template_with_data,
     get_create_electronic_signature_session_schema_template_with_data,
@@ -30,15 +29,18 @@ from src.services.persephone.templates.persephone_templates import (
     get_user_authentication_template_with_data,
 )
 from src.services.third_part_integration.solutiontech import Solutiontech
+from persephone_client import Persephone
 
 
 class AuthenticationService(IAuthentication):
+
+    persephone_client = Persephone
+
     @staticmethod
     async def thebes_gate(
         thebes_answer: dict,
         user_repository=UserRepository,
-        token_service=JwtService,
-        persephone_client=PersephoneService.get_client(),
+        token_service=JwtService
     ) -> dict:
         user_data = await user_repository.find_one(
             {"unique_id": thebes_answer["user"].get("unique_id")}
@@ -62,11 +64,11 @@ class AuthenticationService(IAuthentication):
                 raise InternalServerError("common.process_issue")
             user_data.update(update_data)
 
-        sent_to_persephone = persephone_client.run(
+        sent_to_persephone, status = await AuthenticationService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_AUTHENTICATION.value,
-            payload=get_user_authentication_template_with_data(payload=user_data),
-            schema="user_authentication_schema",
+            message=get_user_authentication_template_with_data(payload=user_data),
+            schema_name="user_authentication_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
@@ -130,8 +132,7 @@ class AuthenticationService(IAuthentication):
     async def thebes_hall(
         device_and_thebes_answer_from_request: dict,
         user_repository=UserRepository,
-        token_service=JwtService,
-        persephone_client=PersephoneService.get_client(),
+        token_service=JwtService
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request["x-thebes-answer"]
         unique_id = x_thebes_answer["user"]["unique_id"]
@@ -165,10 +166,10 @@ class AuthenticationService(IAuthentication):
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
-        sent_to_persephone = persephone_client.run(
+        sent_to_persephone, status = await AuthenticationService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_THEBES_HALL.value,
-            payload=get_user_thebes_hall_schema_template_with_data(
+            message=get_user_thebes_hall_schema_template_with_data(
                 unique_id=unique_id,
                 jwt=jwt,
                 jwt_payload_data=jwt_payload_data,
@@ -176,7 +177,7 @@ class AuthenticationService(IAuthentication):
                     "device_information"
                 ),
             ),
-            schema="user_thebes_hall_schema",
+            schema_name="user_thebes_hall_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
@@ -189,7 +190,6 @@ class AuthenticationService(IAuthentication):
     @staticmethod
     async def create_electronic_signature_jwt(
         change_electronic_signature_request: dict,
-        persephone_client=PersephoneService.get_client(),
         jwt_service=JwtService,
     ):
         jwt_mist_session = None
@@ -204,17 +204,17 @@ class AuthenticationService(IAuthentication):
             allowed = False
             raise e
         finally:
-            sent_to_persephone = persephone_client.run(
+            sent_to_persephone = await AuthenticationService.persephone_client.send_to_persephone(
                 topic=config("PERSEPHONE_TOPIC_USER"),
                 partition=PersephoneQueue.USER_ELECTRONIC_SIGNATURE_SESSION.value,
-                payload=get_create_electronic_signature_session_schema_template_with_data(
+                message=get_create_electronic_signature_session_schema_template_with_data(
                     unique_id=change_electronic_signature_request["jwt_user"][
                         "unique_id"
                     ],
                     mist_session=jwt_mist_session,
                     allowed=allowed,
                 ),
-                schema="create_electronic_signature_session_schema",
+                schema_name="create_electronic_signature_session_schema",
             )
             if sent_to_persephone is False:
                 raise InternalServerError("common.process_issue")
@@ -226,12 +226,11 @@ class AuthenticationService(IAuthentication):
     @staticmethod
     async def logout(
         device_jwt_and_thebes_answer_from_request: dict,
-        persephone_client=PersephoneService.get_client(),
     ) -> dict:
-        sent_to_persephone = persephone_client.run(
+        sent_to_persephone = await AuthenticationService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_LOGOUT.value,
-            payload=get_user_logout_template_with_data(
+            message=get_user_logout_template_with_data(
                 jwt=device_jwt_and_thebes_answer_from_request["jwt"],
                 unique_id=device_jwt_and_thebes_answer_from_request["jwt_user"][
                     "unique_id"
@@ -240,7 +239,7 @@ class AuthenticationService(IAuthentication):
                     "device_information"
                 ],
             ),
-            schema="user_logout_schema",
+            schema_name="user_logout_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
@@ -250,8 +249,7 @@ class AuthenticationService(IAuthentication):
     @staticmethod
     async def _dtvm_client_has_br_trade_allowed(
         user: dict,
-        client_register_repository=ClientRegisterRepository,
-        solutiontech=Solutiontech,
+        solutiontech=Solutiontech
     ) -> dict:
 
         user_solutiontech_status_from_database = user.get("solutiontech")

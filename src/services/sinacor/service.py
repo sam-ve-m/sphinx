@@ -3,7 +3,7 @@ import datetime
 from copy import deepcopy
 
 from fastapi import status
-from nidavellir.src.uru import Sindri
+from nidavellir import Sindri
 
 # SPHINX
 from src.domain.sinacor.client_sinacor_status import SinacorClientStatus
@@ -12,17 +12,19 @@ from src.domain.solutiontech.client_import_status import SolutiontechClientImpor
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
-from src.services.persephone.service import PersephoneService
+from persephone_client import Persephone
 from src.services.third_part_integration.solutiontech import Solutiontech
 
 
 class SinacorService:
+
+    persephone_client = Persephone
+
     @staticmethod
     async def process_callback(
         payload: dict,
         client_register_repository=ClientRegisterRepository(),
         user_repository=UserRepository(),
-        persephone_client=PersephoneService.get_client(),
     ):
         dtvm_client_data_provided_by_bureau = payload.get("data")
 
@@ -36,9 +38,7 @@ class SinacorService:
             raise BadRequestError("common.register_exists")
 
         SinacorService._send_dtvm_client_data_to_persephone(
-            persephone_client=persephone_client,
-            dtvm_client_data=dtvm_client_data_provided_by_bureau,
-            user_email=user_database_document.get("email"),
+            dtvm_client_data=dtvm_client_data_provided_by_bureau
         )
 
         database_and_bureau_dtvm_client_data_merged = (
@@ -137,7 +137,7 @@ class SinacorService:
         return database_and_bureau_dtvm_client_data_merged
 
     @staticmethod
-    def _send_dtvm_client_data_to_persephone(persephone_client, dtvm_client_data: dict):
+    def _send_dtvm_client_data_to_persephone(dtvm_client_data: dict):
         # TODO: REMOVE THIS IS FROM STONEAGE
         # sent_to_persephone = persephone_client.run(
         #     topic=config("PERSEPHONE_TOPIC_USER"),
@@ -169,8 +169,8 @@ class SinacorService:
         return sinacor_user_control_data
 
     @staticmethod
-    def _require_sync_to_solutiontech_from_sinacor(bmf_account: int) -> str:
-        is_synced_with_solutiontech = Solutiontech.request_client_sync(
+    async def _require_sync_to_solutiontech_from_sinacor(bmf_account: int) -> str:
+        is_synced_with_solutiontech = await Solutiontech.request_client_sync(
             user_bmf_code=bmf_account
         )
 
@@ -211,7 +211,7 @@ class SinacorService:
         )
         bmf_account = SinacorService._build_bmf_account(account_prefix=account_prefix)
 
-        sync_status = SinacorService._require_sync_to_solutiontech_from_sinacor(
+        sync_status = await SinacorService._require_sync_to_solutiontech_from_sinacor(
             int(bmf_account)
         )
 

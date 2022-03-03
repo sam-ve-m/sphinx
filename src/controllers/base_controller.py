@@ -16,7 +16,7 @@ from src.exceptions.exceptions import (
 )
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.core.interfaces.controllers.base_controller.interface import IController
-from nidavellir.src.uru import Sindri
+from nidavellir import Sindri
 
 
 class BaseController(IController):

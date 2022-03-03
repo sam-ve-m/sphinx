@@ -1,16 +1,11 @@
 from src.core.interfaces.utils.encrypt.password.interface import IPasswordEncrypt
-from mist_client.asgard import Mist
-from src.infrastructures.env_config import config
-from mist_client.src.domain.enums.mist_status_responses import MistStatusResponses
+from mist_client import Mist, MistStatusResponses
 from src.exceptions.exceptions import InternalServerError
-import logging
-
-logger = logging.getLogger(config("LOG_NAME"))
 
 
 class PasswordEncrypt(IPasswordEncrypt):
 
-    mist = Mist(logger)
+    mist = Mist
 
     @classmethod
     async def encrypt_password(cls, user_password: str):

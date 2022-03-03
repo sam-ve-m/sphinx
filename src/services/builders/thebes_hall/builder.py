@@ -18,7 +18,7 @@ from src.services.builders.thebes_hall.validators.terms import Terms as TermsVal
 from src.services.builders.thebes_hall.validators.account_data import (
     AccountData as AccountDataValidator,
 )
-from nidavellir.src.uru import Sindri
+from nidavellir import Sindri
 from jwt.utils import get_int_from_datetime
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 
@@ -43,7 +43,7 @@ class ThebesHallBuilder:
         build_strategy = self._get_strategy()
         build_strategy()
         self._jwt_payload_data.update({"user": self._jwt_payload_user_data})
-        Sindri.dict_to_primitive_types(values=self._jwt_payload_data)
+        Sindri.dict_to_primitive_types(obj=self._jwt_payload_data)
         return self._jwt_payload_data, self._control_data
 
     def _get_build_strategies(self) -> dict:

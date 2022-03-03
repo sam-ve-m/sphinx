@@ -8,9 +8,8 @@ from fastapi import Request
 from jwt import JWT
 from jwt.jwk import jwk_from_pem
 
-from heimdall_client.bifrost import Heimdall, HeimdallStatusResponses
-from mist_client.asgard import Mist
-from mist_client.src.domain.enums.mist_status_responses import MistStatusResponses
+from heimdall_client import Heimdall, HeimdallStatusResponses
+from mist_client import Mist, MistStatusResponses
 
 # SPHINX
 from src.repositories.jwt.repository import JwtRepository
@@ -21,8 +20,8 @@ class JwtService:
 
     instance = JWT()
     logger = logging.getLogger(config("LOG_NAME"))
-    heimdall = Heimdall(logger=logging.getLogger(config("LOG_NAME")))
-    mist = Mist(logger=logging.getLogger(config("LOG_NAME")))
+    heimdall = Heimdall
+    mist = Mist
     jwt_repository = JwtRepository()
 
     @classmethod

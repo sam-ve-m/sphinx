@@ -2,12 +2,9 @@
 from abc import ABC, abstractmethod
 from typing import Type
 
-from persephone_client.main import Persephone
-
 # SPHINX
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.services.authentications.service import AuthenticationService
-from src.services.persephone.service import PersephoneService
 
 from src.repositories.user.repository import UserRepository
 from src.repositories.file.repository import FileRepository
@@ -21,8 +18,7 @@ class IUser(ABC):
     def create(
         payload: dict,
         user_repository: UserRepository,
-        authentication_service: AuthenticationService,
-        persephone_client: Persephone,
+        authentication_service: AuthenticationService
     ) -> dict:
         pass
 
@@ -77,7 +73,6 @@ class IUser(ABC):
     def save_user_selfie(
         payload: dict,
         file_repository: FileRepository,
-        persephone_client: Type[PersephoneService],
     ) -> dict:
         pass
 
@@ -88,7 +83,6 @@ class IUser(ABC):
         user_repository: UserRepository,
         token_service: JwtService,
         file_repository: FileRepository,
-        persephone_client: Type[PersephoneService],
     ) -> dict:
         pass
 
@@ -108,14 +102,14 @@ class IUser(ABC):
     @staticmethod
     @abstractmethod
     def user_identifier_data(
-        payload: dict, user_repository, persephone_client: Type[PersephoneService]
+        payload: dict, user_repository
     ) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def user_complementary_data(
-        payload: dict, user_repository, persephone_client: Type[PersephoneService]
+        payload: dict, user_repository
     ) -> dict:
         pass
 
@@ -136,7 +130,7 @@ class IUser(ABC):
     @staticmethod
     @abstractmethod
     def reset_electronic_signature(
-        payload: dict, user_repository, persephone_client
+        payload: dict, user_repository
     ) -> dict:
         pass
 
@@ -144,7 +138,6 @@ class IUser(ABC):
     @abstractmethod
     def change_electronic_signature(
         payload: dict,
-        user_repository=UserRepository(),
-        persephone_client: Type[PersephoneService] = None,
+        user_repository: UserRepository
     ) -> dict:
         pass

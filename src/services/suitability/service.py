@@ -21,7 +21,7 @@ from src.repositories.user.repository import UserRepository
 from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 from src.services.jwts.service import JwtService
-from src.services.persephone.service import PersephoneService
+from persephone_client import Persephone
 from src.services.persephone.templates.persephone_templates import (
     get_user_suitability_template_with_data,
     get_user_fill_suitability,
@@ -29,6 +29,9 @@ from src.services.persephone.templates.persephone_templates import (
 
 
 class SuitabilityService(ISuitability):
+
+    persephone_client = Persephone
+
     @staticmethod
     async def create_quiz(
         payload: dict,
@@ -69,7 +72,6 @@ class SuitabilityService(ISuitability):
         user_repository=UserRepository(),
         suitability_repository=SuitabilityRepository(),
         suitability_user_profile_repository=SuitabilityUserProfileRepository(),
-        persephone_client=PersephoneService.get_client(),
         token_service=JwtService,
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
@@ -80,10 +82,10 @@ class SuitabilityService(ISuitability):
             score,
             suitability_version,
         ) = await SuitabilityService.__get_last_suitability_answers_metadata()
-        sent_to_persephone = persephone_client.run(
+        sent_to_persephone = await SuitabilityService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.SUITABILITY_QUEUE.value,
-            payload=get_user_suitability_template_with_data(
+            message=get_user_suitability_template_with_data(
                 payload=get_user_fill_suitability(
                     answers=answers,
                     score=score,
@@ -91,7 +93,7 @@ class SuitabilityService(ISuitability):
                     suitability_version=suitability_version,
                 )
             ),
-            schema="suitability_schema",
+            schema_name="suitability_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
