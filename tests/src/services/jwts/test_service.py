@@ -10,7 +10,6 @@ from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAt
 from src.exceptions.exceptions import UnauthorizedError, InternalServerError
 
 
-
 @pytest.fixture
 def get_new_stub_jwt_service():
     stub_jwt_service = JwtServiceWithStubAttributes()

@@ -1,3 +1,7 @@
+from etria_logger import GLADSHEIM_LOGGING_CONFIG, Gladsheim
+
+import logging
+
 import uvicorn
 from fastapi import FastAPI
 
@@ -41,13 +45,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
         port=8000,
         access_log=True,
-        log_config="./log.ini",
-        log_level="info",
+        log_config=GLADSHEIM_LOGGING_CONFIG,
         root_path=config("ROOT_PATH"),
     )

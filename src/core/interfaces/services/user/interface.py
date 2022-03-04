@@ -18,7 +18,7 @@ class IUser(ABC):
     def create(
         payload: dict,
         user_repository: UserRepository,
-        authentication_service: AuthenticationService
+        authentication_service: AuthenticationService,
     ) -> dict:
         pass
 
@@ -101,16 +101,12 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def user_identifier_data(
-        payload: dict, user_repository
-    ) -> dict:
+    def user_identifier_data(payload: dict, user_repository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
-    def user_complementary_data(
-        payload: dict, user_repository
-    ) -> dict:
+    def user_complementary_data(payload: dict, user_repository) -> dict:
         pass
 
     @staticmethod
@@ -129,15 +125,12 @@ class IUser(ABC):
 
     @staticmethod
     @abstractmethod
-    def reset_electronic_signature(
-        payload: dict, user_repository
-    ) -> dict:
+    def reset_electronic_signature(payload: dict, user_repository) -> dict:
         pass
 
     @staticmethod
     @abstractmethod
     def change_electronic_signature(
-        payload: dict,
-        user_repository: UserRepository
+        payload: dict, user_repository: UserRepository
     ) -> dict:
         pass

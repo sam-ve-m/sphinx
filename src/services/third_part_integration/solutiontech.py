@@ -1,6 +1,6 @@
 from src.infrastructures.env_config import config
 import aiohttp
-import logging
+from etria_logger import Gladsheim
 import json
 
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
@@ -37,10 +37,9 @@ class Solutiontech:
                         if maped_response:
                             return maped_response
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(
-                msg=f"user_bmf_code {user_bmf_code} - response  = {response_message} -  error = {str(e)}",
-                exc_info=e,
+            Gladsheim.error(
+                error=e,
+                message=f"user_bmf_code {user_bmf_code} - response  = {response_message} -  error = {str(e)}",
             )
 
         return user_solutiontech_status_from_database
@@ -65,10 +64,9 @@ class Solutiontech:
                         if status == "OK":
                             return True
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(
-                msg=f"user_bmf_code: {user_bmf_code} - Solution Tech Response  = {response_message} -  error = {str(e)}",
-                exc_info=e,
+            Gladsheim.error(
+                error=e,
+                message=f"user_bmf_code: {user_bmf_code} - Solution Tech Response  = {response_message} -  error = {str(e)}",
             )
 
         return False

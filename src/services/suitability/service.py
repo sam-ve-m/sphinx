@@ -82,18 +82,20 @@ class SuitabilityService(ISuitability):
             score,
             suitability_version,
         ) = await SuitabilityService.__get_last_suitability_answers_metadata()
-        sent_to_persephone = await SuitabilityService.persephone_client.send_to_persephone(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.SUITABILITY_QUEUE.value,
-            message=get_user_suitability_template_with_data(
-                payload=get_user_fill_suitability(
-                    answers=answers,
-                    score=score,
-                    unique_id=unique_id,
-                    suitability_version=suitability_version,
-                )
-            ),
-            schema_name="suitability_schema",
+        sent_to_persephone = (
+            await SuitabilityService.persephone_client.send_to_persephone(
+                topic=config("PERSEPHONE_TOPIC_USER"),
+                partition=PersephoneQueue.SUITABILITY_QUEUE.value,
+                message=get_user_suitability_template_with_data(
+                    payload=get_user_fill_suitability(
+                        answers=answers,
+                        score=score,
+                        unique_id=unique_id,
+                        suitability_version=suitability_version,
+                    )
+                ),
+                schema_name="suitability_schema",
+            )
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")

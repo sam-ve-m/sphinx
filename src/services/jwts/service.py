@@ -1,7 +1,6 @@
 # STANDARD LIBS
 from typing import Optional
-import logging
-from src.infrastructures.env_config import config
+from etria_logger import Gladsheim
 
 # OUTSIDE LIBRARIES
 from fastapi import Request
@@ -19,7 +18,6 @@ from src.exceptions.exceptions import InternalServerError, UnauthorizedError
 class JwtService:
 
     instance = JWT()
-    logger = logging.getLogger(config("LOG_NAME"))
     heimdall = Heimdall
     mist = Mist
     jwt_repository = JwtRepository()
@@ -42,16 +40,14 @@ class JwtService:
             )
             return compact_jws
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             raise InternalServerError("common.process_issue")
 
     @classmethod
     async def decrypt_payload(cls, encrypted_payload: str) -> Optional[dict]:
         payload, status = await cls.heimdall.decode_payload(jwt=encrypted_payload)
         if status != HeimdallStatusResponses.SUCCESS:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(str(payload), exc_info=True)
+            Gladsheim.error(message=str(payload))
             raise InternalServerError("common.process_issue")
         return payload["decoded_jwt"]
 
@@ -77,11 +73,10 @@ class JwtService:
         session_dict = {
             "unique_id": unique_id,
             "password": electronic_signature.get("signature"),
-            "signatureExpireTime": electronic_signature.get("signature_expire_time"),
+            "signature_expire_time": electronic_signature.get("signature_expire_time"),
         }
         payload, status = await cls.mist.generate_jwt(jwt_values=session_dict)
         if status != MistStatusResponses.SUCCESS:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(str(payload), exc_info=True)
+            Gladsheim.error(message=str(payload))
             raise InternalServerError("common.process_issue")
         return payload

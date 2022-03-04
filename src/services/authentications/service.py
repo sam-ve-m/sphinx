@@ -9,6 +9,7 @@ from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 # SPHINX
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
+from src.domain.user_level.enum import UserLevel
 from src.exceptions.exceptions import (
     BadRequestError,
     UnauthorizedError,
@@ -38,9 +39,7 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     async def thebes_gate(
-        thebes_answer: dict,
-        user_repository=UserRepository,
-        token_service=JwtService
+        thebes_answer: dict, user_repository=UserRepository, token_service=JwtService
     ) -> dict:
         user_data = await user_repository.find_one(
             {"unique_id": thebes_answer["user"].get("unique_id")}
@@ -55,7 +54,11 @@ class AuthenticationService(IAuthentication):
             update_data = {
                 "is_active_user": True,
                 "must_do_first_login": False,
-                "scope": {"view_type": "default", "features": ["default", "realtime"]},
+                "scope": {
+                    "user_level": UserLevel.PROSPECT.value,
+                    "view_type": "default",
+                    "features": ["default"]
+                },
             }
             if (
                 await user_repository.update_one(old=user_data, new=update_data)
@@ -64,7 +67,10 @@ class AuthenticationService(IAuthentication):
                 raise InternalServerError("common.process_issue")
             user_data.update(update_data)
 
-        sent_to_persephone, status = await AuthenticationService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await AuthenticationService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_AUTHENTICATION.value,
             message=get_user_authentication_template_with_data(payload=user_data),
@@ -120,7 +126,7 @@ class AuthenticationService(IAuthentication):
         page = HtmlModifier(
             "src/services/asset",
             i18n.get_translate(key=body, locale="pt"),
-            config("TARGET_LINK") + "/" + payload_jwt,
+            config("TARGET_LINK") + f"?token={payload_jwt}",
         )()
         email_sender.send_email_to(
             target_email=email,
@@ -132,7 +138,7 @@ class AuthenticationService(IAuthentication):
     async def thebes_hall(
         device_and_thebes_answer_from_request: dict,
         user_repository=UserRepository,
-        token_service=JwtService
+        token_service=JwtService,
     ) -> dict:
         x_thebes_answer = device_and_thebes_answer_from_request["x-thebes-answer"]
         unique_id = x_thebes_answer["user"]["unique_id"]
@@ -166,7 +172,10 @@ class AuthenticationService(IAuthentication):
         ).build()
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
-        sent_to_persephone, status = await AuthenticationService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await AuthenticationService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_THEBES_HALL.value,
             message=get_user_thebes_hall_schema_template_with_data(
@@ -227,19 +236,21 @@ class AuthenticationService(IAuthentication):
     async def logout(
         device_jwt_and_thebes_answer_from_request: dict,
     ) -> dict:
-        sent_to_persephone = await AuthenticationService.persephone_client.send_to_persephone(
-            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
-            partition=PersephoneQueue.USER_LOGOUT.value,
-            message=get_user_logout_template_with_data(
-                jwt=device_jwt_and_thebes_answer_from_request["jwt"],
-                unique_id=device_jwt_and_thebes_answer_from_request["jwt_user"][
-                    "unique_id"
-                ],
-                device_information=device_jwt_and_thebes_answer_from_request[
-                    "device_information"
-                ],
-            ),
-            schema_name="user_logout_schema",
+        sent_to_persephone = (
+            await AuthenticationService.persephone_client.send_to_persephone(
+                topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+                partition=PersephoneQueue.USER_LOGOUT.value,
+                message=get_user_logout_template_with_data(
+                    jwt=device_jwt_and_thebes_answer_from_request["jwt"],
+                    unique_id=device_jwt_and_thebes_answer_from_request["jwt_user"][
+                        "unique_id"
+                    ],
+                    device_information=device_jwt_and_thebes_answer_from_request[
+                        "device_information"
+                    ],
+                ),
+                schema_name="user_logout_schema",
+            )
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
@@ -248,8 +259,7 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     async def _dtvm_client_has_br_trade_allowed(
-        user: dict,
-        solutiontech=Solutiontech
+        user: dict, solutiontech=Solutiontech
     ) -> dict:
 
         user_solutiontech_status_from_database = user.get("solutiontech")

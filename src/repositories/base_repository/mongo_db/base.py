@@ -1,6 +1,6 @@
 # STANDARD LIBS
 from typing import Optional
-import logging
+from etria_logger import Gladsheim
 from datetime import datetime
 
 # OUTSIDE LIBRARIES
@@ -8,7 +8,6 @@ from pymongo.cursor import Cursor
 from nidavellir import Sindri
 
 # Sphinx
-from src.infrastructures.env_config import config
 from src.core.interfaces.repositories.base_repository.interface import IRepository
 from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
 from src.repositories.cache.redis import RepositoryRedis
@@ -48,8 +47,7 @@ class MongoDbBaseRepository(IRepository):
             await collection.insert_one(data)
             return True
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             return False
 
     @classmethod
@@ -71,8 +69,7 @@ class MongoDbBaseRepository(IRepository):
             return data
 
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             raise Exception("internal_error")
 
     @classmethod
@@ -84,8 +81,7 @@ class MongoDbBaseRepository(IRepository):
                 query.sort(*sort)
             return await query.to_list(limit)
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             raise Exception("internal_error")
 
     @classmethod
@@ -104,8 +100,7 @@ class MongoDbBaseRepository(IRepository):
                 await cls._save_cache(query={"unique_id": unique_id}, ttl=ttl, data=new)
             return True
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             return False
 
     @classmethod
@@ -117,8 +112,7 @@ class MongoDbBaseRepository(IRepository):
                 await cls._delete_cache(query={"unique_id": unique_id})
             return True
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             return False
 
     @classmethod

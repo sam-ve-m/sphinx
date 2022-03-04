@@ -1,5 +1,5 @@
 from starlette.requests import Request
-import logging
+from etria_logger import Gladsheim
 
 # Sphinx
 from src.core.abstract_classes.routes_register.register import RoutesRegister
@@ -18,6 +18,5 @@ class ThirdPartRouter(RoutesRegister):
             if token and token.get("is_third_part"):
                 return True
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
         return False

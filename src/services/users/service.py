@@ -1,5 +1,5 @@
 # STANDARD LIBS
-import logging
+from etria_logger import Gladsheim
 from copy import deepcopy
 from datetime import datetime
 from typing import List
@@ -14,6 +14,7 @@ from src.core.interfaces.services.user.interface import IUser
 from src.domain.caf.status import CAFStatus
 from src.domain.encrypt.password.util import PasswordEncrypt
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
+from src.domain.user_level.enum import UserLevel
 from src.exceptions.exceptions import (
     BadRequestError,
     InternalServerError,
@@ -68,7 +69,10 @@ class UserService(IUser):
 
         await UserService._add_user_control_metadata(payload=user)
 
-        sent_to_persephone, status = await UserService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.PROSPECT_USER_QUEUE.value,
             message=get_prospect_user_template_with_data(payload=user),
@@ -140,8 +144,7 @@ class UserService(IUser):
 
     @staticmethod
     async def reset_electronic_signature(
-        payload: dict,
-        user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         forgot_electronic_signature = thebes_answer.get("forgot_electronic_signature")
@@ -165,7 +168,10 @@ class UserService(IUser):
             "electronic_signature_wrong_attempts": 0,
         }
 
-        sent_to_persephone, status = await UserService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
             message=get_user_change_or_reset_electronic_signature_schema_template_with_data(
@@ -199,8 +205,7 @@ class UserService(IUser):
 
     @staticmethod
     async def change_electronic_signature(
-        payload: dict,
-        user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         current_electronic_signature = payload.get("current_electronic_signature")
@@ -243,7 +248,10 @@ class UserService(IUser):
             ),
         }
 
-        sent_to_persephone, status = await UserService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_CHANGE_OR_RESET_ELECTRONIC_SIGNATURE.value,
             message=get_user_change_or_reset_electronic_signature_schema_template_with_data(
@@ -315,7 +323,8 @@ class UserService(IUser):
         new = deepcopy(old)
         new_scope = new.get("scope")
         feature = payload.get("feature")
-        status_code = status.HTTP_304_NOT_MODIFIED
+        # status_code = status.HTTP_304_NOT_MODIFIED
+        status_code = status.HTTP_200_OK
         if feature not in new_scope.get("features"):
             new_scope.get("features").append(payload.get("feature"))
             new.update({"scope": new_scope})
@@ -346,7 +355,10 @@ class UserService(IUser):
                 raise InternalServerError("common.process_issue")
             response.update({"status_code": status.HTTP_200_OK})
         else:
-            response.update({"status_code": status.HTTP_304_NOT_MODIFIED})
+            response.update({
+                # "status_code": status.HTTP_304_NOT_MODIFIED,
+                "status_code": status.HTTP_200_OK,
+            })
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
@@ -358,10 +370,7 @@ class UserService(IUser):
         return response
 
     @staticmethod
-    async def save_user_selfie(
-        payload: dict,
-        file_repository=FileRepository
-    ) -> dict:
+    async def save_user_selfie(payload: dict, file_repository=FileRepository) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         await UserService.onboarding_step_validator(
             payload=payload, onboard_step=["user_selfie_step"]
@@ -374,7 +383,10 @@ class UserService(IUser):
             bucket_name=config("AWS_BUCKET_USERS_SELF"),
         )
 
-        sent_to_persephone, status = await UserService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_SELFIE.value,
             message=get_user_selfie_schema_template_with_data(
@@ -410,7 +422,10 @@ class UserService(IUser):
             version=term_version,
         )
         thebes_answer_user = thebes_answer["user"]
-        sent_to_persephone, status = await UserService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.TERM_QUEUE.value,
             message=get_user_signed_term_template_with_data(
@@ -499,14 +514,12 @@ class UserService(IUser):
             )
             return {"status_code": status.HTTP_200_OK, "payload": {"link": link}}
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             raise InternalServerError("common.process_issue")
 
     @staticmethod
     async def user_identifier_data(
-        payload: dict,
-        user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         unique_id = thebes_answer["user"]["unique_id"]
@@ -528,7 +541,10 @@ class UserService(IUser):
 
         user_identifier_data.update({"unique_id": unique_id})
 
-        sent_to_persephone, status = await UserService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_IDENTIFIER_DATA.value,
             message=get_user_identifier_data_schema_template_with_data(
@@ -555,8 +571,7 @@ class UserService(IUser):
 
     @staticmethod
     async def user_complementary_data(
-        payload: dict,
-        user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         await UserService.onboarding_step_validator(
             payload=payload, onboard_step=["user_complementary_step"]
@@ -577,7 +592,10 @@ class UserService(IUser):
         current_user_with_complementary_data = deepcopy(current_user)
         current_user_with_complementary_data.update(complementary_data_for_user_update)
 
-        sent_to_persephone, status = await UserService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_COMPLEMENTARY_DATA.value,
             message=get_user_complementary_data_schema_template_with_data(
@@ -667,8 +685,7 @@ class UserService(IUser):
 
     @staticmethod
     async def set_user_electronic_signature(
-        payload: dict,
-        user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         await UserService.onboarding_step_validator(
             payload=payload, onboard_step=["user_electronic_signature"]
@@ -690,7 +707,10 @@ class UserService(IUser):
             "electronic_signature_wrong_attempts": 0,
         }
 
-        sent_to_persephone, status = await UserService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_SET_ELECTRONIC_SIGNATURE.value,
             message=get_user_set_electronic_signature_schema_template_with_data(
@@ -807,8 +827,7 @@ class UserService(IUser):
 
     @staticmethod
     async def update_customer_registration_data(
-        payload: dict,
-        user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ):
         await UserService.onboarding_step_validator(
             payload=payload, onboard_step=["finished", "user_data_validation"]
@@ -877,7 +896,10 @@ class UserService(IUser):
 
         Sindri.dict_to_primitive_types(user_update_register_schema)
 
-        sent_to_persephone, status = await UserService.persephone_client.send_to_persephone(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,
             message=user_update_register_schema,
@@ -898,7 +920,11 @@ class UserService(IUser):
         )
 
         if not await user_repository.update_one(
-            old={"unique_id": unique_id}, new={"is_bureau_data_validated": True}
+            old={"unique_id": unique_id},
+            new={
+                "scope.user_level": UserLevel.CLIENT.value,
+                "is_bureau_data_validated": True
+            }
         ):
             raise InternalServerError("common.process_issue")
 

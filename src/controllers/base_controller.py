@@ -1,6 +1,6 @@
 # STANDARD LIBS
 from typing import Optional
-import logging
+from etria_logger import Gladsheim
 import json
 
 # OUTSIDE LIBRARIES
@@ -56,8 +56,7 @@ class BaseController(IController):
                 message=i18n.get_translate(str(e), locale=lang),
             )
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             return await BaseController.compile_error_response(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 message=i18n.get_translate("internal_error", locale=lang),

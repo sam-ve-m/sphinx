@@ -1,5 +1,5 @@
 from starlette.requests import Request
-import logging
+from etria_logger import Gladsheim
 
 # Sphinx
 from src.core.abstract_classes.routes_register.register import RoutesRegister
@@ -28,6 +28,5 @@ class ClientRouter(RoutesRegister):
                             request=request, user_data=valid_client
                         )
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
         return allowed_client

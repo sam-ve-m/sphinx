@@ -1,5 +1,5 @@
 # NATIVE LIBRARIES
-import logging
+from etria_logger import Gladsheim
 from typing import Optional
 
 # OUTSIDE LIBRARIES
@@ -34,8 +34,7 @@ class MiddlewareUtils:
         except ValueError:
             return False
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             return False
 
     @staticmethod
@@ -74,5 +73,4 @@ class MiddlewareUtils:
         try:
             return await jwt_handler.get_thebes_answer_from_request(request=request)
         except BaseException as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)

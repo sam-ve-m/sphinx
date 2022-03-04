@@ -1,7 +1,7 @@
 # OUTSIDE LIBRARIES
 import aioboto3
 from contextlib import asynccontextmanager
-import logging
+from etria_logger import Gladsheim
 
 # Sphinx
 from src.infrastructures.env_config import config
@@ -29,8 +29,7 @@ class S3Infrastructure:
             async with session.client("s3") as s3_client:
                 yield s3_client
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
 
     @classmethod
     @asynccontextmanager
@@ -40,5 +39,4 @@ class S3Infrastructure:
             async with session.resource("s3") as s3_resource:
                 yield s3_resource
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)

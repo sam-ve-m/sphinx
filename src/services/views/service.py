@@ -69,7 +69,8 @@ class ViewService(IView):
             else:
                 raise InternalServerError("common.process_issue")
         return {
-            "status_code": status.HTTP_304_NOT_MODIFIED,
+            # "status_code": status.HTTP_304_NOT_MODIFIED,
+            "status_code": status.HTTP_200_OK,
             "message_key": "requests.not_modified",
         }
 
@@ -88,7 +89,8 @@ class ViewService(IView):
             else:
                 raise InternalServerError("common.process_issue")
         return {
-            "status_code": status.HTTP_304_NOT_MODIFIED,
+            # "status_code": status.HTTP_304_NOT_MODIFIED,
+            "status_code": status.HTTP_200_OK,
             "message_key": "requests.not_modified",
         }
 

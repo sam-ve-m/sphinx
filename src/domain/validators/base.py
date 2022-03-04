@@ -1,6 +1,6 @@
 # STANDARD LIBS
 from __future__ import annotations
-import logging
+from etria_logger import Gladsheim
 
 # OUTSIDE LIBRARIES
 from email_validator import validate_email
@@ -8,7 +8,6 @@ from email_validator import validate_email
 
 # SPHIX
 from src.domain.validators.onboarding_validators import *
-from src.infrastructures.env_config import config
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
 
@@ -27,8 +26,7 @@ class Email(BaseModel):
                 return value
             raise ValueError("The given email is invalid")
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
         raise ValueError("The given email is invalid")
 
 

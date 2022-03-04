@@ -1,6 +1,6 @@
 # STANDARD LIBS
-import logging
-from typing import Type, Optional
+from etria_logger import Gladsheim
+from typing import Optional
 
 # SPHINX
 from src.exceptions.exceptions import InternalServerError
@@ -170,7 +170,7 @@ class ClientRegisterRepository(OracleBaseRepository):
 
         if callback is None:
             message = f"Sinacor builder callback not implemented. Parameters: (is_married: {is_married}, is_unemployed: {is_unemployed}, is_business_person: {is_business_person})"
-            logging.error(msg=message)
+            Gladsheim.error(message=message)
             raise InternalServerError("internal_error")
 
         return callback(

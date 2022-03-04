@@ -1,10 +1,10 @@
 from starlette.requests import Request
+from etria_logger import Gladsheim
 import logging
 
 # Sphinx
 from src.core.abstract_classes.routes_register.register import RoutesRegister
 from src.routers.routes_registers.middleware_functions import MiddlewareUtils
-from src.infrastructures.env_config import config
 
 
 class UserRouter(RoutesRegister):
@@ -25,6 +25,5 @@ class UserRouter(RoutesRegister):
                         user_data=valid_user, token=token
                     )
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
         return allowed_user

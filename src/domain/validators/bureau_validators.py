@@ -1,4 +1,4 @@
-import logging
+from etria_logger import Gladsheim
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 
@@ -16,7 +16,6 @@ from src.domain.validators.brazil_register_number_validator import (
     is_cnpj_valid,
 )
 from src.domain.validators.user_validators import TaxResidence, Spouse
-from src.infrastructures.env_config import config
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
 
 
@@ -325,8 +324,7 @@ class EmailSource(Source):
                 return value
             raise ValueError("The given email is invalid")
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
         raise ValueError("The given email is invalid")
 
 
