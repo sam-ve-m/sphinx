@@ -104,23 +104,23 @@ class SinaCorTypes:
         marital_status_to_app = [
             {
                 "code": MaritalStatusAppToSphinxEnum.SINGLE.value,
-                "description": "Solteiro (a)",
+                "value": "Solteiro (a)",
             },
             {
                 "code": MaritalStatusAppToSphinxEnum.WIDOWER.value,
-                "description": "Viuvo(a)",
+                "value": "Viuvo(a)",
             },
             {
                 "code": MaritalStatusAppToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
-                "description": "Casado(a)",
+                "value": "Casado(a)",
             },
             {
                 "code": MaritalStatusAppToSphinxEnum.DIVORCED.value,
-                "description": "Divorciado(a)",
+                "value": "Divorciado(a)",
             },
             {
                 "code": MaritalStatusAppToSphinxEnum.STABLE_UNION.value,
-                "description": "União Estável",
+                "value": "União Estável",
             },
         ]
 
