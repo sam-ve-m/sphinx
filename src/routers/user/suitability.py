@@ -12,17 +12,21 @@ router = UserRouter.instance()
 
 @router.post("/suitability/profile", tags=["suitability"])
 async def crate_user_profile_suitability(request: Request):
-    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     payload = {"x-thebes-answer": jwt_data}
 
-    return BaseController.run(SuitabilityController.create_profile, payload, request)
+    return await BaseController.run(
+        SuitabilityController.create_profile, payload, request
+    )
 
 
 @router.get("/suitability/profile", tags=["suitability"])
 async def get_user_profile_suitability(request: Request):
-    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     payload = {"x-thebes-answer": jwt_data}
 
-    return BaseController.run(SuitabilityController.get_user_profile, payload, request)
+    return await BaseController.run(
+        SuitabilityController.get_user_profile, payload, request
+    )

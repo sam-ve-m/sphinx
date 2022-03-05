@@ -78,7 +78,9 @@ class UpdateCustomerRegistrationBuilder:
 
     def personal_birth_place_country(self):
         old_birth_place_country = self.__old_personal_data.get("birth_place_country")
-        if new_birth_place_country := self._get_new_value("personal", "birth_place_country"):
+        if new_birth_place_country := self._get_new_value(
+            "personal", "birth_place_country"
+        ):
             self._update_modified_data(
                 levels=("birth_place_country",),
                 old_field=old_birth_place_country,
@@ -98,7 +100,9 @@ class UpdateCustomerRegistrationBuilder:
 
     def personal_birth_place_state(self):
         old_birth_place_state = self.__old_personal_data.get("birth_place_state")
-        if new_birth_place_state := self._get_new_value("personal", "birth_place_state"):
+        if new_birth_place_state := self._get_new_value(
+            "personal", "birth_place_state"
+        ):
             self._update_modified_data(
                 levels=("birth_place_state",),
                 old_field=old_birth_place_state,
@@ -237,7 +241,7 @@ class UpdateCustomerRegistrationBuilder:
         self._update_modified_data(
             levels=("assets", "date"),
             old_field=old_date,
-            new_filed=datetime.now().replace(hour=0, minute=0, second=0),
+            new_filed=datetime.utcnow().replace(hour=0, minute=0, second=0),
         )
 
     def personal_tax_residences(self):

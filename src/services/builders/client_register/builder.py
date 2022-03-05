@@ -2,72 +2,74 @@
 from datetime import datetime
 from typing import Optional
 
-# SPHINX
-from src.domain.investor_type.type import InvestorType
-from src.domain.sinacor.cosif_tax_classification import CosifTaxClassification
-from src.domain.sinacor.income_tax_type import IncomeTaxType
-from src.domain.sinacor.person_type import PersonType
-from src.repositories.sinacor_types.repository import SinacorTypesRepository
-from src.domain.sinacor.broker_type_of_brokerage import BrokerTypeOfBrokerage
-from src.domain.sinacor.sinacor_identifier_document_types import (
-    SinacorIdentifierDocumentTypes as SID,
+from src.domain.sinacor.account_linked_address import (
+    AccountLinkedAddress,
 )
-from src.domain.sinacor.register_type import RegisterType
-from src.domain.sinacor.dependency_condition import DependencyCondition
-from src.domain.sinacor.client_status_basic_registration import (
-    ClientStatusBasicRegistration,
-)
-from src.domain.sinacor.receipt_dividends_by_stock_exchange import (
-    ReceiptDividendsByStockExchange,
-)
-from src.domain.sinacor.address_type import AddressType
 from src.domain.sinacor.address_purpose import AddressPurpose
+from src.domain.sinacor.address_type import AddressType
+from src.domain.sinacor.bmf_client import BmfClient
+from src.domain.sinacor.broker_type_of_brokerage import BrokerTypeOfBrokerage
+from src.domain.sinacor.brokerage_discount_percentage import (
+    BrokerageDiscountPercentage,
+)
+from src.domain.sinacor.brokerage_note_issuance_indicator import (
+    BrokerageNoteIssuanceIndicator,
+)
+from src.domain.sinacor.client_digit import ClientDigit
 from src.domain.sinacor.client_origin import ClientOrigin
 from src.domain.sinacor.client_registration_status import (
     ClientRegistrationStatus,
 )
-from src.domain.sinacor.is_own_trader import IsOwnTrader
+from src.domain.sinacor.client_status_basic_registration import (
+    ClientStatusBasicRegistration,
+)
 from src.domain.sinacor.client_type_of_exchange_activity import (
     ClientTypeOfExchangeActivity,
 )
+from src.domain.sinacor.collateralization_type_code import (
+    CollateralizationTypeCode,
+)
+from src.domain.sinacor.connected_person import ConnectedPerson
+
+# SPHINX
+from src.domain.sinacor.cosif_tax_classification import CosifTaxClassification
+from src.domain.sinacor.customer_risk_rating import CustomerRiskRating
+from src.domain.sinacor.dependency_condition import DependencyCondition
+from src.domain.sinacor.foreign_state import ForeignState
+from src.domain.sinacor.foreign_zip_code import ForeignZipCode
+from src.domain.sinacor.home_execution_brokerage_note_issuance_indicator import (
+    HomeExecutionBrokerageNoteIssuanceIndicator,
+)
+from src.domain.sinacor.income_tax_type import IncomeTaxType
+from src.domain.sinacor.indicator_by_account import IndicatorByAccount
 from src.domain.sinacor.investor_type_of_exchange_activity import (
     InvestorTypeOfExchangeActivity,
 )
-from src.domain.sinacor.indicator_by_account import IndicatorByAccount
+from src.domain.sinacor.is_own_trader import IsOwnTrader
+from src.domain.sinacor.is_us_person import IsUsPerson
 from src.domain.sinacor.mailing_address import MailingAddress
-from src.domain.sinacor.account_linked_address import (
-    AccountLinkedAddress,
-)
 from src.domain.sinacor.must_send_email_to_bvmf import (
     MustSendEmailToBvmf,
 )
 from src.domain.sinacor.operates_by_treasury_direct_agent import (
     OperatesByTreasuryDirectAgent,
 )
+from src.domain.sinacor.person_gender_sinacor import PersonGenderSinacor
+from src.domain.sinacor.person_type import PersonType
+from src.domain.sinacor.receipt_dividends_by_stock_exchange import (
+    ReceiptDividendsByStockExchange,
+)
 from src.domain.sinacor.register_in_the_direct_treasure_activity import (
     RegisterInTheDirectTreasureActivity,
 )
-from src.domain.sinacor.collateralization_type_code import (
-    CollateralizationTypeCode,
-)
-from src.domain.sinacor.customer_risk_rating import CustomerRiskRating
+from src.domain.sinacor.register_type import RegisterType
 from src.domain.sinacor.risk import Risk
+from src.domain.sinacor.sinacor_identifier_document_types import (
+    SinacorIdentifierDocumentTypes as SID,
+)
 from src.domain.sinacor.work_in_some_company import WorkInSomeCompany
-from src.domain.sinacor.is_us_person import IsUsPerson
-from src.domain.sinacor.client_digit import ClientDigit
-from src.domain.sinacor.brokerage_note_issuance_indicator import (
-    BrokerageNoteIssuanceIndicator,
-)
-from src.domain.sinacor.foreign_zip_code import ForeignZipCode
-from src.domain.sinacor.foreign_state import ForeignState
-from src.domain.sinacor.bmf_client import BmfClient
-from src.domain.sinacor.brokerage_discount_percentage import (
-    BrokerageDiscountPercentage,
-)
-from src.domain.sinacor.home_execution_brokerage_note_issuance_indicator import (
-    HomeExecutionBrokerageNoteIssuanceIndicator,
-)
-from src.domain.sinacor.connected_person import ConnectedPerson
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
+
 
 class ClientRegisterBuilder:
     def __init__(self):
@@ -105,7 +107,7 @@ class ClientRegisterBuilder:
         self._fields_added.update({"CD_CON_DEP": value})
         return self
 
-    def add_in_irsdiv(self, value: int = IncomeTaxType.ISENTO.value):
+    def add_in_irsdiv(self, value: int = IncomeTaxType.IDENTIFICADO.value):
         self._fields_added.update({"IN_IRSDIV": value})
         return self
 
@@ -125,7 +127,9 @@ class ClientRegisterBuilder:
         self._fields_added.update({"TP_PESSOA": value})
         return self
 
-    def add_tp_investidor(self, value: int = InvestorTypeOfExchangeActivity.PHYSICAL_PERSON.value):
+    def add_tp_investidor(
+        self, value: int = InvestorTypeOfExchangeActivity.PHYSICAL_PERSON.value
+    ):
         self._fields_added.update({"TP_INVESTIDOR": value})
         return self
 
@@ -142,9 +146,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cosif_ci(self, value: int = CosifTaxClassification.DEFAULT.value):
-        self._fields_added.update(
-            {"CD_COSIF_CI": value}
-        )
+        self._fields_added.update({"CD_COSIF_CI": value})
         return self
 
     def add_cd_est_civil(self, user_data: dict):
@@ -219,7 +221,16 @@ class ClientRegisterBuilder:
         return self
 
     def add_id_sexo(self, user_data: dict):
-        self._fields_added.update({"ID_SEXO": user_data["gender"]})
+        if user_data["gender"] in [
+            sinacor_gender.value for sinacor_gender in list(PersonGenderSinacor)
+        ]:
+            gender = user_data["gender"]
+        else:
+            gender = user_data.get(
+                "gender_from_bureux", PersonGenderSinacor.FEMININE.value
+            )
+
+        self._fields_added.update({"ID_SEXO": gender})
         return self
 
     def add_in_rec_divi(self, value=ReceiptDividendsByStockExchange.YES.value):
@@ -431,7 +442,7 @@ class ClientRegisterBuilder:
         self._fields_added.update({"NUM_TIPO_CON": value})
         return self
 
-    def add_cod_tipo_colt(self, value=CollateralizationTypeCode.INVESTOR.value):
+    def add_cod_tipo_colt(self, value=CollateralizationTypeCode.PARTICIPANT.value):
         self._fields_added.update({"COD_TIPO_COLT": value})
         return self
 

@@ -385,13 +385,17 @@ def test_thebes_hall_was_sent_to_persephone(
 
 def test_update_client_has_trade_allowed_status_with_solutiontech_status_response_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
-                                                                          user_sincad_status_from_database=True,
-                                                                          user_sinacor_status_from_database=True)
+        AuthenticationService._get_client_map_requirements_to_allow_trade(
+            user_solutiontech_status_from_database="t1",
+            user_sincad_status_from_database=True,
+            user_sinacor_status_from_database=True,
+        )
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
         client_map_requirements_to_allow_trade_from_database=client_has_trade_allowed_status_with_database_user,
-        user_solutiontech_status_from_database="t1", user_solutiontech_status_from_check_status_request="t2")
+        user_solutiontech_status_from_database="t1",
+        user_solutiontech_status_from_check_status_request="t2",
+    )
     assert (
         client_has_trade_allowed_status_with_database_user["solutiontech"]["status"]
         == "t2"
@@ -406,13 +410,17 @@ def test_update_client_has_trade_allowed_status_with_solutiontech_status_respons
 
 def test_update_client_has_trade_allowed_status_with_solutiontech_status_response_dont_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
-                                                                          user_sincad_status_from_database=True,
-                                                                          user_sinacor_status_from_database=True)
+        AuthenticationService._get_client_map_requirements_to_allow_trade(
+            user_solutiontech_status_from_database="t1",
+            user_sincad_status_from_database=True,
+            user_sinacor_status_from_database=True,
+        )
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
         client_map_requirements_to_allow_trade_from_database=client_has_trade_allowed_status_with_database_user,
-        user_solutiontech_status_from_database="t1", user_solutiontech_status_from_check_status_request="t1")
+        user_solutiontech_status_from_database="t1",
+        user_solutiontech_status_from_check_status_request="t1",
+    )
     assert (
         client_has_trade_allowed_status_with_database_user["solutiontech"]["status"]
         == "t1"
@@ -427,9 +435,11 @@ def test_update_client_has_trade_allowed_status_with_solutiontech_status_respons
 
 def test_update_client_has_trade_allowed_status_with_sincad_status_response_change_to_true():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
-                                                                          user_sincad_status_from_database=False,
-                                                                          user_sinacor_status_from_database=True)
+        AuthenticationService._get_client_map_requirements_to_allow_trade(
+            user_solutiontech_status_from_database="t1",
+            user_sincad_status_from_database=False,
+            user_sinacor_status_from_database=True,
+        )
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -447,9 +457,11 @@ def test_update_client_has_trade_allowed_status_with_sincad_status_response_chan
 
 def test_update_client_has_trade_allowed_status_with_sincad_status_response_change_to_false():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
-                                                                          user_sincad_status_from_database=True,
-                                                                          user_sinacor_status_from_database=False)
+        AuthenticationService._get_client_map_requirements_to_allow_trade(
+            user_solutiontech_status_from_database="t1",
+            user_sincad_status_from_database=True,
+            user_sinacor_status_from_database=False,
+        )
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -467,9 +479,11 @@ def test_update_client_has_trade_allowed_status_with_sincad_status_response_chan
 
 def test_update_client_has_trade_allowed_status_with_sincad_status_response_dont_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
-                                                                          user_sincad_status_from_database=True,
-                                                                          user_sinacor_status_from_database=True)
+        AuthenticationService._get_client_map_requirements_to_allow_trade(
+            user_solutiontech_status_from_database="t1",
+            user_sincad_status_from_database=True,
+            user_sinacor_status_from_database=True,
+        )
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -487,9 +501,11 @@ def test_update_client_has_trade_allowed_status_with_sincad_status_response_dont
 
 def test_update_client_has_trade_allowed_status_with_sinacor_status_response_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
-                                                                          user_sincad_status_from_database=False,
-                                                                          user_sinacor_status_from_database=False)
+        AuthenticationService._get_client_map_requirements_to_allow_trade(
+            user_solutiontech_status_from_database="t1",
+            user_sincad_status_from_database=False,
+            user_sinacor_status_from_database=False,
+        )
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -507,9 +523,11 @@ def test_update_client_has_trade_allowed_status_with_sinacor_status_response_cha
 
 def test_update_client_has_trade_allowed_status_with_sinacor_status_response_dont_change():
     client_has_trade_allowed_status_with_database_user = (
-        AuthenticationService._get_client_map_requirements_to_allow_trade(user_solutiontech_status_from_database="t1",
-                                                                          user_sincad_status_from_database=True,
-                                                                          user_sinacor_status_from_database=True)
+        AuthenticationService._get_client_map_requirements_to_allow_trade(
+            user_solutiontech_status_from_database="t1",
+            user_sincad_status_from_database=True,
+            user_sinacor_status_from_database=True,
+        )
     )
     AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
         client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
@@ -527,19 +545,22 @@ def test_update_client_has_trade_allowed_status_with_sinacor_status_response_don
 
 def test_check_if_user_has_valid_solutiontech_status_in_database_send_status():
     assert AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
-        user_solutiontech_status_from_database=SolutiontechClientImportStatus.SEND.value)
+        user_solutiontech_status_from_database=SolutiontechClientImportStatus.SEND.value
+    )
 
 
 def test_check_if_user_has_valid_solutiontech_status_in_database_failed_status():
     assert AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
-        user_solutiontech_status_from_database=SolutiontechClientImportStatus.SEND.value)
+        user_solutiontech_status_from_database=SolutiontechClientImportStatus.SEND.value
+    )
 
 
 def test_check_if_user_has_valid_solutiontech_status_in_database_sync_status():
     assert (
-            AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
-                user_solutiontech_status_from_database=SolutiontechClientImportStatus.SYNC.value)
-            is False
+        AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
+            user_solutiontech_status_from_database=SolutiontechClientImportStatus.SYNC.value
+        )
+        is False
     )
 
 
@@ -551,7 +572,7 @@ def test_sinacor_is_synced_with_sincad_empty_return():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.get_sincad_status = MagicMock(return_value=None)
     assert (
-        AuthenticationService.sinacor_is_synced_with_sincad(
+        AuthenticationService._sinacor_is_synced_with_sincad(
             user_cpf=1234567890,
             client_register_repository=stub_client_register_repository,
         )
@@ -563,7 +584,7 @@ def test_sinacor_is_synced_with_sincad_not_synced():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.get_sincad_status = MagicMock(return_value=("AAA",))
     assert (
-        AuthenticationService.sinacor_is_synced_with_sincad(
+        AuthenticationService._sinacor_is_synced_with_sincad(
             user_cpf=1234567890,
             client_register_repository=stub_client_register_repository,
         )
@@ -575,7 +596,7 @@ def test_sinacor_is_synced_with_sincad_synced():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.get_sincad_status = MagicMock(return_value=("ACE",))
     assert (
-        AuthenticationService.sinacor_is_synced_with_sincad(
+        AuthenticationService._sinacor_is_synced_with_sincad(
             user_cpf=1234567890,
             client_register_repository=stub_client_register_repository,
         )
@@ -587,7 +608,7 @@ def test_client_sinacor_is_blocked_empty_return():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.get_sinacor_status = MagicMock(return_value=None)
     assert (
-        AuthenticationService.client_sinacor_is_blocked(
+        AuthenticationService._client_sinacor_is_blocked(
             user_cpf=1234567890,
             client_register_repository=stub_client_register_repository,
         )
@@ -601,7 +622,7 @@ def test_client_sinacor_is_blocked_not_synced():
         return_value=("AAA",)
     )
     assert (
-        AuthenticationService.client_sinacor_is_blocked(
+        AuthenticationService._client_sinacor_is_blocked(
             user_cpf=1234567890,
             client_register_repository=stub_client_register_repository,
         )
@@ -613,7 +634,7 @@ def test_client_sinacor_is_blocked_synced():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("A",))
     assert (
-        AuthenticationService.client_sinacor_is_blocked(
+        AuthenticationService._client_sinacor_is_blocked(
             user_cpf=1234567890,
             client_register_repository=stub_client_register_repository,
         )

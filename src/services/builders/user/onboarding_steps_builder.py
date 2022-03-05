@@ -129,7 +129,7 @@ class OnboardingStepBuilder:
             self.__onboarding_steps["finished"] = True
             self.__onboarding_steps["current_onboarding_step"] = self.bureau_status
 
-    def build(self) -> dict:
+    async def build(self) -> dict:
         self.is_finished()
         onboarding_steps = self.__onboarding_steps
         return onboarding_steps

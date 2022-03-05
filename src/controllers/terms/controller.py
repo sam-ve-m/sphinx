@@ -3,13 +3,13 @@ from src.services.terms.service import TermsService
 
 class TermsController:
     @staticmethod
-    def save_term(payload: dict):
-        return TermsService.save_term(payload=payload)
+    async def save_term(payload: dict):
+        return await TermsService.save_term(payload=payload)
 
     @staticmethod
-    def get_term(payload: dict):
-        return TermsService.get_term(payload=payload)
+    async def get_term(payload: dict):
+        return await TermsService.get_term(payload=payload)
 
     @staticmethod
-    def get_terms(payload: dict):
-        return TermsService.get_terms(payload=payload)
+    async def get_terms(payload: dict):
+        return await TermsService.get_terms(payload=payload)

@@ -18,7 +18,7 @@ class StubBaseRepository:
     def find_more_than_equal_one(self, query: dict) -> Optional[list]:
         return list
 
-    def find_all(self) -> Optional[list]:
+    async def find_all(self) -> Optional[list]:
         return list
 
     def update_one(self, old: dict, new: dict) -> bool:

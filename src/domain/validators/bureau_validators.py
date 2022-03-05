@@ -1,24 +1,22 @@
-import logging
+from etria_logger import Gladsheim
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 
 from email_validator import validate_email
 from pydantic import BaseModel, validator, constr, root_validator
 
-from src.domain.sinacor.connected_person import ConnectedPerson
-from src.domain.validators.base import Email
 from src.domain.sinacor.decision import Decisions
 from src.domain.sinacor.document_type import DocumentTypes
-from src.domain.validators.user_validators import TaxResidence, Spouse
 from src.domain.sinacor.person_gender import PersonGender
 from src.domain.sinacor.person_type import PersonType
 from src.domain.sinacor.status import OutputStatus
-from src.repositories.sinacor_types.repository import SinacorTypesRepository
+from src.domain.validators.base import Email
 from src.domain.validators.brazil_register_number_validator import (
     is_cpf_valid,
     is_cnpj_valid,
 )
-from src.infrastructures.env_config import config
+from src.domain.validators.user_validators import TaxResidence, Spouse
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 
 
 class AppName(BaseModel):
@@ -326,8 +324,7 @@ class EmailSource(Source):
                 return value
             raise ValueError("The given email is invalid")
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
         raise ValueError("The given email is invalid")
 
 

@@ -1,15 +1,15 @@
 # STANDARD LIBS
 from __future__ import annotations
-from typing import Optional
+
 from datetime import datetime
 
 # OUTSIDE LIBRARIES
 from fastapi import Form
-from pydantic import BaseModel, constr, validator, UUID1
+from pydantic import BaseModel, constr, validator
 
+from src.domain.validators.brazil_register_number_validator import is_cpf_valid
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
-from src.domain.validators.brazil_register_number_validator import is_cpf_valid
 
 
 class Name(BaseModel):

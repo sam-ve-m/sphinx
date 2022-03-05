@@ -1,7 +1,7 @@
 import sendgrid
 from sendgrid.helpers.mail import Email, To, Content, Mail
 from src.infrastructures.env_config import config
-import logging
+from etria_logger import Gladsheim
 
 from src.exceptions.exceptions import InternalServerError
 from src.core.interfaces.email_sender.interface import IEmailSender
@@ -23,6 +23,5 @@ class EmailSender(IEmailSender):
             )
             EmailSender.sg.client.mail.send.post(request_body=mail.get())
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             raise InternalServerError("email.trouble.send")

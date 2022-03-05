@@ -10,7 +10,7 @@ from src.services.email_sender.grid_email_sender import EmailSender as SendGridE
 class IAuthentication(ABC):
     @staticmethod
     @abstractmethod
-    def thebes_gate(
+    async def thebes_gate(
         thebes_answer_from_request_or_error: dict,
         user_repository: UserRepository,
         token_service: JwtService,

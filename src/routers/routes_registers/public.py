@@ -10,5 +10,5 @@ class PublicRouter(RoutesRegister):
     _instance = None
 
     @staticmethod
-    def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
+    async def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
         return True

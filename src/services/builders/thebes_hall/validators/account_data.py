@@ -1,5 +1,4 @@
 # STANDARD LIBS
-from datetime import datetime
 
 # SPHINX
 from src.core.interfaces.services.builders.thebes_hall.validators.interface import (

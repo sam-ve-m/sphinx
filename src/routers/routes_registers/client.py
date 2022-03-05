@@ -1,5 +1,5 @@
 from starlette.requests import Request
-import logging
+from etria_logger import Gladsheim
 
 # Sphinx
 from src.core.abstract_classes.routes_register.register import RoutesRegister
@@ -12,11 +12,13 @@ class ClientRouter(RoutesRegister):
     _instance = None
 
     @staticmethod
-    def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
+    async def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
         allowed_client = False
         try:
-            if token := middleware_utils.get_token_if_token_is_valid(request=request):
-                if valid_client := middleware_utils.get_valid_user_from_database(
+            if token := await middleware_utils.get_token_if_token_is_valid(
+                request=request
+            ):
+                if valid_client := await middleware_utils.get_valid_user_from_database(
                     token=token
                 ):
                     if middleware_utils.is_user_token_life_time_valid(
@@ -26,6 +28,5 @@ class ClientRouter(RoutesRegister):
                             request=request, user_data=valid_client
                         )
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
         return allowed_client

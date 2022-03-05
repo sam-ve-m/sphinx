@@ -11,4 +11,3 @@ class IncomeTaxType(Enum):
     DEPOSITO_EM_JUIZO = 7
     IMUNE = 8
     ISENTO_OUTROS_DL9532 = 9
-

@@ -1,10 +1,9 @@
 # Third part
 from fastapi import Request, status, Response
-import logging
+from etria_logger import Gladsheim
 import json
 
 # Sphinx
-from src.infrastructures.env_config import config
 from src.controllers.base_controller import BaseController
 from src.domain.validators.authenticate_validators import Login
 from src.controllers.authentications.controller import AuthenticationController
@@ -16,19 +15,18 @@ router = PublicRouter.instance()
 
 
 @router.post("/login", tags=["authentication"])
-def login(user_credentials: Login, request: Request):
-    return BaseController.run(
+async def login(user_credentials: Login, request: Request):
+    return await BaseController.run(
         AuthenticationController.login, dict(user_credentials), request
     )
 
 
 @router.get("/thebes_gate", tags=["authentication"])
-def answer(request: Request):
+async def answer(request: Request):
     try:
-        jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+        jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
     except Exception as e:
-        logger = logging.getLogger(config("LOG_NAME"))
-        logger.error(e, exc_info=True)
+        Gladsheim.error(error=e)
         lang = i18n.get_language_from_request(request=request)
         return Response(
             content=json.dumps(
@@ -40,7 +38,7 @@ def answer(request: Request):
             ),
             status_code=status.HTTP_401_UNAUTHORIZED,
         )
-    return BaseController.run(
+    return await BaseController.run(
         AuthenticationController.thebes_gate,
         jwt_data,
         request,

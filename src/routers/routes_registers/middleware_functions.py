@@ -1,5 +1,5 @@
 # NATIVE LIBRARIES
-import logging
+from etria_logger import Gladsheim
 from typing import Optional
 
 # OUTSIDE LIBRARIES
@@ -10,15 +10,17 @@ from fastapi import Request
 from src.infrastructures.env_config import config
 from src.repositories.user.repository import UserRepository
 from src.services.jwts.service import JwtService
-from mist_client.src.domain.enums.mist_status_responses import MistStatusResponses
+from mist_client import MistStatusResponses
 
 
 class MiddlewareUtils:
     @staticmethod
-    def get_valid_user_from_database(
+    async def get_valid_user_from_database(
         token: dict, user_repository=UserRepository()
     ) -> Optional[dict]:
-        user_data = user_repository.find_one(query={"unique_id": token["user"]["unique_id"]})
+        user_data = await user_repository.find_one(
+            query={"unique_id": token["user"]["unique_id"]}
+        )
         if user_data and user_data.get("is_active_user"):
             return user_data
 
@@ -32,15 +34,16 @@ class MiddlewareUtils:
         except ValueError:
             return False
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
             return False
 
     @staticmethod
-    def get_valid_admin_from_database(
+    async def get_valid_admin_from_database(
         token: dict, user_repository=UserRepository()
     ) -> Optional[dict]:
-        user_data = user_repository.find_one(query={"unique_id": token["user"]["unique_id"]})
+        user_data = await user_repository.find_one(
+            query={"unique_id": token["unique_id"]}
+        )
         if user_data and user_data["is_active_user"] and user_data.get("is_admin"):
             return user_data
 
@@ -64,11 +67,10 @@ class MiddlewareUtils:
         return False
 
     @staticmethod
-    def get_token_if_token_is_valid(
+    async def get_token_if_token_is_valid(
         request: Request, jwt_handler=JwtService
     ) -> Optional[dict]:
         try:
-            return jwt_handler.get_thebes_answer_from_request(request=request)
+            return await jwt_handler.get_thebes_answer_from_request(request=request)
         except BaseException as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)

@@ -1,6 +1,6 @@
 # STANDARD LIBS
 from __future__ import annotations
-import logging
+from etria_logger import Gladsheim
 
 # OUTSIDE LIBRARIES
 from email_validator import validate_email
@@ -8,7 +8,6 @@ from email_validator import validate_email
 
 # SPHIX
 from src.domain.validators.onboarding_validators import *
-from src.infrastructures.env_config import config
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
 
@@ -27,8 +26,7 @@ class Email(BaseModel):
                 return value
             raise ValueError("The given email is invalid")
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
         raise ValueError("The given email is invalid")
 
 
@@ -37,8 +35,8 @@ class ViewId(BaseModel):
 
     @validator("view_id", always=True, allow_reuse=True)
     def validate_view_id(cls, e):
-        view_repository = ViewRepository()
-        if view_repository.find_one({"_id": e}, ttl=60):
+        view_repository = ViewRepository
+        if view_repository.exists(view_id=e):
             return e
         raise ValueError("view not exists")
 
@@ -48,8 +46,8 @@ class FeatureId(BaseModel):
 
     @validator("feature_id", always=True, allow_reuse=True)
     def validate_feature_id(cls, e):
-        feature_repository = FeatureRepository()
-        if feature_repository.find_one({"_id": e}, ttl=60):
+        feature_repository = FeatureRepository
+        if feature_repository.exists(view_id=e):
             return e
         raise ValueError("feature not exists")
 
@@ -66,14 +64,6 @@ class Feature(BaseModel):
 class View(BaseModel):
     name: constr(min_length=1)
     display_name: constr(min_length=1)
-
-
-class OptionalPIN(BaseModel):
-    pin: Optional[constr(min_length=6, max_length=6)]
-
-
-class PIN(BaseModel):
-    pin: constr(min_length=6, max_length=6)
 
 
 class ElectronicSignature(BaseModel):

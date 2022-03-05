@@ -1,4 +1,5 @@
 # OUTSIDE LIBRARIES
+
 from src.infrastructures.env_config import config
 
 # SPHINX
@@ -6,14 +7,12 @@ from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
 
 
 class UserRepository(MongoDbBaseRepository):
-    def __init__(self):
-        super().__init__(
-            database=config("MONGODB_DATABASE_NAME"),
-            collection=config("MONGODB_USER_COLLECTION"),
-        )
 
-    def is_user_using_suitability_or_refuse_term(self, unique_id: str) -> str:
-        user = self.find_one({"unique_id": unique_id})
+    database = config("MONGODB_DATABASE_NAME")
+    collection = config("MONGODB_USER_COLLECTION")
+
+    async def is_user_using_suitability_or_refuse_term(self, unique_id: str) -> str:
+        user = await self.find_one({"unique_id": unique_id})
         suitability = user.get("suitability")
         term_refusal = user["terms"].get("term_refusal")
 

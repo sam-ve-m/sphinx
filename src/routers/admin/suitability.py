@@ -15,11 +15,11 @@ router = AdminRouter.instance()
 
 @router.post("/suitability/quiz", tags=["suitability"])
 async def create_quiz_suitability(suitability: Suitability, request: Request):
-    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     payload = {
         "x-thebes-answer": jwt_data,
         "suitability": suitability.dict(),
     }
 
-    return BaseController.run(SuitabilityController.create_quiz, payload, request)
+    return await BaseController.run(SuitabilityController.create_quiz, payload, request)

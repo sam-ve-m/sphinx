@@ -24,4 +24,4 @@ async def save_term(
             "file_or_base64": file_or_base64,
         }
     )
-    return BaseController.run(TermsController.save_term, payload, request)
+    return await BaseController.run(TermsController.save_term, payload, request)

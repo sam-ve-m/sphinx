@@ -38,7 +38,7 @@ class RoutesRegister(ABC):
 
         @cls.router_middleware(app, router)
         async def middleware(request: Request, call_next):
-            if cls.is_allow(request) and cls.has_permission(request):
+            if await cls.is_allow(request) and await cls.has_permission(request):
                 response = await call_next(request)
                 return response
             return RoutesRegister.get_unauthorized_response(request=request)
@@ -81,20 +81,22 @@ class RoutesRegister(ABC):
 
     @staticmethod
     @abstractmethod
-    def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
+    async def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
         pass
 
     @classmethod
-    def has_permission(cls, request: Request, middleware_utils=MiddlewareUtils) -> bool:
+    async def has_permission(
+        cls, request: Request, middleware_utils=MiddlewareUtils
+    ) -> bool:
         permissions_mapped = cls._instance.get_permission_by_route(
             route=request.url.path
         )
         if permissions_mapped is None:
             return True
-        token = middleware_utils.get_token_if_token_is_valid(request)
+        token = await middleware_utils.get_token_if_token_is_valid(request)
         if token is None:
             return True
-        user = middleware_utils.get_valid_user_from_database(token=token)
+        user = await middleware_utils.get_valid_user_from_database(token=token)
         if user is None:
             return False
         scope = user["scope"]

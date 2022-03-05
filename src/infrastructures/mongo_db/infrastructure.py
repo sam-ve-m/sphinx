@@ -1,6 +1,8 @@
 # OUTSIDE LIBRARIES
+
+from motor.motor_asyncio import AsyncIOMotorClient
+
 from src.infrastructures.env_config import config
-from pymongo import MongoClient
 
 
 class MongoDBInfrastructure:
@@ -8,9 +10,8 @@ class MongoDBInfrastructure:
     client = None
 
     @classmethod
-    def _get_client(cls):
+    def get_client(cls):
         if cls.client is None:
-            cls.client = MongoClient(
-                f"{config('MONGO_CONNECTION')}://{config('MONGODB_USER')}:{config('MONGODB_PASSWORD')}@{config('MONGODB_HOST')}:{config('MONGODB_PORT')}"
-            )
+            url = config("MONGO_CONNECTION_URL")
+            cls.client = AsyncIOMotorClient(url)
         return cls.client

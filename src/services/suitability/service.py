@@ -1,13 +1,16 @@
 # STANDARD LIBS
 from datetime import datetime
 from typing import List, Tuple, Union
-from copy import deepcopy
 
 # OUTSIDE LIBRARIES
 from fastapi import status
 
+from src.core.interfaces.services.suitability.interface import ISuitability
+from src.domain.persephone_queue.persephone_queue import PersephoneQueue
+
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError
+from src.infrastructures.env_config import config
 from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
 from src.repositories.suitability.repository import (
     SuitabilityRepository,
@@ -15,21 +18,22 @@ from src.repositories.suitability.repository import (
     SuitabilityAnswersRepository,
 )
 from src.repositories.user.repository import UserRepository
-from src.core.interfaces.services.suitability.interface import ISuitability
 from src.services.builders.suitability.builder import SuitabilityAnswersProfileBuilder
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
-from src.services.persephone.templates.persephone_templates import (
-    get_user_suitability_template_with_data, get_user_fill_suitability,
-)
-from src.services.persephone.service import PersephoneService
-from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.services.jwts.service import JwtService
-from src.infrastructures.env_config import config
+from persephone_client import Persephone
+from src.services.persephone.templates.persephone_templates import (
+    get_user_suitability_template_with_data,
+    get_user_fill_suitability,
+)
 
 
 class SuitabilityService(ISuitability):
+
+    persephone_client = Persephone
+
     @staticmethod
-    def create_quiz(
+    async def create_quiz(
         payload: dict,
         suitability_repository: MongoDbBaseRepository = SuitabilityRepository(),
         suitability_answers_repository: MongoDbBaseRepository = SuitabilityAnswersRepository(),
@@ -44,16 +48,16 @@ class SuitabilityService(ISuitability):
         if not suitability:
             raise InternalServerError("suitability.error.not_found")
 
-        version = SuitabilityService.__get_suitability_version()
+        version = await SuitabilityService.__get_suitability_version()
         suitability_submission_date = datetime.utcnow()
         suitability.update({"date": suitability_submission_date, "version": version})
-        SuitabilityService.__insert_new_suitability(
+        await SuitabilityService.__insert_new_suitability(
             suitability_repository=suitability_repository, suitability=suitability
         )
 
         suitability_answers_profile_builder.suitability = suitability
         answers = suitability_answers_profile_builder.profile
-        SuitabilityService.__insert_new_answers_suitability(
+        await SuitabilityService.__insert_new_answers_suitability(
             suitability_answers_repository=suitability_answers_repository,
             answers=answers,
         )
@@ -63,39 +67,40 @@ class SuitabilityService(ISuitability):
         }
 
     @staticmethod
-    def create_profile(
+    async def create_profile(
         payload,
         user_repository=UserRepository(),
         suitability_repository=SuitabilityRepository(),
         suitability_user_profile_repository=SuitabilityUserProfileRepository(),
-        persephone_client=PersephoneService.get_client(),
         token_service=JwtService,
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
-        unique_id: str = thebes_answer["user"]["unique_id"]
-        suitability_submission_date = datetime.now()
+        unique_id: str = thebes_answer["user"].get("unique_id")
+        suitability_submission_date = datetime.utcnow()
         (
             answers,
             score,
             suitability_version,
-        ) = SuitabilityService.__get_last_suitability_answers_metadata()
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_USER"),
-            partition=PersephoneQueue.SUITABILITY_QUEUE.value,
-            payload=get_user_suitability_template_with_data(
-                payload=get_user_fill_suitability(
-                    answers=answers,
-                    score=score,
-                    unique_id=unique_id,
-                    suitability_version=suitability_version,
-                )
-            ),
-            schema="suitability_schema",
+        ) = await SuitabilityService.__get_last_suitability_answers_metadata()
+        sent_to_persephone = (
+            await SuitabilityService.persephone_client.send_to_persephone(
+                topic=config("PERSEPHONE_TOPIC_USER"),
+                partition=PersephoneQueue.SUITABILITY_QUEUE.value,
+                message=get_user_suitability_template_with_data(
+                    payload=get_user_fill_suitability(
+                        answers=answers,
+                        score=score,
+                        unique_id=unique_id,
+                        suitability_version=suitability_version,
+                    )
+                ),
+                schema_name="suitability_schema",
+            )
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
         (
-            SuitabilityService.__update_suitability_score_and_submission_date_in_user_db(
+            await SuitabilityService.__update_suitability_score_and_submission_date_in_user_db(
                 user_repository=user_repository,
                 unique_id=unique_id,
                 score=score,
@@ -104,7 +109,7 @@ class SuitabilityService(ISuitability):
             )
         )
         (
-            SuitabilityService.__insert_suitability_answers_in_user_profile_db(
+            await SuitabilityService.__insert_suitability_answers_in_user_profile_db(
                 suitability_user_profile_repository=suitability_user_profile_repository,
                 unique_id=unique_id,
                 user_score=score,
@@ -113,7 +118,7 @@ class SuitabilityService(ISuitability):
                 submission_date=suitability_submission_date,
             )
         )
-        user_data = user_repository.find_one({"unique_id": unique_id})
+        user_data = await user_repository.find_one({"unique_id": unique_id})
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
@@ -121,16 +126,19 @@ class SuitabilityService(ISuitability):
 
         jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
-        return {"status_code": status.HTTP_201_CREATED, "payload":  {"jwt": jwt, "control_data": control_data}}
+        return {
+            "status_code": status.HTTP_201_CREATED,
+            "payload": {"jwt": jwt, "control_data": control_data},
+        }
 
     @staticmethod
-    def get_user_profile(
+    async def get_user_profile(
         payload: dict,
         suitability_user_profile_repository=SuitabilityUserProfileRepository(),
     ) -> dict:
         thebes_answer: dict = payload.get("x-thebes-answer")
         user_email: str = thebes_answer.get("email")
-        user_profile = SuitabilityService.__get_last_user_profile(
+        user_profile = await SuitabilityService.__get_last_user_profile(
             suitability_user_profile_repository=suitability_user_profile_repository,
             email=user_email,
         )
@@ -142,13 +150,14 @@ class SuitabilityService(ISuitability):
         }
 
     @staticmethod
-    def __get_suitability_version(
+    async def __get_suitability_version(
         suitability_repository=SuitabilityRepository(),
     ) -> int:
         try:
-            last_suitability = list(
-                suitability_repository.find_all().sort("_id", -1).limit(1)
+            last_suitability = await suitability_repository.find_all(
+                sort=("_id", -1), limit=1
             )
+
         except (TypeError, AttributeError):
             raise InternalServerError("common.process_issue")
 
@@ -173,13 +182,13 @@ class SuitabilityService(ISuitability):
         return new_version
 
     @staticmethod
-    def __insert_new_suitability(
+    async def __insert_new_suitability(
         suitability_repository: MongoDbBaseRepository, suitability: dict
     ) -> None:
         if type(suitability) is not dict:
             raise InternalServerError("common.invalid_params")
         try:
-            inserted = suitability_repository.insert(suitability)
+            inserted = await suitability_repository.insert(suitability)
         except AttributeError:
             raise InternalServerError("common.process_issue")
         else:
@@ -189,14 +198,14 @@ class SuitabilityService(ISuitability):
                 return
 
     @staticmethod
-    def __insert_new_answers_suitability(
+    async def __insert_new_answers_suitability(
         suitability_answers_repository: MongoDbBaseRepository,
         answers: dict,
     ) -> None:
         if type(answers) is not dict:
             raise InternalServerError("common.invalid_params")
         try:
-            inserted = suitability_answers_repository.insert(answers)
+            inserted = await suitability_answers_repository.insert(answers)
         except AttributeError:
             raise InternalServerError("common.process_issue")
         else:
@@ -206,12 +215,12 @@ class SuitabilityService(ISuitability):
                 return
 
     @staticmethod
-    def __get_last_suitability_answers_metadata(
+    async def __get_last_suitability_answers_metadata(
         suitability_answers_repository: MongoDbBaseRepository = SuitabilityAnswersRepository(),
     ) -> Union[Tuple[List[dict], int, int], Exception]:
         try:
             _answers = list(
-                suitability_answers_repository.find_all().sort("_id", -1).limit(1)
+                await suitability_answers_repository.find_all(sort=("_id", -1), limit=1)
             )
         except (TypeError, AttributeError):
             raise InternalServerError("common.process_issue")
@@ -235,7 +244,7 @@ class SuitabilityService(ISuitability):
         return answers, score, suitability_version
 
     @staticmethod
-    def __update_suitability_score_and_submission_date_in_user_db(
+    async def __update_suitability_score_and_submission_date_in_user_db(
         user_repository: MongoDbBaseRepository,
         unique_id: str,
         score: int,
@@ -243,7 +252,7 @@ class SuitabilityService(ISuitability):
         submission_date: datetime,
     ) -> None:
         try:
-            old = user_repository.find_one({"unique_id": unique_id})
+            old = await user_repository.find_one({"unique_id": unique_id})
         except AttributeError:
             raise InternalServerError("common.process_issue")
 
@@ -268,7 +277,7 @@ class SuitabilityService(ISuitability):
             }
         }
         try:
-            updated = user_repository.update_one(old=old, new=suitability_data)
+            updated = await user_repository.update_one(old=old, new=suitability_data)
         except AttributeError:
             raise InternalServerError("common.process_issue")
         else:
@@ -277,7 +286,7 @@ class SuitabilityService(ISuitability):
         return
 
     @staticmethod
-    def __insert_suitability_answers_in_user_profile_db(
+    async def __insert_suitability_answers_in_user_profile_db(
         suitability_user_profile_repository: MongoDbBaseRepository,
         answers: List[dict],
         suitability_version: int,
@@ -304,7 +313,7 @@ class SuitabilityService(ISuitability):
             "suitability_version": suitability_version,
         }
         try:
-            inserted = suitability_user_profile_repository.insert(payload)
+            inserted = await suitability_user_profile_repository.insert(payload)
         except AttributeError:
             raise InternalServerError("common.process_issue")
         else:
@@ -313,7 +322,7 @@ class SuitabilityService(ISuitability):
         return
 
     @staticmethod
-    def __get_last_user_profile(
+    async def __get_last_user_profile(
         suitability_user_profile_repository: MongoDbBaseRepository, email: str
     ) -> dict:
         if not email:
@@ -321,7 +330,7 @@ class SuitabilityService(ISuitability):
 
         try:
             _last_user_profile = (
-                suitability_user_profile_repository.find_more_than_equal_one(
+                await suitability_user_profile_repository.find_more_than_equal_one(
                     {"email": email}
                 )
                 .sort("_id", -1)

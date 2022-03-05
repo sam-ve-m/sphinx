@@ -11,14 +11,14 @@ router = UserRouter.instance()
 
 
 @router.put("/thebes_hall", tags=["authentication"])
-def thebes_hall(device_information: DeviceInformationOptional, request: Request):
-    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+async def thebes_hall(device_information: DeviceInformationOptional, request: Request):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     device_and_thebes_answer_from_request = {
         "device_information": device_information.dict(),
         "x-thebes-answer": jwt_data,
     }
-    return BaseController.run(
+    return await BaseController.run(
         AuthenticationController.thebes_hall,
         device_and_thebes_answer_from_request,
         request,
@@ -26,15 +26,15 @@ def thebes_hall(device_information: DeviceInformationOptional, request: Request)
 
 
 @router.put("/logout", tags=["authentication"])
-def logout(device_information: DeviceInformationOptional, request: Request):
-    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+async def logout(device_information: DeviceInformationOptional, request: Request):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     device_jwt_and_thebes_answer_from_request = {
         "jwt": JwtService.get_jwt_from_request(request=request),
         "jwt_user": jwt_data["user"],
         "device_information": device_information.dict(),
     }
-    return BaseController.run(
+    return await BaseController.run(
         AuthenticationController.logout,
         device_jwt_and_thebes_answer_from_request,
         request,
@@ -42,15 +42,17 @@ def logout(device_information: DeviceInformationOptional, request: Request):
 
 
 @router.post("/validate_electronic_signature", tags=["authentication"])
-def change_electronic_signature(electronic_signature: SignatureCheck, request: Request):
+async def change_electronic_signature(
+    electronic_signature: SignatureCheck, request: Request
+):
     electronic_signature = electronic_signature.dict()
-    jwt_data = JwtService.get_thebes_answer_from_request(request=request)
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     change_electronic_signature_request = {
         "electronic_signature": electronic_signature,
-                "jwt_user": jwt_data["user"],
+        "jwt_user": jwt_data["user"],
     }
-    return BaseController.run(
+    return await BaseController.run(
         AuthenticationController.validate_electronic_signature,
         change_electronic_signature_request,
         request,

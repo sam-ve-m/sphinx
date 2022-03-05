@@ -1,16 +1,13 @@
 # OUTSIDE LIBRARIES
 import pytest
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 
 # SPHINX
-from heimdall_client.src.domain.enums.heimdall_status_responses import (
-    HeimdallStatusResponses,
-)
+from heimdall_client import HeimdallStatusResponses
 
 from tests.stub_classes.stub_request import StubURL, StubRequest
 from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 from src.exceptions.exceptions import UnauthorizedError, InternalServerError
-from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 
 
 @pytest.fixture

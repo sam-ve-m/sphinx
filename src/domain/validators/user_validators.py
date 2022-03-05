@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 from src.domain.validators.base import *
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
 
 
-class UserSimple(Email, NickName, OptionalPIN):
+class UserSimple(Email, NickName):
     pass
 
 

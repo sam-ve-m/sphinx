@@ -1,8 +1,7 @@
 from bs4 import BeautifulSoup as bs
 import tempfile
 import os
-import logging
-from src.infrastructures.env_config import config
+from etria_logger import Gladsheim
 
 
 class HtmlModifier:
@@ -30,8 +29,7 @@ class HtmlModifier:
             self.temp_file = tempfile.TemporaryFile(mode="wb+")
             self.temp_file.write(self.soup.prettify("utf-8"))
         except Exception as e:
-            logger = logging.getLogger(config("LOG_NAME"))
-            logger.error(e, exc_info=True)
+            Gladsheim.error(error=e)
 
     def return_email_content(self):
         self.temp_file.seek(0, 0)

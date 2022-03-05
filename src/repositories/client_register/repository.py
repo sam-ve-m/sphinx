@@ -1,6 +1,6 @@
 # STANDARD LIBS
-import logging
-from typing import Type, Optional
+from etria_logger import Gladsheim
+from typing import Optional
 
 # SPHINX
 from src.exceptions.exceptions import InternalServerError
@@ -14,7 +14,7 @@ from src.infrastructures.env_config import config
 
 
 class ClientRegisterRepository(OracleBaseRepository):
-    def register_validated_users(self, user_cpf: str):
+    async def register_validated_users(self, user_cpf: str):
         values = {
             "cd_empresa": config("COMPANY_OPERATION_CODE"),
             "cd_usuario": "1",
@@ -22,45 +22,45 @@ class ClientRegisterRepository(OracleBaseRepository):
             "cd_cliente_padrao": "1",
             "cpf": str(user_cpf),
         }
-        self.execute(
+        await self.execute(
             sql="call PROC_IMPCLIH_V2_LIONX.EXECIMPH(:cd_empresa, :cd_usuario, :tp_ocorrencia, :cd_cliente_padrao, :cpf)",
             values=values,
         )
 
-    def cleanup_temp_tables(self, user_cpf: str):
+    async def cleanup_temp_tables(self, user_cpf: str):
         client_temp = "DELETE FROM TSCIMPCLIH WHERE CD_CPFCGC = :cpf"
-        self.execute(sql=client_temp, values={"cpf": str(user_cpf)})
+        await self.execute(sql=client_temp, values={"cpf": str(user_cpf)})
         error_temp = "DELETE FROM TSCERROH WHERE CD_CPFCGC = :cpf"
-        self.execute(sql=error_temp, values={"cpf": str(user_cpf)})
+        await self.execute(sql=error_temp, values={"cpf": str(user_cpf)})
 
-    def validate_user_data_errors(self, user_cpf: int) -> bool:
-        self._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
-        return self._validate_errors_on_temp_tables(user_cpf=user_cpf)
+    async def validate_user_data_errors(self, user_cpf: int) -> bool:
+        await self._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
+        return await self._validate_errors_on_temp_tables(user_cpf=user_cpf)
 
-    def _validate_errors_on_temp_tables(self, user_cpf: int) -> bool:
+    async def _validate_errors_on_temp_tables(self, user_cpf: int) -> bool:
         sql = f"""
             SELECT 1 
             FROM TSCERROH
             WHERE CD_CPFCGC = {user_cpf}
         """
-        result = self.query(sql=sql)
+        result = await self.query(sql=sql)
         return len(result) > 0
 
-    def _run_data_validator_in_register_user_tmp_table(self, user_cpf: int) -> int:
-        self.execute(
+    async def _run_data_validator_in_register_user_tmp_table(self, user_cpf: int):
+        await self.execute(
             sql="call PROC_CLIECOH_V2_LIONX.EXECCONH(:s, :cpf)",
             values={"s": "S", "cpf": str(user_cpf)},
         )
 
-    def register_user_data_in_register_users_temp_table(
-        self, builder: Type[ClientRegisterBuilder]
+    async def register_user_data_in_register_users_temp_table(
+        self, builder: ClientRegisterBuilder
     ):
         client_register = builder.build()
         fields = client_register.keys()
         sql = f"INSERT INTO TSCIMPCLIH({','.join(fields)}) VALUES(:{',:'.join(fields)})"
-        self.execute(sql=sql, values=client_register)
+        await self.execute(sql=sql, values=client_register)
 
-    def get_user_control_data_if_user_already_exists(self, user_cpf: int):
+    async def get_user_control_data_if_user_already_exists(self, user_cpf: int):
         verify_user_data_sql = f"SELECT 1 FROM TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
         verify_user_bovespa_account = (
             f"SELECT 1 FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
@@ -77,29 +77,30 @@ class ClientRegisterRepository(OracleBaseRepository):
             verify_user_account,
             verify_user_treasury,
         ]
-        result = self.query(sql=" union ".join(all_validation_query))
+        result = await self.query(sql=" union ".join(all_validation_query))
         if result and len(result) > 0:
-            result = self.query(
+            result = await self.query(
                 sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
             )
             return result[0]
         return None
 
-    def get_sincad_status(self, user_cpf: int):
+    async def get_sincad_status(self, user_cpf: int):
         sql = f"SELECT COD_SITU_ENVIO FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
-        result = self.query(sql=sql)
+        result = await self.query(sql=sql)
         if result and len(result) > 0:
             return result[0]
         return None
 
-    def get_sinacor_status(self, user_cpf: int):
+    async def get_sinacor_status(self, user_cpf: int):
         sql = f"SELECT IN_SITUAC FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
-        result = self.query(sql=sql)
+        result = await self.query(sql=sql)
         if result and len(result) > 0:
             return result[0]
         return None
 
-    def is_married(self, user_data: dict):
+    @staticmethod
+    def is_married(user_data: dict):
         is_married = user_data["marital"]["status"] in [
             MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
             MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_NATURALIZED_BRAZILIAN.value,
@@ -109,12 +110,12 @@ class ClientRegisterRepository(OracleBaseRepository):
 
         return is_married
 
-    def get_builder(
+    async def get_builder(
         self,
         user_data: dict,
         sinacor_user_control_data: Optional[tuple],
         sinacor_types_repository=SinacorTypesRepository(),
-    ) -> Type[ClientRegisterBuilder]:
+    ) -> ClientRegisterBuilder:
         occupation = user_data["occupation"]
         activity = occupation["activity"]
         company = occupation.get("company", {})
@@ -169,23 +170,25 @@ class ClientRegisterRepository(OracleBaseRepository):
 
         if callback is None:
             message = f"Sinacor builder callback not implemented. Parameters: (is_married: {is_married}, is_unemployed: {is_unemployed}, is_business_person: {is_business_person})"
-            logging.error(msg=message)
+            Gladsheim.error(message=message)
             raise InternalServerError("internal_error")
 
         return callback(
             user_data=user_data, sinacor_user_control_data=sinacor_user_control_data
         )
 
-    def client_is_allowed_to_cancel_registration(self, user_cpf: int, bmf_account: int):
-        is_client_blocked = self._is_client_blocked(user_cpf)
-        client_has_value_blocked = self._client_has_value_blocked(bmf_account)
-        client_has_receivables = self._client_has_receivables(bmf_account)
-        client_has_options_blocked = self._client_has_options_blocked(bmf_account)
-        client_has_options_receivables = self._client_has_options_receivables(
+    async def client_is_allowed_to_cancel_registration(
+        self, user_cpf: int, bmf_account: int
+    ):
+        is_client_blocked = await self._is_client_blocked(user_cpf)
+        client_has_value_blocked = await self._client_has_value_blocked(bmf_account)
+        client_has_receivables = await self._client_has_receivables(bmf_account)
+        client_has_options_blocked = await self._client_has_options_blocked(bmf_account)
+        client_has_options_receivables = await self._client_has_options_receivables(
             bmf_account
         )
-        client_has_values_in_bank_account = self._client_has_values_in_bank_account(
-            bmf_account
+        client_has_values_in_bank_account = (
+            await self._client_has_values_in_bank_account(bmf_account)
         )
         return (
             any(
@@ -201,38 +204,38 @@ class ClientRegisterRepository(OracleBaseRepository):
             is False
         )
 
-    def _is_client_blocked(self, user_cpf: int):
-        result = self.query(
+    async def _is_client_blocked(self, user_cpf: int):
+        result = await self.query(
             sql=f"SELECT 1 from TSCCLIGER WHERE CD_CPFCGC = {user_cpf} and IN_SITUAC = 'BL'"
         )
         return len(result) > 0
 
-    def _client_has_value_blocked(self, bmf_account: int):
-        result = self.query(
+    async def _client_has_value_blocked(self, bmf_account: int):
+        result = await self.query(
             sql=f"SELECT 1 from TCCSALDO_BLOQ WHERE COD_CLI = {bmf_account} and VAL_BLOQ > 0"
         )
         return len(result) > 0
 
-    def _client_has_receivables(self, bmf_account: int):
-        result = self.query(
+    async def _client_has_receivables(self, bmf_account: int):
+        result = await self.query(
             sql=f"SELECT 1 from TCCMOVTO WHERE CD_CLIENTE = {bmf_account} and DT_LIQUIDACAO >= SYSDATE"
         )
         return len(result) > 0
 
-    def _client_has_options_blocked(self, bmf_account: int):
-        result = self.query(
+    async def _client_has_options_blocked(self, bmf_account: int):
+        result = await self.query(
             sql=f"SELECT 1 from VCFPOSICAO WHERE COD_CLI = {bmf_account} and QTDE_BLQD is not null and QTDE_BLQD > 0"
         )
         return len(result) > 0
 
-    def _client_has_options_receivables(self, bmf_account: int):
-        result = self.query(
+    async def _client_has_options_receivables(self, bmf_account: int):
+        result = await self.query(
             sql=f"SELECT 1 from VCFPOSICAO where COD_CLI = {bmf_account} and tipo_merc in ('OPC','OPV') and data_venc >= SYSDATE"
         )
         return len(result) > 0
 
-    def _client_has_values_in_bank_account(self, bmf_account: int):
-        result = self.query(
+    async def _client_has_values_in_bank_account(self, bmf_account: int):
+        result = await self.query(
             sql=f"select 1 from tccsaldo WHERE CD_CLIENTE = {bmf_account} and VL_TOTAL > 0"
         )
         return len(result) > 0

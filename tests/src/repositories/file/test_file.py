@@ -122,7 +122,7 @@ def test_save_user_file_with_invalid_user_path(
     new_file_repository_valid_mocked_validate_bucket_name,
 ) -> None:
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    file_repository.resolve_user_path = MagicMock(return_value=None)
+    file_repository._resolve_user_path = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
         file_repository.save_user_file(
             file_type=UserFileType.SELFIE, content="data", user_email="test@validator"
@@ -133,7 +133,7 @@ def test_save_user_file_with_invalid_file_extension(
     new_file_repository_valid_mocked_validate_bucket_name,
 ) -> None:
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    file_repository.get_file_extension_by_type = MagicMock(return_value=None)
+    file_repository._get_file_extension_by_type = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
         file_repository.save_user_file(
             file_type=UserFileType.SELFIE, content="data", user_email="test@validator"
@@ -141,7 +141,7 @@ def test_save_user_file_with_invalid_file_extension(
 
 
 def test_resolve_path() -> None:
-    path = FileRepository.resolve_user_path(
+    path = FileRepository._resolve_user_path(
         user_email="marco@lionx.com.br", file_type=UserFileType.SELFIE
     )
     assert path == "lionx.com.br/ma/marco@lionx.com.br/user_selfie/"
@@ -150,13 +150,13 @@ def test_resolve_path() -> None:
 def test_resolve_content_byte():
     byte_value = b"1234"
     base64_str = b64encode(byte_value).decode()
-    value = FileRepository.resolve_content(content=base64_str)
+    value = FileRepository._resolve_content(content=base64_str)
     assert byte_value == value
 
 
 def test_resolve_content_str():
     str_value = "1234"
-    value = FileRepository.resolve_content(content=str_value)
+    value = FileRepository._resolve_content(content=str_value)
     base64_bytes = str_value.encode("ascii")
     assert b64decode(base64_bytes) == value
 
@@ -164,7 +164,7 @@ def test_resolve_content_str():
 def test_resolve_content_without_value():
     str_value = None
     with pytest.raises(InternalServerError, match="files.content.empty"):
-        FileRepository.resolve_content(content=str_value)
+        FileRepository._resolve_content(content=str_value)
 
 
 def test_save_valid_term_file(
@@ -184,7 +184,7 @@ def test_save_term_file_with_invalid_user_path(
     new_file_repository_valid_mocked_validate_bucket_name,
 ) -> None:
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    file_repository.resolve_term_path = MagicMock(return_value=None)
+    file_repository._resolve_term_path = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
         file_repository.save_term_file(
             file_type=TermsFileType.TERM_REFUSAL, content=b"is a byte"
@@ -195,7 +195,7 @@ def test_save_term_file_with_invalid_file_extension(
     new_file_repository_valid_mocked_validate_bucket_name,
 ) -> None:
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    file_repository.get_file_extension_by_type = MagicMock(return_value=None)
+    file_repository._get_file_extension_by_type = MagicMock(return_value=None)
     with pytest.raises(InternalServerError, match="^files.error"):
         file_repository.save_term_file(
             file_type=TermsFileType.TERM_REFUSAL, content=b"is a byte"
@@ -304,7 +304,7 @@ def test_generate_term_file_name_version_none(
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     with pytest.raises(InternalServerError, match="files.params.invalid"):
-        file_repository.generate_term_file_name(name="lala", version=None)
+        file_repository._generate_term_file_name(name="lala", version=None)
 
 
 def test_generate_term_file_name_name_none(
@@ -312,7 +312,7 @@ def test_generate_term_file_name_name_none(
 ):
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     with pytest.raises(InternalServerError, match="files.params.invalid"):
-        file_repository.generate_term_file_name(name=None, version=1)
+        file_repository._generate_term_file_name(name=None, version=1)
 
 
 def test__get_last_saved_file_from_folder_file_error(
@@ -334,7 +334,7 @@ def test_get_file_extension_by_type_valid(
     new_file_repository_valid_mocked_validate_bucket_name,
 ) -> None:
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
-    result = file_repository.get_file_extension_by_type(file_type=UserFileType.SELFIE)
+    result = file_repository._get_file_extension_by_type(file_type=UserFileType.SELFIE)
     assert result == ".jpg"
 
 
@@ -347,7 +347,7 @@ def test_get_file_extension_by_type_invalid(
 ) -> None:
     file_repository = new_file_repository_valid_mocked_validate_bucket_name
     with pytest.raises(InternalServerError, match="files.error"):
-        file_repository.get_file_extension_by_type(FakeEnum.FAKE)
+        file_repository._get_file_extension_by_type(FakeEnum.FAKE)
 
 
 def test_get_terms_version_without_content(
