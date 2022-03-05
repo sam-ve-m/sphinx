@@ -1,4 +1,6 @@
 # NATIVE LIBRARIES
+import datetime
+
 from etria_logger import Gladsheim
 from typing import Optional
 
@@ -7,7 +9,7 @@ from fastapi import Request
 
 
 # SPHINX
-from src.infrastructures.env_config import config
+from datetime import timezone
 from src.repositories.user.repository import UserRepository
 from src.services.jwts.service import JwtService
 from mist_client import MistStatusResponses
@@ -27,7 +29,9 @@ class MiddlewareUtils:
     @staticmethod
     def is_user_token_life_time_valid(user_data: dict, token: dict) -> bool:
         try:
-            user_created = user_data["token_valid_after"].timestamp()
+            token_valid_after = user_data["token_valid_after"]
+            token_valid_after = token_valid_after.replace(tzinfo=timezone.utc)
+            user_created = token_valid_after.timestamp()
             jwt_created_at = token["created_at"]
             is_token_valid = jwt_created_at >= user_created
             return is_token_valid
