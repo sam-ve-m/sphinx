@@ -1,6 +1,4 @@
 # NATIVE LIBRARIES
-import datetime
-
 from etria_logger import Gladsheim
 from typing import Optional
 
@@ -15,7 +13,7 @@ from src.services.jwts.service import JwtService
 from mist_client import MistStatusResponses
 
 
-class MiddlewareUtils:
+class MiddlewareService:
     @staticmethod
     async def get_valid_user_from_database(
         token: dict, user_repository=UserRepository()
@@ -37,6 +35,8 @@ class MiddlewareUtils:
             return is_token_valid
         except ValueError:
             return False
+        except AttributeError as e:
+            Gladsheim.error(error=e, message="Hey they joke with you probably token_valid_after from user_data isn't a datetime.datetime object." )
         except Exception as e:
             Gladsheim.error(error=e)
             return False
