@@ -7,13 +7,13 @@ from fastapi import Request
 
 
 # SPHINX
-from src.infrastructures.env_config import config
+from datetime import timezone
 from src.repositories.user.repository import UserRepository
 from src.services.jwts.service import JwtService
 from mist_client import MistStatusResponses
 
 
-class MiddlewareUtils:
+class MiddlewareService:
     @staticmethod
     async def get_valid_user_from_database(
         token: dict, user_repository=UserRepository()
@@ -27,12 +27,16 @@ class MiddlewareUtils:
     @staticmethod
     def is_user_token_life_time_valid(user_data: dict, token: dict) -> bool:
         try:
-            user_created = user_data["token_valid_after"].timestamp()
+            token_valid_after = user_data["token_valid_after"]
+            token_valid_after = token_valid_after.replace(tzinfo=timezone.utc)
+            user_created = token_valid_after.timestamp()
             jwt_created_at = token["created_at"]
             is_token_valid = jwt_created_at >= user_created
             return is_token_valid
         except ValueError:
             return False
+        except AttributeError as e:
+            Gladsheim.error(error=e, message="Hey they joke with you probably token_valid_after from user_data isn't a datetime.datetime object." )
         except Exception as e:
             Gladsheim.error(error=e)
             return False
