@@ -1,6 +1,4 @@
-from etria_logger import GLADSHEIM_LOGGING_CONFIG, Gladsheim
-
-import logging
+from etria_logger import GLADSHEIM_LOGGING_CONFIG
 
 import uvicorn
 from fastapi import FastAPI

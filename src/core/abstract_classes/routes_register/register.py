@@ -12,7 +12,7 @@ from fastapi import APIRouter, FastAPI, status, Response
 # Sphinx
 from src.core.api_router.router import SphinxAPIRouter
 from src.i18n.i18n_resolver import i18nResolver as i18n
-from src.routers.routes_registers.middleware_functions import MiddlewareUtils
+from src.services.middleware.service import MiddlewareService
 
 
 class RoutesRegister(ABC):
@@ -81,12 +81,12 @@ class RoutesRegister(ABC):
 
     @staticmethod
     @abstractmethod
-    async def is_allow(request: Request, middleware_utils=MiddlewareUtils) -> bool:
+    async def is_allow(request: Request, middleware_utils=MiddlewareService) -> bool:
         pass
 
     @classmethod
     async def has_permission(
-        cls, request: Request, middleware_utils=MiddlewareUtils
+        cls, request: Request, middleware_utils=MiddlewareService
     ) -> bool:
         permissions_mapped = cls._instance.get_permission_by_route(
             route=request.url.path

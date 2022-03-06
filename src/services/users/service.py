@@ -462,7 +462,11 @@ class UserService(IUser):
             {
                 "unique_id": str(uuid4()),
                 "created_at": datetime.utcnow(),
-                "scope": {"view_type": "default", "features": ["default", "realtime"]},
+                "scope": {
+                    "user_level": UserLevel.PROSPECT.value,
+                    "view_type": "default",
+                    "features": ["default"]
+                },
                 "is_active_user": False,
                 "must_do_first_login": True,
                 "use_magic_link": True,
