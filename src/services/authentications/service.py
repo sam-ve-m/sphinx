@@ -290,11 +290,11 @@ class AuthenticationService(IAuthentication):
             user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
-        user_has_valid_solutiontech_status_in_database = AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
+        user_has_not_synced_solutiontech_status_in_database = AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database
         )
 
-        if user_has_valid_solutiontech_status_in_database:
+        if user_has_not_synced_solutiontech_status_in_database:
             user_solutiontech_status_from_check_status_request = await solutiontech.check_if_client_is_synced_with_solutiontech(
                 user_bmf_code=int(user_bmf_account_from_database),
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
