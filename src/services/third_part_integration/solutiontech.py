@@ -25,9 +25,11 @@ class Solutiontech:
         )
         try:
             async with aiohttp.ClientSession() as session:
+                # TODO: THis must be with ssl
                 async with session.get(
                     f"{base_url_solutiontech}{solutiontech_verify_dtvm_client}",
                     params={"codCliente": user_bmf_code},
+                    ssl=False
                 ) as response:
                     if response.status == 200:
                         response_message = await response.text()
@@ -52,11 +54,13 @@ class Solutiontech:
         try:
             headers = {"content-type": "application/json"}
             async with aiohttp.ClientSession() as session:
+                # TODO: THis must be with ssl
                 async with session.post(
                     f"{base_url_solutiontech}{solutiontech_sync_dtvm_client}",
                     params={"codCliente": user_bmf_code},
                     data=json.dumps({"codCliente": user_bmf_code}),
                     headers=headers,
+                    ssl=False
                 ) as response:
                     if response.status == 200:
                         response_json = json.loads(await response.text())
