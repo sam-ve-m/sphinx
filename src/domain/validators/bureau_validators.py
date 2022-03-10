@@ -261,18 +261,6 @@ class DateOfAcquisition(Source):
 class ConnectedPersonSource(Source):
     value: bool
 
-
-class ClientTypeSource(Source):
-    value: int
-
-    @validator("value", always=True, allow_reuse=True)
-    def validate_value(cls, e):
-        sinacor_types_repository = SinacorTypesRepository()
-        if sinacor_types_repository.validate_client_type(value=e):
-            return e
-        raise ValueError("Client type not exists")
-
-
 class PersonTypeSource(Source):
     value: PersonType
 
