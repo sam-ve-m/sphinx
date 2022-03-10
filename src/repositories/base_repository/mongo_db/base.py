@@ -51,7 +51,11 @@ class MongoDbBaseRepository(IRepository):
             return False
 
     @classmethod
-    async def find_one(cls, query: dict, ttl: int = 0) -> Optional[dict]:
+    async def find_one(cls, query: dict, ttl: int = None, project: dict = None) -> Optional[dict]:
+        if ttl is None:
+            ttl = 0
+        if project is None:
+            project = {}
         try:
             collection = await cls.get_collection()
             data = None
@@ -61,7 +65,7 @@ class MongoDbBaseRepository(IRepository):
                 data = await cls._get_from_cache(query=query)
 
             if not data:  # pragma: no cover
-                data = await collection.find_one(query)
+                data = await collection.find_one(query, project)
 
             if has_ttl and data is not None:  # pragma: no cover
                 await cls._save_cache(query=query, ttl=ttl, data=data)

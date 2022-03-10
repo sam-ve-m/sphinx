@@ -146,6 +146,18 @@ class SinacorTypesRepository(OracleBaseRepository):
         )
         return dict_result
 
+    # TODO IMPLEMNTAR
+    @classmethod
+    async def get_banks_numbers(cls, ):
+        sql = """
+
+            """
+        tuple_result = await cls.query_with_cache(sql=sql)
+        dict_result = cls.tuples_to_dict_list(
+            fields=["code", "description"], values=tuple_result
+        )
+        return dict_result
+
     @classmethod
     async def query_with_cache(cls, sql: str) -> list:
         _sha1 = sha1()
