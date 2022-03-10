@@ -5,7 +5,11 @@ from src.services.sinacor_types.service import SinaCorTypes
 class ClientRegisterEnumsController:
     @staticmethod
     async def get_county(payload: dict):
-        return await SinaCorTypes.get_county(payload=payload)
+        return await SinaCorTypes.get_city(payload=payload)
+
+    @staticmethod
+    async def get_document_type(payload: dict):
+        return await SinaCorTypes.get_document_type()
 
     @staticmethod
     async def get_state(payload: dict):
@@ -41,32 +45,29 @@ class ClientRegisterEnumsController:
 
     @staticmethod
     async def get_marital_status_update(payload: dict):
-        return await SinaCorTypes.get_marital_status_update()
+        return await SinaCorTypes.get_marital_status()
 
     @staticmethod
     async def get_nationality_update(payload: dict):
-        return await SinaCorTypes.get_nationality_update()
+        return await SinaCorTypes.get_nationality()
 
     @staticmethod
     async def get_county_update(payload: dict):
-        return await SinaCorTypes.get_county_update(payload=payload)
+        return await SinaCorTypes.get_city(payload=payload)
 
     @staticmethod
     async def get_state_update(payload: dict):
-        return await SinaCorTypes.get_state_update(payload=payload)
+        return await SinaCorTypes.get_state(payload=payload)
 
     @staticmethod
     async def get_country_update(payload: dict):
-        return await SinaCorTypes.get_country_update()
-
-    @staticmethod
-    async def get_economic_activity_update(payload: dict):
-        return await SinaCorTypes.get_economic_activity_update()
+        return await SinaCorTypes.get_country()
 
     @staticmethod
     async def get_activity_type_update(payload: dict):
-        return await SinaCorTypes.get_activity_type_update()
+        return await SinaCorTypes.get_activity_type()
 
     @staticmethod
     async def get_issuing_body_update(payload: dict):
-        return await SinaCorTypes.get_issuing_body_update()
+        return await SinaCorTypes.get_document_issuing_body()
+

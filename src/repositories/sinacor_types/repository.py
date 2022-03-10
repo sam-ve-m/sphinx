@@ -36,22 +36,10 @@ class SinacorTypesRepository(OracleBaseRepository):
         return dicts_result
 
     @classmethod
-    async def get_type_of_income_tax(cls) -> list:
-        sql = """
-            SELECT TP_IMP_RENDA as code, DS_IMP_RENDA as description
-            FROM TSCTIPIR
-        """
-        tuple_result = await cls.query_with_cache(sql=sql)
-        dict_result = cls.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    @classmethod
     async def get_activity_type(cls) -> list:
         sql = """
-            SELECT CD_ATIV as code, DS_ATIV as description
-            FROM TSCATIV
+            SELECT CODE as code, DESCRIPTION as description
+            FROM USPIXDB001.SINCAD_EXTERNAL_PROFESSIONAL
         """
         tuple_result = await cls.query_with_cache(sql=sql)
         dict_result = cls.tuples_to_dict_list(
@@ -62,20 +50,8 @@ class SinacorTypesRepository(OracleBaseRepository):
     @classmethod
     async def get_nationality(cls) -> list:
         sql = """
-            SELECT CD_NACION as code, DS_NACION as description
-            FROM TSCNACION
-        """
-        tuple_result = await cls.query_with_cache(sql=sql)
-        dict_result = cls.tuples_to_dict_list(
-            fields=["code", "description"], values=tuple_result
-        )
-        return dict_result
-
-    @classmethod
-    async def get_document_issuing_body(cls) -> list:
-        sql = """
-            SELECT CD_ORG_EMIT as code, DS_ORG_EMIT as description
-            FROM TSCOREMI
+            SELECT CODE as code, DESCRIPTION as description
+            FROM USPIXDB001.SINCAD_EXTERNAL_NATIONALITY
         """
         tuple_result = await cls.query_with_cache(sql=sql)
         dict_result = cls.tuples_to_dict_list(
@@ -86,8 +62,8 @@ class SinacorTypesRepository(OracleBaseRepository):
     @classmethod
     async def get_document_type(cls) -> list:
         sql = """
-            SELECT CD_TIPO_DOC as code, DS_TIPO_DOC as description
-            FROM TSCTIPDOC
+            SELECT CODE as code, DESCRIPTION as description
+            FROM USPIXDB001.SINCAD_EXTERNAL_IDENTIFICATION_TYPE
         """
         tuple_result = await cls.query_with_cache(sql=sql)
         dict_result = cls.tuples_to_dict_list(
@@ -135,10 +111,10 @@ class SinacorTypesRepository(OracleBaseRepository):
         return dict_result
 
     @classmethod
-    async def get_economic_activity(cls) -> list:
+    async def get_issuing_body(cls) -> list:
         sql = """
-            SELECT COD_AECO as code, NOME_AECO as description
-            FROM TSCDXAECO
+            SELECT CODE as code, DESCRIPTION as description
+            FROM USPIXDB001.SINCAD_EXTERNAL_ISSUER
         """
         tuple_result = await cls.query_with_cache(sql=sql)
         dict_result = cls.tuples_to_dict_list(
@@ -147,10 +123,22 @@ class SinacorTypesRepository(OracleBaseRepository):
         return dict_result
 
     @classmethod
-    async def get_issuing_body(cls) -> list:
+    async def get_marital_status(cls) -> list:
         sql = """
-            SELECT CD_ORG_EMIT as code, DS_ORG_EMIT as description
-            FROM TSCOREMI
+            SELECT CODE as code, DESCRIPTION as description
+            FROM USPIXDB001.SINCAD_EXTERNAL_MARITAL_STATUS
+        """
+        tuple_result = await cls.query_with_cache(sql=sql)
+        dict_result = cls.tuples_to_dict_list(
+            fields=["code", "description"], values=tuple_result
+        )
+        return dict_result
+
+    @classmethod
+    async def get_gender(cls) -> list:
+        sql = """
+            SELECT CODE as code, DESCRIPTION as description
+            FROM USPIXDB001.SIGAME_GENDER
         """
         tuple_result = await cls.query_with_cache(sql=sql)
         dict_result = cls.tuples_to_dict_list(
@@ -193,8 +181,8 @@ class SinacorTypesRepository(OracleBaseRepository):
     def validate_nationality(cls, value: str) -> bool:
         sql = f"""
             SELECT 1
-            FROM TSCNACION
-            WHERE CD_NACION = {value}
+            FROM USPIXDB001.SINCAD_EXTERNAL_NATIONALITY
+            WHERE CODE = {value}
         """
         return cls.base_validator(sql=sql)
 
@@ -211,29 +199,11 @@ class SinacorTypesRepository(OracleBaseRepository):
         return cls.base_validator(sql=sql)
 
     @classmethod
-    def validate_city_id(cls, value: str) -> bool:
-        sql = f"""
-            SELECT 1
-            FROM TSCDXMUNICIPIO
-            WHERE COD_MUNI = '{value}'
-        """
-        return cls.base_validator(sql=sql)
-
-    @classmethod
-    def validate_city(cls, value: str) -> bool:
-        sql = f"""
-              SELECT 1
-              FROM TSCDXMUNICIPIO
-              WHERE NOME_MUNI = '{value}'
-          """
-        return cls.base_validator(sql=sql)
-
-    @classmethod
     def validate_activity(cls, value: str) -> bool:
         sql = f"""
             SELECT 1
-            FROM TSCATIV
-            WHERE CD_ATIV = {value}
+            FROM USPIXDB001.SINCAD_EXTERNAL_PROFESSIONAL
+            WHERE CODE = {value}
         """
         return cls.base_validator(sql=sql)
 
@@ -241,9 +211,9 @@ class SinacorTypesRepository(OracleBaseRepository):
     def is_unemployed(cls, value: str, cnpj: str) -> bool:
         sql = f"""
             SELECT 1
-            FROM TSCATIV
-            WHERE DS_ATIV = 'OUTROS'
-            AND CD_ATIV = {value}
+            FROM USPIXDB001.SINCAD_EXTERNAL_PROFESSIONAL
+            WHERE DESCRIPTION = 'OUTROS'
+            AND CODE = {value}
         """
         is_other = cls.base_validator(sql=sql)
         has_cnpj = cnpj is not None
@@ -254,36 +224,9 @@ class SinacorTypesRepository(OracleBaseRepository):
     def is_business_person(cls, value: str) -> bool:
         sql = f"""
             SELECT 1
-            FROM TSCATIV
-            WHERE DS_ATIV = 'EMPRESARIO'
-            AND CD_ATIV = {value}
-        """
-        return cls.base_validator(sql=sql)
-
-    @classmethod
-    def validate_client_type(cls, value: str) -> bool:
-        sql = f"""
-            SELECT 1
-            FROM TSCTIPCLI
-            WHERE TP_CLIENTE = {value}
-        """
-        return cls.base_validator(sql=sql)
-
-    @classmethod
-    def validate_document_type(cls, value: str) -> bool:
-        sql = f"""
-            SELECT 1
-            FROM TSCTIPDOC
-            WHERE CD_TIPO_DOC = {value}
-        """
-        return cls.base_validator(sql=sql)
-
-    @classmethod
-    def validate_county(cls, value: str) -> bool:
-        sql = f"""
-            SELECT 1
-            FROM TSCDXMUNICIPIO
-            WHERE NUM_SEQ_MUNI = {value}
+            FROM USPIXDB001.SINCAD_EXTERNAL_PROFESSIONAL
+            WHERE DESCRIPTION = 'EMPRESARIO'
+            AND CODE = {value}
         """
         return cls.base_validator(sql=sql)
 
@@ -291,22 +234,9 @@ class SinacorTypesRepository(OracleBaseRepository):
     def validate_marital_regime(cls, value: str) -> bool:
         sql = f"""
             SELECT 1
-            FROM TSCREGCAS
-            WHERE TP_REGCAS = {value}
+            FROM USPIXDB001.SINCAD_EXTERNAL_MARITAL_STATUS
+            WHERE CODE = {value}
         """
-        return cls.base_validator(sql=sql)
-
-    @classmethod
-    def validate_marital_status(cls, value: str) -> bool:
-        sql = f""" SELECT 1 FROM TSCESTCIV where CD_EST_CIVIL = {value}"""
-        return cls.base_validator(sql=sql)
-
-    @classmethod
-    def validate_contry_state_city_and_id_city(
-        cls, contry: str, state: str, city: str, id_city: int
-    ) -> bool:
-        sql = f"""SELECT 1 FROM TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
-        AND SIGL_ESTADO = '{state}' AND NOME_MUNI = '{city}' AND NUM_SEQ_MUNI = {id_city}"""
         return cls.base_validator(sql=sql)
 
     @classmethod
