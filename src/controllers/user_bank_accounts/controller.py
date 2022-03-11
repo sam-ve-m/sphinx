@@ -5,15 +5,15 @@ class UserBankAccounts:
 
     @staticmethod
     def create(payload: dict):
-        return FeatureService.create(payload=payload)
+        return UserBankAccountService.create_user_bank_accounts(payload=payload)
 
     @staticmethod
     def update(payload: dict):
-        return FeatureService.update(payload=payload)
+        return UserBankAccountService.update_user_bank_accounts(payload=payload)
 
     @staticmethod
     def delete(payload: dict):
-        return UserBankAccountService.delete(payload=payload)
+        return UserBankAccountService.delete_user_bank_accounts(payload=payload)
 
     @staticmethod
     def get(payload: dict):
