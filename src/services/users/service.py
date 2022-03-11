@@ -581,8 +581,9 @@ class UserService(IUser):
             payload=payload, onboard_step=["user_complementary_step"]
         )
         thebes_answer = payload.get("x-thebes-answer")
+        unique_id = thebes_answer["user"]["unique_id"]
         current_user = await user_repository.find_one(
-            {"unique_id": thebes_answer["user"]["unique_id"]}
+            {"unique_id": unique_id}
         )
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
@@ -593,6 +594,10 @@ class UserService(IUser):
                 user_complementary_data=user_complementary_data
             )
         )
+
+        if current_user['identifier_document']['cpf'] == complementary_data_for_user_update['marital']['spouse']['cpf']:
+            raise BadRequestError("user.you_cant_be_your_spouse")
+
         current_user_with_complementary_data = deepcopy(current_user)
         current_user_with_complementary_data.update(complementary_data_for_user_update)
 
@@ -620,7 +625,7 @@ class UserService(IUser):
         )
 
         user_was_updated = await user_repository.update_one(
-            old=current_user, new=complementary_data_for_user_update
+            old={"unique_id": unique_id}, new=complementary_data_for_user_update
         )
         if user_was_updated is False:
             raise InternalServerError("common.process_issue")
