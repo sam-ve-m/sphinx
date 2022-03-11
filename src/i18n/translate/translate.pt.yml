@@ -27,6 +27,7 @@ pt:
     wrong_electronic_signature: Assinatura eletrônica  incorreta.
     creating_account: Iremos criar sua conta bancaria, espere o email.
     cant_delete_account: Você tem pendencias em sua conta, verifique e tente novamente.
+    you_cant_be_your_spouse: Você não poded ser casado com você mesmo.
     files:
       term_not_signed: Você ainda não assinou estes termos.
     quiz:

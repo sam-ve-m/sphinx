@@ -399,6 +399,14 @@ class DocumentTypesSource(Source):
 class UserMaritalData(MaritalStatus):
     spouse: Optional[Spouse]
 
+    @validator("marital_status", "spouse", always=True, allow_reuse=True)
+    def validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if values.get('marital_status') in [2, 6] and not values.get('spouse'):
+            raise ValueError("spouse must be filled")
+        if values.get('marital_status') in [1] and values.get('spouse'):
+            raise ValueError("spouse must not be filled")
+        return cls.construct(**values)
+
 
 class UserMaritalDataSource(BaseModel):
     status: MaritalStatusSource
