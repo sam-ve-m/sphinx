@@ -27,6 +27,7 @@ en:
     wrong_electronic_signature: Wrong electronic signature.
     creating_account: We will create your bank account, await a email.
     cant_delete_account: You have pending issues on your account, please check it and try again.
+    you_cant_be_your_spouse: You can't be your spouse.
     files:
       term_not_signed: You did not sign this term yet.
     quiz:
