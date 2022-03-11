@@ -103,7 +103,7 @@ class CelPhone(BaseModel):
 
 
 class Nationality(BaseModel):
-    nationality: str
+    nationality: int
 
     @validator("nationality", always=True, allow_reuse=True)
     def validate_value(cls, e):
