@@ -14,7 +14,6 @@ from src.infrastructures.env_config import config
 
 
 class ClientRegisterRepository(OracleBaseRepository):
-
     @classmethod
     async def register_validated_users(cls, user_cpf: str):
         values = {

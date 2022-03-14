@@ -38,9 +38,7 @@ class SinaCorTypes:
         issuing_body_enum = SinaCorTypes.convert_description_to_title(issuing_body)
         return {
             "status_code": status.HTTP_200_OK,
-            "payload": {
-                "enums": issuing_body_enum
-            },
+            "payload": {"enums": issuing_body_enum},
         }
 
     @staticmethod
@@ -66,9 +64,7 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    async def get_city(
-        payload: dict, sinacor_types_repository=SinacorTypesRepository
-    ):
+    async def get_city(payload: dict, sinacor_types_repository=SinacorTypesRepository):
         cities = await sinacor_types_repository.get_county(
             country=payload.get("country"), state=payload.get("state")
         )

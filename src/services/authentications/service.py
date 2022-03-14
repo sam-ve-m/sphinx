@@ -57,7 +57,7 @@ class AuthenticationService(IAuthentication):
                 "scope": {
                     "user_level": UserLevel.PROSPECT.value,
                     "view_type": "default",
-                    "features": ["default"]
+                    "features": ["default"],
                 },
             }
             if (

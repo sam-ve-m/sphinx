@@ -92,10 +92,10 @@ def test_get_valid_user_from_database_repository_does_not_fid_user(
     user_repository.find_one = MagicMock(return_value=None)
     token = {"email": ""}
     assert (
-            MiddlewareService.get_valid_user_from_database(
+        MiddlewareService.get_valid_user_from_database(
             token=token, user_repository=user_repository
         )
-            is None
+        is None
     )
 
 
@@ -104,10 +104,10 @@ def test_get_valid_user_from_database_user_is_not_active():
     user_repository.find_one = MagicMock(return_value={"is_active_user": False})
     token = {"email": ""}
     assert (
-            MiddlewareService.get_valid_user_from_database(
+        MiddlewareService.get_valid_user_from_database(
             token=token, user_repository=user_repository
         )
-            is None
+        is None
     )
 
 
@@ -117,10 +117,10 @@ def test_get_valid_user_from_database():
     user_repository.find_one = MagicMock(return_value=user_stub_data)
     token = {"email": ""}
     assert (
-            MiddlewareService.get_valid_user_from_database(
+        MiddlewareService.get_valid_user_from_database(
             token=token, user_repository=user_repository
         )
-            == user_stub_data
+        == user_stub_data
     )
 
 
@@ -131,10 +131,10 @@ def test_get_valid_admin_from_database_repository_does_not_fid_user(
     user_repository.find_one = MagicMock(return_value=None)
     token = {"email": ""}
     assert (
-            MiddlewareService.get_valid_admin_from_database(
+        MiddlewareService.get_valid_admin_from_database(
             token=token, user_repository=user_repository
         )
-            is None
+        is None
     )
 
 
@@ -143,10 +143,10 @@ def test_get_valid_admin_from_database_user_is_not_active(get_new_stubby_reposit
     user_repository.find_one = MagicMock(return_value={"is_active_user": False})
     token = {"email": ""}
     assert (
-            MiddlewareService.get_valid_admin_from_database(
+        MiddlewareService.get_valid_admin_from_database(
             token=token, user_repository=user_repository
         )
-            is None
+        is None
     )
 
 
@@ -156,10 +156,10 @@ def test_get_valid_admin_from_database_dont_have_admin_key(get_new_stubby_reposi
     user_repository.find_one = MagicMock(return_value=user_stub_data)
     token = {"email": ""}
     assert (
-            MiddlewareService.get_valid_admin_from_database(
+        MiddlewareService.get_valid_admin_from_database(
             token=token, user_repository=user_repository
         )
-            is None
+        is None
     )
 
 
@@ -169,10 +169,10 @@ def test_get_valid_admin_from_database_is_not_admin(get_new_stubby_repository):
     user_repository.find_one = MagicMock(return_value=user_stub_data)
     token = {"email": ""}
     assert (
-            MiddlewareService.get_valid_admin_from_database(
+        MiddlewareService.get_valid_admin_from_database(
             token=token, user_repository=user_repository
         )
-            is None
+        is None
     )
 
 
@@ -182,10 +182,10 @@ def test_get_valid_admin_from_database(get_new_stubby_repository):
     user_repository.find_one = MagicMock(return_value=user_stub_data)
     token = {"email": ""}
     assert (
-            MiddlewareService.get_valid_admin_from_database(
+        MiddlewareService.get_valid_admin_from_database(
             token=token, user_repository=user_repository
         )
-            == user_stub_data
+        == user_stub_data
     )
 
 
@@ -198,10 +198,10 @@ def test_validate_electronic_signature_with_token(
     stub_jwt_service.mist.validate_jwt = MagicMock(return_value=False)
 
     assert (
-            MiddlewareService.validate_electronic_signature(
+        MiddlewareService.validate_electronic_signature(
             request=stub_request, user_data={}, jwt_handler=stub_jwt_service
         )
-            is False
+        is False
     )
 
 
@@ -228,12 +228,12 @@ def test_validate_electronic_signature_with_token_and_is_valid_but_email_does_no
     stub_jwt_service.mist.decrypt_payload = MagicMock(return_value={"email": "lalala"})
 
     assert (
-            MiddlewareService.validate_electronic_signature(
+        MiddlewareService.validate_electronic_signature(
             request=stub_request,
             user_data={"email": "lala"},
             jwt_handler=stub_jwt_service,
         )
-            is False
+        is False
     )
 
 
@@ -247,12 +247,12 @@ def test_validate_electronic_signature_with_token_and_is_valid_but_email_does_ma
     stub_jwt_service.mist.decrypt_payload = MagicMock(return_value={"email": "lala"})
 
     assert (
-            MiddlewareService.validate_electronic_signature(
+        MiddlewareService.validate_electronic_signature(
             request=stub_request,
             user_data={"email": "lala"},
             jwt_handler=stub_jwt_service,
         )
-            is False
+        is False
     )
 
 
@@ -278,8 +278,8 @@ def test_get_token_if_token_is_valid_raise_error(
     )
 
     assert (
-            MiddlewareService.get_token_if_token_is_valid(
+        MiddlewareService.get_token_if_token_is_valid(
             request=stub_request, jwt_handler=stub_jwt_service
         )
-            is None
+        is None
     )
