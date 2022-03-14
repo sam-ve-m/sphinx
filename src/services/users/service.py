@@ -355,10 +355,12 @@ class UserService(IUser):
                 raise InternalServerError("common.process_issue")
             response.update({"status_code": status.HTTP_200_OK})
         else:
-            response.update({
-                # "status_code": status.HTTP_304_NOT_MODIFIED,
-                "status_code": status.HTTP_200_OK,
-            })
+            response.update(
+                {
+                    # "status_code": status.HTTP_304_NOT_MODIFIED,
+                    "status_code": status.HTTP_200_OK,
+                }
+            )
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
@@ -465,7 +467,7 @@ class UserService(IUser):
                 "scope": {
                     "user_level": UserLevel.PROSPECT.value,
                     "view_type": "default",
-                    "features": ["default"]
+                    "features": ["default"],
                 },
                 "is_active_user": False,
                 "must_do_first_login": True,
@@ -582,9 +584,7 @@ class UserService(IUser):
         )
         thebes_answer = payload.get("x-thebes-answer")
         unique_id = thebes_answer["user"]["unique_id"]
-        current_user = await user_repository.find_one(
-            {"unique_id": unique_id}
-        )
+        current_user = await user_repository.find_one({"unique_id": unique_id})
         if current_user is None:
             raise BadRequestError("common.register_not_exists")
         user_complementary_data = payload.get("user_complementary")
@@ -595,7 +595,10 @@ class UserService(IUser):
             )
         )
 
-        if current_user['identifier_document']['cpf'] == complementary_data_for_user_update['marital']['spouse']['cpf']:
+        if (
+            current_user["identifier_document"]["cpf"]
+            == complementary_data_for_user_update["marital"]["spouse"]["cpf"]
+        ):
             raise BadRequestError("user.you_cant_be_your_spouse")
 
         current_user_with_complementary_data = deepcopy(current_user)
@@ -932,8 +935,8 @@ class UserService(IUser):
             old={"unique_id": unique_id},
             new={
                 "scope.user_level": UserLevel.CLIENT.value,
-                "is_bureau_data_validated": True
-            }
+                "is_bureau_data_validated": True,
+            },
         ):
             raise InternalServerError("common.process_issue")
 

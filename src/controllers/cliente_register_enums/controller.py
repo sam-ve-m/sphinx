@@ -70,4 +70,3 @@ class ClientRegisterEnumsController:
     @staticmethod
     async def get_issuing_body_update(payload: dict):
         return await SinaCorTypes.get_document_issuing_body()
-

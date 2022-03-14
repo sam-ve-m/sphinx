@@ -261,6 +261,7 @@ class DateOfAcquisition(Source):
 class ConnectedPersonSource(Source):
     value: bool
 
+
 class PersonTypeSource(Source):
     value: PersonType
 
@@ -401,9 +402,9 @@ class UserMaritalData(MaritalStatus):
 
     @validator("marital_status", "spouse", always=True, allow_reuse=True)
     def validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:
-        if values.get('marital_status') in [2, 6] and not values.get('spouse'):
+        if values.get("marital_status") in [2, 6] and not values.get("spouse"):
             raise ValueError("spouse must be filled")
-        if values.get('marital_status') in [1] and values.get('spouse'):
+        if values.get("marital_status") in [1] and values.get("spouse"):
             raise ValueError("spouse must not be filled")
         return cls.construct(**values)
 
