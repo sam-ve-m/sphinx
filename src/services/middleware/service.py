@@ -36,7 +36,10 @@ class MiddlewareService:
         except ValueError:
             return False
         except AttributeError as e:
-            Gladsheim.error(error=e, message="Hey they joke with you probably token_valid_after from user_data isn't a datetime.datetime object." )
+            Gladsheim.error(
+                error=e,
+                message="Hey they joke with you probably token_valid_after from user_data isn't a datetime.datetime object.",
+            )
         except Exception as e:
             Gladsheim.error(error=e)
             return False
