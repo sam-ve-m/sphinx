@@ -406,6 +406,8 @@ class UserMaritalData(MaritalStatus):
             raise ValueError("spouse must be filled")
         if values.get("marital_status") in [1] and values.get("spouse"):
             raise ValueError("spouse must not be filled")
+        if not values["spouse"]:
+            del values["spouse"]
         return cls.construct(**values)
 
 
