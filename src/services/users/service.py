@@ -597,7 +597,7 @@ class UserService(IUser):
 
         if (
             current_user["identifier_document"]["cpf"]
-            == complementary_data_for_user_update["marital"]["spouse"]["cpf"]
+            == complementary_data_for_user_update.get("marital", {}).get("spouse", {}).get("cpf")
         ):
             raise BadRequestError("user.you_cant_be_your_spouse")
 
