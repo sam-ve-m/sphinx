@@ -474,7 +474,7 @@ class UserAddressDataValidation(BaseModel):
         )
         if not is_valid:
             raise ValueError(
-                f"The combination of values {country}, {state}, {city} does not match"
+                f"The combination of values country: '{country}', state: '{state}', city_id: '{city}' does not match"
             )
         return values
 
