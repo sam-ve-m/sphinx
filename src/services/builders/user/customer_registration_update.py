@@ -213,8 +213,8 @@ class UpdateCustomerRegistrationBuilder:
 
     def personal_patrimony(self):
         old_patrimony = self.__old_personal_data.get("assets", {}).get("patrimony")
-
-        if new_patrimony := self._get_new_value("personal", "patrimony"):
+        new_patrimony = self._get_new_value("personal", "patrimony")
+        if new_patrimony is not None:
             self._update_modified_data(
                 levels=("assets", "patrimony"),
                 old_field=old_patrimony,
@@ -225,8 +225,8 @@ class UpdateCustomerRegistrationBuilder:
 
     def personal_income(self):
         old_patrimony = self.__old_personal_data.get("assets", {}).get("income")
-
-        if new_patrimony := self._get_new_value("personal", "income"):
+        new_patrimony = self._get_new_value("personal", "income")
+        if new_patrimony is not None:
             self._update_modified_data(
                 levels=("assets", "income"),
                 old_field=old_patrimony,
