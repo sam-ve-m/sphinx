@@ -429,7 +429,7 @@ class UserPersonalDataValidation(BaseModel):
 
 class UserDocumentsDataValidation(BaseModel):
     cpf: CpfSource
-    identity_tpe: DocumentTypesSource
+    identity_type: DocumentTypesSource
     identity_number: DocumentNumberSource
     expedition_date: DateSource
     issuer: IssuerSource
@@ -509,7 +509,7 @@ class UserPersonalDataUpdate(BaseModel):
 
 class UserDocumentsDataUpdate(BaseModel):
     cpf: Optional[CpfSource]
-    identity_tpe: Optional[DocumentTypesSource]
+    identity_type: Optional[DocumentTypesSource]
     identity_number: Optional[DocumentNumberSource]
     expedition_date: Optional[DateSource]
     issuer: Optional[IssuerSource]
