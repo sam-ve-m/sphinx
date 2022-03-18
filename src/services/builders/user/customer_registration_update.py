@@ -150,7 +150,7 @@ class UpdateCustomerRegistrationBuilder:
         old_phone = self.__old_personal_data.get("cel_phone")
         if new_phone := self._get_new_value("personal", "cel_phone"):
             self._update_modified_data(
-                levels=("cel_phone",), old_field=old_phone, new_filed=new_phone
+                levels=("phone",), old_field=old_phone, new_filed=new_phone
             )
 
         return self

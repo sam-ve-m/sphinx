@@ -261,19 +261,20 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cep(self, user_data: dict):
-        self._fields_added.update({"CD_CEP": int(user_data["address"]["zip_code"])})
+        cep_only_number = user_data["address"]["zip_code"].replace('-', '')
+        self._fields_added.update({"CD_CEP": int(cep_only_number)})
         return self
 
     def add_cd_ddd_celular1(self, user_data: dict):
-        # TODO: celphone format validate
-        self._fields_added.update({"CD_DDD_CELULAR1": int(user_data["phone"][:2])})
+        cel_phone = user_data["phone"]
+        self._fields_added.update({"CD_DDD_CELULAR1": int(cel_phone[3:2])})
         return self
 
     def add_cd_ddd_tel(self, user_data: dict):
         phone = user_data["address"].get("phone")
         if not phone:
             phone = user_data["phone"]
-        self._fields_added.update({"CD_DDD_TEL": int(phone[:2])})
+        self._fields_added.update({"CD_DDD_TEL": int(phone[3:2])})
         return self
 
     def add_in_ende(self, value=AddressType.RESIDENTIAL.value):
@@ -285,7 +286,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_nr_celular1(self, user_data: dict):
-        self._fields_added.update({"NR_CELULAR1": user_data["phone"][2:]})
+        self._fields_added.update({"NR_CELULAR1": user_data["phone"][5:]})
         return self
 
     def add_nm_cidade(
@@ -311,7 +312,7 @@ class ClientRegisterBuilder:
         phone = user_data["address"].get("phone")
         if not phone:
             phone = user_data["phone"]
-        self._fields_added.update({"NR_TELEFONE": int(phone[2:])})
+        self._fields_added.update({"NR_TELEFONE": int(phone[5:])})
         return self
 
     def add_sg_estado(self, user_data: dict):
