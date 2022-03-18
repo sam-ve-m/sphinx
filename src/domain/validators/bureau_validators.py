@@ -282,7 +282,7 @@ class MaritalStatusSource(Source):
 
 
 class NeighborhoodSource(Source):
-    value: str
+    value: constr(min_length=3, max_length=18)
 
 
 class TaxResidenceSource(Source):

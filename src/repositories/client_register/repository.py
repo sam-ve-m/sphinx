@@ -30,9 +30,9 @@ class ClientRegisterRepository(OracleBaseRepository):
 
     @classmethod
     async def cleanup_temp_tables(cls, user_cpf: str):
-        client_temp = "DELETE FROM TSCIMPCLIH WHERE CD_CPFCGC = :cpf"
+        client_temp = "DELETE FROM CORRWIN.TSCIMPCLIH WHERE CD_CPFCGC = :cpf"
         await cls.execute(sql=client_temp, values={"cpf": str(user_cpf)})
-        error_temp = "DELETE FROM TSCERROH WHERE CD_CPFCGC = :cpf"
+        error_temp = "DELETE FROM CORRWIN.TSCERROH WHERE CD_CPFCGC = :cpf"
         await cls.execute(sql=error_temp, values={"cpf": str(user_cpf)})
 
     @classmethod
@@ -44,7 +44,7 @@ class ClientRegisterRepository(OracleBaseRepository):
     async def _validate_errors_on_temp_tables(cls, user_cpf: int) -> bool:
         sql = f"""
             SELECT 1 
-            FROM TSCERROH
+            FROM CORRWIN.TSCERROH
             WHERE CD_CPFCGC = {user_cpf}
         """
         result = await cls.query(sql=sql)
@@ -53,7 +53,7 @@ class ClientRegisterRepository(OracleBaseRepository):
     @classmethod
     async def _run_data_validator_in_register_user_tmp_table(cls, user_cpf: int):
         await cls.execute(
-            sql="call PROC_CLIECOH_V2_LIONX.EXECCONH(:s, :cpf)",
+            sql="call CORRWIN.PROC_CLIECOH_V2_LIONX.EXECCONH(:s, :cpf)",
             values={"s": "S", "cpf": str(user_cpf)},
         )
 
@@ -63,20 +63,20 @@ class ClientRegisterRepository(OracleBaseRepository):
     ):
         client_register = builder.build()
         fields = client_register.keys()
-        sql = f"INSERT INTO TSCIMPCLIH({','.join(fields)}) VALUES(:{',:'.join(fields)})"
+        sql = f"INSERT INTO CORRWIN.TSCIMPCLIH({','.join(fields)}) VALUES(:{',:'.join(fields)})"
         await cls.execute(sql=sql, values=client_register)
 
     @classmethod
     async def get_user_control_data_if_user_already_exists(cls, user_cpf: int):
-        verify_user_data_sql = f"SELECT 1 FROM TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
+        verify_user_data_sql = f"SELECT 1 FROM CORRWIN.TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
         verify_user_bovespa_account = (
-            f"SELECT 1 FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+            f"SELECT 1 FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
         )
         verify_user_bmf_account = (
-            f"SELECT 1 FROM TSCCLIBMF WHERE CD_CPFCGC = {user_cpf}"
+            f"SELECT 1 FROM CORRWIN.TSCCLIBMF WHERE CD_CPFCGC = {user_cpf}"
         )
-        verify_user_account = f"SELECT 1 FROM TSCCLICOMP WHERE CD_CPFCGC = {user_cpf}"
-        verify_user_treasury = f"SELECT 1 FROM TSCCLITSD WHERE CD_CPFCGC = {user_cpf}"
+        verify_user_account = f"SELECT 1 FROM CORRWIN.TSCCLICOMP WHERE CD_CPFCGC = {user_cpf}"
+        verify_user_treasury = f"SELECT 1 FROM CORRWIN.TSCCLITSD WHERE CD_CPFCGC = {user_cpf}"
         all_validation_query = [
             verify_user_data_sql,
             verify_user_bovespa_account,
@@ -87,14 +87,14 @@ class ClientRegisterRepository(OracleBaseRepository):
         result = await cls.query(sql=" union ".join(all_validation_query))
         if result and len(result) > 0:
             result = await cls.query(
-                sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+                sql=f"SELECT CD_CLIENTE, DV_CLIENTE FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
             )
             return result[0]
         return None
 
     @classmethod
     async def get_sincad_status(cls, user_cpf: int):
-        sql = f"SELECT COD_SITU_ENVIO FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+        sql = f"SELECT COD_SITU_ENVIO FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
         result = await cls.query(sql=sql)
         if result and len(result) > 0:
             return result[0]
@@ -102,7 +102,7 @@ class ClientRegisterRepository(OracleBaseRepository):
 
     @classmethod
     async def get_sinacor_status(cls, user_cpf: int):
-        sql = f"SELECT IN_SITUAC FROM TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+        sql = f"SELECT IN_SITUAC FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
         result = await cls.query(sql=sql)
         if result and len(result) > 0:
             return result[0]
@@ -218,42 +218,42 @@ class ClientRegisterRepository(OracleBaseRepository):
     @classmethod
     async def _is_client_blocked(cls, user_cpf: int):
         result = await cls.query(
-            sql=f"SELECT 1 from TSCCLIGER WHERE CD_CPFCGC = {user_cpf} and IN_SITUAC = 'BL'"
+            sql=f"SELECT 1 from CORRWIN.TSCCLIGER WHERE CD_CPFCGC = {user_cpf} and IN_SITUAC = 'BL'"
         )
         return len(result) > 0
 
     @classmethod
     async def _client_has_value_blocked(cls, bmf_account: int):
         result = await cls.query(
-            sql=f"SELECT 1 from TCCSALDO_BLOQ WHERE COD_CLI = {bmf_account} and VAL_BLOQ > 0"
+            sql=f"SELECT 1 from CORRWIN.TCCSALDO_BLOQ WHERE COD_CLI = {bmf_account} and VAL_BLOQ > 0"
         )
         return len(result) > 0
 
     @classmethod
     async def _client_has_receivables(cls, bmf_account: int):
         result = await cls.query(
-            sql=f"SELECT 1 from TCCMOVTO WHERE CD_CLIENTE = {bmf_account} and DT_LIQUIDACAO >= SYSDATE"
+            sql=f"SELECT 1 from CORRWIN.TCCMOVTO WHERE CD_CLIENTE = {bmf_account} and DT_LIQUIDACAO >= SYSDATE"
         )
         return len(result) > 0
 
     @classmethod
     async def _client_has_options_blocked(cls, bmf_account: int):
         result = await cls.query(
-            sql=f"SELECT 1 from VCFPOSICAO WHERE COD_CLI = {bmf_account} and QTDE_BLQD is not null and QTDE_BLQD > 0"
+            sql=f"SELECT 1 from CORRWIN.VCFPOSICAO WHERE COD_CLI = {bmf_account} and QTDE_BLQD is not null and QTDE_BLQD > 0"
         )
         return len(result) > 0
 
     @classmethod
     async def _client_has_options_receivables(cls, bmf_account: int):
         result = await cls.query(
-            sql=f"SELECT 1 from VCFPOSICAO where COD_CLI = {bmf_account} and tipo_merc in ('OPC','OPV') and data_venc >= SYSDATE"
+            sql=f"SELECT 1 from CORRWIN.VCFPOSICAO where COD_CLI = {bmf_account} and tipo_merc in ('OPC','OPV') and data_venc >= SYSDATE"
         )
         return len(result) > 0
 
     @classmethod
     async def _client_has_values_in_bank_account(cls, bmf_account: int):
         result = await cls.query(
-            sql=f"select 1 from tccsaldo WHERE CD_CLIENTE = {bmf_account} and VL_TOTAL > 0"
+            sql=f"select 1 from CORRWIN.tccsaldo WHERE CD_CLIENTE = {bmf_account} and VL_TOTAL > 0"
         )
         return len(result) > 0
 
