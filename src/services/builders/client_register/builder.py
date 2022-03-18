@@ -267,14 +267,14 @@ class ClientRegisterBuilder:
 
     def add_cd_ddd_celular1(self, user_data: dict):
         cel_phone = user_data["phone"]
-        self._fields_added.update({"CD_DDD_CELULAR1": int(cel_phone[3:2])})
+        self._fields_added.update({"CD_DDD_CELULAR1": int(cel_phone[3:5])})
         return self
 
     def add_cd_ddd_tel(self, user_data: dict):
         phone = user_data["address"].get("phone")
         if not phone:
             phone = user_data["phone"]
-        self._fields_added.update({"CD_DDD_TEL": int(phone[3:2])})
+        self._fields_added.update({"CD_DDD_TEL": int(phone[3:5])})
         return self
 
     def add_in_ende(self, value=AddressType.RESIDENTIAL.value):
