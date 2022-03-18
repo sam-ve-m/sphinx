@@ -496,7 +496,7 @@ class ClientRegisterBuilder:
 
     def add_cd_cnpj_empresa(self, user_data: dict):
         self._fields_added.update(
-            {"CD_CNPJ_EMPRESA": user_data["occupation"]["company"]["cnpj"]}
+            {"CD_CNPJ_EMPRESA": user_data["occupation"].get("company", {}).get("cnpj")}
         )
         return self
 

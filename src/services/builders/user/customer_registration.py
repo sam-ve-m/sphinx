@@ -112,12 +112,12 @@ class CustomerRegistrationBuilder:
         return self
 
     def documents_identity_type(self):
-        identity_tpe = (
+        identity_type = (
             self.__personal_data.get("identifier_document", {})
             .get("document_data", {})
             .get("type")
         )
-        self.__buffer["documents"].update({"identity_tpe": identity_tpe})
+        self.__buffer["documents"].update({"identity_type": identity_type})
         return self
 
     def documents_identity_number(self):

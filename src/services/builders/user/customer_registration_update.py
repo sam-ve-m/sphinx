@@ -328,7 +328,7 @@ class UpdateCustomerRegistrationBuilder:
         )
 
         if new_document_identity_type := self._get_new_value(
-            "documents", "identity_tpe"
+            "documents", "identity_type"
         ):
             self._update_modified_data(
                 levels=("identifier_document", "document_data", "type"),
@@ -486,13 +486,13 @@ class UpdateCustomerRegistrationBuilder:
         return self
 
     def address_phone(self):
-        old_address_zip_code = self.__old_personal_data.get("address", {}).get("phone")
+        old_address_phone = self.__old_personal_data.get("address", {}).get("phone")
 
-        if new_address_zip_code := self._get_new_value("address", "phone"):
+        if new_address_phone := self._get_new_value("address", "phone"):
             self._update_modified_data(
                 levels=("address", "phone"),
-                old_field=old_address_zip_code,
-                new_filed=new_address_zip_code,
+                old_field=old_address_phone,
+                new_filed=new_address_phone,
             )
 
         return self
