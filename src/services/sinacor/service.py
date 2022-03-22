@@ -48,6 +48,11 @@ class SinacorService:
             client_register_repository=client_register_repository,
         )
 
+        await SinacorService.__crete_link_with_graphic_account(
+            database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
+            client_register_repository=client_register_repository,
+        )
+
         user_is_updated = await user_repository.update_one(
             old={"unique_id": database_and_bureau_dtvm_client_data_merged["unique_id"]},
             new=database_and_bureau_dtvm_client_data_merged,
@@ -153,9 +158,23 @@ class SinacorService:
         client_code = (
             database_and_bureau_dtvm_client_data_merged["portfolios"]["default"]["br"]["bmf_account"]
         )
-        is_already_allowed_cash_transfer = await client_register_repository.is_already_allowed_cash_transfer(client_code=client_code)
+        is_already_allowed_cash_transfer = await client_register_repository.client_has_already_allowed_cash_transfer(client_code=client_code)
         if not is_already_allowed_cash_transfer:
-            await client_register_repository.allow_cash_transfer(client_code=client_code)
+            await client_register_repository.allow_cash_transfer(client_code=int(client_code))
+
+    @staticmethod
+    async def __crete_link_with_graphic_account(
+            database_and_bureau_dtvm_client_data_merged: dict,
+            client_register_repository: Type[ClientRegisterRepository],
+    ):
+        cpf = (
+            database_and_bureau_dtvm_client_data_merged['identifier_document']["cpf"]
+        )
+        is_already_allowed_cash_transfer = await client_register_repository.client_has_already_link_with_graphic_account(
+            cpf=cpf
+        )
+        if not is_already_allowed_cash_transfer:
+            await client_register_repository.link_client_with_graphic_account(cpf=int(cpf))
 
     @staticmethod
     async def _add_dtvm_client_trade_metadata(

@@ -37,25 +37,55 @@ class ClientRegisterRepository(OracleBaseRepository):
 
     @classmethod
     async def allow_cash_transfer(cls, client_code: int):
-        insert_query = """
+        insert_query = f"""
             INSERT INTO CORRWIN.TSCCLISIS(
                 CD_CLIENTE,
                 CD_SISTEMA,
                 CD_CLISIS,
-                IND_EXPT_BANC_BMF,
-                COD_CLI_BANC_BMF
-            ) VALUES
-            (:client_code, 'OUT', :client_code,'N', None)
+                IND_EXPT_BANC_BMF
+            ) VALUES(:client_code, 'OUT', :client_code,'N')
         """
         await cls.execute(sql=insert_query, values={"client_code": client_code})
 
     @classmethod
-    async def is_already_allowed_cash_transfer(cls, client_code: int):
-        insert_query = f"""
+    async def link_client_with_graphic_account(cls, cpf: int):
+        insert_query = """
+            INSERT INTO TTSRELCTACLI (CD_CPFCGC, CD_CLIENTE_CC, CD_CLIENTE_CI, CD_CLIENTE_CP)
+            (
+                SELECT
+                    CD_CPFCGC,
+                    MAX(NVL((SELECT MIN(CD_CLIENTE) FROM CORRWIN.TSCCLICC WHERE CD_CPFCGC = CC.CD_CPFCGC AND IN_CONTA_INV = 'N' AND IN_SITUAC='A'), 0)) CLIENTE_CC,
+                    MAX( NVL(( SELECT MIN(CD_CLIENTE) FROM CORRWIN.TSCCLICC WHERE  CD_CPFCGC = CC.CD_CPFCGC AND IN_CONTA_INV = 'S'), 0)) CLIENTE_CI,
+                    MAX(NVL((SELECT MIN(CD_CLIENTE) FROM CORRWIN.TSCCLICC WHERE CD_CPFCGC = CC.CD_CPFCGC AND IN_CONTA_INV = 'N'AND IN_SITUAC = 'A'), 0)) CLIENTE_CP
+                FROM CORRWIN.TSCCLICC CC
+                WHERE
+                NOT EXISTS (SELECT 0 FROM CORRWIN.TTSRELCTACLI C WHERE C.CD_CPFCGC = CC.CD_CPFCGC)
+                AND IN_CONTA_INV = 'N'
+                AND IN_SITUAC = 'A'
+                AND CC.CD_CPFCGC = :cpf
+                GROUP BY CD_CPFCGC
+            )
+        """
+        await cls.execute(sql=insert_query, values={"cpf": cpf})
+
+    @classmethod
+    async def client_has_already_link_with_graphic_account(cls, cpf: int):
+        select_query = f"""
+            SELECT 1 FROM CORRWIN.TTSRELCTACLI
+            WHERE CD_CPFCGC = {cpf}
+        """
+        result = await cls.query(sql=select_query)
+        return bool(result)
+
+    @classmethod
+    async def client_has_already_allowed_cash_transfer(cls, client_code: int):
+        select_query = f"""
             SELECT 1 FROM CORRWIN.TSCCLISIS
             WHERE CD_CLIENTE = {client_code}
+            AND CD_SISTEMA = 'OUT'
         """
-        await cls.query(sql=insert_query)
+        result = await cls.query(sql=select_query)
+        return bool(result)
 
     @classmethod
     async def validate_user_data_errors(cls, user_cpf: int) -> bool:
