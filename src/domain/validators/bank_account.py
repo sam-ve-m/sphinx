@@ -1,10 +1,26 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, UUID4
 from typing import Optional
+from src.domain.validators.onboarding_validators import Cpf
 
 
-class CreateAccount(BaseModel):
-    bank_name: Optional[str] = None
-    account_type: Optional[str] = None
-    bak_agency: str = Field(min_length=5)
-    phoneList: List[Dict]
-    address: Optional[str] = None
+class CreateBankAccount(Cpf):
+    bank: str
+    account_type: str
+    agency: str
+    account_number: str
+    account_name: Optional[str]
+
+
+class UpdateBankAccounts(BaseModel):
+    bank: Optional[str]
+    account_type: Optional[str]
+    agency: Optional[str]
+    account_number: Optional[str]
+    account_name: str
+    id: UUID4
+
+
+class DeleteBankAccount(BaseModel):
+    id: str
+
+
