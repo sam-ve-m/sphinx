@@ -1,26 +1,32 @@
 # STANDARD LIBS
 from typing import Optional
+import json
 from etria_logger import Gladsheim
 
 # OUTSIDE LIBRARIES
 from fastapi import Request
 from jwt import JWT
-from jwt.jwk import jwk_from_pem
+from jwt.jwk import jwk_from_dict
 
 from heimdall_client import Heimdall, HeimdallStatusResponses
 from mist_client import Mist, MistStatusResponses
 
 # SPHINX
+from src.infrastructures.env_config import config
 from src.repositories.jwt.repository import JwtRepository
+from src.repositories.bucket.repository import Bucket
 from src.exceptions.exceptions import InternalServerError, UnauthorizedError
 
+
+BUCKET_NAME_KEY = config("BUCKET_NAME_KEY")
 
 class JwtService:
 
     instance = JWT()
     heimdall = Heimdall
     mist = Mist
-    jwt_repository = JwtRepository()
+    jwt_repository = JwtRepository
+    bucket = Bucket
 
     @classmethod
     async def insert_one(cls, jwt: str, email: str) -> None:
@@ -30,11 +36,11 @@ class JwtService:
             raise InternalServerError("common.process_issue")
 
     @classmethod
-    def generate_token(cls, jwt_payload_data: dict) -> Optional[str]:
+    async def generate_token(cls, jwt_payload_data: dict) -> Optional[str]:
         """The ttl value in minutes"""
         try:
-            with open("src/keys/id_rsa", "rb") as fh:
-                signing_key = jwk_from_pem(fh.read())
+            key = await cls.bucket.get_jwt_key_file(BUCKET_NAME_KEY)
+            signing_key = jwk_from_dict(json.loads(key))
             compact_jws = cls.instance.encode(
                 jwt_payload_data, signing_key, alg="RS256"
             )

@@ -95,10 +95,10 @@ class UserService(IUser):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user, ttl=10
         ).build()
-        payload_jwt = jwt_handler.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await jwt_handler.generate_token(jwt_payload_data=jwt_payload_data)
         authentication_service.send_authentication_email(
             email=user.get("email"),
-            payload_jwt=payload_jwt,
+            payload_jwt=jwt,
             body="email.body.created",
         )
         return {
@@ -196,7 +196,7 @@ class UserService(IUser):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_from_database, ttl=525600
         ).build()
-        jwt = JwtService.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await JwtService.generate_token(jwt_payload_data=jwt_payload_data)
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"jwt": jwt, "control_data": control_data},
@@ -294,7 +294,7 @@ class UserService(IUser):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
 
     @staticmethod
@@ -334,7 +334,7 @@ class UserService(IUser):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {
             "status_code": status_code,
             "payload": {"jwt": jwt},
@@ -365,7 +365,7 @@ class UserService(IUser):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=new, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         response.update({"jwt": jwt})
 
@@ -452,7 +452,7 @@ class UserService(IUser):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"jwt": jwt, "control_data": control_data},
@@ -761,11 +761,11 @@ class UserService(IUser):
         ).build()
         jwt_payload_data.update({"forgot_electronic_signature": True})
 
-        payload_jwt = JwtService.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await JwtService.generate_token(jwt_payload_data=jwt_payload_data)
 
         authentication_service.send_authentication_email(
             email=entity.get("email"),
-            payload_jwt=payload_jwt,
+            payload_jwt=jwt,
             body="email.body.forgot_electronic_signature",
         )
         return {
@@ -912,7 +912,7 @@ class UserService(IUser):
 
         (
             sent_to_persephone,
-            status_sent_to_persephone,
+            status_sent_to_persephone
         ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,

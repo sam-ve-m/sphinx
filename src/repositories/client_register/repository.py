@@ -36,6 +36,28 @@ class ClientRegisterRepository(OracleBaseRepository):
         await cls.execute(sql=error_temp, values={"cpf": str(user_cpf)})
 
     @classmethod
+    async def allow_cash_transfer(cls, client_code: int):
+        insert_query = """
+            INSERT INTO CORRWIN.TSCCLISIS(
+                CD_CLIENTE,
+                CD_SISTEMA,
+                CD_CLISIS,
+                IND_EXPT_BANC_BMF,
+                COD_CLI_BANC_BMF
+            ) VALUES
+            (:client_code, 'OUT', :client_code,'N', None)
+        """
+        await cls.execute(sql=insert_query, values={"client_code": client_code})
+
+    @classmethod
+    async def is_already_allowed_cash_transfer(cls, client_code: int):
+        insert_query = f"""
+            SELECT 1 FROM CORRWIN.TSCCLISIS
+            WHERE CD_CLIENTE = {client_code}
+        """
+        await cls.query(sql=insert_query)
+
+    @classmethod
     async def validate_user_data_errors(cls, user_cpf: int) -> bool:
         await cls._run_data_validator_in_register_user_tmp_table(user_cpf=user_cpf)
         return await cls._validate_errors_on_temp_tables(user_cpf=user_cpf)

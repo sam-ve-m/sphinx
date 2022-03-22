@@ -99,7 +99,7 @@ class Cpf(BaseModel):
 
 
 class CelPhone(BaseModel):
-    phone: constr(min_length=11, max_length=11)
+    phone: constr(regex=r'^\+\d+', min_length=5)
 
 
 class Nationality(BaseModel):
