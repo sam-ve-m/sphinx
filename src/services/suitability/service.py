@@ -124,7 +124,7 @@ class SuitabilityService(ISuitability):
             user_data=user_data, ttl=525600
         ).build()
 
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         return {
             "status_code": status.HTTP_201_CREATED,

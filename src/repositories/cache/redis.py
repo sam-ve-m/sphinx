@@ -1,6 +1,6 @@
 # STANDARD LIBS
 import pickle
-from typing import Optional
+from typing import Union, Optional
 
 
 # SPHINX
@@ -28,7 +28,7 @@ class RepositoryRedis(IRedis):
         return
 
     @classmethod
-    async def get(cls, key: str) -> Optional[dict]:
+    async def get(cls, key: str) -> Union[dict, str, bytes]:
         redis = cls.infra.get_redis()
         if type(key) != str:
             raise InternalServerError("cache.error.key")

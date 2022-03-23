@@ -1,5 +1,6 @@
 # STANDARD LIBS
 import datetime
+from typing import Type
 from copy import deepcopy
 
 from fastapi import status
@@ -21,49 +22,10 @@ class SinacorService:
     persephone_client = Persephone
 
     @staticmethod
-    async def process_callback(
-        payload: dict,
-        client_register_repository=ClientRegisterRepository(),
-        user_repository=UserRepository(),
-    ):
-        dtvm_client_data_provided_by_bureau = payload.get("data")
-
-        user_database_document = await user_repository.find_one(
-            {"_id": dtvm_client_data_provided_by_bureau["email"]["value"]}
-        )
-
-        user_from_database_exists = user_database_document
-
-        if user_from_database_exists is None:
-            raise BadRequestError("common.register_exists")
-
-        SinacorService._send_dtvm_client_data_to_persephone(
-            dtvm_client_data=dtvm_client_data_provided_by_bureau
-        )
-
-        database_and_bureau_dtvm_client_data_merged = (
-            SinacorService._merge_bureau_client_data_with_user_database(
-                output=dtvm_client_data_provided_by_bureau,
-                user_database_document=user_database_document,
-            )
-        )
-
-        await SinacorService.save_or_update_client_data(
-            user_data=database_and_bureau_dtvm_client_data_merged,
-            client_register_repository=client_register_repository,
-            user_repository=user_repository,
-        )
-
-        return {
-            "status_code": status.HTTP_200_OK,
-            "message_key": "ok",
-        }
-
-    @staticmethod
     async def save_or_update_client_data(
         user_data: dict,
-        client_register_repository=ClientRegisterRepository(),
-        user_repository=UserRepository(),
+        client_register_repository=ClientRegisterRepository,
+        user_repository=UserRepository,
     ):
         database_and_bureau_dtvm_client_data_merged = (
             await SinacorService._create_or_update_client_into_sinacor(
@@ -77,6 +39,16 @@ class SinacorService:
         )
 
         database_and_bureau_dtvm_client_data_merged = await SinacorService._add_dtvm_client_trade_metadata(
+            database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
+            client_register_repository=client_register_repository,
+        )
+
+        await SinacorService.__crete_reference_to_allow_cash_transfer(
+            database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
+            client_register_repository=client_register_repository,
+        )
+
+        await SinacorService.__crete_link_with_graphic_account(
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
         )
@@ -108,7 +80,7 @@ class SinacorService:
     @classmethod
     async def _create_or_update_client_into_sinacor(
         cls,
-        client_register_repository: ClientRegisterRepository,
+        client_register_repository: Type[ClientRegisterRepository],
         database_and_bureau_dtvm_client_data_merged: dict,
     ):
 
@@ -151,7 +123,7 @@ class SinacorService:
 
     @staticmethod
     async def _clean_sinacor_temp_tables_and_get_client_control_data_if_already_exists(
-        client_register_repository: ClientRegisterRepository,
+        client_register_repository: Type[ClientRegisterRepository],
         database_and_bureau_dtvm_client_data_merged: dict,
     ):
         await client_register_repository.cleanup_temp_tables(
@@ -179,9 +151,35 @@ class SinacorService:
         return SolutiontechClientImportStatus.FAILED.value
 
     @staticmethod
+    async def __crete_reference_to_allow_cash_transfer(
+        database_and_bureau_dtvm_client_data_merged: dict,
+        client_register_repository: Type[ClientRegisterRepository],
+    ):
+        client_code = (
+            database_and_bureau_dtvm_client_data_merged["portfolios"]["default"]["br"]["bmf_account"]
+        )
+        is_already_allowed_cash_transfer = await client_register_repository.client_has_already_allowed_cash_transfer(client_code=client_code)
+        if not is_already_allowed_cash_transfer:
+            await client_register_repository.allow_cash_transfer(client_code=int(client_code))
+
+    @staticmethod
+    async def __crete_link_with_graphic_account(
+            database_and_bureau_dtvm_client_data_merged: dict,
+            client_register_repository: Type[ClientRegisterRepository],
+    ):
+        cpf = (
+            database_and_bureau_dtvm_client_data_merged['identifier_document']["cpf"]
+        )
+        is_already_allowed_cash_transfer = await client_register_repository.client_has_already_link_with_graphic_account(
+            cpf=cpf
+        )
+        if not is_already_allowed_cash_transfer:
+            await client_register_repository.link_client_with_graphic_account(cpf=int(cpf))
+
+    @staticmethod
     async def _add_dtvm_client_trade_metadata(
         database_and_bureau_dtvm_client_data_merged: dict,
-        client_register_repository: ClientRegisterRepository,
+        client_register_repository: Type[ClientRegisterRepository],
     ) -> dict:
 
         client_cpf = database_and_bureau_dtvm_client_data_merged.get(
@@ -264,7 +262,7 @@ class SinacorService:
 
     @staticmethod
     async def _insert_client_on_the_sinacor_temp_table(
-        client_register_repository: ClientRegisterRepository,
+        client_register_repository: Type[ClientRegisterRepository],
         database_and_bureau_dtvm_client_data_merged: dict,
         sinacor_client_control_data,
     ):
@@ -279,7 +277,7 @@ class SinacorService:
 
     @staticmethod
     async def _check_sinacor_errors_if_is_not_update_client(
-        client_register_repository: ClientRegisterRepository,
+        client_register_repository: Type[ClientRegisterRepository],
         sinacor_client_control_data: dict,
         database_and_bureau_dtvm_client_data_merged: dict,
     ):

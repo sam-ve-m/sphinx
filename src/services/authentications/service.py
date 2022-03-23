@@ -83,7 +83,7 @@ class AuthenticationService(IAuthentication):
             user_data=user_data, ttl=525600
         ).build()
 
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         response.update({"payload": {"jwt": jwt, "control_data": control_data}})
 
@@ -108,7 +108,7 @@ class AuthenticationService(IAuthentication):
         if must_do_first_login is False and is_active_user is False:
             raise UnauthorizedError("invalid_credential")
 
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         AuthenticationService.send_authentication_email(
             email=user_data["email"],
             payload_jwt=jwt,
@@ -170,7 +170,7 @@ class AuthenticationService(IAuthentication):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
         ).build()
-        jwt = token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         (
             sent_to_persephone,
