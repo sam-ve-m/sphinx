@@ -1,0 +1,12 @@
+[run]
+omit = 
+    src/interfaces/*
+    src/controllers/*
+    */__init__.py
+    src/i18n/*
+    src/exceptions/*
+    src/*/enum/*
+    src/utils/genarate_id.py
+    src/utils/language_identifier.py
+    src/utils/jwt_utils.py
+    src/routers/authenticate.py 

@@ -1,0 +1,13 @@
+from enum import Enum
+
+
+class IncomeTaxType(Enum):
+    ISENTO = 1
+    ISENTO_COM_LIMINAR = 2
+    IDENTIFICADO = 3
+    RESIDENTE_NO_EXTERIOR = 4
+    ANONIMATO = 5
+    RESIDENTE_EXTERIOR_JAP_0 = 6
+    DEPOSITO_EM_JUIZO = 7
+    IMUNE = 8
+    ISENTO_OUTROS_DL9532 = 9

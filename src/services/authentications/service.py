@@ -1,114 +1,123 @@
 # STANDARD LIBS
-from copy import deepcopy
 
 # OUTSIDE LIBRARIES
 from fastapi import status
 
-from src.domain.sincad.client_sync_status import SincadClientImportStatus
-from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
-from src.utils.env_config import config
+from src.core.interfaces.services.authentication.interface import IAuthentication
+from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 
 # SPHINX
-from src.utils.email import HtmlModifier
-from src.repositories.user.repository import UserRepository
-from src.controllers.jwts.controller import JwtController
-from src.utils.jwt_utils import JWTHandler
+from src.domain.sincad.client_sync_status import SincadClientImportStatus
+from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
+from src.domain.user_level.enum import UserLevel
 from src.exceptions.exceptions import (
     BadRequestError,
     UnauthorizedError,
     InternalServerError,
 )
-from src.domain.persephone_queue import PersephoneQueue
-from src.services.persephone.service import PersephoneService
 from src.i18n.i18n_resolver import i18nResolver as i18n
-from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
-from src.utils.genarate_id import hash_field
-from src.interfaces.services.authentication.interface import IAuthentication
+from src.infrastructures.env_config import config
 from src.repositories.client_register.repository import ClientRegisterRepository
-from src.utils.solutiontech import Solutiontech
-from src.utils.persephone_templates import (
+from src.repositories.user.repository import UserRepository
+from src.services.builders.thebes_hall.builder import ThebesHallBuilder
+from src.services.email_builder.email import HtmlModifier
+from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
+from src.services.jwts.service import JwtService
+from src.services.persephone.templates.persephone_templates import (
     get_user_thebes_hall_schema_template_with_data,
     get_create_electronic_signature_session_schema_template_with_data,
+    get_user_logout_template_with_data,
     get_user_authentication_template_with_data,
-    get_user_logout_template_with_data
 )
+from src.services.third_part_integration.solutiontech import Solutiontech
+from persephone_client import Persephone
 
 
 class AuthenticationService(IAuthentication):
+
+    persephone_client = Persephone
+
     @staticmethod
-    def thebes_gate(
-        thebes_answer_from_request_or_error: dict, user_repository=UserRepository(), token_handler=JWTHandler,
-            persephone_client=PersephoneService.get_client()
+    async def thebes_gate(
+        thebes_answer: dict, user_repository=UserRepository, token_service=JwtService
     ) -> dict:
-        old = user_repository.find_one({"_id": thebes_answer_from_request_or_error.get("email")})
-        if old is None:
+        user_data = await user_repository.find_one(
+            {"unique_id": thebes_answer["user"].get("unique_id")}
+        )
+        if user_data is None:
             raise BadRequestError("common.register_not_exists")
-        new = deepcopy(old)
-        is_active_user = old.get("is_active_user")
-        response = {"status_code": None, "payload": {"jwt": None}}
-        response.update({"status_code": status.HTTP_200_OK})
+
+        is_active_user = user_data.get("is_active_user")
+        response = {"status_code": status.HTTP_200_OK, "payload": {"jwt": None}}
 
         if not is_active_user:
-            new.update(
-                {
-                    "is_active_user": True,
-                    "scope": {"view_type": "default", "features": ["default"]},
-                }
-            )
-            sent_to_persephone = persephone_client.run(
-                topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
-                partition=PersephoneQueue.USER_AUTHENTICATION.value,
-                payload=get_user_authentication_template_with_data(
-                    payload=new
-                ),
-                schema_key="user_authentication_schema",
-            )
-            if sent_to_persephone is False:
+            update_data = {
+                "is_active_user": True,
+                "must_do_first_login": False,
+                "scope": {
+                    "user_level": UserLevel.PROSPECT.value,
+                    "view_type": "default",
+                    "features": ["default"],
+                },
+            }
+            if (
+                await user_repository.update_one(old=user_data, new=update_data)
+                is False
+            ):
                 raise InternalServerError("common.process_issue")
-            if user_repository.update_one(old=old, new=new) is False:
-                raise InternalServerError("common.process_issue")
+            user_data.update(update_data)
 
-        jwt = token_handler.generate_token(payload=new, ttl=525600)
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await AuthenticationService.persephone_client.send_to_persephone(
+            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+            partition=PersephoneQueue.USER_AUTHENTICATION.value,
+            message=get_user_authentication_template_with_data(payload=user_data),
+            schema_name="user_authentication_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
-        response.update({"payload": {"jwt": jwt}})
+        jwt_payload_data, control_data = ThebesHallBuilder(
+            user_data=user_data, ttl=525600
+        ).build()
+
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
+
+        response.update({"payload": {"jwt": jwt, "control_data": control_data}})
 
         return response
 
     @staticmethod
-    def login(
-        user_credentials: dict, user_repository=UserRepository(), token_handler=JWTHandler
+    async def login(
+        user_credentials: dict,
+        user_repository=UserRepository(),
+        token_service=JwtService,
     ) -> dict:
-        entity = user_repository.find_one({"_id": user_credentials.get("email")})
-        if entity is None:
+        user_data = await user_repository.find_one({"email": user_credentials["email"]})
+        if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        ########################################################################### ADICIONAR ESSA VERIFICAÇAO QUANDO DELETAR USUARIO/CLIENTE ####################################################################
-        # if entity.get("is_active_client") is False:
-        #     raise UnauthorizedError("invalid_credential")
-        if entity.get("use_magic_link") is True:
-            payload_jwt = JWTHandler.generate_token(payload=entity, ttl=10)
-            AuthenticationService.send_authentication_email(
-                email=entity.get("email"),
-                payload_jwt=payload_jwt,
-                body="email.body.created",
-            )
-            return {
-                "status_code": status.HTTP_200_OK,
-                "message_key": "email.login",
-            }
-        else:
-            pin = user_credentials.get("pin")
-            if pin is None:
-                return {
-                    "status_code": status.HTTP_200_OK,
-                    "message_key": "user.need_pin",
-                }
-            if hash_field(payload=pin) != entity.get("pin"):
-                raise UnauthorizedError("user.pin_error")
+        jwt_payload_data, control_data = ThebesHallBuilder(
+            user_data=user_data, ttl=10
+        ).build()
 
-            jwt = token_handler.generate_token(payload=entity, ttl=525600)
-            JwtController.insert_one(jwt, entity.get("email"))
-            return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+        is_active_user = user_data["is_active_user"]
+        must_do_first_login = user_data["must_do_first_login"]
+        if must_do_first_login is False and is_active_user is False:
+            raise UnauthorizedError("invalid_credential")
+
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
+        AuthenticationService.send_authentication_email(
+            email=user_data["email"],
+            payload_jwt=jwt,
+            body="email.body.created",
+        )
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "email.login",
+        }
 
     @staticmethod
     def send_authentication_email(
@@ -117,7 +126,7 @@ class AuthenticationService(IAuthentication):
         page = HtmlModifier(
             "src/services/asset",
             i18n.get_translate(key=body, locale="pt"),
-            config("TARGET_LINK") + "/" + payload_jwt,
+            config("TARGET_LINK") + f"?token={payload_jwt}",
         )()
         email_sender.send_email_to(
             target_email=email,
@@ -126,142 +135,213 @@ class AuthenticationService(IAuthentication):
         )
 
     @staticmethod
-    def thebes_hall(
+    async def thebes_hall(
         device_and_thebes_answer_from_request: dict,
-        user_repository=UserRepository(),
-        token_handler=JWTHandler,
-        persephone_client=PersephoneService.get_client(),
+        user_repository=UserRepository,
+        token_service=JwtService,
     ) -> dict:
-        x_thebes_answer = device_and_thebes_answer_from_request.get('x-thebes-answer')
-        user_old = user_repository.find_one({"_id": x_thebes_answer.get("email")})
-        if user_old is None:
+        x_thebes_answer = device_and_thebes_answer_from_request["x-thebes-answer"]
+        unique_id = x_thebes_answer["user"]["unique_id"]
+        user_data = await user_repository.find_one({"unique_id": unique_id})
+        if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        user_new = deepcopy(user_old)
-        client_has_trade_allowed = AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user_old
+        br_third_part_synchronization_status = (
+            await AuthenticationService._dtvm_client_has_br_trade_allowed(
+                user=user_data
+            )
         )
+
+        user_data_update = {}
         must_update = False
-        for key, value in client_has_trade_allowed.items():
+        for key, value in br_third_part_synchronization_status.items():
             if value["status_changed"]:
                 must_update = True
-                user_new.update({key: value["status"]})
+                user_data_update.update({key: value["status"]})
 
         if must_update:
-            if user_repository.update_one(old=user_old, new=user_new) is False:
+            if (
+                await user_repository.update_one(old=user_data, new=user_data_update)
+                is False
+            ):
                 raise InternalServerError("common.process_issue")
+            user_data.update(user_data_update)
 
-        jwt = token_handler.generate_token(payload=user_new, ttl=525600)
+        jwt_payload_data, control_data = ThebesHallBuilder(
+            user_data=user_data, ttl=525600
+        ).build()
+        jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
-        sent_to_persephone = persephone_client.run(
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await AuthenticationService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
             partition=PersephoneQueue.USER_THEBES_HALL.value,
-            payload=get_user_thebes_hall_schema_template_with_data(
-                email=device_and_thebes_answer_from_request.get("email"),
+            message=get_user_thebes_hall_schema_template_with_data(
+                unique_id=unique_id,
                 jwt=jwt,
-                has_trade_allowed=client_has_trade_allowed,
-                device_information=device_and_thebes_answer_from_request.get('device_information')
+                jwt_payload_data=jwt_payload_data,
+                device_information=device_and_thebes_answer_from_request.get(
+                    "device_information"
+                ),
             ),
-            schema_key="user_thebes_hall_schema",
+            schema_name="user_thebes_hall_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"jwt": jwt, "control_data": control_data},
+        }
 
     @staticmethod
-    def get_thebes_hall(
-        thebes_answer_from_request_or_error: dict,
-        user_repository=UserRepository(),
-        token_handler=JWTHandler
-    ) -> dict:
-        user_old = user_repository.find_one({"_id": thebes_answer_from_request_or_error.get("email")})
-        if user_old is None:
-            raise BadRequestError("common.register_not_exists")
-
-        user_new = deepcopy(user_old)
-        client_has_trade_allowed = AuthenticationService._dtvm_client_has_trade_allowed(
-            user=user_old
-        )
-        must_update = False
-        for key, value in client_has_trade_allowed.items():
-            if value["status_changed"]:
-                must_update = True
-                user_new.update({key: value["status"]})
-
-        if must_update:
-            if user_repository.update_one(old=user_old, new=user_new) is False:
+    async def create_electronic_signature_jwt(
+        change_electronic_signature_request: dict,
+        jwt_service=JwtService,
+    ):
+        jwt_mist_session = None
+        allowed = None
+        try:
+            jwt_mist_session = await jwt_service.generate_session_jwt(
+                change_electronic_signature_request["electronic_signature"],
+                change_electronic_signature_request["jwt_user"]["unique_id"],
+            )
+            allowed = True
+        except BaseException as e:
+            allowed = False
+            raise e
+        finally:
+            sent_to_persephone = await AuthenticationService.persephone_client.send_to_persephone(
+                topic=config("PERSEPHONE_TOPIC_USER"),
+                partition=PersephoneQueue.USER_ELECTRONIC_SIGNATURE_SESSION.value,
+                message=get_create_electronic_signature_session_schema_template_with_data(
+                    unique_id=change_electronic_signature_request["jwt_user"][
+                        "unique_id"
+                    ],
+                    mist_session=jwt_mist_session,
+                    allowed=allowed,
+                ),
+                schema_name="create_electronic_signature_session_schema",
+            )
+            if sent_to_persephone is False:
                 raise InternalServerError("common.process_issue")
-
-        jwt = token_handler.generate_token(payload=user_new, ttl=525600)
-
-        return {"status_code": status.HTTP_200_OK, "payload": {"jwt": jwt}}
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": jwt_mist_session,
+        }
 
     @staticmethod
-    def _dtvm_client_has_trade_allowed(user: dict) -> dict:
+    async def logout(
+        device_jwt_and_thebes_answer_from_request: dict,
+    ) -> dict:
+        sent_to_persephone = (
+            await AuthenticationService.persephone_client.send_to_persephone(
+                topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
+                partition=PersephoneQueue.USER_LOGOUT.value,
+                message=get_user_logout_template_with_data(
+                    jwt=device_jwt_and_thebes_answer_from_request["jwt"],
+                    unique_id=device_jwt_and_thebes_answer_from_request["jwt_user"][
+                        "unique_id"
+                    ],
+                    device_information=device_jwt_and_thebes_answer_from_request[
+                        "device_information"
+                    ],
+                ),
+                schema_name="user_logout_schema",
+            )
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
+        return {"status_code": status.HTTP_200_OK, "message_key": "email.logout"}
+
+    @staticmethod
+    async def _dtvm_client_has_br_trade_allowed(
+        user: dict, solutiontech=Solutiontech
+    ) -> dict:
 
         user_solutiontech_status_from_database = user.get("solutiontech")
         user_sincad_status_from_database = user.get("sincad")
         user_sinacor_status_from_database = user.get("sinacor")
-        user_bmf_account_from_database = user.get("bmf_account")
-        user_cpf_from_database = user.get("cpf")
+        user_bmf_account_from_database = (
+            user.get("portfolios", {})
+            .get("default", {})
+            .get("br", {})
+            .get("bmf_account")
+        )
+        user_cpf_from_database = user.get("identifier_document", {}).get("cpf")
 
-        client_has_trade_allowed_status_with_database_user = AuthenticationService._get_client_has_trade_allowed_status_with_database_user(
+        if not all(
+            [
+                user_solutiontech_status_from_database,
+                user_sincad_status_from_database,
+                user_sinacor_status_from_database,
+                user_bmf_account_from_database,
+                user_cpf_from_database,
+            ]
+        ):
+            return {}
+
+        client_map_requirements_to_allow_trade_from_database = AuthenticationService._get_client_map_requirements_to_allow_trade(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             user_sincad_status_from_database=user_sincad_status_from_database,
             user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
-        user_has_valid_solutiontech_status_in_database = AuthenticationService.check_if_user_has_valid_solutiontech_status_in_database(
+        user_has_not_synced_solutiontech_status_in_database = AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database
         )
 
-        if user_has_valid_solutiontech_status_in_database:
-            user_solutiontech_status_from_check_status_request = Solutiontech.check_if_client_is_synced_with_solutiontech(
+        if user_has_not_synced_solutiontech_status_in_database:
+            user_solutiontech_status_from_check_status_request = await solutiontech.check_if_client_is_synced_with_solutiontech(
                 user_bmf_code=int(user_bmf_account_from_database),
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             )
 
-            client_has_trade_allowed_status_with_database_user = AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
-                client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
+            client_map_requirements_to_allow_trade_from_database = AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
+                client_map_requirements_to_allow_trade_from_database=client_map_requirements_to_allow_trade_from_database,
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
                 user_solutiontech_status_from_check_status_request=user_solutiontech_status_from_check_status_request,
             )
 
-        user_is_already_sync_with_sincad = (
+        user_is_not_already_sync_with_sincad = (
             user_sincad_status_from_database
             is SincadClientImportStatus.NOT_SYNCED.value
         )
-        if user_is_already_sync_with_sincad:
+        if user_is_not_already_sync_with_sincad:
             sincad_status_from_sinacor = (
-                AuthenticationService.sinacor_is_synced_with_sincad(
+                await AuthenticationService._sinacor_is_synced_with_sincad(
                     user_cpf=user_cpf_from_database
                 )
             )
 
             AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
-                client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
+                client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_trade_from_database,
                 sincad_status_from_sinacor=sincad_status_from_sinacor,
                 user_sincad_status_from_database=user_sincad_status_from_database,
             )
 
-        sinacor_status_from_sinacor = AuthenticationService.client_sinacor_is_blocked(
-            user_cpf=user_cpf_from_database
+        sinacor_status_from_sinacor = (
+            await AuthenticationService._client_sinacor_is_blocked(
+                user_cpf=user_cpf_from_database
+            )
         )
 
         AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
-            client_has_trade_allowed_status_with_database_user=client_has_trade_allowed_status_with_database_user,
+            client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_trade_from_database,
             sinacor_status_from_sinacor=sinacor_status_from_sinacor,
             user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
-        return client_has_trade_allowed_status_with_database_user
+        return client_map_requirements_to_allow_trade_from_database
 
     @staticmethod
-    def _get_client_has_trade_allowed_status_with_database_user(
+    def _get_client_map_requirements_to_allow_trade(
         user_solutiontech_status_from_database: str,
-        user_sincad_status_from_database: str,
-        user_sinacor_status_from_database: str,
+        user_sincad_status_from_database: bool,
+        user_sinacor_status_from_database: bool,
     ):
         client_has_trade_allowed_status_with_database_user = {
             "solutiontech": {
@@ -282,7 +362,7 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def _update_client_has_trade_allowed_status_with_solutiontech_status_response(
-        client_has_trade_allowed_status_with_database_user: dict,
+        client_map_requirements_to_allow_trade_from_database: dict,
         user_solutiontech_status_from_database: str,
         user_solutiontech_status_from_check_status_request: str,
     ):
@@ -292,14 +372,14 @@ class AuthenticationService(IAuthentication):
             != user_solutiontech_status_from_check_status_request
         )
 
-        client_has_trade_allowed_status_with_database_user["solutiontech"][
+        client_map_requirements_to_allow_trade_from_database["solutiontech"][
             "status"
         ] = user_solutiontech_status_from_check_status_request
-        client_has_trade_allowed_status_with_database_user["solutiontech"][
+        client_map_requirements_to_allow_trade_from_database["solutiontech"][
             "status_changed"
         ] = solutiontech_status_changed
 
-        return client_has_trade_allowed_status_with_database_user
+        return client_map_requirements_to_allow_trade_from_database
 
     @staticmethod
     def _update_client_has_trade_allowed_status_with_sincad_status_response(
@@ -340,84 +420,32 @@ class AuthenticationService(IAuthentication):
         return client_has_trade_allowed_status_with_database_user
 
     @staticmethod
-    def check_if_user_has_valid_solutiontech_status_in_database(
+    def _check_if_user_has_valid_solutiontech_status_in_database(
         user_solutiontech_status_from_database: str,
     ):
         user_has_valid_solutiontech_status_in_database = (
             user_solutiontech_status_from_database
-            == SolutiontechClientImportStatus.SEND.value
-            or user_solutiontech_status_from_database
-            == SolutiontechClientImportStatus.FAILED.value
+            in [
+                SolutiontechClientImportStatus.SEND.value,
+                SolutiontechClientImportStatus.FAILED.value,
+            ]
         )
-
         return user_has_valid_solutiontech_status_in_database
 
     @staticmethod
-    def sinacor_is_synced_with_sincad(
-        user_cpf: int, client_register_repository=ClientRegisterRepository()
+    async def _sinacor_is_synced_with_sincad(
+        user_cpf: int, client_register_repository=ClientRegisterRepository
     ) -> bool:
-        sincad_status = client_register_repository.get_sincad_status(user_cpf=user_cpf)
+        sincad_status = await client_register_repository.get_sincad_status(
+            user_cpf=user_cpf
+        )
         return sincad_status and sincad_status[0] in ["ACE", "ECM"]
 
     @staticmethod
-    def client_sinacor_is_blocked(
-        user_cpf: int, client_register_repository=ClientRegisterRepository()
+    async def _client_sinacor_is_blocked(
+        user_cpf: int, client_register_repository=ClientRegisterRepository
     ) -> bool:
-        sincad_status = client_register_repository.get_sinacor_status(user_cpf=user_cpf)
-        return sincad_status and sincad_status[0] in ["A"]
-
-    @staticmethod
-    def create_electronic_signature_jwt(
-        change_electronic_signature_request: dict, persephone_client=PersephoneService.get_client()
-    ):
-        jwt_mist_session = None
-        allowed = None
-        try:
-            jwt_mist_session = JWTHandler.generate_session_jwt(
-                change_electronic_signature_request.get("electronic_signature"), change_electronic_signature_request.get("email")
-            )
-            allowed = True
-        except BaseException as e:
-            allowed = False
-            raise e
-        finally:
-            sent_to_persephone = persephone_client.run(
-                topic=config("PERSEPHONE_TOPIC_USER"),
-                partition=PersephoneQueue.USER_ELECTRONIC_SIGNATURE_SESSION.value,
-                payload=get_create_electronic_signature_session_schema_template_with_data(
-                    email=change_electronic_signature_request.get("email"),
-                    mist_session=jwt_mist_session[0],
-                    allowed=allowed
-                ),
-                schema_key="create_electronic_signature_session_schema",
-            )
-            if sent_to_persephone is False:
-                raise InternalServerError("common.process_issue")
-
-        return {
-            "status_code": status.HTTP_200_OK,
-            "payload": jwt_mist_session[0],
-        }
-
-    @staticmethod
-    def logout(
-        device_jwt_and_thebes_answer_from_request: dict,
-        persephone_client=PersephoneService.get_client()
-    ) -> dict:
-        sent_to_persephone = persephone_client.run(
-            topic=config("PERSEPHONE_TOPIC_AUTHENTICATION"),
-            partition=PersephoneQueue.USER_LOGOUT.value,
-            payload=get_user_logout_template_with_data(
-                jwt=device_jwt_and_thebes_answer_from_request.get('jwt'),
-                email=device_jwt_and_thebes_answer_from_request.get('email'),
-                device_information=device_jwt_and_thebes_answer_from_request.get('device_information')
-            ),
-            schema_key="user_logout_schema",
+        sincad_status = await client_register_repository.get_sinacor_status(
+            user_cpf=user_cpf
         )
-        if sent_to_persephone is False:
-            raise InternalServerError("common.process_issue")
-
-        return {
-            "status_code": status.HTTP_200_OK,
-            "message_key": "email.logout"
-        }
+        return sincad_status and sincad_status[0] in ["A"]

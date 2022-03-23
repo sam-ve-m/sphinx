@@ -27,6 +27,7 @@ pt:
     wrong_electronic_signature: Assinatura eletrônica  incorreta.
     creating_account: Iremos criar sua conta bancaria, espere o email.
     cant_delete_account: Você tem pendencias em sua conta, verifique e tente novamente.
+    you_cant_be_your_spouse: Você não poded ser casado com você mesmo.
     files:
       term_not_signed: Você ainda não assinou estes termos.
     quiz:
@@ -79,10 +80,10 @@ pt:
       update_error: Não foi possivel fazer o update dos dados.
       last_user_profile_format: O formato do perfil de usuário está incorreto.
       last_user_profile_incomplete_data: Os dados de resposta de perfil de usuário está incompleto.
-      not_found: Suitability não encontrad.
+      not_found: Suitability não encontrado.
   cache:
     error:
       key: Chave invalida enviada para classe ce cache
   bureau:
     error:
-      fail: Erro na resposta da StoneAge
+      fail: Erro na criacao da conta do usuário no broker.

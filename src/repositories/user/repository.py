@@ -1,19 +1,19 @@
 # OUTSIDE LIBRARIES
-from src.utils.env_config import config
+
+from src.infrastructures.env_config import config
 
 # SPHINX
-from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
+from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
 
 
-class UserRepository(MongoDBInfrastructure):
-    def __init__(self):
-        super().__init__(
-            database=config("MONGODB_DATABASE_NAME"),
-            collection=config("MONGODB_USER_COLLECTION"),
-        )
+class UserRepository(MongoDbBaseRepository):
 
-    def is_user_using_suitability_or_refuse_term(self, user_email: str) -> str:
-        user = self.find_one({"_id": user_email})
+    database = config("MONGODB_DATABASE_NAME")
+    collection = config("MONGODB_USER_COLLECTION")
+
+    @classmethod
+    async def is_user_using_suitability_or_refuse_term(cls, unique_id: str) -> str:
+        user = await cls.find_one({"unique_id": unique_id})
         suitability = user.get("suitability")
         term_refusal = user["terms"].get("term_refusal")
 

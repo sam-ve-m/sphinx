@@ -1,13 +1,21 @@
 # OUTSIDE LIBRARIES
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
+import asyncio
+import nest_asyncio
+
+nest_asyncio.apply()
 
 # SPHINX
-from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
+from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
 
 
-class ViewRepository(MongoDBInfrastructure):
-    def __init__(self) -> None:
-        super().__init__(
-            database=config("MONGODB_DATABASE_NAME"),
-            collection=config("MONGODB_VIEW_COLLECTION"),
-        )
+class ViewRepository(MongoDbBaseRepository):
+    database = config("MONGODB_DATABASE_NAME")
+    collection = config("MONGODB_VIEW_COLLECTION")
+
+    @classmethod
+    def exists(cls, view_id: str):
+        current_event_loop = asyncio.get_running_loop()
+        task = current_event_loop.create_task(cls.find_one(query={"_id": view_id}))
+        value = current_event_loop.run_until_complete(task)
+        return value is not None

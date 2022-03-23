@@ -1,6 +1,5 @@
 # STANDARD LIBS
 from functools import reduce
-from operator import mul
 from typing import Optional, List
 
 # SPHINX

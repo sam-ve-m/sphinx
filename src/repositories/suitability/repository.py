@@ -1,29 +1,20 @@
 # OUTSIDE LIBRARIES
-from src.utils.env_config import config
+from src.infrastructures.env_config import config
 
 # SPHINX
-from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
+from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
 
 
-class SuitabilityRepository(MongoDBInfrastructure):
-    def __init__(self):
-        super().__init__(
-            database=config("MONGODB_DATABASE_NAME"),
-            collection=config("MONGODB_SUITABILITY_COLLECTION"),
-        )
+class SuitabilityRepository(MongoDbBaseRepository):
+    database = config("MONGODB_DATABASE_NAME")
+    collection = config("MONGODB_SUITABILITY_COLLECTION")
 
 
-class SuitabilityUserProfileRepository(MongoDBInfrastructure):
-    def __init__(self):
-        super().__init__(
-            database=config("MONGODB_DATABASE_NAME"),
-            collection=config("MONGODB_SUITABILITY_USER_PROFILE_COLLECTION"),
-        )
+class SuitabilityUserProfileRepository(MongoDbBaseRepository):
+    database = config("MONGODB_DATABASE_NAME")
+    collection = config("MONGODB_SUITABILITY_USER_PROFILE_COLLECTION")
 
 
-class SuitabilityAnswersRepository(MongoDBInfrastructure):
-    def __init__(self):
-        super().__init__(
-            database=config("MONGODB_DATABASE_NAME"),
-            collection=config("MONGODB_SUITABILITY_ANSWERS_COLLECTION"),
-        )
+class SuitabilityAnswersRepository(MongoDbBaseRepository):
+    database = config("MONGODB_DATABASE_NAME")
+    collection = config("MONGODB_SUITABILITY_ANSWERS_COLLECTION")

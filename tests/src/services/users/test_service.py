@@ -5,9 +5,37 @@ from fastapi import status
 
 # SPHINX
 from src.exceptions.exceptions import BadRequestError, InternalServerError
+from src.repositories.user.repository import UserRepository
 from src.services.users.service import UserService
+from src.repositories.file.repository import TermsFileType, FileRepository
+from tests.src.services.users.test_service_arguments import (
+    onboarding_complete_client_data,
+    on_boarding_steps,
+    onboarding_steps_success_status_code,
+    get_x_thebes_answer_with_client_data,
+    onboarding_unstarted_client_data,
+    stub_bucket_name,
+    stub_buckets,
+    onboarding_suitability_step_client_data,
+    onboarding_user_identifier_data_step_client_data,
+    onboarding_user_complementary_data_step_client_data,
+)
+from tests.src.services.users.test_service_utils import (
+    get_current_onboarding_step,
+    get_onboarding_steps,
+)
+from tests.stub_classes.stub_jwt_service_composition import JwtServiceWithStubAttributes
 from tests.stub_classes.stub_base_repository import StubBaseRepository
-from src.repositories.file.repository import TermsFileType
+from tests.stub_classes.stub_persephone_service import StubPersephoneService
+from tests.stub_classes.stub_client_register_repository import (
+    StubClientRegisterRepository,
+)
+
+
+@pytest.fixture
+def get_new_stub_persephone_service():
+    stub_persephone_service = StubPersephoneService()
+    return stub_persephone_service
 
 
 class StubRepository(StubBaseRepository):
@@ -26,7 +54,7 @@ class StubPersephoneClient:
     pass
 
 
-class StubJWTHandler:
+class StubJwtService:
     pass
 
 
@@ -43,6 +71,7 @@ def get_user_data():
     return {
         "email": "afl@lionx.com.br",
         "name": "anderson",
+        "terms": {},
         "scope": {"view_type": None, "features": ["real_time_data"]},
         "is_active_user": True,
         "is_active_client": False,
@@ -74,11 +103,14 @@ def test_created(get_new_stubby_repository):
     stub_authentication_service.send_authentication_email = MagicMock(return_value=True)
     stub_persephone_client = StubPersephoneClient()
     stub_persephone_client.run = MagicMock(return_value=True)
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(return_value={})
     response = UserService.create(
         user=payload,
         user_repository=stub_repository,
         authentication_service=stub_authentication_service,
         persephone_client=stub_persephone_client,
+        jwt_handler=stub_jwt_service,
     )
     assert response.get("status_code") == status.HTTP_201_CREATED
     assert response.get("message_key") == "user.created"
@@ -141,14 +173,16 @@ def test_change_view_process_issue(get_new_stubby_repository):
 
 def test_change_view(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
-    stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
+    stub_repository.find_one = MagicMock(
+        return_value={"scope": {"view_type": ""}, "terms": {}, "is_active_user": True}
+    )
     stub_repository.update_one = MagicMock(return_value=True)
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value="toaskjdg1.233213.123123")
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(return_value="toaskjdg1.233213.123123")
     response = UserService.change_view(
         payload=payload_change_view,
         user_repository=stub_repository,
-        token_handler=stub_jwt_handler,
+        token_service=stub_jwt_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert "jwt" in response.get("payload")
@@ -164,10 +198,20 @@ def test_delete_register_exists(get_new_stubby_repository):
 
 def test_delete_process_issue(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
-    stub_repository.find_one = MagicMock(return_value={"scope": {"view_type": ""}})
+    stub_repository.find_one = MagicMock(
+        return_value={"bmf_account": "123", "cpf": "123", "scope": {"view_type": ""}}
+    )
     stub_repository.update_one = MagicMock(return_value=False)
+    stub_client_register_repository = StubClientRegisterRepository()
+    stub_client_register_repository.client_is_allowed_to_cancel_registration = (
+        MagicMock(return_value=True)
+    )
     with pytest.raises(InternalServerError, match="^common.process_issue"):
-        UserService.delete(payload=payload_change_view, user_repository=stub_repository)
+        UserService.delete(
+            payload=payload_change_view,
+            user_repository=stub_repository,
+            client_register=stub_client_register_repository,
+        )
 
 
 @patch(
@@ -206,13 +250,18 @@ def test_forgot_password_register_exists(get_new_stubby_repository):
 
 def test_forgot_password(get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
-    stub_repository.find_one = MagicMock(return_value={})
+    stub_repository.find_one = MagicMock(
+        return_value={"is_active_user": True, "terms": {}}
+    )
     stub_repository.update_one = MagicMock(return_value=True)
     StubAuthenticationService.send_authentication_email = MagicMock(return_value=True)
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     response = UserService.forgot_password(
         payload=payload_change_password,
         user_repository=stub_repository,
         authentication_service=StubAuthenticationService,
+        jwt_handler=stub_jwt_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "email.forgot_password"
@@ -253,12 +302,12 @@ def test_add_feature_already_exists(get_user_data, get_new_stubby_repository):
         "x-thebes-answer": get_user_data,
         "feature": "real_time_data",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=get_user_data)
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.add_feature(
-        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        payload=payload, user_repository=stub_repository, token_service=stub_jwt_service
     )
     assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
 
@@ -272,15 +321,15 @@ def test_add_feature_process_issue(get_user_data, get_new_stubby_repository):
         "x-thebes-answer": copy,
         "feature": "real_time_data",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=get_user_data)
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.add_feature(
             payload=payload,
             user_repository=stub_repository,
-            token_handler=stub_jwt_handler,
+            token_service=stub_jwt_service,
         )
 
 
@@ -289,14 +338,14 @@ def test_add_feature(get_user_data, get_new_stubby_repository):
         "x-thebes-answer": get_user_data,
         "feature": "test_feature",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(
         return_value="jkasdh71283.12938712.1029873912"
     )
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.add_feature(
-        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        payload=payload, user_repository=stub_repository, token_service=stub_jwt_service
     )
     assert result.get("status_code") == status.HTTP_200_OK
     assert type(result.get("payload").get("jwt")) == str
@@ -309,8 +358,8 @@ def test_delete_feature_that_not_exists_raises(
         "x-thebes-answer": get_user_data,
         "feature": "real_time_data",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(
         return_value="asdkjash761.asd98y7139.123y7129h"
     )
     stub_repository = get_new_stubby_repository
@@ -319,7 +368,7 @@ def test_delete_feature_that_not_exists_raises(
         UserService.delete_feature(
             payload=payload,
             user_repository=stub_repository,
-            token_handler=stub_jwt_handler,
+            token_service=stub_jwt_service,
         )
 
 
@@ -330,10 +379,10 @@ def test_delete_feature_not_exists(get_user_data, get_new_stubby_repository):
     }
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=False)
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=get_user_data)
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     result = UserService.delete_feature(
-        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        payload=payload, user_repository=stub_repository, token_service=stub_jwt_service
     )
     assert result.get("status_code") == status.HTTP_304_NOT_MODIFIED
 
@@ -343,14 +392,14 @@ def test_delete_feature_that_exists(get_user_data, get_new_stubby_repository):
         "x-thebes-answer": get_user_data,
         "feature": "real_time_data",
     }
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(
         return_value="asdkjash761.asd98y7139.123y7129h"
     )
     stub_repository = get_new_stubby_repository
     stub_repository.update_one = MagicMock(return_value=True)
     result = UserService.delete_feature(
-        payload=payload, user_repository=stub_repository, token_handler=stub_jwt_handler
+        payload=payload, user_repository=stub_repository, token_service=stub_jwt_service
     )
     assert result.get("status_code") == status.HTTP_200_OK
 
@@ -358,9 +407,12 @@ def test_delete_feature_that_exists(get_user_data, get_new_stubby_repository):
 def test_save_user_selfie(get_user_data, get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
     stub_repository.save_user_file = MagicMock(return_value=None)
+    UserService.onboarding_step_validator = MagicMock(return_value=None)
+    StubPersephoneClient.run = MagicMock(return_value=True)
     response = UserService.save_user_selfie(
-        payload={"x-thebes-answer": {"email": "lala"}, "file_or_base64": ""},
+        payload={"x-thebes-answer": {"email": "lala@com.br"}, "file_or_base64": ""},
         file_repository=stub_repository,
+        persephone_client=StubPersephoneClient,
     )
     assert response.get("status_code") == status.HTTP_200_OK
     assert response.get("message_key") == "files.uploaded"
@@ -416,23 +468,25 @@ def test_sign_term_process_issue_v2(get_user_data, get_new_stubby_repository):
 
 def test_sign_term(get_user_data, get_new_stubby_repository):
     stub_user_repository = get_new_stubby_repository
-    stub_user_repository.find_one = MagicMock(return_value={"email": "lala"})
+    stub_user_repository.find_one = MagicMock(
+        return_value={"email": "lala", "is_active_user": True}
+    )
     stub_user_repository.update_one = MagicMock(return_value=True)
 
     stub_file_repository = StubRepository(database="", collection="")
     stub_file_repository.get_current_term_version = MagicMock(return_value=1)
 
     StubPersephoneClient.run = MagicMock(return_value=True)
-    stub_jwt_handler = StubJWTHandler()
-    stub_jwt_handler.generate_token = MagicMock(return_value=get_user_data)
+    stub_jwt_service = JwtServiceWithStubAttributes()
+    stub_jwt_service.generate_token = MagicMock(return_value=get_user_data)
     response = UserService.sign_term(
         payload={
-            "x-thebes-answer": {"email": "lala"},
+            "x-thebes-answer": {"email": "lala", "is_active_user": True},
             "file_type": TermsFileType.TERM_REFUSAL,
         },
         file_repository=stub_file_repository,
         user_repository=stub_user_repository,
-        token_handler=stub_jwt_handler,
+        token_service=stub_jwt_service,
         persephone_client=StubPersephoneClient,
     )
     assert response.get("status_code") == status.HTTP_200_OK
@@ -499,125 +553,40 @@ def test_user_identifier_data_register_not_exists(
         )
 
 
-# def test_user_identifier_data_process_issue_v1(
-#     get_user_data, get_new_stubby_repository
-# ):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
-#     stub_user_repository.update_one = MagicMock(return_value=True)
-#     StubStoneAge.send_user_identifier_data = MagicMock(return_value=None)
-#     with pytest.raises(InternalServerError, match="^user.quiz.trouble"):
-#         UserService.user_identifier_data(
-#             payload=payload_user_identifier_data,
-#             user_repository=stub_user_repository,
-#         )
-
-
 def test_user_identifier_data_process_issue_v2(
-    get_user_data, get_new_stubby_repository
+    get_user_data, get_new_stubby_repository, get_new_stub_persephone_service
 ):
     stub_user_repository = get_new_stubby_repository
-    stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
+    stub_persephone_service = get_new_stub_persephone_service
+    stub_persephone_service.run = MagicMock(return_value=True)
+    stub_user_repository.find_one = lambda x: None if "cpf" in x else {"a": 1}
     stub_user_repository.update_one = MagicMock(return_value=False)
     StubStoneAge.send_user_identifier_data = MagicMock(return_value={"a": 123})
+    UserService.onboarding_step_validator = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
             user_repository=stub_user_repository,
+            persephone_client=stub_persephone_service,
         )
 
 
-def test_user_identifier_data(get_user_data, get_new_stubby_repository):
+def test_user_identifier_data(
+    get_user_data, get_new_stubby_repository, get_new_stub_persephone_service
+):
+    stub_persephone_service = get_new_stub_persephone_service
+    stub_persephone_service.run = MagicMock(return_value=True)
     stub_user_repository = get_new_stubby_repository
-    stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
+    stub_user_repository.find_one = lambda x: None if "cpf" in x else {"a": 1}
     StubStoneAge.send_user_identifier_data = MagicMock(return_value={"a": 123})
     stub_user_repository.update_one = MagicMock(return_value=True)
+    UserService.onboarding_step_validator = MagicMock(return_value=True)
     response = UserService.user_identifier_data(
         payload=payload_user_identifier_data,
         user_repository=stub_user_repository,
+        persephone_client=stub_persephone_service,
     )
     assert response.get("status_code") == status.HTTP_200_OK
-
-
-class StubPersephoneClient:
-    pass
-
-
-# def test_user_quiz_responses_register_not_exists(
-#     get_user_data, get_new_stubby_repository
-# ):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(return_value=None)
-#     StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
-#     with pytest.raises(BadRequestError, match="^common.register_not_exists"):
-#         UserService.fill_user_data(
-#             payload=payload_user_identifier_data,
-#             user_repository=stub_user_repository,
-#             stone_age=StubStoneAge,
-#             persephone_client=StubPersephoneClient,
-#         )
-
-
-# @patch(
-#     "src.services.users.service.get_user_account_template_with_data",
-#     MagicMock(return_value={}),
-# )
-# def test_user_quiz_responses_process_issue_v1(get_user_data, get_new_stubby_repository):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(return_value={"la": "la"})
-#     StubStoneAge.send_user_quiz_responses = MagicMock(return_value=None)
-#     StubPersephoneClient.run = MagicMock(return_value=False)
-#     with pytest.raises(InternalServerError, match="^common.process_issue"):
-#         UserService.fill_user_data(
-#             payload=payload_user_identifier_data,
-#             user_repository=stub_user_repository,
-#             stone_age=StubStoneAge,
-#             persephone_client=StubPersephoneClient,
-#         )
-
-
-# @patch(
-#     "src.services.users.service.get_user_account_template_with_data",
-#     MagicMock(return_value={}),
-# )
-# def test_user_quiz_responses_process_issue_v2(get_user_data, get_new_stubby_repository):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(
-#         return_value={"user_account_data": {"data": "lalal"}}
-#     )
-#     stub_user_repository.update_one = MagicMock(return_value=False)
-#     StubStoneAge.send_user_quiz_responses = MagicMock(return_value={})
-#     StubPersephoneClient.run = MagicMock(return_value=True)
-#     with pytest.raises(InternalServerError, match="^common.process_issue"):
-#         UserService.fill_user_data(
-#             payload=payload_user_identifier_data,
-#             user_repository=stub_user_repository,
-#             stone_age=StubStoneAge,
-#             persephone_client=StubPersephoneClient,
-#         )
-
-
-# @patch(
-#     "src.services.users.service.get_user_account_template_with_data",
-#     MagicMock(return_value={}),
-# )
-# def test_user_quiz_responses(get_user_data, get_new_stubby_repository):
-#     stub_user_repository = get_new_stubby_repository
-#     stub_user_repository.find_one = MagicMock(
-#         return_value={"user_account_data": {"data": "lalal"}}
-#     )
-#     stub_user_repository.update_one = MagicMock(return_value=True)
-#     StubPersephoneClient.run = MagicMock(return_value=True)
-#     stone_age = StubStoneAge()
-#     stone_age.send_user_quiz_responses = MagicMock(return_value={})
-#     response = UserService.fill_user_data(
-#         payload=payload_user_identifier_data,
-#         user_repository=stub_user_repository,
-#         stone_age=stone_age,
-#         persephone_client=StubPersephoneClient,
-#     )
-#     assert response.get("status_code") == status.HTTP_200_OK
-#     assert response.get("message_key") == "user.creating_account"
 
 
 def test_fill_term_signed_empty_terms_on_payload():
@@ -645,13 +614,13 @@ def test_fill_term_signed_filled_terms_on_payload():
     assert len(payload.get("terms")) == 2
 
 
-def test_fill_account_data_on_user_document_without_provided_by_bureaux_field():
-    payload = dict()
-    stone_age_user_data = {"name": {"source": "test", "value": "Nome completo"}}
-    UserService.fill_account_data_on_user_document(
-        payload=payload, stone_age_user_data=stone_age_user_data
-    )
-    assert payload.get("provided_by_bureaux").get("name") == "Nome completo"
+# def test_fill_account_data_on_user_document_without_provided_by_bureaux_field():
+#     payload = dict()
+#     stone_age_user_data = {"name": {"source": "test", "value": "Nome completo"}}
+#     UserService.fill_account_data_on_user_document(
+#         payload=payload, stone_age_user_data=stone_age_user_data
+#     )
+#     assert payload.get("provided_by_bureaux").get("name") == "Nome completo"
 
 
 def test_fill_account_data_on_user_document_with_provided_by_bureaux_field():
@@ -661,3 +630,218 @@ def test_fill_account_data_on_user_document_with_provided_by_bureaux_field():
         payload=payload, stone_age_user_data=stone_age_user_data
     )
     assert payload.get("provided_by_bureaux").get("year") == 2012
+
+
+def test_get_onboarding_current_steps_with_none_steps_completed_expect_all_steps_false():
+    user_repository = UserRepository()
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.user_file_exists = MagicMock(return_value=True)
+
+    user_repository.find_one = MagicMock(return_value=onboarding_unstarted_client_data)
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert current_onboarding_step is on_boarding_steps.get("suitability_step")
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_suitability_step_completed_expect_only_suitability_step_true():
+    user_repository = UserRepository()
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.user_file_exists = MagicMock(return_value=False)
+
+    user_repository.find_one = MagicMock(
+        return_value=onboarding_suitability_step_client_data
+    )
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert current_onboarding_step is on_boarding_steps.get("user_identifier_data_step")
+    assert onboarding_steps.get("suitability_step") is True
+    del onboarding_steps["suitability_step"]
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_user_identifier_data_step_completed_expect_identifier_step_true():
+    user_repository = UserRepository()
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.user_file_exists = MagicMock(return_value=False)
+
+    user_repository.find_one = MagicMock(
+        return_value=onboarding_user_identifier_data_step_client_data
+    )
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert current_onboarding_step is on_boarding_steps.get("user_selfie_step")
+    assert onboarding_steps.get("suitability_step") is True
+    assert onboarding_steps.get("user_identifier_data_step") is True
+    del onboarding_steps["suitability_step"]
+    del onboarding_steps["user_identifier_data_step"]
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_user_selfie_step_completed_expect_user_selfie_step_true():
+    user_repository = UserRepository()
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.user_file_exists = MagicMock(return_value=True)
+
+    user_repository.find_one = MagicMock(
+        return_value=onboarding_user_identifier_data_step_client_data
+    )
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert current_onboarding_step is on_boarding_steps.get("user_complementary_step")
+    assert onboarding_steps.get("suitability_step") is True
+    assert onboarding_steps.get("user_identifier_data_step") is True
+    assert onboarding_steps.get("user_selfie_step") is True
+    del onboarding_steps["suitability_step"]
+    del onboarding_steps["user_identifier_data_step"]
+    del onboarding_steps["user_selfie_step"]
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_user_complementary_step_completed_expect_user_complementary_step_true():
+    user_repository = UserRepository()
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.user_file_exists = MagicMock(return_value=True)
+
+    user_repository.find_one = MagicMock(
+        return_value=onboarding_user_complementary_data_step_client_data
+    )
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert onboarding_steps.get("suitability_step") is True
+    assert onboarding_steps.get("user_identifier_data_step") is True
+    assert onboarding_steps.get("user_selfie_step") is True
+    assert onboarding_steps.get("user_complementary_step") is True
+    del onboarding_steps["suitability_step"]
+    del onboarding_steps["user_identifier_data_step"]
+    del onboarding_steps["user_selfie_step"]
+    del onboarding_steps["user_complementary_step"]
+    assert all(step is False for step in onboarding_steps.values()) is True
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_all_steps_completed_expect_true_filled_on_boarding_steps():
+    user_repository = UserRepository()
+
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.user_file_exists = MagicMock(return_value=True)
+
+    user_repository.find_one = MagicMock(return_value=onboarding_complete_client_data)
+
+    payload = get_x_thebes_answer_with_client_data()
+
+    user_onboarding_steps_response = UserService.get_onboarding_user_current_step(
+        payload=payload,
+        user_repository=user_repository,
+        file_repository=file_repository,
+    )
+
+    payload = user_onboarding_steps_response.get("payload")
+    status_code = user_onboarding_steps_response.get("status_code")
+
+    current_onboarding_step = get_current_onboarding_step(onboarding_steps=payload)
+    onboarding_steps = get_onboarding_steps(onboarding_steps=payload)
+
+    assert all(step is True for step in onboarding_steps.values()) is True
+    assert current_onboarding_step is on_boarding_steps.get("finished")
+    assert status_code is onboarding_steps_success_status_code
+
+
+def test_get_onboarding_current_steps_with_not_exists_user_expect_bad_request_error():
+    user_repository = UserRepository()
+
+    FileRepository.client.list_buckets = MagicMock(return_value=stub_buckets)
+    file_repository = FileRepository(bucket_name=stub_bucket_name)
+    file_repository.validate_bucket_name = MagicMock(return_value=stub_bucket_name)
+    file_repository.user_file_exists = MagicMock(return_value=False)
+
+    user_repository.find_one = MagicMock(return_value=None)
+    payload = get_x_thebes_answer_with_client_data()
+
+    with pytest.raises(BadRequestError, match="common.register_not_exists"):
+        UserService.get_onboarding_user_current_step(
+            payload=payload,
+            user_repository=user_repository,
+            file_repository=file_repository,
+        )

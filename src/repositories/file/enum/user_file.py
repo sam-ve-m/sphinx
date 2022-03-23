@@ -2,4 +2,4 @@ from enum import Enum
 
 
 class UserFileType(Enum):
-    SELF = "user_selfie"
+    SELFIE = "user_selfie"
