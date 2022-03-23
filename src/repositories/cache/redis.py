@@ -17,9 +17,9 @@ class RepositoryRedis(IRedis):
         redis = cls.infra.get_redis()
         """ttl in secounds"""
         if ttl > 0:
-            await redis.set(name=key, value=pickle.dumps(value), ex=ttl)
+            await redis.set(name=key, value=str(value), ex=ttl)
         else:
-            await redis.set(name=key, value=pickle.dumps(value))
+            await redis.set(name=key, value=str(value))
 
     @classmethod
     async def delete(cls, key: str):
@@ -33,7 +33,7 @@ class RepositoryRedis(IRedis):
         if type(key) != str:
             raise InternalServerError("cache.error.key")
         value = await redis.get(name=key)
-        return value and pickle.loads(value) or value
+        return eval(value) if value else value
 
     @classmethod
     async def get_keys(cls, pattern: str) -> Optional[list]:
