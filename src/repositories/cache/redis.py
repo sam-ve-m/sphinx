@@ -11,15 +11,17 @@ from src.infrastructures.redis.infrastructure import RedisInfrastructure
 
 class RepositoryRedis(IRedis):
     infra = RedisInfrastructure
+    prefix = 'sphinx:'
 
     @classmethod
     async def set(cls, key: str, value: dict, ttl: int = 0) -> None:
         redis = cls.infra.get_redis()
         """ttl in secounds"""
+        key = f"{cls.prefix}{key}"
         if ttl > 0:
-            await redis.set(name=key, value=str(value), ex=ttl)
+            await redis.set(name=key, value=pickle.dumps(value), ex=ttl)
         else:
-            await redis.set(name=key, value=str(value))
+            await redis.set(name=key, value=pickle.dumps(value))
 
     @classmethod
     async def delete(cls, key: str):
@@ -32,8 +34,9 @@ class RepositoryRedis(IRedis):
         redis = cls.infra.get_redis()
         if type(key) != str:
             raise InternalServerError("cache.error.key")
+        key = f"{cls.prefix}{key}"
         value = await redis.get(name=key)
-        return eval(value) if value else value
+        return value and pickle.loads(value) or value
 
     @classmethod
     async def get_keys(cls, pattern: str) -> Optional[list]:
