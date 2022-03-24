@@ -59,7 +59,7 @@ containers:
     - name: AWS_BUCKET_USERS_FILES
       value: "dtvm-users-files-dev"
     - name: AWS_BUCKET_USERS_SELF
-      value: "dtvm-user-self-dev"
+      value: "dtvm-user-selfie-dev"
     - name: AWS_BUCKET_TERMS
       value: "dtvm-terms-dev"
     - name: ORACLE_BASE_DSN
