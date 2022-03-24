@@ -202,7 +202,7 @@ class ThebesHallBuilder:
             self._jwt_payload_user_data.update({"portfolios": dict()})
         if self._jwt_payload_user_data["portfolios"].get("us") is None:
             self._jwt_payload_user_data["portfolios"].update({"us": dict()})
-        self._jwt_payload_user_data["portfolios"]["us"].update({"_": None})
+        self.add_dw_account()
         return self
 
     def add_bovespa_account(self):
@@ -223,6 +223,17 @@ class ThebesHallBuilder:
                 .get("default", {})
                 .get("br", {})
                 .get("bmf_account")
+            }
+        )
+        return self
+
+    def add_dw_account(self):
+        self._jwt_payload_user_data["portfolios"]["us"].update(
+            {
+                "dw_account": self._user_data.get("portfolios", {})
+                .get("default", {})
+                .get("us", {})
+                .get("dw_account")
             }
         )
         return self
