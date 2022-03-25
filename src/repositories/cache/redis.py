@@ -11,7 +11,7 @@ from src.infrastructures.redis.infrastructure import RedisInfrastructure
 
 class RepositoryRedis(IRedis):
     infra = RedisInfrastructure
-    prefix = 'sphinx:'
+    prefix = "sphinx:"
 
     @classmethod
     async def set(cls, key: str, value: dict, ttl: int = 0) -> None:

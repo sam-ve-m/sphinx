@@ -68,11 +68,11 @@ class BirthDateSource(Source):
 
 
 class CelPhoneSource(Source):
-    value: constr(regex=r'^\+\d+', min_length=5)
+    value: constr(regex=r"^\+\d+", min_length=5)
 
 
 class PhoneSource(Source):
-    value: constr(regex=r'^\+\d+', min_length=5)
+    value: constr(regex=r"^\+\d+", min_length=5)
 
 
 class EmailSource(Source):
@@ -193,7 +193,7 @@ class IdCitySource(Source):
 
 
 class ZipCodeSource(Source):
-    value: constr(regex=r'^[0-9]{5}-[\d]{3}')
+    value: constr(regex=r"^[0-9]{5}-[\d]{3}")
 
 
 class PhoneNumberSource(Source):
