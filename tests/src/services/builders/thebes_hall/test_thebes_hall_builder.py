@@ -1,23 +1,21 @@
 # Std imports
 from copy import deepcopy
+from unittest.mock import MagicMock
 
 # External imports
 import pytest
 from pydantic import ValidationError
-from unittest.mock import MagicMock
 
+from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 # Src imports
 from src.repositories.user.repository import UserRepository
-from src.services.builders.thebes_hall.validators.terms import Terms as TermsValidator
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
-from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
-
+from src.services.builders.thebes_hall.validators.terms import Terms as TermsValidator
 # Test imports
 from tests.src.services.builders.thebes_hall.test_thebes_hall_builder_arguments import (
     valid_client_data,
     ttl_10_seconds,
     valid_user_data,
-    not_active_user_data,
     mocked_term,
 )
 from tests.src.services.builders.thebes_hall.test_thebes_hall_builder_validator import (

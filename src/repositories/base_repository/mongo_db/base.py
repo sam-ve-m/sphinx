@@ -51,7 +51,9 @@ class MongoDbBaseRepository(IRepository):
             return False
 
     @classmethod
-    async def find_one(cls, query: dict, ttl: int = 0) -> Optional[dict]:
+    async def find_one(cls, query: dict, ttl: int = None, project: dict = None) -> Optional[dict]:
+        if ttl is None:
+            ttl = 0
         try:
             collection = await cls.get_collection()
             data = None
@@ -61,7 +63,7 @@ class MongoDbBaseRepository(IRepository):
                 data = await cls._get_from_cache(query=query)
 
             if not data:  # pragma: no cover
-                data = await collection.find_one(query)
+                data = await collection.find_one(query, project)
 
             if has_ttl and data is not None:  # pragma: no cover
                 await cls._save_cache(query=query, ttl=ttl, data=data)
@@ -73,10 +75,12 @@ class MongoDbBaseRepository(IRepository):
             raise Exception("internal_error")
 
     @classmethod
-    async def find_all(cls, sort: tuple = None, limit: int = None) -> Optional[Cursor]:
+    async def find_all(cls, query: dict, project: dict = None, sort: tuple = None, limit: int = None) -> Optional[Cursor]:
         try:
+            if query is None:
+                query = {}
             collection = await cls.get_collection()
-            query = collection.find()
+            query = collection.find(query, project)
             if sort:
                 query.sort(*sort)
             return await query.to_list(limit)
@@ -85,7 +89,7 @@ class MongoDbBaseRepository(IRepository):
             raise Exception("internal_error")
 
     @classmethod
-    async def update_one(cls, old, new, ttl=60) -> bool:
+    async def update_one(cls, old, new, array_filters=None, upsert=False, ttl=60) -> bool:
         if not old or len(old) == 0:
             return False
 
@@ -95,9 +99,26 @@ class MongoDbBaseRepository(IRepository):
         try:
             collection = await cls.get_collection()
             Sindri.dict_to_primitive_types(new, types_to_ignore=[datetime])
-            await collection.update_one(old, {"$set": new})
+            await collection.update_one(old, {"$set": new}, array_filters=array_filters, upsert=upsert)
             if unique_id := new.get("unique_id"):
                 await cls._save_cache(query={"unique_id": unique_id}, ttl=ttl, data=new)
+            return True
+        except Exception as e:
+            Gladsheim.error(error=e)
+            return False
+
+    @classmethod
+    async def add_one_in_array(cls, old, new, array_filters=None, upsert=False, ttl=60) -> bool:
+        if not old or len(old) == 0:
+            return False
+
+        if not new or len(new) == 0:
+            return False
+
+        try:
+            collection = await cls.get_collection()
+            Sindri.dict_to_primitive_types(new, types_to_ignore=[datetime])
+            await collection.update_one(old, {"$push": new}, array_filters=array_filters, upsert=upsert)
             return True
         except Exception as e:
             Gladsheim.error(error=e)

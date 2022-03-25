@@ -55,7 +55,7 @@ class MiddlewareService:
             return user_data
 
     @staticmethod
-    def validate_electronic_signature(
+    async def validate_electronic_signature(
         request: Request, user_data: dict, jwt_handler=JwtService
     ) -> bool:
         mist_token = None
@@ -63,12 +63,12 @@ class MiddlewareService:
             if b"x-mist" in header_tuple:
                 mist_token = header_tuple[1].decode()
                 break
-        is_valid = jwt_handler.mist.validate_jwt(jwt=mist_token)
+        is_valid = await jwt_handler.mist.validate_jwt(jwt=mist_token)
         if is_valid:
-            mist_content, status = jwt_handler.mist.decode_payload(jwt=mist_token)
+            mist_content, status = await jwt_handler.mist.decode_payload(jwt=mist_token)
             if (
                 status == MistStatusResponses.SUCCESS
-                and user_data["email"] == mist_content["decoded_jwt"]["email"]
+                and user_data["unique_id"] == mist_content["decoded_jwt"]["unique_id"]
             ):
                 return True
         return False
