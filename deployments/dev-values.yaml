@@ -4,7 +4,7 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.2.15
+    image: nexus.sigame.com.br/sphinx:1.2.16
     ports:
     - containerPort: 8000
     env:
@@ -178,7 +178,6 @@ containers:
       value: "/sphinx"
     - name: JWT_FILE_BUCKET_NAME
       value: "heimdall_rsa"
-
 
 imagePullSecrets:
   - name: nexus-v3
