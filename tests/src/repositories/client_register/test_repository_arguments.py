@@ -1,7 +1,5 @@
 # Std imports
 from datetime import datetime
-from pydantic import BaseModel
-
 
 invalid_client_data = {}
 
