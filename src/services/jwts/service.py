@@ -20,6 +20,7 @@ from src.exceptions.exceptions import InternalServerError, UnauthorizedError
 
 BUCKET_NAME_KEY = config("BUCKET_NAME_KEY")
 
+
 class JwtService:
 
     instance = JWT()

@@ -261,7 +261,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cep(self, user_data: dict):
-        cep_only_number = user_data["address"]["zip_code"].replace('-', '')
+        cep_only_number = user_data["address"]["zip_code"].replace("-", "")
         self._fields_added.update({"CD_CEP": int(cep_only_number)})
         return self
 

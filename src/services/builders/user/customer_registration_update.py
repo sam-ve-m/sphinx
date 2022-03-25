@@ -1,5 +1,5 @@
 from typing import Tuple, Optional
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 
 class UpdateCustomerRegistrationBuilder:
@@ -241,7 +241,9 @@ class UpdateCustomerRegistrationBuilder:
         self._update_modified_data(
             levels=("assets", "date"),
             old_field=old_date,
-            new_filed=datetime.utcnow().replace(hour=0, minute=0, second=0),
+            new_filed=datetime.utcnow()
+            .replace(hour=0, minute=0, second=0)
+            .astimezone(timezone(timedelta(minutes=-180))),
         )
 
     def personal_tax_residences(self):
