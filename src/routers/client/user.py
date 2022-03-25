@@ -36,7 +36,7 @@ async def create_user_bank_accounts(
     return create_user_bank_accounts_response
 
 
-@router.put("/user/update_bank_accounts", tags=["user"])
+@router.put("/user/bank_accounts", tags=["user"])
 async def update_bank_account(
         update_bank_account: UpdateUserBankAccounts,
         request: Request
@@ -53,7 +53,7 @@ async def update_bank_account(
     return update_bank_account_response
 
 
-@router.delete("/user/delete_bank_account", tags=["user"])
+@router.delete("/user/bank_account", tags=["user"])
 async def delete_bank_account(
         delete_bank_account: DeleteUsersBankAccount,
         request: Request):
