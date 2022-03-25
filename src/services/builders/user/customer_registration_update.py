@@ -242,8 +242,6 @@ class UpdateCustomerRegistrationBuilder:
             levels=("assets", "date"),
             old_field=old_date,
             new_filed=datetime.utcnow()
-            .replace(hour=0, minute=0, second=0)
-            .astimezone(timezone(timedelta(minutes=-180))),
         )
 
     def personal_tax_residences(self):
