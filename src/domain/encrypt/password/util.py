@@ -1,3 +1,5 @@
+from etria_logger import Gladsheim
+
 from src.core.interfaces.utils.encrypt.password.interface import IPasswordEncrypt
 from mist_client import Mist, MistStatusResponses
 from src.exceptions.exceptions import InternalServerError
@@ -13,6 +15,6 @@ class PasswordEncrypt(IPasswordEncrypt):
             user_password=user_password
         )
         if status != MistStatusResponses.SUCCESS:
-            logger.error(str(payload), exc_info=True)
+            Gladsheim.info(message=f"Error when encrypt password: {MistStatusResponses.SUCCESS.value}")
             raise InternalServerError("common.process_issue")
         return payload["encrypted_password"]

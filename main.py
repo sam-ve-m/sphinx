@@ -1,8 +1,6 @@
-from etria_logger import GLADSHEIM_LOGGING_CONFIG
-
 import uvicorn
+from etria_logger import GLADSHEIM_LOGGING_CONFIG
 from fastapi import FastAPI
-
 # SPHINX
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,7 +14,6 @@ from src.routers.routes_registers import (
 )
 
 # This import is extremely important for load all routes
-from src.routers import *
 
 app = FastAPI(root_path=config("ROOT_PATH"))
 
@@ -45,10 +42,11 @@ app.add_middleware(
 
 
 if __name__ == "__main__":
+    sphinx_port = int(config("SPHINX_PORT"))
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=8001,
+        port=sphinx_port,
         access_log=True,
         log_config=GLADSHEIM_LOGGING_CONFIG,
         root_path=config("ROOT_PATH"),

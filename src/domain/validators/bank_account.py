@@ -3,7 +3,7 @@ from typing import Optional
 from src.domain.validators.onboarding_validators import Cpf
 
 
-class CreateBankAccount(Cpf):
+class CreateUserBankAccount(Cpf):
     bank: str
     account_type: str
     agency: str
@@ -11,7 +11,7 @@ class CreateBankAccount(Cpf):
     account_name: Optional[str]
 
 
-class UpdateBankAccounts(BaseModel):
+class UpdateUserBankAccounts(BaseModel):
     bank: Optional[str]
     account_type: Optional[str]
     agency: Optional[str]
@@ -20,7 +20,7 @@ class UpdateBankAccounts(BaseModel):
     id: UUID4
 
 
-class DeleteBankAccount(BaseModel):
+class DeleteUsersBankAccount(BaseModel):
     id: str
 
 

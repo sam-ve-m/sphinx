@@ -1,15 +1,13 @@
 # OUTSIDE LIBRARIES
 from fastapi import Request
-
 # SPHINX
 from nidavellir import Sindri
 
-from src.domain.validators.bank_account import CreateBankAccount, UpdateBankAccounts, DeleteBankAccount
-from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
-from src.controllers.users.controller import UserController
 from src.controllers.user_bank_accounts.controller import UserBankAccounts
+from src.domain.validators.bank_account import CreateUserBankAccount, UpdateUserBankAccounts, DeleteUsersBankAccount
 from src.routers.routes_registers.client import ClientRouter
+from src.services.jwts.service import JwtService
 
 router = ClientRouter.instance()
 
@@ -20,12 +18,13 @@ async def get_user_bank_accounts(request: Request):
     payload = {
         "x-thebes-answer": jwt_data
     }
-    return await BaseController.run(UserBankAccounts.get, payload, request)
+    get_user_bank_accounts_response = await BaseController.run(UserBankAccounts.get, payload, request)
+    return get_user_bank_accounts_response
 
 
 @router.post("/user/bank_accounts", tags=["user"])
 async def create_user_bank_accounts(
-        create_bank_account: CreateBankAccount,
+        create_bank_account: CreateUserBankAccount,
         request: Request
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
@@ -33,12 +32,13 @@ async def create_user_bank_accounts(
         "x-thebes-answer": jwt_data,
         "bank_account": create_bank_account.dict()
     }
-    return await BaseController.run(UserBankAccounts.create, payload, request)
+    create_user_bank_accounts_response = await BaseController.run(UserBankAccounts.create, payload, request)
+    return create_user_bank_accounts_response
 
 
 @router.put("/user/update_bank_accounts", tags=["user"])
 async def update_bank_account(
-        update_bank_account: UpdateBankAccounts,
+        update_bank_account: UpdateUserBankAccounts,
         request: Request
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
@@ -49,12 +49,13 @@ async def update_bank_account(
         "bank_account": bank_account
 
     }
-    return await BaseController.run(UserBankAccounts.update, payload, request)
+    update_bank_account_response = await BaseController.run(UserBankAccounts.update, payload, request)
+    return update_bank_account_response
 
 
 @router.delete("/user/delete_bank_account", tags=["user"])
 async def delete_bank_account(
-        delete_bank_account: DeleteBankAccount,
+        delete_bank_account: DeleteUsersBankAccount,
         request: Request):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
     bank_account = delete_bank_account.dict()
@@ -62,4 +63,5 @@ async def delete_bank_account(
         "x-thebes-answer": jwt_data,
         "bank_account": bank_account
     }
-    return await BaseController.run(UserBankAccounts.delete, payload, request)
+    delete_bank_account_response = await BaseController.run(UserBankAccounts.delete, payload, request)
+    return delete_bank_account_response

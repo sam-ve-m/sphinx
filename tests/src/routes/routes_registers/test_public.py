@@ -1,10 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
 
 # Sphinx
 from src.routers.routes_registers.public import PublicRouter
-from tests.stub_classes.stub_request import StubRequest, StubURL
 from tests.stub_classes.stub_middleware_utils import StubMiddlewareUtils
+from tests.stub_classes.stub_request import StubRequest, StubURL
 
 
 def test_is_allow():

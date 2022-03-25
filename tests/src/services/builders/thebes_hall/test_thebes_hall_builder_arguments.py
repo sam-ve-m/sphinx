@@ -1,5 +1,4 @@
 from datetime import datetime
-from pydantic import BaseModel
 
 valid_client_data = {
     "_id": "ilm@lionx.com.br",

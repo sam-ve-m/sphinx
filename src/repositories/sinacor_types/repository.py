@@ -146,7 +146,7 @@ class SinacorTypesRepository(OracleBaseRepository):
         )
         return dict_result
 
-    # TODO IMPLEMNTAR
+    # TODO IMPLEMNTAR LISTAGEM DOS CÓDIGOS DOS BANCOS
     @classmethod
     async def get_banks_numbers(cls, ):
         sql = """
