@@ -44,3 +44,20 @@ class S3Infrastructure:
             Gladsheim.error(error=e)
             raise InternalServerError("files.error")
 
+    @classmethod
+    @asynccontextmanager
+    async def get_bucket(cls, bucket_name: str):
+        try:
+            if cls.session is None:
+                cls.session = aioboto3.Session()
+            async with cls.session.resource(
+                "s3",
+                aws_access_key_id=config("AWS_ACCESS_KEY_ID"),
+                aws_secret_access_key=config("AWS_SECRET_ACCESS_KEY"),
+                region_name=config("REGION_NAME"),
+            ) as s3:
+                bucket = await s3.Bucket(bucket_name)
+                yield bucket
+        except Exception as e:
+            Gladsheim.error(error=e)
+            raise InternalServerError("files.error")
