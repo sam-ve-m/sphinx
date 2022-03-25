@@ -19,7 +19,7 @@ class SinacorTypesRepository(OracleBaseRepository):
     def get_county_name_by_id(cls, id: int) -> Optional[str]:
         sql = f"""
             SELECT NOME_MUNI
-            FROM TSCDXMUNICIPIO
+            FROM CORRWIN.TSCDXMUNICIPIO
             WHERE NUM_SEQ_MUNI = {id}
         """
         current_event_loop = asyncio.get_running_loop()
@@ -75,7 +75,7 @@ class SinacorTypesRepository(OracleBaseRepository):
     async def get_county(cls, country: str, state: str) -> list:
         sql = f"""
             SELECT NUM_SEQ_MUNI as code, NOME_MUNI as description
-            FROM TSCDXMUNICIPIO
+            FROM CORRWIN.TSCDXMUNICIPIO
             WHERE SIGL_PAIS='{country}'
             AND SIGL_ESTADO='{state}'
         """
@@ -89,7 +89,7 @@ class SinacorTypesRepository(OracleBaseRepository):
     async def get_state(cls, country: str) -> list:
         sql = f"""
             SELECT SG_ESTADO as initials, NM_ESTADO as description
-            FROM TSCESTADO
+            FROM CORRWIN.TSCESTADO
             WHERE SG_PAIS='{country}'
         """
         tuple_result = await cls.query_with_cache(sql=sql)
@@ -102,7 +102,7 @@ class SinacorTypesRepository(OracleBaseRepository):
     async def get_country(cls) -> list:
         sql = """
             SELECT SG_PAIS as initials, NM_PAIS as description
-            FROM TSCPAIS
+            FROM CORRWIN.TSCPAIS
         """
         tuple_result = await cls.query_with_cache(sql=sql)
         dict_result = cls.tuples_to_dict_list(
@@ -172,7 +172,7 @@ class SinacorTypesRepository(OracleBaseRepository):
     def validate_country(cls, value: str) -> bool:
         sql = f"""
             SELECT 1
-            FROM TSCPAIS
+            FROM CORRWIN.TSCPAIS
             WHERE SG_PAIS = '{value}'
         """
         return cls.base_validator(sql=sql)
@@ -193,7 +193,7 @@ class SinacorTypesRepository(OracleBaseRepository):
     ) -> bool:
         sql = f"""
             SELECT 1
-            FROM TSCESTADO
+            FROM CORRWIN.TSCESTADO
             WHERE SG_ESTADO = '{value}'
         """
         return cls.base_validator(sql=sql)
@@ -243,6 +243,6 @@ class SinacorTypesRepository(OracleBaseRepository):
     def validate_contry_state_and_id_city(
         cls, contry: str, state: str, id_city: int
     ) -> bool:
-        sql = f"""SELECT 1 FROM TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
+        sql = f"""SELECT 1 FROM CORRWIN.TSCDXMUNICIPIO WHERE SIGL_PAIS = '{contry}' 
         AND SIGL_ESTADO = '{state}' AND NUM_SEQ_MUNI = {id_city}"""
         return cls.base_validator(sql=sql)
