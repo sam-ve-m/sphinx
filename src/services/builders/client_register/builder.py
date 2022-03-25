@@ -1,5 +1,5 @@
 # STANDARD LIBS
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from src.domain.sinacor.account_linked_address import (
@@ -261,7 +261,7 @@ class ClientRegisterBuilder:
         return self
 
     def add_cd_cep(self, user_data: dict):
-        cep_only_number = user_data["address"]["zip_code"].replace('-', '')
+        cep_only_number = user_data["address"]["zip_code"].replace("-", "")
         self._fields_added.update({"CD_CEP": int(cep_only_number)})
         return self
 
@@ -487,7 +487,8 @@ class ClientRegisterBuilder:
         return self
 
     def add_data_cfin(self, user_data: dict):
-        self._fields_added.update({"DATA_CFIN": user_data["assets"]["date"]})
+        data_in_gmt_minus_3 = user_data["assets"]["date"] + timedelta(minutes=-180)
+        self._fields_added.update({"DATA_CFIN": data_in_gmt_minus_3})
         return self
 
     def add_cd_cpf_conjuge(self, user_data: dict):

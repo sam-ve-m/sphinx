@@ -120,15 +120,21 @@ class ClientRegisterRepository(OracleBaseRepository):
 
     @classmethod
     async def get_user_control_data_if_user_already_exists(cls, user_cpf: int):
-        verify_user_data_sql = f"SELECT 1 FROM CORRWIN.TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
+        verify_user_data_sql = (
+            f"SELECT 1 FROM CORRWIN.TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
+        )
         verify_user_bovespa_account = (
             f"SELECT 1 FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
         )
         verify_user_bmf_account = (
             f"SELECT 1 FROM CORRWIN.TSCCLIBMF WHERE CD_CPFCGC = {user_cpf}"
         )
-        verify_user_account = f"SELECT 1 FROM CORRWIN.TSCCLICOMP WHERE CD_CPFCGC = {user_cpf}"
-        verify_user_treasury = f"SELECT 1 FROM CORRWIN.TSCCLITSD WHERE CD_CPFCGC = {user_cpf}"
+        verify_user_account = (
+            f"SELECT 1 FROM CORRWIN.TSCCLICOMP WHERE CD_CPFCGC = {user_cpf}"
+        )
+        verify_user_treasury = (
+            f"SELECT 1 FROM CORRWIN.TSCCLITSD WHERE CD_CPFCGC = {user_cpf}"
+        )
         all_validation_query = [
             verify_user_data_sql,
             verify_user_bovespa_account,
@@ -146,7 +152,9 @@ class ClientRegisterRepository(OracleBaseRepository):
 
     @classmethod
     async def get_sincad_status(cls, user_cpf: int):
-        sql = f"SELECT COD_SITU_ENVIO FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+        sql = (
+            f"SELECT COD_SITU_ENVIO FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+        )
         result = await cls.query(sql=sql)
         if result and len(result) > 0:
             return result[0]
