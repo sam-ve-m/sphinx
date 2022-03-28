@@ -599,7 +599,9 @@ class UserService(IUser):
             complementary_data_for_user_update.get("marital")
             and complementary_data_for_user_update.get("marital", {}).get("spouse")
             and current_user["identifier_document"]["cpf"]
-            == complementary_data_for_user_update.get("marital", {}).get("spouse", {}).get("cpf")
+            == complementary_data_for_user_update.get("marital", {})
+            .get("spouse", {})
+            .get("cpf")
         ):
             raise BadRequestError("user.you_cant_be_your_spouse")
 
@@ -912,7 +914,7 @@ class UserService(IUser):
 
         (
             sent_to_persephone,
-            status_sent_to_persephone
+            status_sent_to_persephone,
         ) = await UserService.persephone_client.send_to_persephone(
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.USER_UPDATE_REGISTER_DATA.value,

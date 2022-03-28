@@ -1,19 +1,19 @@
 # STANDARD LIBS
-from io import BytesIO
-from typing import Union, Optional
 from base64 import b64decode
 from enum import Enum
+from io import BytesIO
+from typing import Union, Optional
 
-# OUTSIDE LIBRARIES
-from src.infrastructures.env_config import config
-
+from src.core.interfaces.repositories.file_repository.interface import IFile
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError
 from src.infrastructures.s3.infrastructure import S3Infrastructure
 from src.repositories.cache.redis import RepositoryRedis
-from src.core.interfaces.repositories.file_repository.interface import IFile
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.file.enum.user_file import UserFileType
+
+
+# OUTSIDE LIBRARIES
 
 
 class FileRepository(IFile):
