@@ -13,14 +13,12 @@ from src.core.interfaces.services.view.interface import IView
 class ViewService(IView):
     @staticmethod
     async def create(payload: dict, view_repository=ViewRepository) -> dict:
-        payload.update({"_id": payload["name"], "features": list()})
-        if await view_repository.find_one(payload) is not None:
-            raise BadRequestError("common.register_exists")
-        if await view_repository.insert(payload):
-            return {
+        if await view_repository.create_view(payload):
+            create_view_response = {
                 "status_code": status.HTTP_201_CREATED,
                 "message_key": "requests.created",
             }
+            return create_view_response
         else:
             raise InternalServerError("common.process_issue")
 
