@@ -69,7 +69,7 @@ containers:
     - name: ORACLE_PASSWORD
       value: "5VUn2yD5"
     - name: ORACLE_SERVICE
-      value: "opdbuat.subpriv.vcnuat.oraclevcn.com"
+      value: "OPDBDEV.SUBPRIV.VCNDEV.ORACLEVCN.COM"
     - name: ORACLE_ENCODING
       value: "UTF-8"
     - name: ORACLE_PORT
