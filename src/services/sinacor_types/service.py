@@ -113,7 +113,7 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def convert_description_to_title(enum: List[dict]) -> List[dict]:
+    def  convert_description_to_title(enum: List[dict]) -> List[dict]:
         titled_enum = [
             {"code": item["code"], "value": item["description"].title()}
             for item in enum
