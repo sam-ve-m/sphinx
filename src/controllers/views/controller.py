@@ -24,7 +24,7 @@ class ViewController:
 
     @staticmethod
     async def delink_feature(payload: dict):
-        return await ViewService.delink_feature(payload=payload)
+        return await ViewService.delete_link_feature(payload=payload)
 
     @staticmethod
     async def get_view(payload: dict):

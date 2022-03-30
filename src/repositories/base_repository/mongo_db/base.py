@@ -15,7 +15,6 @@ from src.domain.model_decorator.generate_id import hash_field
 
 
 class MongoDbBaseRepository(IRepository):
-
     infra = MongoDBInfrastructure
     cache = RepositoryRedis
     database = None
@@ -75,7 +74,8 @@ class MongoDbBaseRepository(IRepository):
             raise Exception("internal_error")
 
     @classmethod
-    async def find_all(cls, query: dict, project: dict = None, sort: tuple = None, limit: int = None) -> Optional[Cursor]:
+    async def find_all(cls, query: dict, project: dict = None, sort: tuple = None, limit: int = None) -> Optional[
+        Cursor]:
         try:
             if query is None:
                 query = {}
@@ -119,6 +119,23 @@ class MongoDbBaseRepository(IRepository):
             collection = await cls.get_collection()
             Sindri.dict_to_primitive_types(new, types_to_ignore=[datetime])
             await collection.update_one(old, {"$push": new}, array_filters=array_filters, upsert=upsert)
+            return True
+        except Exception as e:
+            Gladsheim.error(error=e)
+            return False
+
+    @classmethod
+    async def delete_one_in_array(cls, old, new, array_filters=None, upsert=False, ttl=60) -> bool:
+        if not old or len(old) == 0:
+            return False
+
+        if not new or len(new) == 0:
+            return False
+
+        try:
+            collection = await cls.get_collection()
+            Sindri.dict_to_primitive_types(new, types_to_ignore=[datetime])
+            await collection.update_one(old, {"$pull": new}, array_filters=array_filters, upsert=upsert)
             return True
         except Exception as e:
             Gladsheim.error(error=e)

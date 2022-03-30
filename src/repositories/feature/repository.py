@@ -45,8 +45,8 @@ class FeatureRepository(MongoDbBaseRepository):
         return features
 
     @classmethod
-    def feature_exists(cls, view_id: str) -> bool:
+    def feature_exists(cls, feature_id: str) -> bool:
         current_event_loop = asyncio.get_running_loop()
-        task = current_event_loop.create_task(cls.find_one(query={"_id": view_id}))
+        task = current_event_loop.create_task(cls.find_one(query={"_id": feature_id}))
         value = current_event_loop.run_until_complete(task)
         return value is not None

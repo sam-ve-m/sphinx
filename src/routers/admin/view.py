@@ -34,6 +34,13 @@ async def get_view(view_id: str, request: Request):
     )
 
 
+@router.get("/views", tags=["views"])
+async def get_all(request: Request):
+    return await BaseController.run(
+        ViewController.get, {}, request
+    )
+
+
 @router.put("/view/link_feature", tags=["views_link"])
 async def link_feature(link: LinkViewFeature, request: Request):
     return await BaseController.run(
@@ -43,7 +50,16 @@ async def link_feature(link: LinkViewFeature, request: Request):
     )
 
 
-@router.get("/views", tags=["views_link"])
+@router.delete("/view/link_feature", tags=["views_link"])
+async def link_feature(link: LinkViewFeature, request: Request):
+    return await BaseController.run(
+        ViewController.delink_feature,
+        link.dict(),
+        request,
+    )
+
+
+@router.get("/views/link", tags=["views_link"])
 async def link_feature(request: Request):
     return await BaseController.run(
         ViewController.get,
@@ -51,12 +67,12 @@ async def link_feature(request: Request):
         request,
     )
 
-
-@router.delete("/view/link_feature", tags=["views_link"])
-# @router.requested_permissions(views=["async default"], features=["async default"])
-async def link_feature(link: LinkViewFeature, request: Request):
-    return await BaseController.run(
-        ViewController.delink_feature,
-        link.dict(),
-        request,
-    )
+#
+# @router.delete("/view/link_feature", tags=["views_link"])
+# # @router.requested_permissions(views=["async default"], features=["async default"])
+# async def link_feature(link: LinkViewFeature, request: Request):
+#     return await BaseController.run(
+#         ViewController.delink_feature,
+#         link.dict(),
+#         request,
+#     )
