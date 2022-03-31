@@ -14,7 +14,7 @@ async def create_feature(feature: Feature, request: Request):
 
 
 @router.put("/feature/{feature_id}", tags=["feature"])
-async def update_feature_data(feature_id: str, feature: Feature, request: Request):
+async def update_feature(feature_id: str, feature: Feature, request: Request):
     return await BaseController.run(
         FeatureController.update,
         {"feature_id": feature_id, "model": feature.dict()},
@@ -30,5 +30,5 @@ async def delete_feature(feature_id: str, request: Request):
 
 
 @router.get("/features", tags=["feature"])
-async def delete_feature(request: Request):
+async def get_feature(request: Request):
     return await BaseController.run(FeatureController.get, {}, request)

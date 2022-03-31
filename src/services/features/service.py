@@ -13,47 +13,45 @@ from src.exceptions.exceptions import BadRequestError, InternalServerError
 class FeatureService(IFeature):
     @staticmethod
     async def create(payload: dict, feature_repository=FeatureRepository) -> dict:
-        payload.update({"_id": payload["name"]})
-        if await feature_repository.find_one({"_id": payload.get("_id")}):
-            raise BadRequestError("common.register_exists")
-        if await feature_repository.insert(payload):
-            return {
-                "status_code": status.HTTP_201_CREATED,
-                "message_key": "requests.created",
-            }
-        else:
-            raise InternalServerError("common.process_issue")
+        feature_id = payload["name"]
+        payload.update({"_id": feature_id})
+        await feature_repository.create_feature(feature=payload)
+        create_feature_response = {
+            "status_code": status.HTTP_201_CREATED,
+            "message_key": "requests.created",
+        }
+        return create_feature_response
 
     @staticmethod
     async def update(payload: dict, feature_repository=FeatureRepository) -> dict:
-        old = await feature_repository.find_one({"_id": payload.get("feature_id")})
-        if not old:
-            raise BadRequestError("common.register_not_exists")
-        new = deepcopy(old)
-        new.update(payload.get("model"))
-        if await feature_repository.update_one(old=old, new=new):
-            return {
+        feature_id = payload.get("feature_id")
+        feature_update = deepcopy({"_id": feature_id})
+        feature_update.update(payload.get("model"))
+        if await feature_repository.update_feature(feature_id=feature_id, feature_update=feature_update):
+            update_feature_response = {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.updated",
             }
+            return update_feature_response
         else:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
     async def delete(payload: dict, feature_repository=FeatureRepository) -> dict:
-        feature_id = payload.get("feature_id")
-        if await feature_repository.delete_one({"_id": feature_id}):
-            return {
+        if await feature_repository.delete_feature(payload.get("feature_id")):
+            delete_feature_response = {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.deleted",
             }
+            return delete_feature_response
         else:
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    async def get(payload: dict, feature_repository=FeatureRepository) -> dict:
-        features = await feature_repository.find_all()
-        return {
+    async def get(feature_repository=FeatureRepository) -> dict:
+        features = await feature_repository.get_features()
+        get_features_response = {
             "status_code": status.HTTP_200_OK,
             "payload": {"features": features},
         }
+        return get_features_response
