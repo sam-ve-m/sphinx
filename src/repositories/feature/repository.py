@@ -19,11 +19,10 @@ class FeatureRepository(MongoDbBaseRepository):
     collection = config("MONGODB_FEATURE_COLLECTION")
 
     @classmethod
-    async def create_feature(cls, payload: dict):
-        payload.update({"_id": payload["name"]})
-        if await cls.find_one({"_id": payload.get("_id")}):
+    async def create_feature(cls, feature: dict):
+        if await cls.find_one({"_id": feature["_id"]}):
             raise BadRequestError("common.register_exists")
-        await cls.insert(payload)
+        await cls.insert(feature)
 
     @classmethod
     async def update_feature(cls, feature_id: str, feature_update: dict):
@@ -40,8 +39,8 @@ class FeatureRepository(MongoDbBaseRepository):
         return delete
 
     @classmethod
-    async def get_features(cls, payload: dict):
-        features = await cls.find_all(payload)
+    async def get_features(cls):
+        features = await cls.find_all({})
         return features
 
     @classmethod

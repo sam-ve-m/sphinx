@@ -13,7 +13,9 @@ from src.core.interfaces.services.view.interface import IView
 class ViewService(IView):
     @staticmethod
     async def create(payload: dict, view_repository=ViewRepository) -> dict:
-        create_view_succeeded = await view_repository.create_view(payload)
+        view_id = payload["name"]
+        payload.update({"_id": view_id})
+        create_view_succeeded = await view_repository.create_view(view=payload)
         if create_view_succeeded:
             create_view_response = {
                 "status_code": status.HTTP_201_CREATED,
@@ -25,9 +27,10 @@ class ViewService(IView):
 
     @staticmethod
     async def update(payload: dict, view_repository=ViewRepository) -> dict:
-        view_update = deepcopy({"_id": payload.get("view_id")})
+        view_id = payload.get("view_id")
+        view_update = deepcopy({"_id": view_id})
         view_update.update(payload.get("model"))
-        view_update_succeeded = await view_repository.update_view(payload=payload, view_update=view_update)
+        view_update_succeeded = await view_repository.update_view(view_id=view_id, view_update=view_update)
         if view_update_succeeded:
             update_view_response = {
                 "status_code": status.HTTP_200_OK,
@@ -39,7 +42,8 @@ class ViewService(IView):
 
     @staticmethod
     async def delete(payload: dict, view_repository=ViewRepository) -> dict:
-        delete_view_succeeded = await view_repository.delete_view(payload)
+        view_id = payload.get("view_id")
+        delete_view_succeeded = await view_repository.delete_view(view_id)
         if delete_view_succeeded:
             delete_view_response = {
                 "status_code": status.HTTP_200_OK,
@@ -90,15 +94,16 @@ class ViewService(IView):
 
     @staticmethod
     async def get_view(payload: dict, view_repository=ViewRepository) -> dict:
-        view = await view_repository.get_one_view(payload)
+        view_id = payload.get("view_id")
+        view = await view_repository.get_one_view(view_id)
         if view is None:
             raise BadRequestError("common.register_not_exists")
         get_one_view_response = {"status_code": status.HTTP_200_OK, "payload": view}
         return get_one_view_response
 
     @staticmethod
-    async def get(payload: dict, view_repository=ViewRepository) -> dict:
-        views = await view_repository.get_all_views(payload)
+    async def get(view_repository=ViewRepository) -> dict:
+        views = await view_repository.get_all_views()
         get_all_views_response = {
             "status_code": status.HTTP_200_OK,
             "payload": {"views": views},

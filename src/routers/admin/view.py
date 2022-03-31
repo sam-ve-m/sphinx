@@ -53,7 +53,7 @@ async def link_feature(link: LinkViewFeature, request: Request):
 @router.delete("/view/link_feature", tags=["views_link"])
 async def link_feature(link: LinkViewFeature, request: Request):
     return await BaseController.run(
-        ViewController.delink_feature,
+        ViewController.delete_link_feature,
         link.dict(),
         request,
     )

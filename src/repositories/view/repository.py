@@ -17,41 +17,39 @@ class ViewRepository(MongoDbBaseRepository):
     collection = config("MONGODB_VIEW_COLLECTION")
 
     @classmethod
-    async def create_view(cls, payload: dict):
-        payload.update({"_id": payload["name"], "features": list()})
-        if await cls.find_one(payload) is not None:
+    async def create_view(cls, view: dict):
+        if await cls.find_one({"_id": view["_id"]}):
             raise BadRequestError("common.register_exists")
-        create = await cls.insert(payload)
+        create = await cls.insert(view)
         return create
 
     @classmethod
-    async def update_view(cls, payload: dict, view_update: dict):
-        if not await cls.find_one({"_id": payload.get("view_id")}):
+    async def update_view(cls, view_id: str, view_update: dict):
+        if not await cls.find_one({"_id": view_id}):
             raise BadRequestError("common.register_not_exists")
-        update = await cls.update_one(old={"_id": payload.get("view_id")}, new=view_update)
+        update = await cls.update_one(old={"_id": view_id}, new=view_update)
         return update
 
     @classmethod
-    async def delete_view(cls, payload: dict):
-        view_id = payload.get("view_id")
+    async def delete_view(cls, view_id: str):
         if not await cls.find_one({"_id": view_id}):
             raise BadRequestError("common.register_not_exists")
         delete = await cls.delete_one({"_id": view_id})
         return delete
 
     @classmethod
-    async def get_one_view(cls, payload: dict):
-        view = await cls.find_one({"_id": payload.get("view_id")})
+    async def get_one_view(cls, view_id: str):
+        view = await cls.find_one({"_id": view_id})
         return view
 
     @classmethod
-    async def get_all_views(cls, payload: dict):
-        views = await cls.find_all(payload)
+    async def get_all_views(cls):
+        views = await cls.find_all({})
         return views
 
     @classmethod
-    async def link_feature_view(cls, payload: dict, feature_id: str, view_id: str):
-        if not await cls.find_one({"_id": payload.get("view_id")}):
+    async def link_feature_view(cls, feature_id: str, view_id: str):
+        if not await cls.find_one({"_id": view_id}):
             raise BadRequestError("common.register_not_exists")
         link_feature_view_was_added = await cls.add_one_in_array(
             old={"_id": view_id},

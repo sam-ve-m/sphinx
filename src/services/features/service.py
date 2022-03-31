@@ -13,7 +13,9 @@ from src.exceptions.exceptions import BadRequestError, InternalServerError
 class FeatureService(IFeature):
     @staticmethod
     async def create(payload: dict, feature_repository=FeatureRepository) -> dict:
-        await feature_repository.create_feature(payload)
+        feature_id = payload["name"]
+        payload.update({"_id": feature_id})
+        await feature_repository.create_feature(feature=payload)
         create_feature_response = {
             "status_code": status.HTTP_201_CREATED,
             "message_key": "requests.created",
@@ -21,7 +23,8 @@ class FeatureService(IFeature):
         return create_feature_response
 
     @staticmethod
-    async def update(payload: dict, feature_id: str, feature_repository=FeatureRepository) -> dict:
+    async def update(payload: dict, feature_repository=FeatureRepository) -> dict:
+        feature_id = payload.get("feature_id")
         feature_update = deepcopy({"_id": feature_id})
         feature_update.update(payload.get("model"))
         if await feature_repository.update_feature(feature_id=feature_id, feature_update=feature_update):
@@ -45,8 +48,8 @@ class FeatureService(IFeature):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    async def get(payload: dict, feature_repository=FeatureRepository) -> dict:
-        features = await feature_repository.get_features(payload)
+    async def get(feature_repository=FeatureRepository) -> dict:
+        features = await feature_repository.get_features()
         get_features_response = {
             "status_code": status.HTTP_200_OK,
             "payload": {"features": features},

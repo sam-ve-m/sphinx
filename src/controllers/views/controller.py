@@ -20,10 +20,10 @@ class ViewController:
 
     @staticmethod
     async def get(payload: dict):
-        return await ViewService.get(payload=payload)
+        return await ViewService.get()
 
     @staticmethod
-    async def delink_feature(payload: dict):
+    async def delete_link_feature(payload: dict):
         return await ViewService.delete_link_feature(payload=payload)
 
     @staticmethod

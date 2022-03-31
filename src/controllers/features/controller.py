@@ -8,7 +8,7 @@ class FeatureController:
 
     @staticmethod
     def update(payload: dict):
-        return FeatureService.update(payload=payload, feature_id=payload.get("feature_id"))
+        return FeatureService.update(payload=payload)
 
     @staticmethod
     def delete(payload: dict):
@@ -16,4 +16,4 @@ class FeatureController:
 
     @staticmethod
     def get(payload: dict):
-        return FeatureService.get(payload=payload)
+        return FeatureService.get()
