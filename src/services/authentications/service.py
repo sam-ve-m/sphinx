@@ -272,14 +272,13 @@ class AuthenticationService(IAuthentication):
         )
         user_cpf_from_database = user.get("identifier_document", {}).get("cpf")
 
-        user_solutiontech_status_is_synced = user.get("solutiontech") == SolutiontechClientImportStatus.SYNC.value
         if all(
             [
-                user_solutiontech_status_is_synced,
-                user_sincad_status_from_database,
-                user_sinacor_status_from_database,
-                user_bmf_account_from_database,
-                user_cpf_from_database,
+                user_solutiontech_status_from_database is None,
+                user_sincad_status_from_database is None,
+                user_sinacor_status_from_database is None,
+                user_bmf_account_from_database is None,
+                user_cpf_from_database is None,
             ]
         ):
             return {}
@@ -290,6 +289,7 @@ class AuthenticationService(IAuthentication):
             user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
+        user_solutiontech_status_is_synced = user.get("solutiontech") == SolutiontechClientImportStatus.SYNC.value
         if not user_solutiontech_status_is_synced:
             user_solutiontech_status_from_check_status_request = await solutiontech.check_if_client_is_synced_with_solutiontech(
                 user_bmf_code=int(user_bmf_account_from_database),
