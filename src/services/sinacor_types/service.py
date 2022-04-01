@@ -5,10 +5,6 @@ from fastapi import status
 
 # PERSEPHONE
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
-from src.domain.sinacor.person_gender import PersonGender
-from src.domain.validators.marital_status_app_to_sphinx import (
-    MaritalStatusAppToSphinxEnum,
-)
 
 
 class SinaCorTypes:

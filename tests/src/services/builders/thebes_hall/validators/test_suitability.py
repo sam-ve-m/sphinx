@@ -1,10 +1,9 @@
 # Third part
-from unittest.mock import MagicMock
 from datetime import datetime
-from freezegun import freeze_time
 
 # Sphinx
 import pytest
+from freezegun import freeze_time
 
 from src.services.builders.thebes_hall.validators.suitability import Suitability
 

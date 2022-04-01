@@ -31,6 +31,7 @@ class Solutiontech:
                     params={"codCliente": user_bmf_code},
                     ssl=False,
                 ) as response:
+                    response_message = await response.text()
                     if response.status == 200:
                         response_message = await response.text()
                         maped_response = Solutiontech.response_message_map.get(

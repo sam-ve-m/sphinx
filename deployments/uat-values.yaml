@@ -1,0 +1,262 @@
+replicaCount: 1
+name: sphinx
+namespace: homolog
+
+containers:
+  - name: sphinx
+    image: nexus.sigame.com.br/sphinx:1.2.16
+    ports:
+    - containerPort: 8000
+    env:
+    - name: ETRIA_LOG_LEVEL
+      value: "DEBUG"
+    - name: ROOT_LOG_LEVEL
+      value: "WARNING"
+    - name: PERSEPHONE_KAFKA_BROKERS
+      value: "sigbrvnlkafka-uat.subpriv.vcnuat.oraclevcn.com:9092"
+    - name: PRODUCTION
+      value: "False"
+    - name: MONGO_CONNECTION
+      value: "mongodb"
+    - name: LOG_NAME
+      value: "uvicorn.info"
+    - name: COMPANY_OPERATION_CODE
+      value: "7029"
+    - name: MONGO_IS_SERVER
+      value: "False"
+    - name: MONGO_CONNECTION_URL
+      value: "mongodb://bnd:4FZPY5Yj@172.30.18.223:41000,172.30.19.240:41000,172.30.19.71:41000/?authSource=admin&replicaSet=rslionx&readPreference=secondary"
+    - name: MONGODB_DATABASE_NAME
+      value: "lionx"
+    - name: MONGODB_FEATURE_COLLECTION
+      value: "features"
+    - name: MONGODB_USER_COLLECTION
+      value: "users"
+    - name: MONGODB_VIEW_COLLECTION
+      value: "views"
+    - name: MONGODB_JWT_COLLECTION
+      value: "jwts"
+    - name: MONGODB_SUITABILITY_COLLECTION
+      value: "suitability"
+    - name: MONGODB_SUITABILITY_USER_PROFILE_COLLECTION
+      value: "suitability_user_profile"
+    - name: MONGODB_SUITABILITY_ANSWERS_COLLECTION
+      value: "suitability_answers"
+    - name: MAIL_KEY
+      value: "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"
+    - name: MAIL_SENDER
+      value: "no-reply@lionx.ai"
+    - name: TARGET_LINK
+      value: "https://app.lionx.com.br/public/deeplink"
+    - name: REDIS_HOST_URL
+      value: "redis://bnd:93uOKu5H@lnxbrspkeydb-01.subpriv.vcnuat.oraclevcn.com:6379?db=1"
+    - name: AWS_ACCESS_KEY_ID
+      value: "AKIATZVFXI25USQWCS5O"
+    - name: AWS_SECRET_ACCESS_KEY
+      value: "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"
+    - name: REGION_NAME
+      value: "sa-east-1"
+    - name: AWS_BUCKET_USERS_FILES
+      value: "dtvm-users-files-uat"
+    - name: AWS_BUCKET_USERS_SELF
+      value: "dtvm-user-selfie-uat"
+    - name: AWS_BUCKET_TERMS
+      value: "dtvm-terms-uat"
+    - name: ORACLE_BASE_DSN
+      value: "172.30.18.44"
+    - name: ORACLE_USER
+      value: "corrwin"
+    - name: ORACLE_PASSWORD
+      value: "5VUn2yD5"
+    - name: ORACLE_SERVICE
+      value: "opdbuat.subpriv.vcnuat.oraclevcn.com"
+    - name: ORACLE_ENCODING
+      value: "UTF-8"
+    - name: ORACLE_PORT
+      value: "1521"
+    - name: LD_LIBRARY_PATH
+      value: "/opt/instantclient"
+    - name: PERSEPHONE_QUEUE_HOST
+      value: "sigbrvnlkafka-uat.subpriv.vcnuat.oraclevcn.com"
+    - name: PERSEPHONE_QUEUE_PORT
+      value: "9092"
+    - name: PERSEPHONE_TOPIC
+      value: "thebes.sphinx_persephone.topic"
+    - name: PERSEPHONE_TOPIC_USER
+      value: "sphinx_persephone.user.crud"
+    - name: PERSEPHONE_TOPIC_AUTHENTICATION
+      value: "sphinx_persephone.user.authentication"
+    - name: SOLUTIONTECH_BASE_URL
+      value: "http://hml-serviceportal.lionx.com.br/STImportaCliente/"
+    - name: SOLUTIONTECH_VERIFY_DTVM_CLIENT
+      value: "STImportaCliente/VerificaClienteImportado"
+    - name: SOLUTIONTECH_SYNC_DTVM_CLIENT
+      value: "STImportaCliente/InsereAgendamentoImportacao"
+    - name: REDIS_POOL_MIN_CONNECTIONS
+      value: "5"
+    - name: REDIS_POOL_MAX_CONNECTIONS
+      value: "500"
+    - name: BUCKET_NAME_KEY
+      value: "auth-gateway-keys-uat"
+    - name: FILE_BUCKET_NAME
+      value: "heimdall_rsa"
+    - name: VALHALLA_QUEUE_HOST
+      value: "sigbrvnlkafka-uat.subpriv.vcnuat.oraclevcn.com:9092"
+    - name: HEIMDALL_FILE_BUCKET_NAME
+      value: "heimdall_rsa"
+    - name: HEIMDALL_AWS_ACCESS_KEY_ID
+      value: "AKIATZVFXI25USQWCS5O"
+    - name: HEIMDALL_AWS_SECRET_ACCESS_KEY
+      value: "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"
+    - name: HEIMDALL_REGION_NAME
+      value: "sa-east-1"
+    - name: HEIMDALL_BUCKET_NAME_KEY
+      value: "auth-gateway-keys-uat"
+    - name: HEIMDALL_AWS_BUCKET_USERS_FILES
+      value: "dtvm-users-files-uat"
+    - name: HEIMDALL_AWS_BUCKET_TERMS
+      value: "dtvm-terms-uat"
+    - name: HEIMDALL_JWT_REQUIRED_FIELDS
+      value: "[]"
+    - name: HEIMDALL_REDIS_HOST
+      value: "lnxbrspkeydb-01.subpriv.vcnuat.oraclevcn.com"
+    - name: HEIMDALL_REDIS_PORT
+      value: "6379"
+    - name: HEIMDALL_REDIS_DB
+      value: "1"
+    - name: HEIMDALL_REDIS_USER
+      value: "bnd"
+    - name: HEIMDALL_REDIS_PASSWORD
+      value: "93uOKu5H"
+    - name: MIST_REDIS_HOST
+      value: "lnxbrspkeydb-01.subpriv.vcnuat.oraclevcn.com"
+    - name: MIST_REDIS_PORT
+      value: "6379"
+    - name: MIST_REDIS_DB
+      value: "1"
+    - name: MIST_REDIS_USER
+      value: "bnd"
+    - name: MIST_REDIS_PASSWORD
+      value: "93uOKu5H"
+    - name: MIST_AWS_ACCESS_KEY_ID
+      value: "AKIATZVFXI25USQWCS5O"
+    - name: MIST_AWS_SECRET_ACCESS_KEY
+      value: "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"
+    - name: MIST_REGION_NAME
+      value: "sa-east-1"
+    - name: MIST_BUCKET_NAME_KEY
+      value: "auth-gateway-keys-uat"
+    - name: MIST_JWT_FILE_BUCKET_NAME
+      value: "mist_rsa"
+    - name: MIST_ELECTRONIC_SIGNATURE_FILE_BUCKET_NAME
+      value: "eletronic-signature-key"
+    - name: MIST_JWT_REQUIRED_FIELDS
+      value: "[]"
+    - name: MIST_MONGODB_CONNECTION
+      value: "mongodb://bnd:4FZPY5Yj@172.30.18.223:41000,172.30.19.240:41000,172.30.19.71:41000/?authSource=admin&replicaSet=rslionx&readPreference=secondary&appname=MongoDB%20Compass&ssl=false"
+    - name: MIST_AUTH_DATABASE_MONGO_CONNECTION
+      value: "mongodb"
+    - name: MIST_AUTH_DATABASE_HOST
+      value: "172.30.18.223"
+    - name: MIST_AUTH_DATABASE_PORT
+      value: "41000"
+    - name: MIST_AUTH_DATABASE_USER
+      value: "bnd"
+    - name: MIST_AUTH_DATABASE_PASSWORD
+      value: "4FZPY5Yj"
+    - name: MIST_ELECTRONIC_SIGNATURE_MAX_ATTEMPTS
+      value: "5"
+    - name: MIST_ENCRYPT_KEY
+      value: "c_-e_-e_-e_-i_-i"
+    - name: MIST_FILE_BUCKET_NAME
+      value: "mist_rsa"
+    - name: MIST_AUTH_DATABASE_NAME
+      value: "lionx"
+    - name: MIST_AUTH_DATABASE_USER_COLLECTION
+      value: "users"
+    - name: ROOT_PATH
+      value: "/sphinx"
+    - name: JWT_FILE_BUCKET_NAME
+      value: "heimdall_rsa"
+
+
+
+imagePullSecrets:
+  - name: nexus-v3
+
+service:
+  name: sphinx-service
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8000
+
+virtualService:
+  name: sphinx-vs
+  spec:
+    hosts:
+      - hom.api.siga.me 
+    gateways:
+      - hom-istio-gateway
+    http:
+    - match:
+      - uri:
+          prefix: "/sphinx/"
+      - uri:
+          prefix: "/sphinx"
+      rewrite:
+        uri: "/"
+      route:
+      - destination:
+          host: sphinx-service.homolog.svc.cluster.local
+          port:
+            number: 8000
+      corsPolicy:
+        allowOrigins:
+        - regex: "."
+        allowMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+        - OPTIONS
+        allowHeaders:
+        - x-thebes-answer
+        - content-type
+
+labels:
+  app: sphinx
+
+podAnnotations: {}
+
+# securityContext:
+#   capabilities:
+#     drop:
+#     - AUDIT_WRITE
+#     - MKNOD
+#     - SETFCAP
+#     - SETPCAP
+#     - KILL
+#   # runAsNonRoot: true
+#   # runAsUser: 1000
+resources:
+  requests: #Amount of resources kube-scheduler will look into nodes to alocate the given POD
+    cpu: 512m
+    memory: 512Mi
+  limits: #Amount of resources limited by kubelet (will not exceed)
+    cpu: 1
+    memory: 768Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

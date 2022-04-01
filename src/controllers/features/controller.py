@@ -16,4 +16,4 @@ class FeatureController:
 
     @staticmethod
     def get(payload: dict):
-        return FeatureService.get(payload=payload)
+        return FeatureService.get()

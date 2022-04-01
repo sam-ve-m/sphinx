@@ -1,36 +1,5 @@
-# Third part
-import pytest
-
 # Sphinx
-from src.domain.model_decorator.generate_id import generate_unique_id, hash_field
-
-# USAR FREEZE TIME PARA PODER TESTAR ISSO AKI
-def test_generate_id_error_because_key_not_exists():
-    with pytest.raises(Exception, match="Error to generate _id"):
-        generate_unique_id(key="lala", payload={}, must_remove=False)
-
-
-def test_generate_id_and_not_delete_the_key():
-    payload = {"lala": "oi"}
-    generate_unique_id(key="lala", payload=payload, must_remove=False)
-    assert payload["lala"] == payload["_id"]
-
-
-def test_generate_id_and_delete_the_key():
-    payload = {"lala": "oi"}
-    generate_unique_id(key="lala", payload=payload, must_remove=True)
-    assert "oi" == payload["_id"]
-    assert payload.get("lala") == None
-
-
-def test_generate_id_payload_as_str():
-    with pytest.raises(AttributeError):
-        generate_unique_id(key="lala", payload="", must_remove=True)
-
-
-def test_generate_id_key_as_dict():
-    with pytest.raises(TypeError):
-        generate_unique_id(key={"teste": 123}, payload={}, must_remove=True)
+from src.domain.model_decorator.generate_id import hash_field
 
 
 def test_hash_field_str():

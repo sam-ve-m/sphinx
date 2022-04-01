@@ -47,7 +47,7 @@ class FeatureId(BaseModel):
     @validator("feature_id", always=True, allow_reuse=True)
     def validate_feature_id(cls, e):
         feature_repository = FeatureRepository
-        if feature_repository.exists(view_id=e):
+        if feature_repository.feature_exists(feature_id=e):
             return e
         raise ValueError("feature not exists")
 

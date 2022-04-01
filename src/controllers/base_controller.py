@@ -1,12 +1,13 @@
 # STANDARD LIBS
-from typing import Optional
-from etria_logger import Gladsheim
 import json
+from typing import Optional
 
+from etria_logger import Gladsheim
 # OUTSIDE LIBRARIES
 from fastapi import Response, status, Request
-from src.infrastructures.env_config import config
+from nidavellir import Sindri
 
+from src.core.interfaces.controllers.base_controller.interface import IController
 # SPHINX
 from src.exceptions.exceptions import (
     UnauthorizedError,
@@ -15,8 +16,6 @@ from src.exceptions.exceptions import (
     InternalServerError,
 )
 from src.i18n.i18n_resolver import i18nResolver as i18n
-from src.core.interfaces.controllers.base_controller.interface import IController
-from nidavellir import Sindri
 
 
 class BaseController(IController):

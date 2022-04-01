@@ -23,7 +23,7 @@ class ClientRouter(RoutesRegister):
                     if middleware_utils.is_user_token_life_time_valid(
                         user_data=valid_client, token=token
                     ):
-                        allowed_client = middleware_utils.validate_electronic_signature(
+                        allowed_client = await middleware_utils.validate_electronic_signature(
                             request=request, user_data=valid_client
                         )
         except Exception as e:
