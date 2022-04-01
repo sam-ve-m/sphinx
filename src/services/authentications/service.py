@@ -261,7 +261,6 @@ class AuthenticationService(IAuthentication):
     async def _dtvm_client_has_br_trade_allowed(
         user: dict, solutiontech=Solutiontech
     ) -> dict:
-
         user_solutiontech_status_from_database = user.get("solutiontech")
         user_sincad_status_from_database = user.get("sincad")
         user_sinacor_status_from_database = user.get("sinacor")
@@ -273,9 +272,10 @@ class AuthenticationService(IAuthentication):
         )
         user_cpf_from_database = user.get("identifier_document", {}).get("cpf")
 
-        if not all(
+        user_solutiontech_status_is_synced = user.get("solutiontech") == SolutiontechClientImportStatus.SYNC.value
+        if all(
             [
-                user_solutiontech_status_from_database,
+                user_solutiontech_status_is_synced,
                 user_sincad_status_from_database,
                 user_sinacor_status_from_database,
                 user_bmf_account_from_database,
@@ -290,11 +290,7 @@ class AuthenticationService(IAuthentication):
             user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
-        user_has_not_synced_solutiontech_status_in_database = AuthenticationService._check_if_user_has_valid_solutiontech_status_in_database(
-            user_solutiontech_status_from_database=user_solutiontech_status_from_database
-        )
-
-        if user_has_not_synced_solutiontech_status_in_database:
+        if not user_solutiontech_status_is_synced:
             user_solutiontech_status_from_check_status_request = await solutiontech.check_if_client_is_synced_with_solutiontech(
                 user_bmf_code=int(user_bmf_account_from_database),
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
@@ -418,19 +414,6 @@ class AuthenticationService(IAuthentication):
         ] = sincad_status_changed
 
         return client_has_trade_allowed_status_with_database_user
-
-    @staticmethod
-    def _check_if_user_has_valid_solutiontech_status_in_database(
-        user_solutiontech_status_from_database: str,
-    ):
-        user_has_valid_solutiontech_status_in_database = (
-            user_solutiontech_status_from_database
-            in [
-                SolutiontechClientImportStatus.SEND.value,
-                SolutiontechClientImportStatus.FAILED.value,
-            ]
-        )
-        return user_has_valid_solutiontech_status_in_database
 
     @staticmethod
     async def _sinacor_is_synced_with_sincad(
