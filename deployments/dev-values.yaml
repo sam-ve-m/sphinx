@@ -8,6 +8,8 @@ containers:
     ports:
     - containerPort: 8000
     env:
+    - name: SPHINX_PORT
+      value: "8000"
     - name: ETRIA_LOG_LEVEL
       value: "INFO"
     - name: ROOT_LOG_LEVEL
