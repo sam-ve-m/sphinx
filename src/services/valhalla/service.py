@@ -24,3 +24,14 @@ class ValhallaService:
 
         if social_network_operation_status is not StatusResponse.SUCCESS:
             raise InternalServerError("common.process_issue")
+
+    @classmethod
+    async def register_user_portfolio(cls, user_email: str, nick_name: str):
+        # TODO: this
+        social_client = cls.__get_social_client()
+        social_network_operation_status, message = await social_client.create_social_network_user_portfolio(
+            msg={"email": user_email, "name": nick_name}
+        )
+
+        if social_network_operation_status is not StatusResponse.SUCCESS:
+            raise InternalServerError("common.process_issue")
