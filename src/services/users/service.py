@@ -57,7 +57,7 @@ class UserService(IUser):
         user: dict,
         user_repository=UserRepository,
         authentication_service=AuthenticationService,
-        social_client=ValhallaService.get_social_client(),
+        valhalla_service=ValhallaService,
         jwt_handler=JwtService,
     ) -> dict:
         user_from_database = await user_repository.find_one(
@@ -85,12 +85,9 @@ class UserService(IUser):
         if was_user_inserted is False:
             raise InternalServerError("common.process_issue")
 
-        # was_user_created_on_social_network = social_client.create_social_network_user(
-        #     msg={"email": user.get("email"), "name": user.get("nick_name")}
-        # )
-        #
-        # if not was_user_created_on_social_network:
-        #     raise InternalServerError("common.process_issue")
+        await valhalla_service.register_user(
+            user_email=user.get("email"), nick_name=user.get("nick_name")
+        )
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user, ttl=10
