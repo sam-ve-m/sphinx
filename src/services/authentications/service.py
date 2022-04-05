@@ -265,7 +265,7 @@ class AuthenticationService(IAuthentication):
         user_sincad_status_from_database = user.get("sincad")
         user_sinacor_status_from_database = user.get("sinacor")
         user_bmf_account_from_database = (
-            user.get("portfolios", {})
+             user.get("portfolios", {})
             .get("default", {})
             .get("br", {})
             .get("bmf_account")
@@ -303,7 +303,7 @@ class AuthenticationService(IAuthentication):
             )
 
         user_is_not_already_sync_with_sincad = (
-            user_sincad_status_from_database
+             user_sincad_status_from_database
             is SincadClientImportStatus.NOT_SYNCED.value
         )
         if user_is_not_already_sync_with_sincad:
