@@ -16,10 +16,19 @@ class ValhallaService:
         return cls.social_client
 
     @classmethod
-    async def register_user(cls, user_email: str, nick_name: str):
+    async def register_user(
+        cls,
+        user_type: str,
+        nickname: str,
+        unique_id: str
+    ):
         social_client = cls.__get_social_client()
         social_network_operation_status, message = await social_client.create_social_network_user(
-            msg={"email": user_email, "name": nick_name}
+            msg={
+                "user_type": user_type,
+                "nickname": nickname,
+                "unique_id": unique_id
+            }
         )
 
         if social_network_operation_status is not StatusResponse.SUCCESS:

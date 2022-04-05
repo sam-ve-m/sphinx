@@ -86,7 +86,7 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
 
         await valhalla_service.register_user(
-            user_email=user.get("email"), nick_name=user.get("nick_name")
+            unique_id=user["unique_id"], nickname=user["nick_name"], user_type=user["scope"]["user_level"]
         )
 
         jwt_payload_data, control_data = ThebesHallBuilder(
