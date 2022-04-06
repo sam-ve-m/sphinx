@@ -178,7 +178,7 @@ class SinacorTypesRepository(OracleBaseRepository):
         current_event_loop = asyncio.get_running_loop()
         task = current_event_loop.create_task(cls.query_with_cache(sql=sql))
         value = current_event_loop.run_until_complete(task)
-        return len(value) == 1 and value[0][0] == 1
+        return len(value) >= 1 and value[0][0] == 1
 
     @classmethod
     def validate_country(cls, value: str) -> bool:
