@@ -32,8 +32,10 @@ class Solutiontech:
                     ssl=False,
                 ) as response:
                     response_message = await response.text()
+                    Gladsheim.metrics(
+                        message=f"user_bmf_code {user_bmf_code} - response  = {response_message}",
+                    )
                     if response.status == 200:
-                        response_message = await response.text()
                         maped_response = Solutiontech.response_message_map.get(
                             response_message
                         )
@@ -63,8 +65,12 @@ class Solutiontech:
                     headers=headers,
                     ssl=False,
                 ) as response:
+                    response_message = await response.text()
+                    Gladsheim.metrics(
+                        message=f"user_bmf_code {user_bmf_code} - response  = {response_message}",
+                    )
                     if response.status == 200:
-                        response_json = json.loads(await response.text())
+                        response_json = json.loads(response_message)
                         status = response_json.get("message")
                         if status == "OK":
                             return True
