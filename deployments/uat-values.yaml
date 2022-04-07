@@ -4,7 +4,7 @@ namespace: homolog
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.2.22
+    image: nexus.sigame.com.br/sphinx:1.2.23
     ports:
     - containerPort: 8000
     env:
@@ -89,7 +89,7 @@ containers:
     - name: PERSEPHONE_TOPIC_AUTHENTICATION
       value: "sphinx_persephone.user.authentication"
     - name: SOLUTIONTECH_BASE_URL
-      value: "http://hml-serviceportal.lionx.com.br/STImportaCliente/"
+      value: "https://hml-serviceportal.lionx.com.br/STImportaCliente/"
     - name: SOLUTIONTECH_VERIFY_DTVM_CLIENT
       value: "STImportaCliente/VerificaClienteImportado"
     - name: SOLUTIONTECH_SYNC_DTVM_CLIENT
