@@ -10,7 +10,7 @@ from nidavellir import Sindri
 # Sphinx
 from src.core.interfaces.repositories.base_repository.interface import IRepository
 from src.infrastructures.mongo_db.infrastructure import MongoDBInfrastructure
-from src.repositories.cache.redis import RepositoryRedis
+from src.repositories.cache.repository import RepositoryRedis
 from src.domain.model_decorator.generate_id import hash_field
 
 

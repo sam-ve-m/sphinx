@@ -12,6 +12,7 @@ from src.domain.sincad.client_sync_status import SincadClientImportStatus
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 from src.exceptions.exceptions import BadRequestError, InternalServerError
 from src.repositories.client_register.repository import ClientRegisterRepository
+from src.repositories.protfolio.repository import PortfolioRepository
 from src.repositories.user.repository import UserRepository
 from persephone_client import Persephone
 from src.services.third_part_integration.solutiontech import Solutiontech
@@ -26,6 +27,7 @@ class SinacorService:
         user_data: dict,
         client_register_repository=ClientRegisterRepository,
         user_repository=UserRepository,
+        portfolio_repository=PortfolioRepository
     ):
         database_and_bureau_dtvm_client_data_merged = (
             await SinacorService._create_or_update_client_into_sinacor(
@@ -41,6 +43,11 @@ class SinacorService:
         database_and_bureau_dtvm_client_data_merged = await SinacorService._add_dtvm_client_trade_metadata(
             database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
             client_register_repository=client_register_repository,
+        )
+
+        await portfolio_repository.save_unique_id_by_account(
+            bmf_account=user_data["portfolios"]["default"]["br"]["bmf_account"],
+            unique_id=user_data["unique_id"]
         )
 
         await SinacorService.__crete_reference_to_allow_cash_transfer(
