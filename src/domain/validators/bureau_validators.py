@@ -318,7 +318,7 @@ class EmailSource(Source):
 
 
 class NameSource(Source):
-    value: constr(regex=r"^[a-zA-Z\saéíóúãẽĩõũâêîôû]+$")
+    value: constr(regex=r"^[a-zA-Z\sáéíóúãẽĩõũâêîôûç]+$")
 
 
 class NickName(Source):
