@@ -155,7 +155,7 @@ class IssuerSource(Source):
 
 
 class StreetNameSource(Source):
-    value: str
+    value: constr(min_length=3, max_length=30)
 
 
 class AddressNumberSource(Source):
