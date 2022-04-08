@@ -845,9 +845,9 @@ class UserService(IUser):
     async def update_customer_registration_data(
         payload: dict, user_repository=UserRepository
     ):
-        await UserService.onboarding_step_validator(
-            payload=payload, onboard_step=["finished", "user_data_validation"]
-        )
+        # await UserService.onboarding_step_validator(
+        #     payload=payload, onboard_step=["finished", "user_data_validation"]
+        # )
         unique_id: str = payload["x-thebes-answer"]["user"]["unique_id"]
         update_customer_registration_data: dict = payload.get(
             "customer_registration_data"

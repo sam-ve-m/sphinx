@@ -9,7 +9,7 @@ nest_asyncio.apply()
 
 # SPHINX
 from src.repositories.base_repository.oracle.base import OracleBaseRepository
-from src.repositories.cache.redis import RepositoryRedis
+from src.repositories.cache.repository import RepositoryRedis
 
 
 class SinacorTypesRepository(OracleBaseRepository):
