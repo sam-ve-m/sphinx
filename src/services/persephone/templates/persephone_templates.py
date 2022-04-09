@@ -131,13 +131,13 @@ def get_create_electronic_signature_session_schema_template_with_data(
     }
 
 
-def get_user_signed_term_template_with_data(
-    term_version: int, payload: dict, file_type: str
+def get_user_signed_terms_template_with_data(
+    terms_update: dict, payload: dict, files_type: str
 ) -> dict:
     return {
         "unique_id": payload.get("unique_id"),
-        "term_type": file_type,
-        "term_version": f"v{term_version}",
+        "terms_type": files_type,
+        "terms_update": terms_update,
         "user_accept": True,
         "term_answer_time_stamp": int(datetime.utcnow().timestamp()),
     }

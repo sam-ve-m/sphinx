@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import List
 
 # OUTSIDE LIBRARIES
 from fastapi import Form
@@ -86,6 +87,10 @@ class TermFile(BaseModel):
     @classmethod
     def as_form(cls, file_type: str = Form(...)) -> TermFile:
         return cls(file_type=file_type)
+
+
+class TermsFile(BaseModel):
+    file_types: List[TermsFileType]
 
 
 class Cpf(BaseModel):

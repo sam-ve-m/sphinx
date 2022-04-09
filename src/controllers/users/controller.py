@@ -36,8 +36,8 @@ class UserController:
         return await UserService.save_user_selfie(payload=payload)
 
     @staticmethod
-    async def sign_term(payload: dict):
-        return await UserService.sign_term(payload=payload)
+    async def sign_terms(payload: dict):
+        return await UserService.sign_terms(payload=payload)
 
     @staticmethod
     async def get_signed_term(payload: dict):
@@ -52,8 +52,12 @@ class UserController:
         return await UserService.user_complementary_data(payload=payload)
 
     @staticmethod
-    async def get_onboarding_user_current_step(payload: dict):
-        return await UserService.get_onboarding_user_current_step(payload=payload)
+    async def onboarding_user_current_step_br(payload: dict):
+        return await UserService.onboarding_user_current_step_br(payload=payload)
+
+    @staticmethod
+    async def onboarding_user_current_step_us(payload: dict):
+        return await UserService.onboarding_user_current_step_us(payload=payload)
 
     @staticmethod
     async def set_user_electronic_signature(payload: dict):

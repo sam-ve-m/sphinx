@@ -10,7 +10,7 @@ from src.domain.validators.base import (
 )
 from src.domain.validators.onboarding_validators import (
     TermFile,
-    FileBase64,
+    FileBase64, TermsFile,
 )
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
@@ -114,16 +114,16 @@ async def save_user_selfie(request: Request, file_or_base64: FileBase64):
     return await BaseController.run(UserController.save_user_selfie, payload, request)
 
 
-@router.put("/user/sign_term", tags=["user"])
+@router.put("/user/sign_terms", tags=["user"])
 async def sign_term(
     request: Request,
-    file_type: TermFile,
+    file_types: TermsFile,
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
-    payload = file_type.dict()
+    payload = file_types.dict()
     payload.update({"x-thebes-answer": jwt_data})
-    return await BaseController.run(UserController.sign_term, payload, request)
+    return await BaseController.run(UserController.sign_terms, payload, request)
 
 
 @router.get("/user/signed_term", tags=["user"])
@@ -137,7 +137,7 @@ async def get_assigned_term(
     return await BaseController.run(UserController.get_signed_term, payload, request)
 
 
-@router.get("/user/onboarding_user_current_step", tags=["user"])
+@router.get("/user/onboarding_user_current_step_br", tags=["user"])
 async def get_onboarding_user_current_step(
     request: Request,
 ):
@@ -147,7 +147,20 @@ async def get_onboarding_user_current_step(
         "x-thebes-answer": jwt_data,
     }
     return await BaseController.run(
-        UserController.get_onboarding_user_current_step, payload, request
+        UserController.onboarding_user_current_step_br, payload, request
+    )
+
+@router.get("/user/onboarding_user_current_step_us", tags=["user"])
+async def get_onboarding_user_current_step(
+    request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    return await BaseController.run(
+        UserController.onboarding_user_current_step_us, payload, request
     )
 
 
