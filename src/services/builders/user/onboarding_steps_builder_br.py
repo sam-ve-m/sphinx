@@ -86,11 +86,12 @@ class OnboardingStepBuilderBR:
             self.bureau_status = bureau_status
 
         if (
-            bureau_status
-            and bureau_status != CAFStatus.DOCUMENT.value
-            and self.__onboarding_steps["current_onboarding_step"]
-            == "user_document_validator"
-            and document_exists
+            self.__onboarding_steps["current_onboarding_step"] == "user_document_validator"
+            and
+                (
+                        (bureau_status and bureau_status != CAFStatus.DOCUMENT.value)
+                        or document_exists
+                )
         ):
             self.__onboarding_steps["user_document_validator"] = True
             self.__onboarding_steps["current_onboarding_step"] = "user_data_validation"

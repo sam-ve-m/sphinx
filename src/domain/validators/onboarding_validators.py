@@ -69,6 +69,11 @@ class FileBase64(BaseModel):
     file_or_base64: constr(min_length=258)
 
 
+class UserDocument(BaseModel):
+    document_front: constr(min_length=258)
+    document_back: constr(min_length=258)
+
+
 class Weight(BaseModel):
     weight: int
 
@@ -79,6 +84,10 @@ class Order(BaseModel):
 
 class ValueText(BaseModel):
     value_text: constr(min_length=1, max_length=520)
+
+
+class PoliticallyExposed(BaseModel):
+    is_politically_exposed: bool
 
 
 class TermFile(BaseModel):

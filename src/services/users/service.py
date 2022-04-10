@@ -376,7 +376,7 @@ class UserService(IUser):
     @staticmethod
     async def save_user_selfie(payload: dict, file_repository=FileRepository) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
-        await UserService.onboarding_step_validator(
+        await UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["user_selfie_step"]
         )
 
@@ -398,6 +398,51 @@ class UserService(IUser):
             ),
             schema_name="user_selfie_schema",
         )
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "files.uploaded",
+        }
+
+    @staticmethod
+    async def save_user_document(payload: dict, file_repository=FileRepository) -> dict:
+        thebes_answer = payload.get("x-thebes-answer")
+        br_step_validator = UserService.onboarding_br_step_validator(
+            payload=payload, onboard_step=["user_document_validator", "finished"]
+        )
+        us_step_validator = UserService.onboarding_us_step_validator(
+            payload=payload, onboard_step=["user_document_validator_step", "finished"]
+        )
+        await asyncio.gather(br_step_validator, us_step_validator)
+
+        save_document_front = file_repository.save_user_file(
+            file_type=UserFileType.DOCUMENT_FRONT,
+            content=payload["user_document"].get("document_front"),
+            unique_id=thebes_answer["user"].get("unique_id"),
+            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+        )
+        save_document_back = file_repository.save_user_file(
+            file_type=UserFileType.DOCUMENT_BACK,
+            content=payload["user_document"].get("document_back"),
+            unique_id=thebes_answer["user"].get("unique_id"),
+            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+        )
+        (path_document_front, path_document_back) = await asyncio.gather(save_document_front, save_document_back)
+
+        # TODO PRECISO DE UMA PARTITION PARA ISSO
+        # (
+        #     sent_to_persephone,
+        #     status_sent_to_persephone,
+        # ) = await UserService.persephone_client.send_to_persephone(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_SELFIE.value,
+        #     message=get_user_selfie_schema_template_with_data(
+        #         path_document_front=path_document_front,
+        #         path_document_back=path_document_back,
+        #         unique_id=thebes_answer["user"]["unique_id"]
+        #     ),
+        #     schema_name="user_selfie_schema",
+        # )
 
         return {
             "status_code": status.HTTP_200_OK,
@@ -551,7 +596,7 @@ class UserService(IUser):
         if user_by_cpf:
             raise BadRequestError("common.register_exists")
 
-        await UserService.onboarding_step_validator(
+        await UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["user_identifier_data_step"]
         )
 
@@ -591,7 +636,7 @@ class UserService(IUser):
     async def user_complementary_data(
         payload: dict, user_repository=UserRepository
     ) -> dict:
-        await UserService.onboarding_step_validator(
+        await UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["user_complementary_step"]
         )
         thebes_answer = payload.get("x-thebes-answer")
@@ -714,7 +759,7 @@ class UserService(IUser):
             .user_identifier_step(current_user=current_user)
             .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
-            .user_document_validator_step(current_user=user_document_exists, document_exists=user_document_exists)
+            .user_document_validator_step(current_user=current_user, document_exists=user_document_exists)
             .user_data_validation_step(current_user=current_user)
             .user_electronic_signature_step(current_user=current_user)
             .build()
@@ -764,7 +809,7 @@ class UserService(IUser):
     async def set_user_electronic_signature(
         payload: dict, user_repository=UserRepository
     ) -> dict:
-        await UserService.onboarding_step_validator(
+        await UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["user_electronic_signature"]
         )
         thebes_answer = payload.get("x-thebes-answer")
@@ -837,8 +882,18 @@ class UserService(IUser):
         }
 
     @staticmethod
-    async def onboarding_step_validator(payload: dict, onboard_step: List[str]):
-        onboarding_steps = await UserService.get_onboarding_user_current_step(payload)
+    async def onboarding_br_step_validator(payload: dict, onboard_step: List[str]):
+        onboarding_steps = await UserService.onboarding_user_current_step_br(payload)
+        payload_from_onboarding_steps = onboarding_steps.get("payload")
+        current_onboarding_step = payload_from_onboarding_steps.get(
+            "current_onboarding_step"
+        )
+        if current_onboarding_step not in onboard_step:
+            raise BadRequestError("user.invalid_on_boarding_step")
+
+    @staticmethod
+    async def onboarding_us_step_validator(payload: dict, onboard_step: List[str]):
+        onboarding_steps = await UserService.onboarding_user_current_step_us(payload)
         payload_from_onboarding_steps = onboarding_steps.get("payload")
         current_onboarding_step = payload_from_onboarding_steps.get(
             "current_onboarding_step"
@@ -901,14 +956,55 @@ class UserService(IUser):
             "status_code": status.HTTP_200_OK,
             "payload": customer_registration_data_built,
         }
+    
+    @staticmethod
+    async def update_politically_exposed_us(
+        payload: dict, user_repository=UserRepository
+    ) -> dict:
+        thebes_answer = payload["x-thebes-answer"]
+        thebes_answer_user = thebes_answer["user"]
+        user_is_politically_exposed = payload["is_politically_exposed"]
+        br_step_validator = UserService.onboarding_br_step_validator(
+            payload=payload, onboard_step=["finished"]
+        )
+        us_step_validator = UserService.onboarding_us_step_validator(
+            payload=payload, onboard_step=["is_politically_exposed_step"]
+        )
+        await asyncio.gather(br_step_validator, us_step_validator)
+        # TODO PRECISO DE UMA PARTITION PARA ISSO
+        # (
+        #     sent_to_persephone,
+        #     status_sent_to_persephone,
+        # ) = await UserService.persephone_client.send_to_persephone(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_SELFIE.value,
+        #     message=get_user_selfie_schema_template_with_data(
+        #         path_document_front=path_document_front,
+        #         path_document_back=path_document_back,
+        #         unique_id=thebes_answer["user"]["unique_id"]
+        #     ),
+        #     schema_name="user_selfie_schema",
+        # )
+        
+        was_updated = await user_repository.update_one(
+            old={"unique_id": thebes_answer_user["unique_id"]},
+            new={"external_exchange_requirements.us.is_politically_exposed": user_is_politically_exposed}
+        )
+        if not was_updated:
+            raise InternalServerError("common.unable_to_process")
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
 
     @staticmethod
     async def update_customer_registration_data(
         payload: dict, user_repository=UserRepository
     ):
-        # await UserService.onboarding_step_validator(
-        #     payload=payload, onboard_step=["finished", "user_data_validation"]
-        # )
+        await UserService.onboarding_br_step_validator(
+            payload=payload, onboard_step=["finished", "user_data_validation"]
+        )
         unique_id: str = payload["x-thebes-answer"]["user"]["unique_id"]
         update_customer_registration_data: dict = payload.get(
             "customer_registration_data"

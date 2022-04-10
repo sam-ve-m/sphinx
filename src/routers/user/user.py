@@ -10,7 +10,7 @@ from src.domain.validators.base import (
 )
 from src.domain.validators.onboarding_validators import (
     TermFile,
-    FileBase64, TermsFile,
+    FileBase64, TermsFile, UserDocument, PoliticallyExposed,
 )
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
@@ -114,6 +114,17 @@ async def save_user_selfie(request: Request, file_or_base64: FileBase64):
     return await BaseController.run(UserController.save_user_selfie, payload, request)
 
 
+@router.post("/user/document", tags=["user"], include_in_schema=True)
+async def save_user_selfie(request: Request, user_document: UserDocument):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+        "user_document": user_document.dict(),
+    }
+    return await BaseController.run(UserController.save_user_document, payload, request)
+
+
 @router.put("/user/sign_terms", tags=["user"])
 async def sign_term(
     request: Request,
@@ -163,6 +174,20 @@ async def get_onboarding_user_current_step(
         UserController.onboarding_user_current_step_us, payload, request
     )
 
+
+@router.put("/user/politically_exposed_us", tags=["user"])
+async def put_politically_exposed_us(
+    politically_exposed: PoliticallyExposed, request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    payload.update(politically_exposed.dict())
+    return await BaseController.run(
+        UserController.update_politically_exposed_us, payload, request
+    )
 
 @router.put("/user/electronic_signature", tags=["user"])
 async def set_user_electronic_signature(

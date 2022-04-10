@@ -56,24 +56,24 @@ class OnboardingStepBuilderUS:
     def is_politically_exposed_step(self, current_user: dict):
         politically_exposed = current_user.get("external_exchange_requirements", {}).get("us", {}).get("is_politically_exposed")
         is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "is_politically_exposed_step"
-        if is_valid_onbaording_step and politically_exposed:
-            self.__onboarding_steps["user_document_validator_step"] = True
+        if is_valid_onbaording_step and politically_exposed is not None:
+            self.__onboarding_steps["is_politically_exposed_step"] = True
             self.__onboarding_steps["current_onboarding_step"] = "is_exchange_member_step"
         return self
 
     def is_exchange_member_step(self, current_user: dict):
         is_exchange_member = current_user.get("external_exchange_requirements", {}).get("us", {}).get("is_exchange_member")
         is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "is_exchange_member_step"
-        if is_valid_onbaording_step and is_exchange_member:
-            self.__onboarding_steps["user_document_validator_step"] = True
+        if is_valid_onbaording_step and is_exchange_member is not None:
+            self.__onboarding_steps["is_exchange_member_step"] = True
             self.__onboarding_steps["current_onboarding_step"] = "is_company_director_step"
         return self
 
     def is_company_director_step(self, current_user: dict):
         is_exchange_member = current_user.get("external_exchange_requirements", {}).get("us", {}).get("is_company_director")
         is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "is_company_director_step"
-        if is_valid_onbaording_step and is_exchange_member:
-            self.__onboarding_steps["user_document_validator_step"] = True
+        if is_valid_onbaording_step and is_exchange_member is not None:
+            self.__onboarding_steps["is_company_director_step"] = True
             self.__onboarding_steps["current_onboarding_step"] = "time_experience_step"
         return self
 
@@ -81,7 +81,7 @@ class OnboardingStepBuilderUS:
         is_exchange_member = current_user.get("external_exchange_requirements", {}).get("us", {}).get("time_experience")
         is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "time_experience_step"
         if is_valid_onbaording_step and is_exchange_member:
-            self.__onboarding_steps["user_document_validator_step"] = True
+            self.__onboarding_steps["time_experience_step"] = True
             self.__onboarding_steps["current_onboarding_step"] = "finished"
         return self
 
