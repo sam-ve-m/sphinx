@@ -407,7 +407,7 @@ def test_delete_feature_that_exists(get_user_data, get_new_stubby_repository):
 def test_save_user_selfie(get_user_data, get_new_stubby_repository):
     stub_repository = get_new_stubby_repository
     stub_repository.save_user_file = MagicMock(return_value=None)
-    UserService.onboarding_step_validator = MagicMock(return_value=None)
+    UserService.onboarding_br_step_validator = MagicMock(return_value=None)
     StubPersephoneClient.run = MagicMock(return_value=True)
     response = UserService.save_user_selfie(
         payload={"x-thebes-answer": {"email": "lala@com.br"}, "file_or_base64": ""},
@@ -562,7 +562,7 @@ def test_user_identifier_data_process_issue_v2(
     stub_user_repository.find_one = lambda x: None if "cpf" in x else {"a": 1}
     stub_user_repository.update_one = MagicMock(return_value=False)
     StubStoneAge.send_user_identifier_data = MagicMock(return_value={"a": 123})
-    UserService.onboarding_step_validator = MagicMock(return_value=False)
+    UserService.onboarding_br_step_validator = MagicMock(return_value=False)
     with pytest.raises(InternalServerError, match="^common.process_issue"):
         UserService.user_identifier_data(
             payload=payload_user_identifier_data,
@@ -580,7 +580,7 @@ def test_user_identifier_data(
     stub_user_repository.find_one = lambda x: None if "cpf" in x else {"a": 1}
     StubStoneAge.send_user_identifier_data = MagicMock(return_value={"a": 123})
     stub_user_repository.update_one = MagicMock(return_value=True)
-    UserService.onboarding_step_validator = MagicMock(return_value=True)
+    UserService.onboarding_br_step_validator = MagicMock(return_value=True)
     response = UserService.user_identifier_data(
         payload=payload_user_identifier_data,
         user_repository=stub_user_repository,

@@ -24,11 +24,17 @@ class FileRepository(IFile):
     # This dict keys must be TermsFileType, UserFileType constants
     _file_extension_by_type = {
         "user_selfie": ".jpg",
+        "document_front": ".jpg",
+        "document_back": ".jpg",
         "term_application": ".pdf",
         "term_open_account": ".pdf",
         "term_refusal": ".pdf",
         "term_non_compliance": ".pdf",
         "term_retail_liquid_provider": ".pdf",
+        "term_open_account_dw": ".pdf",
+        "term_application_dw": ".pdf",
+        "term_privacy_policy_dw": ".pdf",
+        "term_data_sharing_policy_dw": ".pdf",
     }
 
     @classmethod
@@ -153,11 +159,12 @@ class FileRepository(IFile):
     async def get_terms_version(cls, bucket_name: str) -> dict:
         value = dict()
         for file_type in TermsFileType:
+            version = await cls.get_current_term_version(
+                file_type=file_type, bucket_name=bucket_name
+            )
             value.update(
                 {
-                    file_type.value: await cls.get_current_term_version(
-                        file_type=file_type, bucket_name=bucket_name
-                    )
+                    file_type.value: version
                 }
             )
         return value
@@ -185,14 +192,12 @@ class FileRepository(IFile):
     async def get_current_term_version(
         cls, file_type: TermsFileType, bucket_name: str
     ) -> int:
+        version = 0
         async with cls.infra.get_resource() as s3_resource:
             bucket = await s3_resource.Bucket(bucket_name)
             prefix = cls._resolve_term_path(file_type=file_type)
-            version = 0
             async for s3_object in bucket.objects.filter(Prefix=prefix, Delimiter="/"):
                 version += 1
-        if not version:
-            raise BadRequestError("files.not_exists")
         return version
 
     @staticmethod

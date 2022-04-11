@@ -2,14 +2,16 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import List, Optional, Dict, Any
 
 # OUTSIDE LIBRARIES
 from fastapi import Form
-from pydantic import BaseModel, constr, validator
+from pydantic import BaseModel, constr, validator, root_validator
 
 from src.domain.validators.brazil_register_number_validator import is_cpf_valid
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
+from src.repositories.user.enum.time_experience import TimeExperienceEnum
 
 
 class Name(BaseModel):
@@ -68,6 +70,11 @@ class FileBase64(BaseModel):
     file_or_base64: constr(min_length=258)
 
 
+class UserDocument(BaseModel):
+    document_front: constr(min_length=258)
+    document_back: constr(min_length=258)
+
+
 class Weight(BaseModel):
     weight: int
 
@@ -80,12 +87,41 @@ class ValueText(BaseModel):
     value_text: constr(min_length=1, max_length=520)
 
 
+class PoliticallyExposed(BaseModel):
+    is_politically_exposed: bool
+
+
+class ExchangeMember(BaseModel):
+    is_exchange_member: bool
+
+
+class TimeExperience(BaseModel):
+    time_experience: TimeExperienceEnum
+
+
+class CompanyDirector(BaseModel):
+    is_company_director: bool
+    company_name: Optional[str]
+
+    @root_validator()
+    def validate_cpf(cls, values: Dict[str, Any]):
+        is_company_director = values.get("is_company_director")
+        company_name = values.get("company_name")
+        if is_company_director and not company_name:
+            raise ValueError("need inform the field campany_name is you are a company director")
+        return values
+
+
 class TermFile(BaseModel):
     file_type: TermsFileType
 
     @classmethod
     def as_form(cls, file_type: str = Form(...)) -> TermFile:
         return cls(file_type=file_type)
+
+
+class TermsFile(BaseModel):
+    file_types: List[TermsFileType]
 
 
 class Cpf(BaseModel):

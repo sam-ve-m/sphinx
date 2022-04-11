@@ -10,7 +10,7 @@ from src.domain.validators.base import (
 )
 from src.domain.validators.onboarding_validators import (
     TermFile,
-    FileBase64,
+    FileBase64, TermsFile, UserDocument, PoliticallyExposed, ExchangeMember, CompanyDirector, TimeExperience,
 )
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
@@ -114,16 +114,27 @@ async def save_user_selfie(request: Request, file_or_base64: FileBase64):
     return await BaseController.run(UserController.save_user_selfie, payload, request)
 
 
-@router.put("/user/sign_term", tags=["user"])
+@router.post("/user/document", tags=["user"], include_in_schema=True)
+async def save_user_selfie(request: Request, user_document: UserDocument):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+        "user_document": user_document.dict(),
+    }
+    return await BaseController.run(UserController.save_user_document, payload, request)
+
+
+@router.put("/user/sign_terms", tags=["user"])
 async def sign_term(
     request: Request,
-    file_type: TermFile,
+    file_types: TermsFile,
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
-    payload = file_type.dict()
+    payload = file_types.dict()
     payload.update({"x-thebes-answer": jwt_data})
-    return await BaseController.run(UserController.sign_term, payload, request)
+    return await BaseController.run(UserController.sign_terms, payload, request)
 
 
 @router.get("/user/signed_term", tags=["user"])
@@ -137,7 +148,7 @@ async def get_assigned_term(
     return await BaseController.run(UserController.get_signed_term, payload, request)
 
 
-@router.get("/user/onboarding_user_current_step", tags=["user"])
+@router.get("/user/onboarding_user_current_step_br", tags=["user"])
 async def get_onboarding_user_current_step(
     request: Request,
 ):
@@ -147,7 +158,80 @@ async def get_onboarding_user_current_step(
         "x-thebes-answer": jwt_data,
     }
     return await BaseController.run(
-        UserController.get_onboarding_user_current_step, payload, request
+        UserController.onboarding_user_current_step_br, payload, request
+    )
+
+@router.get("/user/onboarding_user_current_step_us", tags=["user"])
+async def get_onboarding_user_current_step(
+    request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    return await BaseController.run(
+        UserController.onboarding_user_current_step_us, payload, request
+    )
+
+
+@router.put("/user/politically_exposed_us", tags=["user"])
+async def put_politically_exposed_us(
+    politically_exposed: PoliticallyExposed, request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    payload.update(politically_exposed.dict())
+    return await BaseController.run(
+        UserController.update_politically_exposed_us, payload, request
+    )
+
+
+@router.put("/user/exchange_member_us", tags=["user"])
+async def put_exchange_member_us(
+    exchange_member: ExchangeMember, request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    payload.update(exchange_member.dict())
+    return await BaseController.run(
+        UserController.update_exchange_member_us, payload, request
+    )
+
+
+@router.put("/user/company_director_us", tags=["user"])
+async def put_company_director_us(
+    company_director: CompanyDirector, request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    payload.update(company_director.dict())
+    return await BaseController.run(
+        UserController.update_company_director_us, payload, request
+    )
+
+
+@router.put("/user/time_experience_us", tags=["user"])
+async def put_time_experience_us(
+    time_experience: TimeExperience, request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    payload.update(time_experience.dict())
+    return await BaseController.run(
+        UserController.update_time_experience_us, payload, request
     )
 
 
