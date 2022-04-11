@@ -10,7 +10,7 @@ from src.domain.validators.base import (
 )
 from src.domain.validators.onboarding_validators import (
     TermFile,
-    FileBase64, TermsFile, UserDocument, PoliticallyExposed,
+    FileBase64, TermsFile, UserDocument, PoliticallyExposed, ExchangeMember, CompanyDirector, TimeExperience,
 )
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
@@ -188,6 +188,52 @@ async def put_politically_exposed_us(
     return await BaseController.run(
         UserController.update_politically_exposed_us, payload, request
     )
+
+
+@router.put("/user/exchange_member_us", tags=["user"])
+async def put_exchange_member_us(
+    exchange_member: ExchangeMember, request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    payload.update(exchange_member.dict())
+    return await BaseController.run(
+        UserController.update_exchange_member_us, payload, request
+    )
+
+
+@router.put("/user/company_director_us", tags=["user"])
+async def put_company_director_us(
+    company_director: CompanyDirector, request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    payload.update(company_director.dict())
+    return await BaseController.run(
+        UserController.update_company_director_us, payload, request
+    )
+
+
+@router.put("/user/time_experience_us", tags=["user"])
+async def put_time_experience_us(
+    time_experience: TimeExperience, request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    payload.update(time_experience.dict())
+    return await BaseController.run(
+        UserController.update_time_experience_us, payload, request
+    )
+
 
 @router.put("/user/electronic_signature", tags=["user"])
 async def set_user_electronic_signature(

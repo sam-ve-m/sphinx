@@ -68,6 +68,18 @@ class UserController:
         return await UserService.update_politically_exposed_us(payload=payload)
 
     @staticmethod
+    async def update_exchange_member_us(payload: dict):
+        return await UserService.update_exchange_member_us(payload=payload)
+
+    @staticmethod
+    async def update_time_experience_us(payload: dict):
+        return await UserService.update_time_experience_us(payload=payload)
+
+    @staticmethod
+    async def update_company_director_us(payload: dict):
+        return await UserService.update_company_director_us(payload=payload)
+
+    @staticmethod
     async def set_user_electronic_signature(payload: dict):
         return await UserService.set_user_electronic_signature(payload=payload)
 

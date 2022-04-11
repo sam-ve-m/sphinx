@@ -999,6 +999,133 @@ class UserService(IUser):
         }
 
     @staticmethod
+    async def update_exchange_member_us(
+            payload: dict, user_repository=UserRepository
+    ) -> dict:
+        thebes_answer = payload["x-thebes-answer"]
+        thebes_answer_user = thebes_answer["user"]
+        user_is_exchange_member = payload["is_exchange_member"]
+        br_step_validator = UserService.onboarding_br_step_validator(
+            payload=payload, onboard_step=["finished"]
+        )
+        us_step_validator = UserService.onboarding_us_step_validator(
+            payload=payload, onboard_step=["is_exchange_member_step"]
+        )
+        await asyncio.gather(br_step_validator, us_step_validator)
+        # TODO PRECISO DE UMA PARTITION PARA ISSO
+        # (
+        #     sent_to_persephone,
+        #     status_sent_to_persephone,
+        # ) = await UserService.persephone_client.send_to_persephone(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_SELFIE.value,
+        #     message=get_user_selfie_schema_template_with_data(
+        #         path_document_front=path_document_front,
+        #         path_document_back=path_document_back,
+        #         unique_id=thebes_answer["user"]["unique_id"]
+        #     ),
+        #     schema_name="user_selfie_schema",
+        # )
+
+        was_updated = await user_repository.update_one(
+            old={"unique_id": thebes_answer_user["unique_id"]},
+            new={"external_exchange_requirements.us.is_exchange_member": user_is_exchange_member}
+        )
+        if not was_updated:
+            raise InternalServerError("common.unable_to_process")
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
+
+    @staticmethod
+    async def update_time_experience_us(
+            payload: dict, user_repository=UserRepository
+    ) -> dict:
+        thebes_answer = payload["x-thebes-answer"]
+        thebes_answer_user = thebes_answer["user"]
+        user_time_experience = payload["time_experience"]
+        br_step_validator = UserService.onboarding_br_step_validator(
+            payload=payload, onboard_step=["finished"]
+        )
+        us_step_validator = UserService.onboarding_us_step_validator(
+            payload=payload, onboard_step=["time_experience_step"]
+        )
+        await asyncio.gather(br_step_validator, us_step_validator)
+        # TODO PRECISO DE UMA PARTITION PARA ISSO
+        # (
+        #     sent_to_persephone,
+        #     status_sent_to_persephone,
+        # ) = await UserService.persephone_client.send_to_persephone(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_SELFIE.value,
+        #     message=get_user_selfie_schema_template_with_data(
+        #         path_document_front=path_document_front,
+        #         path_document_back=path_document_back,
+        #         unique_id=thebes_answer["user"]["unique_id"]
+        #     ),
+        #     schema_name="user_selfie_schema",
+        # )
+
+        was_updated = await user_repository.update_one(
+            old={"unique_id": thebes_answer_user["unique_id"]},
+            new={"external_exchange_requirements.us.time_experience": user_time_experience}
+        )
+        if not was_updated:
+            raise InternalServerError("common.unable_to_process")
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
+
+    @staticmethod
+    async def update_company_director_us(
+            payload: dict, user_repository=UserRepository
+    ) -> dict:
+        thebes_answer = payload["x-thebes-answer"]
+        thebes_answer_user = thebes_answer["user"]
+        user_is_company_director = payload["is_company_director"]
+        user_is_company_director_from = payload.get("company_name")
+        br_step_validator = UserService.onboarding_br_step_validator(
+            payload=payload, onboard_step=["finished"]
+        )
+        us_step_validator = UserService.onboarding_us_step_validator(
+            payload=payload, onboard_step=["is_company_director_step"]
+        )
+        await asyncio.gather(br_step_validator, us_step_validator)
+        # TODO PRECISO DE UMA PARTITION PARA ISSO
+        # (
+        #     sent_to_persephone,
+        #     status_sent_to_persephone,
+        # ) = await UserService.persephone_client.send_to_persephone(
+        #     topic=config("PERSEPHONE_TOPIC_USER"),
+        #     partition=PersephoneQueue.USER_SELFIE.value,
+        #     message=get_user_selfie_schema_template_with_data(
+        #         path_document_front=path_document_front,
+        #         path_document_back=path_document_back,
+        #         unique_id=thebes_answer["user"]["unique_id"]
+        #     ),
+        #     schema_name="user_selfie_schema",
+        # )
+
+        was_updated = await user_repository.update_one(
+            old={"unique_id": thebes_answer_user["unique_id"]},
+            new={
+                "external_exchange_requirements.us.is_company_director": user_is_company_director,
+                "external_exchange_requirements.us.is_company_director_from": user_is_company_director_from,
+            }
+        )
+        if not was_updated:
+            raise InternalServerError("common.unable_to_process")
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
+
+    @staticmethod
     async def update_customer_registration_data(
         payload: dict, user_repository=UserRepository
     ):
