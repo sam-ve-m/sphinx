@@ -1,5 +1,6 @@
 # STANDARD LIBS
 from datetime import datetime
+from typing import List
 
 
 def get_prospect_user_template_with_data(payload: dict) -> dict:
@@ -177,7 +178,7 @@ def get_create_electronic_signature_session_schema_template_with_data(
 
 
 def get_user_signed_terms_template_with_data(
-    terms_update: dict, payload: dict, files_type: str
+    terms_update: dict, payload: dict, files_type: List[str]
 ) -> dict:
     return {
         "unique_id": payload.get("unique_id"),

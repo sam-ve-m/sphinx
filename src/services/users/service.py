@@ -432,21 +432,21 @@ class UserService(IUser):
         )
         (path_document_front, path_document_back) = await asyncio.gather(save_document_front, save_document_back)
 
-        # (
-        #     sent_to_persephone,
-        #     status_sent_to_persephone,
-        # ) = await UserService.persephone_client.send_to_persephone(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_DOCUMENT.value,
-        #     message=get_user_document_schema_template_with_data(
-        #         path_document_front=path_document_front,
-        #         path_document_back=path_document_back,
-        #         unique_id=thebes_answer["user"]["unique_id"]
-        #     ),
-        #     schema_name="user_user_document_schema",
-        # )
-        # if not sent_to_persephone:
-        #     raise InternalServerError("common.unable_to_process")
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_DOCUMENT.value,
+            message=get_user_document_schema_template_with_data(
+                path_document_front=path_document_front,
+                path_document_back=path_document_back,
+                unique_id=thebes_answer["user"]["unique_id"]
+            ),
+            schema_name="user_document_schema",
+        )
+        if not sent_to_persephone:
+            raise InternalServerError("common.unable_to_process")
 
         return {
             "status_code": status.HTTP_200_OK,
@@ -978,20 +978,20 @@ class UserService(IUser):
         )
         await asyncio.gather(br_step_validator, us_step_validator)
 
-        # (
-        #     sent_to_persephone,
-        #     status_sent_to_persephone,
-        # ) = await UserService.persephone_client.send_to_persephone(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_POLITICALLY_EXPOSED_IN_US.value,
-        #     message=get_user_politically_exposed_schema_template_with_data(
-        #         politically_exposed=user_is_politically_exposed,
-        #         unique_id=thebes_answer["user"]["unique_id"]
-        #     ),
-        #     schema_name="user_politically_exposed_us_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_POLITICALLY_EXPOSED_IN_US.value,
+            message=get_user_politically_exposed_schema_template_with_data(
+                politically_exposed=user_is_politically_exposed,
+                unique_id=thebes_answer["user"]["unique_id"]
+            ),
+            schema_name="user_politically_exposed_us_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
         
         was_updated = await user_repository.update_one(
             old={"unique_id": thebes_answer_user["unique_id"]},
@@ -1020,20 +1020,20 @@ class UserService(IUser):
         )
         await asyncio.gather(br_step_validator, us_step_validator)
 
-        # (
-        #     sent_to_persephone,
-        #     status_sent_to_persephone,
-        # ) = await UserService.persephone_client.send_to_persephone(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_EXCHANGE_MEMBER_IN_US.value,
-        #     message=get_user_exchange_member_schema_template_with_data(
-        #         exchange_member=user_is_exchange_member,
-        #         unique_id=thebes_answer["user"]["unique_id"]
-        #     ),
-        #     schema_name="user_exchange_member_us_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_EXCHANGE_MEMBER_IN_US.value,
+            message=get_user_exchange_member_schema_template_with_data(
+                exchange_member=user_is_exchange_member,
+                unique_id=thebes_answer["user"]["unique_id"]
+            ),
+            schema_name="user_exchange_member_us_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         was_updated = await user_repository.update_one(
             old={"unique_id": thebes_answer_user["unique_id"]},
@@ -1062,20 +1062,20 @@ class UserService(IUser):
         )
         await asyncio.gather(br_step_validator, us_step_validator)
 
-        # (
-        #     sent_to_persephone,
-        #     status_sent_to_persephone,
-        # ) = await UserService.persephone_client.send_to_persephone(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_TRADE_TIME_EXPERIENCE_IN_US.value,
-        #     message=get_user_time_experience_schema_template_with_data(
-        #         time_experience=user_time_experience,
-        #         unique_id=thebes_answer["user"]["unique_id"]
-        #     ),
-        #     schema_name="user_time_experience_us_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_TRADE_TIME_EXPERIENCE_IN_US.value,
+            message=get_user_time_experience_schema_template_with_data(
+                time_experience=user_time_experience,
+                unique_id=thebes_answer["user"]["unique_id"]
+            ),
+            schema_name="user_time_experience_us_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
         was_updated = await user_repository.update_one(
             old={"unique_id": thebes_answer_user["unique_id"]},
@@ -1104,22 +1104,22 @@ class UserService(IUser):
             payload=payload, onboard_step=["is_company_director_step"]
         )
         await asyncio.gather(br_step_validator, us_step_validator)
-        #
-        # (
-        #     sent_to_persephone,
-        #     status_sent_to_persephone,
-        # ) = await UserService.persephone_client.send_to_persephone(
-        #     topic=config("PERSEPHONE_TOPIC_USER"),
-        #     partition=PersephoneQueue.USER_COMPANY_DIRECTOR_IN_US.value,
-        #     message=get_user_company_director_schema_template_with_data(
-        #         company_director=user_is_company_director,
-        #         company_director_from=user_is_company_director_from,
-        #         unique_id=thebes_answer["user"]["unique_id"]
-        #     ),
-        #     schema_name="user_company_director_us_schema",
-        # )
-        # if sent_to_persephone is False:
-        #     raise InternalServerError("common.process_issue")
+
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_COMPANY_DIRECTOR_IN_US.value,
+            message=get_user_company_director_schema_template_with_data(
+                company_director=user_is_company_director,
+                company_director_from=user_is_company_director_from,
+                unique_id=thebes_answer["user"]["unique_id"]
+            ),
+            schema_name="user_company_director_us_schema",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
 
 
         was_updated = await user_repository.update_one(
