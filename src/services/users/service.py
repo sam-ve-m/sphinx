@@ -35,6 +35,7 @@ from src.services.builders.user.customer_registration_update import (
 )
 from src.services.builders.user.onboarding_steps_builder_br import OnboardingStepBuilderBR
 from src.services.builders.user.onboarding_steps_builder_us import OnboardingStepBuilderUS
+from src.services.drive_wealth.service import DriveWealthService
 from src.services.jwts.service import JwtService
 from persephone_client import Persephone
 from src.services.persephone.templates.persephone_templates import (
@@ -1077,17 +1078,23 @@ class UserService(IUser):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
+        unique_id=  thebes_answer_user["unique_id"]
         was_updated = await user_repository.update_one(
-            old={"unique_id": thebes_answer_user["unique_id"]},
+            old={"unique_id": unique_id},
             new={"external_exchange_requirements.us.time_experience": user_time_experience}
         )
         if not was_updated:
             raise InternalServerError("common.unable_to_process")
 
+        user_data = await user_repository.find_one({"unique_id": unique_id})
+        await DriveWealthService.registry_client(user_data=user_data)
+
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "requests.updated",
         }
+
+
 
     @staticmethod
     async def update_company_director_us(
@@ -1096,7 +1103,7 @@ class UserService(IUser):
         thebes_answer = payload["x-thebes-answer"]
         thebes_answer_user = thebes_answer["user"]
         user_is_company_director = payload["is_company_director"]
-        user_is_company_director_from = payload.get("company_name")
+        user_is_company_director_of = payload.get("company_name")
         br_step_validator = UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["finished"]
         )
@@ -1113,7 +1120,7 @@ class UserService(IUser):
             partition=PersephoneQueue.USER_COMPANY_DIRECTOR_IN_US.value,
             message=get_user_company_director_schema_template_with_data(
                 company_director=user_is_company_director,
-                company_director_from=user_is_company_director_from,
+                user_is_company_director_of=user_is_company_director_of,
                 unique_id=thebes_answer["user"]["unique_id"]
             ),
             schema_name="user_company_director_us_schema",
@@ -1121,12 +1128,11 @@ class UserService(IUser):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-
         was_updated = await user_repository.update_one(
             old={"unique_id": thebes_answer_user["unique_id"]},
             new={
                 "external_exchange_requirements.us.is_company_director": user_is_company_director,
-                "external_exchange_requirements.us.is_company_director_from": user_is_company_director_from,
+                "external_exchange_requirements.us.is_company_director_of": user_is_company_director_of,
             }
         )
         if not was_updated:

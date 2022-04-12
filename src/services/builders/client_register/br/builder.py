@@ -71,7 +71,7 @@ from src.domain.sinacor.work_in_some_company import WorkInSomeCompany
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
 
 
-class ClientRegisterBuilder:
+class ClientRegisterBuilderBr:
     def __init__(self):
         self._fields_added = dict()
 

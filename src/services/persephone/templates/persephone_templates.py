@@ -51,13 +51,13 @@ def get_user_time_experience_schema_template_with_data(time_experience: str, uni
 
 def get_user_company_director_schema_template_with_data(
         company_director: bool,
-        company_director_from: str,
+        user_is_company_director_of: str,
         unique_id: str
 ) -> dict:
     return {
         "unique_id": unique_id,
         "company_director": company_director,
-        "company_director_from": company_director_from
+        "user_is_company_director_of": user_is_company_director_of
     }
 
 
