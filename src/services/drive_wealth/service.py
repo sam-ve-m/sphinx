@@ -1,12 +1,24 @@
 from src.services.builders.client_register.us.builder import ClientRegisterBuilderUs
+from src.transports.dw.transport import DWTransport
+import json
 
 
 class DriveWealthService:
+    dw_transport = DWTransport
 
     @classmethod
     async def registry_client(cls, user_data: dict):
-        body = cls.__get_registry_body(user_data=user_data)
+        user_id = cls.save_user_and_get_id(user_data=user_data)
+
         pass
+
+    @classmethod
+    async def save_user_and_get_id(cls, user_data: dict) -> str:
+        builder = cls.__get_registry_body(user_data=user_data)
+        response = await cls.dw_transport.call_registry_user_post(builder=builder)
+        body = await response.text()
+        dict_body = json.loads(body)
+        return dict_body["id"]
 
     @staticmethod
     def __get_registry_body(user_data: dict) -> ClientRegisterBuilderUs:
