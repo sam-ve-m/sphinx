@@ -1,5 +1,5 @@
 from typing import List
-
+from src.infrastructures.env_config import config
 
 class ClientRegisterBuilderUs:
 
@@ -36,6 +36,11 @@ class ClientRegisterBuilderUs:
             "type": "DISCLOSURES",
             "data": {}
         }
+        self._margin_disclosure = {
+            "type": "MARGIN_DISCLOSURE",
+            "data": {}
+        }
+        self._parent_ibid = None
 
     def __get_filed_documents(self) -> List[dict]:
         possible_documents = [
@@ -47,6 +52,7 @@ class ClientRegisterBuilderUs:
             self._employment,
             self._investing_profile,
             self._disclosures,
+            self._margin_disclosure
         ]
         documents = []
         for document in possible_documents:
@@ -55,14 +61,18 @@ class ClientRegisterBuilderUs:
         return documents
 
     def build(self):
-        # TODO: precisa revisar isso aki
         data = {
             "userType": "INDIVIDUAL_TRADER",
-            "parentIBID": None,
-            "wlpID": None,
+            "parentIBID": config("DW_PARENT_IBID"),
+            "wlpID": config("DW_WLP_ID"),
             "documents": self.__get_filed_documents()
         }
         return data
+
+    def add_parent_ibid(self, user_data: dict):
+        unique_id = user_data["unique_id"]
+        self._parent_ibid = unique_id
+        return self
 
     def add_basic_information_first_name(self, user_data: dict):
         first_name = user_data["name"].split(" ")[0]
@@ -94,37 +104,46 @@ class ClientRegisterBuilderUs:
         return self
 
     def add_tax_id_information_number(self, user_data: dict):
-        tax_id_information_filtered = list(filter(lambda x: x["country"] == "USA", user_data.get('tax_residences', [])))
-        if tax_id_information_filtered:
-            tax_id_information = tax_id_information_filtered[0]
+        us_tax_id_information_filtered = list(filter(lambda x: x["country"] == "USA", user_data.get('tax_residences', [])))
+        if us_tax_id_information_filtered:
+            tax_id_information = us_tax_id_information_filtered[0]
             number = tax_id_information["tax_number"]
             self._tax_id_information["data"].update({"value": number.replace("-", "")})
+        else:
+            self._tax_id_information["data"].update({"value": user_data['identifier_document']["cpf"]})
         return self
 
     def add_tax_id_information_type(self, user_data: dict):
-        tax_id_information_filtered = list(filter(lambda x: x["country"] == "USA", user_data.get('tax_residences', [])))
-        if tax_id_information_filtered:
-            tax_id_information = tax_id_information_filtered[0]
-            tax_ype = "other"
+        us_tax_id_information_filtered = list(filter(lambda x: x["country"] == "USA", user_data.get('tax_residences', [])))
+        tax_ype = "other"
+        if us_tax_id_information_filtered:
+            tax_id_information = us_tax_id_information_filtered[0]
+            self._tax_id_information["data"].update({"type": tax_ype})
+        else:
             self._tax_id_information["data"].update({"type": tax_ype})
         return self
 
     def add_tax_id_information_citizenship(self, user_data: dict):
-        tax_id_information_filtered = list(filter(lambda x: x["country"] == "USA", user_data.get('tax_residences', [])))
-        if tax_id_information_filtered:
-            tax_id_information = tax_id_information_filtered[0]
+        us_tax_id_information_filtered = list(filter(lambda x: x["country"] == "USA", user_data.get('tax_residences', [])))
+        if us_tax_id_information_filtered:
+            tax_id_information = us_tax_id_information_filtered[0]
             country = tax_id_information["country"]
             self._tax_id_information["data"].update({"citizenship": country})
+        else:
+            self._tax_id_information["data"].update({"citizenship": "BRA"})
         return self
 
     def add_tax_id_information_us_tax_payer(self, user_data: dict):
-        tax_id_information_filtered = list(filter(lambda x: x["country"] == "USA", user_data.get('tax_residences', [])))
-        if tax_id_information_filtered:
+        us_tax_id_information_filtered = list(filter(lambda x: x["country"] == "USA", user_data.get('tax_residences', [])))
+        if us_tax_id_information_filtered:
             self._tax_id_information["data"].update({"usTaxPayer": True})
+        else:
+            self._tax_id_information["data"].update({"usTaxPayer": False})
         return self
 
     def add_tax_residence_information_tax_treaty_with_us(self, user_data: dict):
-        if False:
+        us_tax_id_information_filtered = list(filter(lambda x: x["country"] == "USA", user_data.get('tax_residences', [])))
+        if us_tax_id_information_filtered:
             self._tax_residence_information["data"].update({"taxTreatyWithUS": True})
         return self
 
@@ -191,6 +210,7 @@ class ClientRegisterBuilderUs:
         # TODO PEGAR DO SINACOR
         address = user_data["address"]
         city = address["city"]
+        city = "Osasco"
         self._address["data"].update({
             "city": city
         })
@@ -224,36 +244,43 @@ class ClientRegisterBuilderUs:
         occupation = user_data['occupation']
         activity = occupation['activity']
         # TODO MAPA MISSING
+        value = None
+        value = "UNEMPLOYED"
         self._employment["data"].update({
-            "status": None
+            "status": value
         })
         return self
 
     def add_employment_company(self, user_data: dict):
-        occupation = user_data['occupation']
-        company_name = occupation['company']['name']
-        # TODO CONDIFITNAL IF EMPLOYED ad SELF_EMPLOYED
-        self._employment["data"].update({
-            "company": company_name
-        })
+        if self._employment["data"]["status"] in ["EMPLOYED", "SELF_EMPLOYED"]:
+            occupation = user_data['occupation']
+            company_name = occupation['company']['name']
+            # TODO CONDIFITNAL IF EMPLOYED ad SELF_EMPLOYED
+            self._employment["data"].update({
+                "company": company_name
+            })
         return self
 
     def add_employment_type(self, user_data: dict):
-        occupation = user_data['occupation']
-        # TODO MAPA MISSING
-        # TODO CONDIFITNAL IF EMPLOYED ad SELF_EMPLOYED
-        self._employment["data"].update({
-            "type": None
-        })
+        if self._employment["data"]["status"] in ["EMPLOYED", "SELF_EMPLOYED"]:
+            occupation = user_data['occupation']
+            # TODO MAPA MISSING
+            # TODO CONDIFITNAL IF EMPLOYED ad SELF_EMPLOYED
+            value = None
+            self._employment["data"].update({
+                "type": value
+            })
         return self
 
     def add_employment_position(self, user_data: dict):
-        occupation = user_data['occupation']
-        # TODO MAPA MISSING
-        # TODO CONDIFITNAL IF EMPLOYED ad SELF_EMPLOYED
-        self._employment["data"].update({
-            "position": None
-        })
+        if self._employment["data"]["status"] in ["EMPLOYED", "SELF_EMPLOYED"]:
+            occupation = user_data['occupation']
+            # TODO MAPA MISSING
+            # TODO CONDIFITNAL IF EMPLOYED ad SELF_EMPLOYED
+            value = None
+            self._employment["data"].update({
+                "position": value
+            })
         return self
 
     def add_employment_broker(self, user_data: dict):
@@ -354,6 +381,7 @@ class ClientRegisterBuilderUs:
         # TODO PRECISA IMPLEMENTAR ISSO AKI
         # if user_data["terms"]['term_rule14b_dw']:
         #     value = True
+        value = True
         self._disclosures["data"].update({
             "rule14b": value
         })
@@ -364,5 +392,11 @@ class ClientRegisterBuilderUs:
             "marketDataAgreement": False,
             "findersFee": False,
             "extendedHoursAgreement": False
+        })
+        return self
+
+    def add_margin_disclosure_agreement(self):
+        self._margin_disclosure["data"].update({
+            "marginAgreement": True
         })
         return self

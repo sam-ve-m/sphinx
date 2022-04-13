@@ -388,7 +388,7 @@ class UserService(IUser):
             file_type=UserFileType.SELFIE,
             content=payload.get("file_or_base64"),
             unique_id=thebes_answer["user"].get("unique_id"),
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
 
         (
@@ -423,13 +423,13 @@ class UserService(IUser):
             file_type=UserFileType.DOCUMENT_FRONT,
             content=payload["user_document"].get("document_front"),
             unique_id=thebes_answer["user"].get("unique_id"),
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         save_document_back = file_repository.save_user_file(
             file_type=UserFileType.DOCUMENT_BACK,
             content=payload["user_document"].get("document_back"),
             unique_id=thebes_answer["user"].get("unique_id"),
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         (path_document_front, path_document_back) = await asyncio.gather(save_document_front, save_document_back)
 
@@ -743,17 +743,17 @@ class UserService(IUser):
         user_file_exists = await file_repository.user_file_exists(
             file_type=UserFileType.SELFIE,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         user_document_front_exists = file_repository.user_file_exists(
             file_type=UserFileType.DOCUMENT_FRONT,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         user_document_back_exists = file_repository.user_file_exists(
             file_type=UserFileType.DOCUMENT_BACK,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         user_document_exists = all(await asyncio.gather(user_document_front_exists, user_document_back_exists))
 
@@ -791,12 +791,12 @@ class UserService(IUser):
         user_document_front_exists = file_repository.user_file_exists(
             file_type=UserFileType.DOCUMENT_FRONT,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         user_document_back_exists = file_repository.user_file_exists(
             file_type=UserFileType.DOCUMENT_BACK,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         user_document_exists = all(await asyncio.gather(user_document_front_exists, user_document_back_exists))
 
@@ -1059,7 +1059,7 @@ class UserService(IUser):
             payload=payload, onboard_step=["finished"]
         )
         us_step_validator = UserService.onboarding_us_step_validator(
-            payload=payload, onboard_step=["time_experience_step"]
+            payload=payload, onboard_step=["time_experience_step", "finished"]
         )
         await asyncio.gather(br_step_validator, us_step_validator)
 
@@ -1078,7 +1078,7 @@ class UserService(IUser):
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-        unique_id=  thebes_answer_user["unique_id"]
+        unique_id = thebes_answer_user["unique_id"]
         was_updated = await user_repository.update_one(
             old={"unique_id": unique_id},
             new={"external_exchange_requirements.us.time_experience": user_time_experience}

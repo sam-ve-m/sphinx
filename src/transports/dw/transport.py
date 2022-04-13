@@ -2,10 +2,17 @@
 from datetime import datetime
 from typing import List, Tuple
 import json
-import asyncio
+from nidavellir import Sindri
 
-from src.domain.drive_wealth.file_type import DriveWealthFileType, DriveWealthFileSide
-from src.services.builders.client_register.us.builder import ClientRegisterBuilderUs
+from src.domain.drive_wealth.account import (
+    DriveWealthAccountType,
+    DriveWealthAccountManagementType,
+    DriveWealthAccountTradingType
+)
+from src.domain.drive_wealth.file_type import (
+    DriveWealthFileType,
+    DriveWealthFileSide,
+)
 
 # Third part
 from aiohttp import ClientSession, ClientResponse
@@ -28,11 +35,12 @@ class DWCaller:
         session = await cls.__get_session()
         headers = {
             "Accept": "application/json",
+            "Content-Type": "application/json",
             "dw-client-app-key": config("DW_APP_KEY"),
             "dw-auth-token": cls.token,
         }
-        responses = await session.post(url=url, data=body, headers=headers)
-        if responses.status != 200:
+        responses = await session.post(url=url, data=json.dumps(body, default=Sindri.resolver), headers=headers)
+        if responses.status not in [200, 201]:
             Gladsheim.error(
                 message=f"DWTransportGraphicAccount::execute_get::Erros to get data from dw {responses}"
             )
@@ -97,20 +105,41 @@ class DWTransport:
     dw_caller_transport = DWCaller
 
     @classmethod
-    def _build_response(cls, http_response: ClientResponse) -> Tuple[bool, dict]:
+    async def _build_response(cls, http_response: ClientResponse) -> Tuple[bool, dict]:
         status = False
-        if http_response.status == 200:
+        if http_response.status in [200, 201]:
             status = True
         body = await http_response.text()
         dict_body = json.loads(body)
         return status, dict_body
 
     @classmethod
-    async def call_registry_user_post(cls, builder: ClientRegisterBuilderUs):
+    async def call_registry_user_post(cls, user_register_data: dict):
         url = config("DW_CREATE_USER_URL")
-        body = builder.build()
+        http_response = await cls.dw_caller_transport.execute_post(url=url, body=user_register_data)
+        response = await cls._build_response(http_response=http_response)
+        return response
+
+    @classmethod
+    async def call_registry_account_post(
+        cls,
+        user_id: str,
+        account_type: DriveWealthAccountType,
+        account_management_type: DriveWealthAccountManagementType,
+        trading_type: DriveWealthAccountTradingType,
+        ignore_buying_power: bool
+    ):
+        body = {
+            "userID": user_id,
+            "accountType": account_type.value,
+            "accountManagementType": account_management_type.value,
+            "tradingType": trading_type.value,
+            "ignoreBuyingPower": ignore_buying_power,
+            "ignoreMarketHoursForTest": bool(eval(config("DW_IGNORE_MARKET_HOURS_FOR_TEST")))
+        }
+        url = config("DW_CREATE_ACCOUNT_URL")
         http_response = await cls.dw_caller_transport.execute_post(url=url, body=body)
-        response = cls._build_response(http_response=http_response)
+        response = await cls._build_response(http_response=http_response)
         return response
 
     @classmethod
@@ -129,5 +158,5 @@ class DWTransport:
             "side": side.value,
         }
         http_response = await cls.dw_caller_transport.execute_post(url=url, body=body)
-        response = cls._build_response(http_response=http_response)
+        response = await cls._build_response(http_response=http_response)
         return response
