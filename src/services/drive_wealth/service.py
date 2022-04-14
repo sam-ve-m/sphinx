@@ -43,7 +43,10 @@ class DriveWealthService:
         else:
             user_dw_id = await cls._save_user_and_get_id(user_data=user_data)
             update_user.update(
-                {"external_exchange_requirements.us.user_id": user_dw_id}
+                {
+                    "external_exchange_requirements.us.user_id": user_dw_id,
+                    "dw": False
+                }
             )
 
         await cls._send_user_document(user_data=user_data, user_dw_id=user_dw_id)
