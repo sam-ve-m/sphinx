@@ -282,6 +282,16 @@ class AuthenticationService(IAuthentication):
             user_dw_status_from_database=user_dw_status_from_database
         )
 
+        if user_dw_status_from_database is not None and user_dw_status_from_database:
+            user_dw_id = user["external_exchange_requirements"]["us"].get("user_id")
+            kyc_status_from_dw = await dw_service.validate_kyc_status(user_dw_id=user_dw_id)
+            AuthenticationService._update_client_has_trade_us_allowed_status_with_dw_status_response(
+                client_map_requirements_to_allow_trade_from_database=client_map_requirements_to_allow_us_trade_from_database,
+                user_dw_status_from_database=user_dw_status_from_database,
+                user_dw_status_from_check_status_request=kyc_status_from_dw,
+            )
+        return client_map_requirements_to_allow_us_trade_from_database
+
     @staticmethod
     async def _dtvm_client_has_br_trade_allowed(
         user: dict, solutiontech=Solutiontech
@@ -398,6 +408,27 @@ class AuthenticationService(IAuthentication):
         }
 
         return client_has_trade_allowed_status_with_database_user
+
+    @staticmethod
+    def _update_client_has_trade_us_allowed_status_with_dw_status_response(
+        client_map_requirements_to_allow_trade_from_database: dict,
+        user_dw_status_from_database: str,
+        user_dw_status_from_check_status_request: str,
+    ):
+
+        dw_status_changed = (
+            user_dw_status_from_database
+            != user_dw_status_from_check_status_request
+        )
+
+        client_map_requirements_to_allow_trade_from_database["dw"][
+            "status"
+        ] = user_dw_status_from_check_status_request
+        client_map_requirements_to_allow_trade_from_database["dw"][
+            "status_changed"
+        ] = dw_status_changed
+
+        return client_map_requirements_to_allow_trade_from_database
 
 
     @staticmethod

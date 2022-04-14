@@ -1,6 +1,7 @@
 import asyncio
 
 from src.domain.drive_wealth.file_type import DriveWealthFileSide, DriveWealthFileType
+from src.domain.drive_wealth.kyc_status import KycStatus
 from src.repositories.file.enum.user_file import UserFileType
 from src.repositories.file.repository import FileRepository
 from src.services.builders.client_register.us.builder import (
@@ -45,7 +46,7 @@ class DriveWealthService:
             update_user.update(
                 {
                     "external_exchange_requirements.us.user_id": user_dw_id,
-                    "dw": False
+                    "dw": KycStatus.KYC_PROCESSING.value
                 }
             )
 
@@ -61,6 +62,17 @@ class DriveWealthService:
             )
             if was_updated is False:
                 raise InternalServerError("common.process_issue")
+
+    @classmethod
+    async def validate_kyc_status(cls, user_dw_id: str) -> str:
+        status, response = await cls.dw_transport.call_kyc_status_get(
+            user_id=user_dw_id
+        )
+        # TODO PERSEPHONE LOG AKI
+        if not status:
+            raise InternalServerError("common.unable_to_process")
+        kyc_status = response["kyc"]["status"]["name"]
+        return kyc_status
 
     @classmethod
     async def _create_user_account(cls, user_dw_id: str):

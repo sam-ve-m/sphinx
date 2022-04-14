@@ -204,7 +204,6 @@ class ClientUpdateRegisterBuilderUs:
         # TODO PEGAR DO SINACOR
         address = user_data["address"]
         city = address["city"]
-        city = "Osasco"
         self._address["data"].update({"city": city})
         return self
 
@@ -231,7 +230,6 @@ class ClientUpdateRegisterBuilderUs:
         activity = occupation["activity"]
         # TODO MAPA MISSING
         value = None
-        value = "UNEMPLOYED"
         self._employment["data"].update({"status": value})
         return self
 
@@ -345,7 +343,6 @@ class ClientUpdateRegisterBuilderUs:
         # TODO PRECISA IMPLEMENTAR ISSO AKI
         # if user_data["terms"]['term_rule14b_dw']:
         #     value = True
-        value = True
         self._disclosures["data"].update({"rule14b": value})
         return self
 
