@@ -30,7 +30,9 @@ class ViewService(IView):
         view_id = payload.get("view_id")
         view_update = deepcopy({"_id": view_id})
         view_update.update(payload.get("model"))
-        view_update_succeeded = await view_repository.update_view(view_id=view_id, view_update=view_update)
+        view_update_succeeded = await view_repository.update_view(
+            view_id=view_id, view_update=view_update
+        )
         if view_update_succeeded:
             update_view_response = {
                 "status_code": status.HTTP_200_OK,
@@ -57,13 +59,17 @@ class ViewService(IView):
     async def link_feature(payload: dict, view_repository=ViewRepository) -> dict:
         feature_id = payload.get("feature_id")
         view_id = payload.get("view_id")
-        is_already_linked = await view_repository.is_feature_linked_with_view(feature_id=feature_id, view_id=view_id)
+        is_already_linked = await view_repository.is_feature_linked_with_view(
+            feature_id=feature_id, view_id=view_id
+        )
         if is_already_linked:
             return {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.not_modified",
             }
-        feature_was_linked = await view_repository.link_feature_view(feature_id=feature_id, view_id=view_id)
+        feature_was_linked = await view_repository.link_feature_view(
+            feature_id=feature_id, view_id=view_id
+        )
         if feature_was_linked:
             return {
                 "status_code": status.HTTP_200_OK,
@@ -73,17 +79,23 @@ class ViewService(IView):
             raise InternalServerError("common.process_issue")
 
     @staticmethod
-    async def delete_link_feature(payload: dict, view_repository=ViewRepository) -> dict:
+    async def delete_link_feature(
+        payload: dict, view_repository=ViewRepository
+    ) -> dict:
         feature_id = payload.get("feature_id")
         view_id = payload.get("view_id")
-        is_already_linked = await view_repository.is_feature_linked_with_view(feature_id=feature_id, view_id=view_id)
+        is_already_linked = await view_repository.is_feature_linked_with_view(
+            feature_id=feature_id, view_id=view_id
+        )
         if not is_already_linked:
             return {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.not_modified",
             }
 
-        feature_was_delete_linked = await view_repository.delete_link_feature_view(feature_id=feature_id, view_id=view_id)
+        feature_was_delete_linked = await view_repository.delete_link_feature_view(
+            feature_id=feature_id, view_id=view_id
+        )
         if feature_was_delete_linked:
             return {
                 "status_code": status.HTTP_200_OK,

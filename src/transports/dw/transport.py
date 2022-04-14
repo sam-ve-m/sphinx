@@ -7,7 +7,7 @@ from nidavellir import Sindri
 from src.domain.drive_wealth.account import (
     DriveWealthAccountType,
     DriveWealthAccountManagementType,
-    DriveWealthAccountTradingType
+    DriveWealthAccountTradingType,
 )
 from src.domain.drive_wealth.file_type import (
     DriveWealthFileType,
@@ -28,9 +28,7 @@ class DWCaller:
     expire_at = None
 
     @classmethod
-    async def execute_post(
-        cls, url, body: dict
-    ) -> ClientResponse:
+    async def execute_post(cls, url, body: dict) -> ClientResponse:
         await cls.__do_authentication()
         session = await cls.__get_session()
         headers = {
@@ -39,17 +37,36 @@ class DWCaller:
             "dw-client-app-key": config("DW_APP_KEY"),
             "dw-auth-token": cls.token,
         }
-        responses = await session.post(url=url, data=json.dumps(body, default=Sindri.resolver), headers=headers)
+        responses = await session.post(
+            url=url, data=json.dumps(body, default=Sindri.resolver), headers=headers
+        )
         if responses.status not in [200, 201]:
             Gladsheim.error(
-                message=f"DWTransportGraphicAccount::execute_get::Erros to get data from dw {responses}"
+                message=f"DWTransportGraphicAccount::execute_post::Erros to get data from dw {responses}"
             )
         return responses
 
     @classmethod
-    async def execute_get(
-        cls, url, query_params: dict
-    ) -> ClientResponse:
+    async def execute_patch(cls, url, body: dict) -> ClientResponse:
+        await cls.__do_authentication()
+        session = await cls.__get_session()
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "dw-client-app-key": config("DW_APP_KEY"),
+            "dw-auth-token": cls.token,
+        }
+        responses = await session.patch(
+            url=url, data=json.dumps(body, default=Sindri.resolver), headers=headers
+        )
+        if responses.status not in [200, 201]:
+            Gladsheim.error(
+                message=f"DWTransportGraphicAccount::execute_patch::Erros to get data from dw {responses}"
+            )
+        return responses
+
+    @classmethod
+    async def execute_get(cls, url, query_params: dict) -> ClientResponse:
         await cls.__do_authentication()
         session = await cls.__get_session()
         headers = {
@@ -63,7 +80,6 @@ class DWCaller:
                 message=f"DWTransportGraphicAccount::execute_get::Erros to get data from dw {responses}"
             )
         return responses
-
 
     @classmethod
     async def __do_authentication(cls):
@@ -116,7 +132,19 @@ class DWTransport:
     @classmethod
     async def call_registry_user_post(cls, user_register_data: dict):
         url = config("DW_CREATE_USER_URL")
-        http_response = await cls.dw_caller_transport.execute_post(url=url, body=user_register_data)
+        http_response = await cls.dw_caller_transport.execute_post(
+            url=url, body=user_register_data
+        )
+        response = await cls._build_response(http_response=http_response)
+        return response
+
+    @classmethod
+    async def call_registry_user_patch(cls, user_register_data: dict, user_dw_id: str):
+        url = config("DW_UPDATE_USER_URL")
+        formatted_url = url.format(user_dw_id)
+        http_response = await cls.dw_caller_transport.execute_patch(
+            url=formatted_url, body=user_register_data
+        )
         response = await cls._build_response(http_response=http_response)
         return response
 
@@ -127,7 +155,7 @@ class DWTransport:
         account_type: DriveWealthAccountType,
         account_management_type: DriveWealthAccountManagementType,
         trading_type: DriveWealthAccountTradingType,
-        ignore_buying_power: bool
+        ignore_buying_power: bool,
     ):
         body = {
             "userID": user_id,
@@ -135,7 +163,9 @@ class DWTransport:
             "accountManagementType": account_management_type.value,
             "tradingType": trading_type.value,
             "ignoreBuyingPower": ignore_buying_power,
-            "ignoreMarketHoursForTest": bool(eval(config("DW_IGNORE_MARKET_HOURS_FOR_TEST")))
+            "ignoreMarketHoursForTest": bool(
+                eval(config("DW_IGNORE_MARKET_HOURS_FOR_TEST"))
+            ),
         }
         url = config("DW_CREATE_ACCOUNT_URL")
         http_response = await cls.dw_caller_transport.execute_post(url=url, body=body)
@@ -148,7 +178,7 @@ class DWTransport:
         user_id: str,
         document_type: DriveWealthFileType,
         document: str,
-        side: DriveWealthFileSide
+        side: DriveWealthFileSide,
     ):
         url = config("DW_USER_FILE_UPLOAD_URL")
         body = {

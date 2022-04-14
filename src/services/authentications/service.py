@@ -289,7 +289,9 @@ class AuthenticationService(IAuthentication):
             user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
-        user_solutiontech_status_is_synced = user.get("solutiontech") == SolutiontechClientImportStatus.SYNC.value
+        user_solutiontech_status_is_synced = (
+            user.get("solutiontech") == SolutiontechClientImportStatus.SYNC.value
+        )
         if not user_solutiontech_status_is_synced:
             if user.get("solutiontech") == SolutiontechClientImportStatus.FAILED.value:
                 await solutiontech.request_client_sync(

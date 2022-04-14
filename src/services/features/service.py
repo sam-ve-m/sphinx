@@ -27,7 +27,9 @@ class FeatureService(IFeature):
         feature_id = payload.get("feature_id")
         feature_update = deepcopy({"_id": feature_id})
         feature_update.update(payload.get("model"))
-        if await feature_repository.update_feature(feature_id=feature_id, feature_update=feature_update):
+        if await feature_repository.update_feature(
+            feature_id=feature_id, feature_update=feature_update
+        ):
             update_feature_response = {
                 "status_code": status.HTTP_200_OK,
                 "message_key": "requests.updated",

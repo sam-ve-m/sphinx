@@ -6,6 +6,7 @@ from typing import Union, Optional
 from aiohttp import ClientSession
 
 from src.core.interfaces.repositories.file_repository.interface import IFile
+
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError
 from src.infrastructures.s3.infrastructure import S3Infrastructure
@@ -84,12 +85,14 @@ class FileRepository(IFile):
 
     @classmethod
     async def get_file_as_base_64(
-            cls,
-            file_type: UserFileType,
-            unique_id: str,
-            bucket_name: str,
+        cls,
+        file_type: UserFileType,
+        unique_id: str,
+        bucket_name: str,
     ) -> str:
-        url = await cls.get_user_file(file_type=file_type, unique_id=unique_id, bucket_name=bucket_name)
+        url = await cls.get_user_file(
+            file_type=file_type, unique_id=unique_id, bucket_name=bucket_name
+        )
         if url is None:
             raise InternalServerError("files.error")
         async with ClientSession() as session:
@@ -181,11 +184,7 @@ class FileRepository(IFile):
             version = await cls.get_current_term_version(
                 file_type=file_type, bucket_name=bucket_name
             )
-            value.update(
-                {
-                    file_type.value: version
-                }
-            )
+            value.update({file_type.value: version})
         return value
 
     @classmethod

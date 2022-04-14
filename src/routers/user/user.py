@@ -10,7 +10,13 @@ from src.domain.validators.base import (
 )
 from src.domain.validators.onboarding_validators import (
     TermFile,
-    FileBase64, TermsFile, UserDocument, PoliticallyExposed, ExchangeMember, CompanyDirector, TimeExperience,
+    FileBase64,
+    TermsFile,
+    UserDocument,
+    PoliticallyExposed,
+    ExchangeMember,
+    CompanyDirector,
+    TimeExperience,
 )
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
@@ -161,6 +167,7 @@ async def get_onboarding_user_current_step(
         UserController.onboarding_user_current_step_br, payload, request
     )
 
+
 @router.get("/user/onboarding_user_current_step_us", tags=["user"])
 async def get_onboarding_user_current_step(
     request: Request,
@@ -177,7 +184,8 @@ async def get_onboarding_user_current_step(
 
 @router.put("/user/politically_exposed_us", tags=["user"])
 async def put_politically_exposed_us(
-    politically_exposed: PoliticallyExposed, request: Request,
+    politically_exposed: PoliticallyExposed,
+    request: Request,
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
@@ -192,7 +200,8 @@ async def put_politically_exposed_us(
 
 @router.put("/user/exchange_member_us", tags=["user"])
 async def put_exchange_member_us(
-    exchange_member: ExchangeMember, request: Request,
+    exchange_member: ExchangeMember,
+    request: Request,
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
@@ -207,7 +216,8 @@ async def put_exchange_member_us(
 
 @router.put("/user/company_director_us", tags=["user"])
 async def put_company_director_us(
-    company_director: CompanyDirector, request: Request,
+    company_director: CompanyDirector,
+    request: Request,
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
@@ -222,7 +232,8 @@ async def put_company_director_us(
 
 @router.put("/user/time_experience_us", tags=["user"])
 async def put_time_experience_us(
-    time_experience: TimeExperience, request: Request,
+    time_experience: TimeExperience,
+    request: Request,
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 

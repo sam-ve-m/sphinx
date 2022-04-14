@@ -27,7 +27,7 @@ class SinacorService:
         user_data: dict,
         client_register_repository=ClientRegisterRepository,
         user_repository=UserRepository,
-        portfolio_repository=PortfolioRepository
+        portfolio_repository=PortfolioRepository,
     ):
         database_and_bureau_dtvm_client_data_merged = (
             await SinacorService._create_or_update_client_into_sinacor(
@@ -47,7 +47,7 @@ class SinacorService:
 
         await portfolio_repository.save_unique_id_by_account(
             bmf_account=user_data["portfolios"]["default"]["br"]["bmf_account"],
-            unique_id=user_data["unique_id"]
+            unique_id=user_data["unique_id"],
         )
 
         await SinacorService.__crete_reference_to_allow_cash_transfer(
