@@ -312,8 +312,7 @@ class AuthenticationService(IAuthentication):
                 user_solutiontech_status_from_database is None,
                 user_sincad_status_from_database is None,
                 user_sinacor_status_from_database is None,
-                user_bmf_account_from_database is None,
-                user_cpf_from_database is None,
+                user_bmf_account_from_database is None
             ]
         ):
             return {}
