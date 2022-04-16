@@ -1,9 +1,12 @@
 # STANDARD LIBS
 
 # OUTSIDE LIBRARIES
+import asyncio
+
 from fastapi import status
 
 from src.core.interfaces.services.authentication.interface import IAuthentication
+from src.domain.drive_wealth.kyc_status import KycStatus
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 
 # SPHINX
@@ -150,22 +153,26 @@ class AuthenticationService(IAuthentication):
         user_data_update = {}
         must_update = False
 
-        br_third_part_synchronization_status = (
-            await AuthenticationService._dtvm_client_has_br_trade_allowed(
+        br_third_part_synchronization_status_task = (
+            AuthenticationService._dtvm_client_has_br_trade_allowed(
                 user=user_data
             )
         )
+
+        us_third_part_synchronization_status_task = (
+            AuthenticationService._dtvm_client_has_us_trade_allowed(
+                user=user_data
+            )
+        )
+        (
+            br_third_part_synchronization_status,
+            us_third_part_synchronization_status
+        ) = await asyncio.gather(br_third_part_synchronization_status_task, us_third_part_synchronization_status_task)
 
         for key, value in br_third_part_synchronization_status.items():
             if value["status_changed"]:
                 must_update = True
                 user_data_update.update({key: value["status"]})
-
-        us_third_part_synchronization_status = (
-            await AuthenticationService._dtvm_client_has_us_trade_allowed(
-                user=user_data
-            )
-        )
 
         for key, value in us_third_part_synchronization_status.items():
             if value["status_changed"]:
@@ -282,7 +289,7 @@ class AuthenticationService(IAuthentication):
             user_dw_status_from_database=user_dw_status_from_database
         )
 
-        if user_dw_status_from_database is not None and user_dw_status_from_database:
+        if user_dw_status_from_database is not None and user_dw_status_from_database != KycStatus.KYC_APPROVED.value:
             user_dw_id = user["external_exchange_requirements"]["us"].get("user_id")
             kyc_status_from_dw = await dw_service.validate_kyc_status(user_dw_id=user_dw_id)
             AuthenticationService._update_client_has_trade_us_allowed_status_with_dw_status_response(

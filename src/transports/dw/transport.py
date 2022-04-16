@@ -19,106 +19,12 @@ from aiohttp import ClientSession, ClientResponse
 
 # Jotunheimr
 from src.infrastructures.env_config import config
-from etria_logger import Gladsheim
-
-
-class DWCaller:
-    session = None
-    token = None
-    expire_at = None
-
-    @classmethod
-    async def execute_post(cls, url, body: dict) -> ClientResponse:
-        await cls.__do_authentication()
-        session = await cls.__get_session()
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "dw-client-app-key": config("DW_APP_KEY"),
-            "dw-auth-token": cls.token,
-        }
-        responses = await session.post(
-            url=url, data=json.dumps(body, default=Sindri.resolver), headers=headers
-        )
-        if responses.status not in [200, 201]:
-            Gladsheim.error(
-                message=f"DWTransportGraphicAccount::execute_post::Erros to get data from dw {responses}"
-            )
-        return responses
-
-    @classmethod
-    async def execute_patch(cls, url, body: dict) -> ClientResponse:
-        await cls.__do_authentication()
-        session = await cls.__get_session()
-        headers = {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "dw-client-app-key": config("DW_APP_KEY"),
-            "dw-auth-token": cls.token,
-        }
-        responses = await session.patch(
-            url=url, data=json.dumps(body, default=Sindri.resolver), headers=headers
-        )
-        if responses.status not in [200, 201]:
-            Gladsheim.error(
-                message=f"DWTransportGraphicAccount::execute_patch::Erros to get data from dw {responses}"
-            )
-        return responses
-
-    @classmethod
-    async def execute_get(cls, url, query_params: dict) -> ClientResponse:
-        await cls.__do_authentication()
-        session = await cls.__get_session()
-        headers = {
-            "Accept": "application/json",
-            "dw-client-app-key": config("DW_APP_KEY"),
-            "dw-auth-token": cls.token,
-        }
-        responses = await session.get(url=url, params=query_params, headers=headers)
-        if responses.status != 200:
-            Gladsheim.error(
-                message=f"DWTransportGraphicAccount::execute_get::Erros to get data from dw {responses}"
-            )
-        return responses
-
-    @classmethod
-    async def __do_authentication(cls):
-        if not cls.expire_at or cls.expire_at < datetime.utcnow():
-            session = await cls.__get_session()
-            payload = {
-                "username": config("DW_USER"),
-                "password": config("DW_PASSWORD"),
-                "appTypeID": 4,
-            }
-            headers = {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "dw-client-app-key": config("DW_APP_KEY"),
-            }
-            try:
-                async with session.post(
-                    config("DW_AUTHENTICATION_URL"), json=payload, headers=headers
-                ) as response:
-                    body = await response.text()
-                    dict_body = json.loads(body)
-                    cls.token = dict_body["authToken"]
-                    cls.expire_at = datetime.fromisoformat(dict_body["expiresAt"][:-1])
-            except Exception as exception:
-                Gladsheim.error(
-                    message=f"DWTransportGraphicAccount::get_balances::Error to authenticate:  {exception}",
-                    error=exception,
-                )
-
-    @classmethod
-    async def __get_session(cls) -> ClientSession:
-        if cls.session is None:
-            cls.session = ClientSession()
-        return cls.session
+from mepho import DWApiTransport
 
 
 class DWTransport:
 
-    dw_caller_transport = DWCaller
+    dw_caller_transport = DWApiTransport
 
     @classmethod
     async def _build_response(cls, http_response: ClientResponse) -> Tuple[bool, dict]:
