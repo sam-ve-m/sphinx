@@ -27,12 +27,12 @@ class DriveWealthService:
     file_repository = FileRepository
 
     @classmethod
-    async def registry_client(
+    async def registry_update_client(
         cls,
         user_data: dict,
         user_repository=UserRepository,
     ):
-        user_dw_id = user_data["external_exchange_requirements"]["us"].get("user_id")
+        user_dw_id = user_data["portfolios"]["default"].get("us", {}).get("dw_id")
         account_id = user_data["portfolios"]["default"].get("us", {}).get("dw_account")
         is_update = bool(user_dw_id)
         need_create_account = not bool(account_id)
@@ -45,7 +45,7 @@ class DriveWealthService:
             user_dw_id = await cls._save_user_and_get_id(user_data=user_data)
             update_user.update(
                 {
-                    "external_exchange_requirements.us.user_id": user_dw_id,
+                    "portfolios.default.us.dw_id": user_dw_id,
                     "dw": KycStatus.KYC_PROCESSING.value
                 }
             )

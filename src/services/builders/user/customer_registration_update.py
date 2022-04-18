@@ -45,10 +45,10 @@ class UpdateCustomerRegistrationBuilder:
         )
 
     def _get_new_value(self, sub_partition: str, field_name: str) -> Optional[any]:
-        if source := self.__new_personal_data.get(sub_partition, {}).get(
-            field_name, {}
-        ):
-            return source.get("value")
+        sub_partition = self.__new_personal_data.get(sub_partition)
+        if sub_partition:
+            if source := sub_partition.get(field_name):
+                return source.get("value")
 
     def personal_name(self):
         old_name = self.__old_personal_data.get("name")

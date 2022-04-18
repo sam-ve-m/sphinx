@@ -513,13 +513,35 @@ class ExternalExchangeAccountUs(BaseModel):
     is_company_director_of: Optional[CompanyDirectorOf]
 
     @root_validator()
-    def validate_cpf(cls, values: Dict[str, Any]):
+    def validate(cls, values: Dict[str, Any]):
         is_company_director = values.get("is_company_director", {}).get("value")
-        company_name = values.get("is_company_director_of", {}).get("value")
-        if is_company_director and not company_name:
-            raise ValueError(
-                "need inform the field company_director_of is you are a company director"
-            )
+        company_name_meta = values.get("is_company_director_of", {})
+        if is_company_director and not company_name_meta:
+            company_name = company_name_meta.get("value")
+            if not company_name:
+                raise ValueError(
+                    "need inform the field company_director_of is you are a company director"
+                )
+        return values
+
+
+class ExternalExchangeAccountUsUpdate(BaseModel):
+    is_politically_exposed: Optional[PoliticallyExposed]
+    is_exchange_member: Optional[ExchangeMember]
+    time_experience: Optional[TimeExperience]
+    is_company_director: Optional[CompanyDirector]
+    is_company_director_of: Optional[CompanyDirectorOf]
+
+    @root_validator()
+    def validate(cls, values: Dict[str, Any]):
+        is_company_director = values.get("is_company_director", {}).get("value")
+        company_name_meta = values.get("is_company_director_of", {})
+        if is_company_director and not company_name_meta:
+            company_name = company_name_meta.get("value")
+            if not company_name:
+                raise ValueError(
+                    "need inform the field company_director_of is you are a company director"
+                )
         return values
 
 
@@ -528,7 +550,6 @@ class ClientValidationData(BaseModel):
     marital: UserMaritalDataSource
     documents: UserDocumentsDataValidation
     address: UserAddressDataValidation
-    external_exchange_account_us: Optional[ExternalExchangeAccountUs]
 
 
 class UserPersonalDataUpdate(BaseModel):
@@ -577,4 +598,4 @@ class UpdateCustomerRegistrationData(BaseModel):
     marital: Optional[UserMaritalDataSource]
     documents: Optional[UserDocumentsDataUpdate]
     address: Optional[UserAddressDataUpdate]
-    external_exchange_account_us: Optional[ExternalExchangeAccountUs]
+    external_exchange_account_us: Optional[ExternalExchangeAccountUsUpdate]

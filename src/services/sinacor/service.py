@@ -29,6 +29,8 @@ class SinacorService:
         user_repository=UserRepository,
         portfolio_repository=PortfolioRepository,
     ):
+        user_data_to_update = bool(user_data.get("portfolios", {}).get("default", {}).get("br", {}).get("bmf_account"))
+
         database_and_bureau_dtvm_client_data_merged = (
             await SinacorService._create_or_update_client_into_sinacor(
                 client_register_repository=client_register_repository,
@@ -36,29 +38,31 @@ class SinacorService:
             )
         )
 
-        SinacorService._add_third_party_operator_information(
-            database_and_bureau_dtvm_client_data_merged
-        )
+        if not user_data_to_update:
 
-        database_and_bureau_dtvm_client_data_merged = await SinacorService._add_dtvm_client_trade_metadata(
-            database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
-            client_register_repository=client_register_repository,
-        )
+            SinacorService._add_third_party_operator_information(
+                database_and_bureau_dtvm_client_data_merged
+            )
 
-        await portfolio_repository.save_unique_id_by_account(
-            bmf_account=user_data["portfolios"]["default"]["br"]["bmf_account"],
-            unique_id=user_data["unique_id"],
-        )
+            database_and_bureau_dtvm_client_data_merged = await SinacorService._add_dtvm_client_trade_metadata(
+                database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
+                client_register_repository=client_register_repository,
+            )
 
-        await SinacorService.__crete_reference_to_allow_cash_transfer(
-            database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
-            client_register_repository=client_register_repository,
-        )
+            await portfolio_repository.save_unique_id_by_account(
+                bmf_account=user_data["portfolios"]["default"]["br"]["bmf_account"],
+                unique_id=user_data["unique_id"],
+            )
 
-        await SinacorService.__crete_link_with_graphic_account(
-            database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
-            client_register_repository=client_register_repository,
-        )
+            await SinacorService.__crete_reference_to_allow_cash_transfer(
+                database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
+                client_register_repository=client_register_repository,
+            )
+
+            await SinacorService.__crete_link_with_graphic_account(
+                database_and_bureau_dtvm_client_data_merged=database_and_bureau_dtvm_client_data_merged,
+                client_register_repository=client_register_repository,
+            )
 
         user_is_updated = await user_repository.update_one(
             old={"unique_id": database_and_bureau_dtvm_client_data_merged["unique_id"]},
@@ -231,14 +235,9 @@ class SinacorService:
         )
         database_and_bureau_dtvm_client_data_merged.update(
             {
-                "portfolios": {
-                    "default": {
-                        "br": {
-                            "bovespa_account": bovespa_account,
-                            "bmf_account": bmf_account,
-                        },
-                    },
-                    "vnc": {"br": []},
+                "portfolios.default.br.bovespa_account": {
+                    "bovespa_account": bovespa_account,
+                    "bmf_account": bmf_account,
                 }
             }
         )

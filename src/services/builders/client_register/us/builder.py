@@ -51,11 +51,11 @@ class ClientUpdateRegisterBuilderUs:
         return self
 
     def add_parent_wlp_id(self):
-        self._parent_ibid = config("DW_WLP_ID")
+        self._wlp_id = config("DW_WLP_ID")
         return self
 
     def add_user_type(self):
-        self._parent_ibid = "INDIVIDUAL_TRADER"
+        self._user_type = "INDIVIDUAL_TRADER"
         return self
 
     def add_basic_information_first_name(self, user_data: dict):

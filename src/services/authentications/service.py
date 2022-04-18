@@ -288,9 +288,8 @@ class AuthenticationService(IAuthentication):
         client_map_requirements_to_allow_us_trade_from_database = AuthenticationService._get_client_map_requirements_to_allow_us_trade(
             user_dw_status_from_database=user_dw_status_from_database
         )
-
         if user_dw_status_from_database is not None and user_dw_status_from_database != KycStatus.KYC_APPROVED.value:
-            user_dw_id = user["external_exchange_requirements"]["us"].get("user_id")
+            user_dw_id = user["portfolios"]["default"].get("us", {}).get("dw_id")
             kyc_status_from_dw = await dw_service.validate_kyc_status(user_dw_id=user_dw_id)
             AuthenticationService._update_client_has_trade_us_allowed_status_with_dw_status_response(
                 client_map_requirements_to_allow_trade_from_database=client_map_requirements_to_allow_us_trade_from_database,

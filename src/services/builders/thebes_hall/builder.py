@@ -270,10 +270,11 @@ class ThebesHallBuilder:
     def add_client_has_us_trade_allowed(
         self,
     ):
-        if self._user_data["dw"] == KycStatus.KYC_APPROVED.value:
-            self._jwt_payload_user_data.update({"client_has_us_trade_allowed": True})
-        else:
-            self._jwt_payload_user_data.update({"client_has_us_trade_allowed": False})
+        if current_dw_status := self._user_data.get("dw"):
+            if current_dw_status == KycStatus.KYC_APPROVED.value:
+                self._jwt_payload_user_data.update({"client_has_us_trade_allowed": True})
+            else:
+                self._jwt_payload_user_data.update({"client_has_us_trade_allowed": False})
         return self
 
     def add_client_profile(self):

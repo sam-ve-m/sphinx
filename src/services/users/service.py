@@ -1114,7 +1114,7 @@ class UserService(IUser):
             raise InternalServerError("common.unable_to_process")
 
         user_data = await user_repository.find_one({"unique_id": unique_id})
-        await DriveWealthService.registry_client(user_data=user_data)
+        await DriveWealthService.registry_update_client(user_data=user_data)
 
         return {
             "status_code": status.HTTP_200_OK,
@@ -1262,11 +1262,12 @@ class UserService(IUser):
         ):
             raise InternalServerError("common.process_issue")
 
+        user_data = await user_repository.find_one({"unique_id": unique_id}, project={"_id": False})
         await SinacorService.save_or_update_client_data(
-            user_data=new_customer_registration_data
+            user_data=user_data
         )
         await UserService.update_external_exchange_account(
-            user_data=new_customer_registration_data
+            user_data=user_data
         )
 
         if not await user_repository.update_one(
@@ -1286,9 +1287,10 @@ class UserService(IUser):
     @staticmethod
     async def update_external_exchange_account(user_data: dict):
         user_dw_id = (
-            user_data.get("external_exchange_requirements", {})
+            user_data.get("portfolios", {})
+            .get("default", {})
             .get("us", {})
-            .get("user_id")
+            .get("dw_id")
         )
         if user_dw_id:
-            await DriveWealthService.registry_client(user_data=user_data)
+            await DriveWealthService.registry_update_client(user_data=user_data)
