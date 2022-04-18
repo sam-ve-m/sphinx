@@ -155,7 +155,7 @@ class IssuerSource(Source):
 
 
 class StreetNameSource(Source):
-    value: str
+    value: constr(min_length=3, max_length=30)
 
 
 class AddressNumberSource(Source):
@@ -318,6 +318,10 @@ class EmailSource(Source):
 
 
 class NameSource(Source):
+    value: constr(regex=r"^[a-zA-Z\sáéíóúãẽĩõũâêîôûç]+$")
+
+
+class NickName(Source):
     value: str
 
 
@@ -408,7 +412,7 @@ class UserMaritalDataSource(BaseModel):
 
 class UserPersonalDataValidation(BaseModel):
     name: NameSource
-    nick_name: NameSource
+    nick_name: NickName
     birth_date: BirthDateSource
     gender: GenderSource
     father_name: Optional[NameSource]
@@ -488,7 +492,7 @@ class ClientValidationData(BaseModel):
 
 class UserPersonalDataUpdate(BaseModel):
     name: Optional[NameSource]
-    nick_name: Optional[NameSource]
+    nick_name: Optional[NickName]
     birth_date: Optional[BirthDateSource]
     gender: Optional[GenderSource]
     father_name: Optional[NameSource]
