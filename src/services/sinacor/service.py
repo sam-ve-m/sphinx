@@ -74,9 +74,9 @@ class SinacorService:
             unique_id=unique_id
         )
 
-        await social_network_service.register_user_portfolio(
-            bmf_account=bmf_account,
+        await social_network_service.register_user_portfolio_br(
             unique_id=unique_id,
+            bmf_account=bmf_account,
             bovespa_account=bovespa_account
         )
 

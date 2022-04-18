@@ -91,7 +91,7 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
 
         await valhalla_service.register_user(
-            user_email=user.get("email"), nick_name=user.get("nick_name")
+            unique_id=user["unique_id"], nickname=user["nick_name"], user_type=user["scope"]["user_level"]
         )
 
         jwt_payload_data, control_data = ThebesHallBuilder(
@@ -1136,7 +1136,7 @@ class UserService(IUser):
 
     @staticmethod
     async def update_customer_registration_data(
-        payload: dict, user_repository=UserRepository
+        payload: dict, user_repository=UserRepository, valhalla_service=ValhallaService
     ):
         await UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["finished", "user_data_validation"]
@@ -1227,7 +1227,7 @@ class UserService(IUser):
         await SinacorService.save_or_update_client_data(
             user_data=new_customer_registration_data
         )
-
+        # OnLy if is create
         if not await user_repository.update_one(
             old={"unique_id": unique_id},
             new={
@@ -1236,6 +1236,15 @@ class UserService(IUser):
             },
         ):
             raise InternalServerError("common.process_issue")
+
+        user = await user_repository.find_one(
+            {"unique_id": unique_id}
+        )
+        await valhalla_service.register_user(
+            unique_id=user["unique_id"],
+            nickname=user["nick_name"],
+            user_type=user["scope"]["user_level"]
+        )
 
         return {
             "status_code": status.HTTP_200_OK,
