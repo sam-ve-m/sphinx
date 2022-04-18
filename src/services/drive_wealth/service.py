@@ -4,9 +4,11 @@ from src.domain.drive_wealth.file_type import DriveWealthFileSide, DriveWealthFi
 from src.domain.drive_wealth.kyc_status import KycStatus
 from src.repositories.file.enum.user_file import UserFileType
 from src.repositories.file.repository import FileRepository
+from src.repositories.protfolio.repository import PortfolioRepository
 from src.services.builders.client_register.us.builder import (
     ClientUpdateRegisterBuilderUs,
 )
+from src.services.valhalla.service import ValhallaService
 from src.transports.dw.transport import DWTransport
 from src.infrastructures.env_config import config
 from src.repositories.user.repository import UserRepository
@@ -31,6 +33,8 @@ class DriveWealthService:
         cls,
         user_data: dict,
         user_repository=UserRepository,
+        social_network_service=ValhallaService,
+        portfolio_repository=PortfolioRepository,
     ):
         user_dw_id = user_data["portfolios"]["default"].get("us", {}).get("dw_id")
         account_id = user_data["portfolios"]["default"].get("us", {}).get("dw_account")
@@ -55,6 +59,16 @@ class DriveWealthService:
         if need_create_account:
             account_id = await cls._create_user_account(user_dw_id=user_dw_id)
             update_user.update({"portfolios.default.us.dw_account": account_id})
+            unique_id = user_data["unique_id"]
+            await social_network_service.register_user_portfolio_us(
+                unique_id=unique_id,
+                dw_account=account_id,
+                dw_id=user_dw_id
+            )
+            await portfolio_repository.save_unique_id_by_account(
+                account=account_id,
+                unique_id=unique_id
+            )
 
         if update_user:
             was_updated = await user_repository.update_one(
