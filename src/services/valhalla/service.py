@@ -26,11 +26,10 @@ class ValhallaService:
             raise InternalServerError("common.process_issue")
 
     @classmethod
-    async def register_user_portfolio(cls, user_email: str, nick_name: str):
-        # TODO: this
+    async def register_user_portfolio(cls, unique_id: str, bmf_account: str, bovespa_account: str):
         social_client = cls.__get_social_client()
-        social_network_operation_status, message = await social_client.create_social_network_user_portfolio(
-            msg={"email": user_email, "name": nick_name}
+        social_network_operation_status, message = await social_client.create_social_network_portfolio_default(
+            msg={"unique_id": unique_id, "bmf_account": bmf_account, "bovespa_account": bovespa_account}
         )
 
         if social_network_operation_status is not StatusResponse.SUCCESS:
