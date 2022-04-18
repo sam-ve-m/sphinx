@@ -6,6 +6,8 @@ import asyncio
 # Third part
 import nest_asyncio
 
+from src.repositories.file.enum.term_file import TermsFileType
+
 nest_asyncio.apply()
 
 # SPHINX
@@ -120,10 +122,11 @@ class ThebesHallBuilder:
     def add_terms(self):
         self.terms_validator.run(user_data=self._user_data)
         terms_map = list()
-        for name, value in self._user_data["terms"].items():
-            if not value:
-                value = {}
-            terms_map.append({"name": name, **value})
+        for term in TermsFileType:
+            term_metadata = self._user_data["terms"].get(term.value)
+            if not term_metadata:
+                term_metadata = {}
+            terms_map.append({"name": term.value, **term_metadata})
         self._control_data.update({"terms": terms_map})
         return self
 

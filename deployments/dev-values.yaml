@@ -4,7 +4,7 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.2.19
+    image: nexus.sigame.com.br/sphinx:1.2.26
     ports:
     - containerPort: 8000
     env:
@@ -51,7 +51,11 @@ containers:
     - name: TARGET_LINK
       value: "https://app.lionx.com.br/public/deeplink"
     - name: REDIS_HOST_URL
-      value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379?db=1"
+      value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
+    - name: REDIS_CACHE_DB
+      value: "1"
+    - name: REDIS_PORTFOLIO_DB
+      value: "0"
     - name: AWS_ACCESS_KEY_ID
       value: "AKIATZVFXI25USQWCS5O"
     - name: AWS_SECRET_ACCESS_KEY
