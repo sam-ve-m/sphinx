@@ -62,7 +62,7 @@ class UserService(IUser):
         user: dict,
         user_repository=UserRepository,
         authentication_service=AuthenticationService,
-        social_client=ValhallaService.get_social_client(),
+        valhalla_service=ValhallaService,
         jwt_handler=JwtService,
     ) -> dict:
         user_from_database = await user_repository.find_one(
@@ -90,12 +90,9 @@ class UserService(IUser):
         if was_user_inserted is False:
             raise InternalServerError("common.process_issue")
 
-        # was_user_created_on_social_network = social_client.create_social_network_user(
-        #     msg={"email": user.get("email"), "name": user.get("nick_name")}
-        # )
-        #
-        # if not was_user_created_on_social_network:
-        #     raise InternalServerError("common.process_issue")
+        await valhalla_service.register_user(
+            unique_id=user["unique_id"], nickname=user["nick_name"], user_type=user["scope"]["user_level"]
+        )
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user, ttl=10
@@ -1139,7 +1136,7 @@ class UserService(IUser):
 
     @staticmethod
     async def update_customer_registration_data(
-        payload: dict, user_repository=UserRepository
+        payload: dict, user_repository=UserRepository, valhalla_service=ValhallaService
     ):
         await UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["finished", "user_data_validation"]
@@ -1230,7 +1227,7 @@ class UserService(IUser):
         await SinacorService.save_or_update_client_data(
             user_data=new_customer_registration_data
         )
-
+        # OnLy if is create
         if not await user_repository.update_one(
             old={"unique_id": unique_id},
             new={
@@ -1239,6 +1236,15 @@ class UserService(IUser):
             },
         ):
             raise InternalServerError("common.process_issue")
+
+        user = await user_repository.find_one(
+            {"unique_id": unique_id}
+        )
+        await valhalla_service.register_user(
+            unique_id=user["unique_id"],
+            nickname=user["nick_name"],
+            user_type=user["scope"]["user_level"]
+        )
 
         return {
             "status_code": status.HTTP_200_OK,

@@ -93,7 +93,7 @@ class ThebesHallBuilder:
             .add_is_blocked_electronic_signature()
             .add_register_analyses()
             .add_br_accounts()
-            .add_us_accounts()
+            .add_us_accounts()  
             .add_using_suitability_or_refuse_term()
             .add_last_modified_date_months_past()
             .add_suitability_months_past()
