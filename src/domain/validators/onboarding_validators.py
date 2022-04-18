@@ -108,7 +108,9 @@ class CompanyDirector(BaseModel):
         is_company_director = values.get("is_company_director")
         company_name = values.get("company_name")
         if is_company_director and not company_name:
-            raise ValueError("need inform the field campany_name is you are a company director")
+            raise ValueError(
+                "need inform the field campany_name is you are a company director"
+            )
         return values
 
 

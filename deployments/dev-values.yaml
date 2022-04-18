@@ -64,8 +64,6 @@ containers:
       value: "sa-east-1"
     - name: AWS_BUCKET_USERS_FILES
       value: "dtvm-users-files-dev"
-    - name: AWS_BUCKET_USERS_SELF
-      value: "dtvm-user-selfie-dev"
     - name: AWS_BUCKET_TERMS
       value: "dtvm-terms-dev"
     - name: ORACLE_BASE_DSN

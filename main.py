@@ -1,10 +1,12 @@
 import uvicorn
 from etria_logger import GLADSHEIM_LOGGING_CONFIG
 from fastapi import FastAPI
+
 # SPHINX
 from fastapi.middleware.cors import CORSMiddleware
-
 from src.infrastructures.env_config import config
+
+
 from src.routers.routes_registers import (
     UserRouter,
     ThirdPartRouter,

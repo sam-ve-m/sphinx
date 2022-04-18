@@ -8,6 +8,6 @@ class PortfolioRepository(BaseRepositoryRedis):
     prefix = ""
 
     @classmethod
-    async def save_unique_id_by_account(cls, bmf_account: str, unique_id: str):
-        key = f"symbolic_user_id:br:{bmf_account}"
+    async def save_unique_id_by_account(cls, account: str, unique_id: str):
+        key = f"symbolic_user_id:br:{account}"
         await cls.set_without_pickle(key, unique_id)

@@ -6,6 +6,7 @@ import asyncio
 # Third part
 import nest_asyncio
 
+from src.domain.drive_wealth.kyc_status import KycStatus
 from src.repositories.file.enum.term_file import TermsFileType
 
 nest_asyncio.apply()
@@ -269,7 +270,11 @@ class ThebesHallBuilder:
     def add_client_has_us_trade_allowed(
         self,
     ):
-        self._jwt_payload_user_data.update({"client_has_us_trade_allowed": False})
+        if current_dw_status := self._user_data.get("dw"):
+            if current_dw_status == KycStatus.KYC_APPROVED.value:
+                self._jwt_payload_user_data.update({"client_has_us_trade_allowed": True})
+            else:
+                self._jwt_payload_user_data.update({"client_has_us_trade_allowed": False})
         return self
 
     def add_client_profile(self):

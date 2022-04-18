@@ -17,6 +17,7 @@ from src.domain.validators.brazil_register_number_validator import (
 )
 from src.domain.validators.user_validators import TaxResidence, Spouse
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
+from src.repositories.user.enum.time_experience import TimeExperienceEnum
 
 
 class AppName(BaseModel):
@@ -391,6 +392,27 @@ class RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
     value: bool
 
 
+class PoliticallyExposed(Source):
+    is_politically_exposed: bool
+
+
+class ExchangeMember(Source):
+    is_exchange_member: bool
+
+
+class TimeExperience(Source):
+    time_experience: TimeExperienceEnum
+
+
+class CompanyDirector(Source):
+    is_company_director: bool
+    company_name: str
+
+
+class CompanyDirectorOf(Source):
+    company_name: str
+
+
 class SpouseSource(BaseModel):
     name: NameSource
     cpf: CpfSource
@@ -483,6 +505,46 @@ class UserAddressDataValidation(BaseModel):
         return values
 
 
+class ExternalExchangeAccountUs(BaseModel):
+    is_politically_exposed: PoliticallyExposed
+    is_exchange_member: ExchangeMember
+    time_experience: TimeExperience
+    is_company_director: CompanyDirector
+    is_company_director_of: Optional[CompanyDirectorOf]
+
+    @root_validator()
+    def validate(cls, values: Dict[str, Any]):
+        is_company_director = values.get("is_company_director", {}).get("value")
+        company_name_meta = values.get("is_company_director_of", {})
+        if is_company_director and not company_name_meta:
+            company_name = company_name_meta.get("value")
+            if not company_name:
+                raise ValueError(
+                    "need inform the field company_director_of is you are a company director"
+                )
+        return values
+
+
+class ExternalExchangeAccountUsUpdate(BaseModel):
+    is_politically_exposed: Optional[PoliticallyExposed]
+    is_exchange_member: Optional[ExchangeMember]
+    time_experience: Optional[TimeExperience]
+    is_company_director: Optional[CompanyDirector]
+    is_company_director_of: Optional[CompanyDirectorOf]
+
+    @root_validator()
+    def validate(cls, values: Dict[str, Any]):
+        is_company_director = values.get("is_company_director", {}).get("value")
+        company_name_meta = values.get("is_company_director_of", {})
+        if is_company_director and not company_name_meta:
+            company_name = company_name_meta.get("value")
+            if not company_name:
+                raise ValueError(
+                    "need inform the field company_director_of is you are a company director"
+                )
+        return values
+
+
 class ClientValidationData(BaseModel):
     personal: UserPersonalDataValidation
     marital: UserMaritalDataSource
@@ -536,3 +598,4 @@ class UpdateCustomerRegistrationData(BaseModel):
     marital: Optional[UserMaritalDataSource]
     documents: Optional[UserDocumentsDataUpdate]
     address: Optional[UserAddressDataUpdate]
+    external_exchange_account_us: Optional[ExternalExchangeAccountUsUpdate]

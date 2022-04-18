@@ -45,10 +45,10 @@ class UpdateCustomerRegistrationBuilder:
         )
 
     def _get_new_value(self, sub_partition: str, field_name: str) -> Optional[any]:
-        if source := self.__new_personal_data.get(sub_partition, {}).get(
-            field_name, {}
-        ):
-            return source.get("value")
+        sub_partition = self.__new_personal_data.get(sub_partition)
+        if sub_partition:
+            if source := sub_partition.get(field_name):
+                return source.get("value")
 
     def personal_name(self):
         old_name = self.__old_personal_data.get("name")
@@ -239,9 +239,7 @@ class UpdateCustomerRegistrationBuilder:
     def update_assets_update_date(self):
         old_date = self.__old_personal_data.get("assets", {}).get("date")
         self._update_modified_data(
-            levels=("assets", "date"),
-            old_field=old_date,
-            new_filed=datetime.utcnow()
+            levels=("assets", "date"), old_field=old_date, new_filed=datetime.utcnow()
         )
 
     def personal_tax_residences(self):
@@ -487,7 +485,6 @@ class UpdateCustomerRegistrationBuilder:
 
     def address_phone(self):
         old_address_phone = self.__old_personal_data.get("address", {}).get("phone")
-
         if new_address_phone := self._get_new_value("address", "phone"):
             self._update_modified_data(
                 levels=("address", "phone"),
@@ -495,6 +492,91 @@ class UpdateCustomerRegistrationBuilder:
                 new_filed=new_address_phone,
             )
 
+        return self
+
+    def external_exchange_account_politically_exposed_us(self):
+        old_is_politically_exposed = (
+            self.__old_personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_politically_exposed")
+        )
+        if new_is_politically_exposed := self._get_new_value(
+            "external_exchange_account_us", "is_politically_exposed"
+        ):
+            self._update_modified_data(
+                levels=(
+                    "external_exchange_requirements",
+                    "us",
+                    "is_politically_exposed",
+                ),
+                old_field=old_is_politically_exposed,
+                new_filed=new_is_politically_exposed,
+            )
+        return self
+
+    def external_exchange_account_exchange_member_us(self):
+        old_is_exchange_member = (
+            self.__old_personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_exchange_member")
+        )
+        if new_is_exchange_member := self._get_new_value(
+            "external_exchange_account_us", "is_exchange_member"
+        ):
+            self._update_modified_data(
+                levels=("external_exchange_requirements", "us", "is_exchange_member"),
+                old_field=old_is_exchange_member,
+                new_filed=new_is_exchange_member,
+            )
+        return self
+
+    def external_exchange_account_time_experience_us(self):
+        old_time_experience = (
+            self.__old_personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("time_experience")
+        )
+        if new_time_experience := self._get_new_value(
+            "external_exchange_account_us", "time_experience"
+        ):
+            self._update_modified_data(
+                levels=("external_exchange_requirements", "us", "time_experience"),
+                old_field=old_time_experience,
+                new_filed=new_time_experience,
+            )
+        return self
+
+    def external_exchange_account_company_director_us(self):
+        old_is_company_director = (
+            self.__old_personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_company_director")
+        )
+        if new_is_company_director := self._get_new_value(
+            "external_exchange_account_us", "is_company_director"
+        ):
+            self._update_modified_data(
+                levels=("external_exchange_requirements", "us", "is_company_director"),
+                old_field=old_is_company_director,
+                new_filed=new_is_company_director,
+            )
+        old_is_company_director_of = (
+            self.__old_personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_company_director_of")
+        )
+        if new_is_company_director_of := self._get_new_value(
+            "external_exchange_account_us", "is_company_director_of"
+        ):
+            self._update_modified_data(
+                levels=(
+                    "external_exchange_requirements",
+                    "us",
+                    "is_company_director_of",
+                ),
+                old_field=old_is_company_director_of,
+                new_filed=new_is_company_director_of,
+            )
         return self
 
     def build(self) -> Tuple[dict, dict]:

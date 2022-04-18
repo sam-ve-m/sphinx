@@ -15,6 +15,8 @@ class PasswordEncrypt(IPasswordEncrypt):
             user_password=user_password
         )
         if status != MistStatusResponses.SUCCESS:
-            Gladsheim.info(message=f"Error when encrypt password: {MistStatusResponses.SUCCESS.value}")
+            Gladsheim.info(
+                message=f"Error when encrypt password: {MistStatusResponses.SUCCESS.value}"
+            )
             raise InternalServerError("common.process_issue")
         return payload["encrypted_password"]

@@ -26,18 +26,22 @@ class OnboardingStepBuilderUS:
 
     def terms_step(self, current_user: dict):
         user_terms = current_user.get("terms")
-        user_signed_terms = set([
-            term_name if metadata else None
-            for term_name, metadata in user_terms.items()
-        ])
+        user_signed_terms = set(
+            [
+                term_name if metadata else None
+                for term_name, metadata in user_terms.items()
+            ]
+        )
         terms_that_needs_be_signed = {
             TermsFileType.TERM_OPEN_ACCOUNT_DW.value,
             TermsFileType.TERM_APPLICATION_DW.value,
             TermsFileType.TERM_PRIVACY_POLICY_DW.value,
-            TermsFileType.TERM_DATA_SHARING_POLICY_DW.value
+            TermsFileType.TERM_DATA_SHARING_POLICY_DW.value,
         }
         all_terms_is_signed = not terms_that_needs_be_signed - user_signed_terms
-        is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "terms_step"
+        is_valid_onbaording_step = (
+            self.__onboarding_steps["current_onboarding_step"] == "terms_step"
+        )
         if all_terms_is_signed and is_valid_onbaording_step:
             self.__onboarding_steps["terms_step"] = True
             self.__onboarding_steps[
@@ -46,40 +50,76 @@ class OnboardingStepBuilderUS:
         return self
 
     def user_document_validator_step(self, document_exists: bool):
-        is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "user_document_validator_step"
+        is_valid_onbaording_step = (
+            self.__onboarding_steps["current_onboarding_step"]
+            == "user_document_validator_step"
+        )
         if is_valid_onbaording_step and document_exists:
             self.__onboarding_steps["user_document_validator_step"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "is_politically_exposed_step"
+            self.__onboarding_steps[
+                "current_onboarding_step"
+            ] = "is_politically_exposed_step"
 
         return self
 
     def is_politically_exposed_step(self, current_user: dict):
-        politically_exposed = current_user.get("external_exchange_requirements", {}).get("us", {}).get("is_politically_exposed")
-        is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "is_politically_exposed_step"
+        politically_exposed = (
+            current_user.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_politically_exposed")
+        )
+        is_valid_onbaording_step = (
+            self.__onboarding_steps["current_onboarding_step"]
+            == "is_politically_exposed_step"
+        )
         if is_valid_onbaording_step and politically_exposed is not None:
             self.__onboarding_steps["is_politically_exposed_step"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "is_exchange_member_step"
+            self.__onboarding_steps[
+                "current_onboarding_step"
+            ] = "is_exchange_member_step"
         return self
 
     def is_exchange_member_step(self, current_user: dict):
-        is_exchange_member = current_user.get("external_exchange_requirements", {}).get("us", {}).get("is_exchange_member")
-        is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "is_exchange_member_step"
+        is_exchange_member = (
+            current_user.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_exchange_member")
+        )
+        is_valid_onbaording_step = (
+            self.__onboarding_steps["current_onboarding_step"]
+            == "is_exchange_member_step"
+        )
         if is_valid_onbaording_step and is_exchange_member is not None:
             self.__onboarding_steps["is_exchange_member_step"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "is_company_director_step"
+            self.__onboarding_steps[
+                "current_onboarding_step"
+            ] = "is_company_director_step"
         return self
 
     def is_company_director_step(self, current_user: dict):
-        is_exchange_member = current_user.get("external_exchange_requirements", {}).get("us", {}).get("is_company_director")
-        is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "is_company_director_step"
+        is_exchange_member = (
+            current_user.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_company_director")
+        )
+        is_valid_onbaording_step = (
+            self.__onboarding_steps["current_onboarding_step"]
+            == "is_company_director_step"
+        )
         if is_valid_onbaording_step and is_exchange_member is not None:
             self.__onboarding_steps["is_company_director_step"] = True
             self.__onboarding_steps["current_onboarding_step"] = "time_experience_step"
         return self
 
     def time_experience_step(self, current_user: dict):
-        is_exchange_member = current_user.get("external_exchange_requirements", {}).get("us", {}).get("time_experience")
-        is_valid_onbaording_step = self.__onboarding_steps["current_onboarding_step"] == "time_experience_step"
+        is_exchange_member = (
+            current_user.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("time_experience")
+        )
+        is_valid_onbaording_step = (
+            self.__onboarding_steps["current_onboarding_step"] == "time_experience_step"
+        )
         if is_valid_onbaording_step and is_exchange_member:
             self.__onboarding_steps["time_experience_step"] = True
             self.__onboarding_steps["current_onboarding_step"] = "finished"
