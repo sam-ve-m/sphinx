@@ -14,4 +14,4 @@ python-multipart==0.0.5
 pyyaml==6.0
 sendgrid==6.9.6
 uvicorn==0.17.5
-valhalla-client==1.0.10
+valhalla-client==1.0.11

@@ -82,6 +82,7 @@ class ThebesHallBuilder:
             .add_scope()
             .add_nick_name()
             .add_terms()
+            .add_using_suitability_or_refuse_term()
             .add_last_modified_date_months_past()
         )
 
@@ -94,7 +95,7 @@ class ThebesHallBuilder:
             .add_is_blocked_electronic_signature()
             .add_register_analyses()
             .add_br_accounts()
-            .add_us_accounts()  
+            .add_us_accounts()
             .add_using_suitability_or_refuse_term()
             .add_last_modified_date_months_past()
             .add_suitability_months_past()
@@ -272,9 +273,13 @@ class ThebesHallBuilder:
     ):
         if current_dw_status := self._user_data.get("dw"):
             if current_dw_status == KycStatus.KYC_APPROVED.value:
-                self._jwt_payload_user_data.update({"client_has_us_trade_allowed": True})
+                self._jwt_payload_user_data.update(
+                    {"client_has_us_trade_allowed": True}
+                )
             else:
-                self._jwt_payload_user_data.update({"client_has_us_trade_allowed": False})
+                self._jwt_payload_user_data.update(
+                    {"client_has_us_trade_allowed": False}
+                )
         return self
 
     def add_client_profile(self):

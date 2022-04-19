@@ -155,7 +155,7 @@ async def get_assigned_term(
 
 
 @router.get("/user/onboarding_user_current_step_br", tags=["user"])
-async def get_onboarding_user_current_step(
+async def get_onboarding_user_current_step_br(
     request: Request,
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
@@ -169,7 +169,7 @@ async def get_onboarding_user_current_step(
 
 
 @router.get("/user/onboarding_user_current_step_us", tags=["user"])
-async def get_onboarding_user_current_step(
+async def get_onboarding_user_current_step_us(
     request: Request,
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)

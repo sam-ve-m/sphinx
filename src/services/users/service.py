@@ -99,7 +99,9 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
 
         await valhalla_service.register_user(
-            unique_id=user["unique_id"], nickname=user["nick_name"], user_type=user["scope"]["user_level"]
+            unique_id=user["unique_id"],
+            nickname=user["nick_name"],
+            user_type=user["scope"]["user_level"],
         )
 
         jwt_payload_data, control_data = ThebesHallBuilder(
@@ -495,7 +497,7 @@ class UserService(IUser):
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.TERM_QUEUE.value,
             message=get_user_signed_terms_template_with_data(
-                terms_update=terms_update,
+                terms_update=deepcopy(terms_update),
                 payload=thebes_answer_user,
                 files_type=file_types,
             ),
@@ -1259,13 +1261,11 @@ class UserService(IUser):
         ):
             raise InternalServerError("common.process_issue")
 
-        user_data = await user_repository.find_one({"unique_id": unique_id}, project={"_id": False})
-        await SinacorService.save_or_update_client_data(
-            user_data=user_data
+        user_data = await user_repository.find_one(
+            {"unique_id": unique_id}, project={"_id": False}
         )
-        await UserService.update_external_exchange_account(
-            user_data=user_data
-        )
+        await SinacorService.save_or_update_client_data(user_data=user_data)
+        await UserService.update_external_exchange_account(user_data=user_data)
         # OnLy if is create
         if not await user_repository.update_one(
             old={"unique_id": unique_id},
@@ -1276,13 +1276,12 @@ class UserService(IUser):
         ):
             raise InternalServerError("common.process_issue")
 
-        user = await user_repository.find_one(
-            {"unique_id": unique_id}
-        )
-        await valhalla_service.register_user(
+        user = await user_repository.find_one({"unique_id": unique_id})
+        # Se da pau aki oq ue fazer?
+        await valhalla_service.update_user(
             unique_id=user["unique_id"],
             nickname=user["nick_name"],
-            user_type=user["scope"]["user_level"]
+            user_type=user["scope"]["user_level"],
         )
 
         return {

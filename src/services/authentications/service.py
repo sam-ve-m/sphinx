@@ -154,20 +154,19 @@ class AuthenticationService(IAuthentication):
         must_update = False
 
         br_third_part_synchronization_status_task = (
-            AuthenticationService._dtvm_client_has_br_trade_allowed(
-                user=user_data
-            )
+            AuthenticationService._dtvm_client_has_br_trade_allowed(user=user_data)
         )
 
         us_third_part_synchronization_status_task = (
-            AuthenticationService._dtvm_client_has_us_trade_allowed(
-                user=user_data
-            )
+            AuthenticationService._dtvm_client_has_us_trade_allowed(user=user_data)
         )
         (
             br_third_part_synchronization_status,
-            us_third_part_synchronization_status
-        ) = await asyncio.gather(br_third_part_synchronization_status_task, us_third_part_synchronization_status_task)
+            us_third_part_synchronization_status,
+        ) = await asyncio.gather(
+            br_third_part_synchronization_status_task,
+            us_third_part_synchronization_status_task,
+        )
 
         for key, value in br_third_part_synchronization_status.items():
             if value["status_changed"]:
@@ -279,18 +278,25 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     async def _dtvm_client_has_us_trade_allowed(
-            user: dict, dw_service=DriveWealthService
+        user: dict, dw_service=DriveWealthService
     ) -> dict:
         user_dw_status_from_database = user.get("dw")
         if user_dw_status_from_database is None:
             return {}
 
-        client_map_requirements_to_allow_us_trade_from_database = AuthenticationService._get_client_map_requirements_to_allow_us_trade(
-            user_dw_status_from_database=user_dw_status_from_database
+        client_map_requirements_to_allow_us_trade_from_database = (
+            AuthenticationService._get_client_map_requirements_to_allow_us_trade(
+                user_dw_status_from_database=user_dw_status_from_database
+            )
         )
-        if user_dw_status_from_database is not None and user_dw_status_from_database != KycStatus.KYC_APPROVED.value:
+        if (
+            user_dw_status_from_database is not None
+            and user_dw_status_from_database != KycStatus.KYC_APPROVED.value
+        ):
             user_dw_id = user["portfolios"]["default"].get("us", {}).get("dw_id")
-            kyc_status_from_dw = await dw_service.validate_kyc_status(user_dw_id=user_dw_id)
+            kyc_status_from_dw = await dw_service.validate_kyc_status(
+                user_dw_id=user_dw_id
+            )
             AuthenticationService._update_client_has_trade_us_allowed_status_with_dw_status_response(
                 client_map_requirements_to_allow_trade_from_database=client_map_requirements_to_allow_us_trade_from_database,
                 user_dw_status_from_database=user_dw_status_from_database,
@@ -306,7 +312,7 @@ class AuthenticationService(IAuthentication):
         user_sincad_status_from_database = user.get("sincad")
         user_sinacor_status_from_database = user.get("sinacor")
         user_bmf_account_from_database = (
-             user.get("portfolios", {})
+            user.get("portfolios", {})
             .get("default", {})
             .get("br", {})
             .get("bmf_account")
@@ -318,7 +324,7 @@ class AuthenticationService(IAuthentication):
                 user_solutiontech_status_from_database is None,
                 user_sincad_status_from_database is None,
                 user_sinacor_status_from_database is None,
-                user_bmf_account_from_database is None
+                user_bmf_account_from_database is None,
             ]
         ):
             return {}
@@ -326,7 +332,8 @@ class AuthenticationService(IAuthentication):
         client_map_requirements_to_allow_br_trade_from_database = AuthenticationService._get_client_map_requirements_to_allow_br_trade(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             user_sincad_status_from_database=user_sincad_status_from_database,
-            user_sinacor_status_from_database=user_sinacor_status_from_database)
+            user_sinacor_status_from_database=user_sinacor_status_from_database,
+        )
 
         user_solutiontech_status_is_synced = (
             user.get("solutiontech") == SolutiontechClientImportStatus.SYNC.value
@@ -348,7 +355,7 @@ class AuthenticationService(IAuthentication):
             )
 
         user_is_not_already_sync_with_sincad = (
-             user_sincad_status_from_database
+            user_sincad_status_from_database
             is SincadClientImportStatus.NOT_SYNCED.value
         )
         if user_is_not_already_sync_with_sincad:
@@ -403,7 +410,7 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def _get_client_map_requirements_to_allow_us_trade(
-        user_dw_status_from_database: bool
+        user_dw_status_from_database: bool,
     ):
         client_has_trade_allowed_status_with_database_user = {
             "dw": {
@@ -422,8 +429,7 @@ class AuthenticationService(IAuthentication):
     ):
 
         dw_status_changed = (
-            user_dw_status_from_database
-            != user_dw_status_from_check_status_request
+            user_dw_status_from_database != user_dw_status_from_check_status_request
         )
 
         client_map_requirements_to_allow_trade_from_database["dw"][
@@ -434,7 +440,6 @@ class AuthenticationService(IAuthentication):
         ] = dw_status_changed
 
         return client_map_requirements_to_allow_trade_from_database
-
 
     @staticmethod
     def _update_client_has_trade_allowed_status_with_solutiontech_status_response(

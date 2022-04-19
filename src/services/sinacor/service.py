@@ -29,9 +29,14 @@ class SinacorService:
         client_register_repository=ClientRegisterRepository,
         user_repository=UserRepository,
         portfolio_repository=PortfolioRepository,
-        social_network_service=ValhallaService
+        social_network_service=ValhallaService,
     ):
-        user_data_to_update = bool(user_data.get("portfolios", {}).get("default", {}).get("br", {}).get("bmf_account"))
+        user_data_to_update = bool(
+            user_data.get("portfolios", {})
+            .get("default", {})
+            .get("br", {})
+            .get("bmf_account")
+        )
 
         database_and_bureau_dtvm_client_data_merged = (
             await SinacorService._create_or_update_client_into_sinacor(
@@ -52,7 +57,7 @@ class SinacorService:
             )
 
             await portfolio_repository.save_unique_id_by_account(
-                account=user_data["portfolios"]["default"]["br"]["bmf_account"],
+                account=user_data["portfolios.default.br"]["bmf_account"],
                 unique_id=user_data["unique_id"],
             )
 
@@ -74,19 +79,21 @@ class SinacorService:
         if user_is_updated is False:
             raise InternalServerError("common.process_issue")
 
+        user_data = await user_repository.find_one(
+            {"unique_id": database_and_bureau_dtvm_client_data_merged["unique_id"]}
+        )
         bmf_account = user_data["portfolios"]["default"]["br"]["bmf_account"]
         bovespa_account = user_data["portfolios"]["default"]["br"]["bovespa_account"]
         unique_id = user_data["unique_id"]
 
         await portfolio_repository.save_unique_id_by_account(
-            account=bmf_account,
-            unique_id=unique_id
+            account=bmf_account, unique_id=unique_id
         )
 
         await social_network_service.register_user_portfolio_br(
             unique_id=unique_id,
             bmf_account=bmf_account,
-            bovespa_account=bovespa_account
+            bovespa_account=bovespa_account,
         )
 
     @staticmethod
@@ -183,9 +190,9 @@ class SinacorService:
         database_and_bureau_dtvm_client_data_merged: dict,
         client_register_repository: Type[ClientRegisterRepository],
     ):
-        client_code = database_and_bureau_dtvm_client_data_merged["portfolios"][
-            "default"
-        ]["br"]["bmf_account"]
+        client_code = database_and_bureau_dtvm_client_data_merged[
+            "portfolios.default.br"
+        ]["bmf_account"]
         is_already_allowed_cash_transfer = (
             await client_register_repository.client_has_already_allowed_cash_transfer(
                 client_code=client_code
@@ -252,7 +259,7 @@ class SinacorService:
         )
         database_and_bureau_dtvm_client_data_merged.update(
             {
-                "portfolios.default.br.bovespa_account": {
+                "portfolios.default.br": {
                     "bovespa_account": bovespa_account,
                     "bmf_account": bmf_account,
                 }
@@ -260,7 +267,7 @@ class SinacorService:
         )
         database_and_bureau_dtvm_client_data_merged.update(
             {
-                "last_modified_date": {"concluded_at": datetime.datetime.utcnow()},
+                "last_modified_date.concluded_at": datetime.datetime.utcnow(),
                 "is_active_client": True,
             }
         )

@@ -50,7 +50,7 @@ class DriveWealthService:
             update_user.update(
                 {
                     "portfolios.default.us.dw_id": user_dw_id,
-                    "dw": KycStatus.KYC_PROCESSING.value
+                    "dw": KycStatus.KYC_PROCESSING.value,
                 }
             )
 
@@ -61,13 +61,10 @@ class DriveWealthService:
             update_user.update({"portfolios.default.us.dw_account": account_id})
             unique_id = user_data["unique_id"]
             await social_network_service.register_user_portfolio_us(
-                unique_id=unique_id,
-                dw_account=account_id,
-                dw_id=user_dw_id
+                unique_id=unique_id, dw_account=account_id, dw_id=user_dw_id
             )
             await portfolio_repository.save_unique_id_by_account(
-                account=account_id,
-                unique_id=unique_id
+                account=account_id, unique_id=unique_id
             )
 
         if update_user:

@@ -86,11 +86,23 @@ class ClientRegisterBuilderBr:
         return self
 
     def add_dt_criacao(self, user_data: dict):
-        self._fields_added.update({"DT_CRIACAO": user_data["created_at"]})
+        self._fields_added.update(
+            {
+                "DT_CRIACAO": user_data["created_at"].astimezone(
+                    timezone(timedelta(minutes=-180))
+                )
+            }
+        )
         return self
 
     def add_dt_atualiz(self):
-        self._fields_added.update({"DT_ATUALIZ": datetime.utcnow()})
+        self._fields_added.update(
+            {
+                "DT_ATUALIZ": datetime.utcnow().astimezone(
+                    timezone(timedelta(minutes=-180))
+                )
+            }
+        )
         return self
 
     def add_cd_cpfcgc(self, user_data: dict):
@@ -487,8 +499,8 @@ class ClientRegisterBuilderBr:
         return self
 
     def add_data_cfin(self, user_data: dict):
-        data_in_gmt_minus_3: datetime = user_data["assets"]["date"] + timedelta(
-            minutes=-180
+        data_in_gmt_minus_3: datetime = user_data["assets"]["date"].astimezone(
+            timezone(timedelta(minutes=-180))
         )
         self._fields_added.update(
             {

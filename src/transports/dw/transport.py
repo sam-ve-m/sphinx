@@ -45,7 +45,10 @@ class DWTransport:
         return response
 
     @classmethod
-    async def call_kyc_status_get(cls, user_id: str,):
+    async def call_kyc_status_get(
+        cls,
+        user_id: str,
+    ):
         url = config("DW_KYC_USER_URL")
         formatted_url = url.format(user_id)
         http_response = await cls.dw_caller_transport.execute_get(
