@@ -718,6 +718,7 @@ class UserService(IUser):
         if old.get("electronic_signature"):
             raise BadRequestError("user.electronic_signature.already_set")
         new_data = {
+            "scope.user_level": UserLevel.CLIENT.value,
             "electronic_signature": encrypted_electronic_signature,
             "is_blocked_electronic_signature": False,
             "electronic_signature_wrong_attempts": 0,
@@ -938,7 +939,6 @@ class UserService(IUser):
         if not await user_repository.update_one(
             old={"unique_id": unique_id},
             new={
-                "scope.user_level": UserLevel.CLIENT.value,
                 "is_bureau_data_validated": True,
             },
         ):
