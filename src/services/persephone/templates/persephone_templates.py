@@ -1,5 +1,6 @@
 # STANDARD LIBS
 from datetime import datetime
+from typing import List
 
 
 def get_prospect_user_template_with_data(payload: dict) -> dict:
@@ -24,6 +25,53 @@ def get_user_selfie_schema_template_with_data(file_path: str, unique_id: str) ->
     return {
         "unique_id": unique_id,
         "file_path": file_path,
+    }
+
+
+def get_user_politically_exposed_schema_template_with_data(
+    politically_exposed: bool, unique_id: str
+) -> dict:
+    return {
+        "unique_id": unique_id,
+        "politically_exposed": politically_exposed,
+    }
+
+
+def get_user_exchange_member_schema_template_with_data(
+    exchange_member: bool, unique_id: str
+) -> dict:
+    return {
+        "unique_id": unique_id,
+        "exchange_member": exchange_member,
+    }
+
+
+def get_user_time_experience_schema_template_with_data(
+    time_experience: str, unique_id: str
+) -> dict:
+    return {
+        "unique_id": unique_id,
+        "time_experience": time_experience,
+    }
+
+
+def get_user_company_director_schema_template_with_data(
+    company_director: bool, user_is_company_director_of: str, unique_id: str
+) -> dict:
+    return {
+        "unique_id": unique_id,
+        "company_director": company_director,
+        "user_is_company_director_of": user_is_company_director_of,
+    }
+
+
+def get_user_document_schema_template_with_data(
+    path_document_front: str, path_document_back: str, unique_id: str
+) -> dict:
+    return {
+        "unique_id": unique_id,
+        "path_document_front": path_document_front,
+        "path_document_back": path_document_back,
     }
 
 
@@ -131,13 +179,13 @@ def get_create_electronic_signature_session_schema_template_with_data(
     }
 
 
-def get_user_signed_term_template_with_data(
-    term_version: int, payload: dict, file_type: str
+def get_user_signed_terms_template_with_data(
+    terms_update: dict, payload: dict, files_type: List[str]
 ) -> dict:
     return {
         "unique_id": payload.get("unique_id"),
-        "term_type": file_type,
-        "term_version": f"v{term_version}",
+        "terms_type": files_type,
+        "terms_update": terms_update,
         "user_accept": True,
         "term_answer_time_stamp": int(datetime.utcnow().timestamp()),
     }

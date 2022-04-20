@@ -1,10 +1,12 @@
 # STANDARD LIBS
-from base64 import b64decode
+from base64 import b64decode, b64encode
 from enum import Enum
 from io import BytesIO
 from typing import Union, Optional
+from aiohttp import ClientSession
 
 from src.core.interfaces.repositories.file_repository.interface import IFile
+
 # SPHINX
 from src.exceptions.exceptions import InternalServerError, BadRequestError
 from src.infrastructures.s3.infrastructure import S3Infrastructure
@@ -24,11 +26,17 @@ class FileRepository(IFile):
     # This dict keys must be TermsFileType, UserFileType constants
     _file_extension_by_type = {
         "user_selfie": ".jpg",
+        "document_front": ".jpg",
+        "document_back": ".jpg",
         "term_application": ".pdf",
         "term_open_account": ".pdf",
         "term_refusal": ".pdf",
         "term_non_compliance": ".pdf",
         "term_retail_liquid_provider": ".pdf",
+        "term_open_account_dw": ".pdf",
+        "term_application_dw": ".pdf",
+        "term_privacy_policy_dw": ".pdf",
+        "term_data_sharing_policy_dw": ".pdf",
     }
 
     @classmethod
@@ -54,7 +62,7 @@ class FileRepository(IFile):
         return fully_qualified_path
 
     @classmethod
-    async def get_user_selfie(
+    async def get_user_file(
         cls,
         file_type: UserFileType,
         unique_id: str,
@@ -74,6 +82,26 @@ class FileRepository(IFile):
                 ExpiresIn=604800,
             )
         return url
+
+    @classmethod
+    async def get_file_as_base_64(
+        cls,
+        file_type: UserFileType,
+        unique_id: str,
+        bucket_name: str,
+    ) -> str:
+        url = await cls.get_user_file(
+            file_type=file_type, unique_id=unique_id, bucket_name=bucket_name
+        )
+        if url is None:
+            raise InternalServerError("files.error")
+        async with ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    byte_content = await response.read()
+                    base_64_content = b64encode(byte_content).decode()
+                    return f"data:image/jpeg;base64,{base_64_content}"
+                raise InternalServerError("files.error")
 
     @classmethod
     async def user_file_exists(
@@ -153,13 +181,10 @@ class FileRepository(IFile):
     async def get_terms_version(cls, bucket_name: str) -> dict:
         value = dict()
         for file_type in TermsFileType:
-            value.update(
-                {
-                    file_type.value: await cls.get_current_term_version(
-                        file_type=file_type, bucket_name=bucket_name
-                    )
-                }
+            version = await cls.get_current_term_version(
+                file_type=file_type, bucket_name=bucket_name
             )
+            value.update({file_type.value: version})
         return value
 
     @classmethod
@@ -185,14 +210,12 @@ class FileRepository(IFile):
     async def get_current_term_version(
         cls, file_type: TermsFileType, bucket_name: str
     ) -> int:
+        version = 0
         async with cls.infra.get_resource() as s3_resource:
             bucket = await s3_resource.Bucket(bucket_name)
             prefix = cls._resolve_term_path(file_type=file_type)
-            version = 0
             async for s3_object in bucket.objects.filter(Prefix=prefix, Delimiter="/"):
                 version += 1
-        if not version:
-            raise BadRequestError("files.not_exists")
         return version
 
     @staticmethod

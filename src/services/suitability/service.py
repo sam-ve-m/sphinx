@@ -155,9 +155,7 @@ class SuitabilityService(ISuitability):
     ) -> int:
         try:
             last_suitability = await suitability_repository.find_all(
-                {},
-                sort=("_id", -1),
-                limit=1
+                {}, sort=("_id", -1), limit=1
             )
 
         except (TypeError, AttributeError):
@@ -222,7 +220,9 @@ class SuitabilityService(ISuitability):
     ) -> Union[Tuple[List[dict], int, int], Exception]:
         try:
             _answers = list(
-                await suitability_answers_repository.find_all({}, sort=("_id", -1), limit=1)
+                await suitability_answers_repository.find_all(
+                    {}, sort=("_id", -1), limit=1
+                )
             )
         except (TypeError, AttributeError) as e:
             raise InternalServerError("common.process_issue")

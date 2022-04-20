@@ -5,6 +5,7 @@ from fastapi import status
 
 # PERSEPHONE
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
+from src.repositories.user.enum.time_experience import TimeExperienceEnum
 
 
 class SinaCorTypes:
@@ -35,6 +36,21 @@ class SinaCorTypes:
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {"enums": issuing_body_enum},
+        }
+
+    @staticmethod
+    async def get_time_experience():
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {
+                "enums": {
+                    TimeExperienceEnum.NONE.value: "N/D",
+                    TimeExperienceEnum.ONE_TO_TWO_YEARS.value: "1 a 2 anos",
+                    TimeExperienceEnum.THREE_TO_FIVE_YEARS.value: "3 a 5 anos",
+                    TimeExperienceEnum.FIVE_TO_TEN_YEARS.value: "5 a 10 anos",
+                    TimeExperienceEnum.OVER_TEN_YEARS.value: "Mais de 10 anos",
+                }
+            },
         }
 
     @staticmethod
@@ -109,7 +125,7 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def  convert_description_to_title(enum: List[dict]) -> List[dict]:
+    def convert_description_to_title(enum: List[dict]) -> List[dict]:
         titled_enum = [
             {"code": item["code"], "value": item["description"].title()}
             for item in enum

@@ -12,6 +12,7 @@ RUN echo "extra-index-url =" >> ~/.pip/pip.conf
 RUN echo "    https://backend:${oci_nexus_password}@nexus.sigame.com.br/repository/pypi/simple" >> ~/.pip/pip.conf
 
 RUN pip install wheel
+RUN pip install --upgrade pip
 RUN pip install --user -r requirements.txt
 
 FROM python:3.8-slim
@@ -31,11 +32,13 @@ RUN mkdir -p /opt/envs/heimdall.lionx.com.br/
 RUN mkdir -p /opt/envs/mist.lionx.com.br/
 RUN mkdir -p /opt/envs/etria.lionx.com.br/
 RUN mkdir -p /opt/envs/persephone.client.python.lionx.com.br/
+RUN mkdir -p /opt/envs/mepho.lionx.com.br/
 RUN touch /opt/envs/sphinx.lionx.com.br/.env
 RUN touch /opt/envs/heimdall.lionx.com.br/.env
 RUN touch /opt/envs/mist.lionx.com.br/.env
 RUN touch /opt/envs/etria.lionx.com.br/.env
 RUN touch /opt/envs/persephone.client.python.lionx.com.br/.env
+RUN touch /opt/envs/mepho.lionx.com.br/.env
 RUN mkdir -p /app/logs/
 
 COPY . .

@@ -87,3 +87,12 @@ async def get_economic_activity(request: Request):
         payload={},
         request=request,
     )
+
+
+@router.get("/client_update_enums/time_experience_us", tags=["client_update_enums"])
+async def get_marital_status_update(request: Request):
+    return await BaseController.run(
+        ClientRegisterEnumsController.get_time_experience_update,
+        payload={},
+        request=request,
+    )

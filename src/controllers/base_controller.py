@@ -3,11 +3,13 @@ import json
 from typing import Optional
 
 from etria_logger import Gladsheim
+
 # OUTSIDE LIBRARIES
 from fastapi import Response, status, Request
 from nidavellir import Sindri
 
 from src.core.interfaces.controllers.base_controller.interface import IController
+
 # SPHINX
 from src.exceptions.exceptions import (
     UnauthorizedError,

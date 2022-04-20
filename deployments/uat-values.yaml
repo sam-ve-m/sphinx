@@ -4,14 +4,16 @@ namespace: homolog
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.2.16
+    image: nexus.sigame.com.br/sphinx:1.2.26
     ports:
     - containerPort: 8000
     env:
+    - name: SPHINX_PORT
+      value: "8000"
     - name: ETRIA_LOG_LEVEL
       value: "DEBUG"
     - name: ROOT_LOG_LEVEL
-      value: "WARNING"
+      value: "INFO"
     - name: PERSEPHONE_KAFKA_BROKERS
       value: "sigbrvnlkafka-uat.subpriv.vcnuat.oraclevcn.com:9092"
     - name: PRODUCTION
@@ -49,7 +51,11 @@ containers:
     - name: TARGET_LINK
       value: "https://app.lionx.com.br/public/deeplink"
     - name: REDIS_HOST_URL
-      value: "redis://bnd:93uOKu5H@lnxbrspkeydb-01.subpriv.vcnuat.oraclevcn.com:6379?db=1"
+      value: "redis://bnd:93uOKu5H@lnxbrspkeydb-01.subpriv.vcnuat.oraclevcn.com:6379"
+    - name: REDIS_CACHE_DB
+      value: "1"
+    - name: REDIS_PORTFOLIO_DB
+      value: "0"
     - name: AWS_ACCESS_KEY_ID
       value: "AKIATZVFXI25USQWCS5O"
     - name: AWS_SECRET_ACCESS_KEY
@@ -58,8 +64,6 @@ containers:
       value: "sa-east-1"
     - name: AWS_BUCKET_USERS_FILES
       value: "dtvm-users-files-uat"
-    - name: AWS_BUCKET_USERS_SELF
-      value: "dtvm-user-selfie-uat"
     - name: AWS_BUCKET_TERMS
       value: "dtvm-terms-uat"
     - name: ORACLE_BASE_DSN
@@ -87,7 +91,7 @@ containers:
     - name: PERSEPHONE_TOPIC_AUTHENTICATION
       value: "sphinx_persephone.user.authentication"
     - name: SOLUTIONTECH_BASE_URL
-      value: "http://hml-serviceportal.lionx.com.br/STImportaCliente/"
+      value: "https://hml-serviceportal.lionx.com.br/STImportaCliente/"
     - name: SOLUTIONTECH_VERIFY_DTVM_CLIENT
       value: "STImportaCliente/VerificaClienteImportado"
     - name: SOLUTIONTECH_SYNC_DTVM_CLIENT

@@ -6,6 +6,9 @@ import asyncio
 # Third part
 import nest_asyncio
 
+from src.domain.drive_wealth.kyc_status import KycStatus
+from src.repositories.file.enum.term_file import TermsFileType
+
 nest_asyncio.apply()
 
 # SPHINX
@@ -79,6 +82,7 @@ class ThebesHallBuilder:
             .add_scope()
             .add_nick_name()
             .add_terms()
+            .add_using_suitability_or_refuse_term()
             .add_last_modified_date_months_past()
         )
 
@@ -120,10 +124,11 @@ class ThebesHallBuilder:
     def add_terms(self):
         self.terms_validator.run(user_data=self._user_data)
         terms_map = list()
-        for name, value in self._user_data["terms"].items():
-            if not value:
-                value = {}
-            terms_map.append({"name": name, **value})
+        for term in TermsFileType:
+            term_metadata = self._user_data["terms"].get(term.value)
+            if not term_metadata:
+                term_metadata = {}
+            terms_map.append({"name": term.value, **term_metadata})
         self._control_data.update({"terms": terms_map})
         return self
 
@@ -266,7 +271,15 @@ class ThebesHallBuilder:
     def add_client_has_us_trade_allowed(
         self,
     ):
-        self._jwt_payload_user_data.update({"client_has_us_trade_allowed": False})
+        if current_dw_status := self._user_data.get("dw"):
+            if current_dw_status == KycStatus.KYC_APPROVED.value:
+                self._jwt_payload_user_data.update(
+                    {"client_has_us_trade_allowed": True}
+                )
+            else:
+                self._jwt_payload_user_data.update(
+                    {"client_has_us_trade_allowed": False}
+                )
         return self
 
     def add_client_profile(self):

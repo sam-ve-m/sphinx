@@ -1,7 +1,7 @@
 from src.domain.caf.status import CAFStatus
 
 
-class OnboardingStepBuilder:
+class OnboardingStepBuilderBR:
     def __init__(self):
         self.__onboarding_steps: dict = {
             "current_onboarding_step": "suitability_step",
@@ -79,24 +79,24 @@ class OnboardingStepBuilder:
 
         return self
 
-    def user_document_validator(self, current_user):
+    def user_document_validator_step(self, current_user, document_exists: bool):
         bureau_status = current_user.get("bureau_status")
 
         if bureau_status is not None:
             self.bureau_status = bureau_status
 
-        if (
-            bureau_status
-            and bureau_status != CAFStatus.DOCUMENT.value
-            and self.__onboarding_steps["current_onboarding_step"]
-            == "user_document_validator"
+        if self.__onboarding_steps[
+            "current_onboarding_step"
+        ] == "user_document_validator" and (
+            (bureau_status and bureau_status != CAFStatus.DOCUMENT.value)
+            or document_exists
         ):
             self.__onboarding_steps["user_document_validator"] = True
             self.__onboarding_steps["current_onboarding_step"] = "user_data_validation"
 
         return self
 
-    def user_data_validation(self, current_user):
+    def user_data_validation_step(self, current_user):
         has_validate_data = current_user.get("is_bureau_data_validated")
 
         if (
@@ -111,7 +111,7 @@ class OnboardingStepBuilder:
 
         return self
 
-    def user_electronic_signature(self, current_user):
+    def user_electronic_signature_step(self, current_user):
         has_electronic_signature = current_user.get("electronic_signature")
         if (
             has_electronic_signature is not None

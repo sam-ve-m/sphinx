@@ -5,7 +5,7 @@ from typing import Optional
 # SPHINX
 from src.exceptions.exceptions import InternalServerError
 from src.repositories.base_repository.oracle.base import OracleBaseRepository
-from src.services.builders.client_register.builder import ClientRegisterBuilder
+from src.services.builders.client_register.br.builder import ClientRegisterBuilderBr
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.domain.validators.marital_status_stone_age_to_sphinx import (
     MaritalStatusStoneAgeToSphinxEnum,
@@ -111,7 +111,7 @@ class ClientRegisterRepository(OracleBaseRepository):
 
     @classmethod
     async def register_user_data_in_register_users_temp_table(
-        cls, builder: ClientRegisterBuilder
+        cls, builder: ClientRegisterBuilderBr
     ):
         client_register = builder.build()
         fields = client_register.keys()
@@ -185,7 +185,7 @@ class ClientRegisterRepository(OracleBaseRepository):
         user_data: dict,
         sinacor_user_control_data: Optional[tuple],
         sinacor_types_repository=SinacorTypesRepository(),
-    ) -> ClientRegisterBuilder:
+    ) -> ClientRegisterBuilderBr:
         occupation = user_data["occupation"]
         activity = occupation["activity"]
         company = occupation.get("company", {})
@@ -320,8 +320,8 @@ class ClientRegisterRepository(OracleBaseRepository):
     @staticmethod
     def _is_unemployed_and_not_married_person(
         user_data: dict, sinacor_user_control_data: Optional[tuple]
-    ) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
+    ) -> ClientRegisterBuilderBr:
+        builder = ClientRegisterBuilderBr()
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
@@ -405,8 +405,8 @@ class ClientRegisterRepository(OracleBaseRepository):
     @staticmethod
     def _is_employed_and_not_married_person(
         user_data: dict, sinacor_user_control_data: Optional[tuple]
-    ) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
+    ) -> ClientRegisterBuilderBr:
+        builder = ClientRegisterBuilderBr()
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
@@ -492,8 +492,8 @@ class ClientRegisterRepository(OracleBaseRepository):
     @staticmethod
     def _is_business_and_not_married_person(
         user_data: dict, sinacor_user_control_data: Optional[tuple]
-    ) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
+    ) -> ClientRegisterBuilderBr:
+        builder = ClientRegisterBuilderBr()
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
@@ -578,8 +578,8 @@ class ClientRegisterRepository(OracleBaseRepository):
     @staticmethod
     def _is_unemployed_and_married_person(
         user_data: dict, sinacor_user_control_data: Optional[tuple]
-    ) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
+    ) -> ClientRegisterBuilderBr:
+        builder = ClientRegisterBuilderBr()
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
@@ -667,8 +667,8 @@ class ClientRegisterRepository(OracleBaseRepository):
     @staticmethod
     def _is_employed_and_married_person(
         user_data: dict, sinacor_user_control_data: Optional[tuple]
-    ) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
+    ) -> ClientRegisterBuilderBr:
+        builder = ClientRegisterBuilderBr()
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
@@ -758,8 +758,8 @@ class ClientRegisterRepository(OracleBaseRepository):
     @staticmethod
     def _is_business_and_married_person(
         user_data: dict, sinacor_user_control_data: Optional[tuple]
-    ) -> ClientRegisterBuilder:
-        builder = ClientRegisterBuilder()
+    ) -> ClientRegisterBuilderBr:
+        builder = ClientRegisterBuilderBr()
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
