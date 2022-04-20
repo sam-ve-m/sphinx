@@ -161,8 +161,8 @@ class ClientRegisterRepository(OracleBaseRepository):
         return None
 
     @classmethod
-    async def get_sinacor_status(cls, user_cpf: int):
-        sql = f"SELECT IN_SITUAC FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf}"
+    async def get_sinacor_status(cls, user_cpf: str, user_bmf_account: str):
+        sql = f"SELECT IN_SITUAC FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf} AND CD_CLIENTE = '{user_bmf_account}'"
         result = await cls.query(sql=sql)
         if result and len(result) > 0:
             return result[0]
