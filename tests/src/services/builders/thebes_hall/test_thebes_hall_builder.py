@@ -7,10 +7,12 @@ import pytest
 from pydantic import ValidationError
 
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
+
 # Src imports
 from src.repositories.user.repository import UserRepository
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 from src.services.builders.thebes_hall.validators.terms import Terms as TermsValidator
+
 # Test imports
 from tests.src.services.builders.thebes_hall.test_thebes_hall_builder_arguments import (
     valid_client_data,

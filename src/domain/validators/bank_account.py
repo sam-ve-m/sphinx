@@ -22,5 +22,3 @@ class UpdateUserBankAccounts(BaseModel):
 
 class DeleteUsersBankAccount(BaseModel):
     id: str
-
-

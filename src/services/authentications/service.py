@@ -1,9 +1,12 @@
 # STANDARD LIBS
 
 # OUTSIDE LIBRARIES
+import asyncio
+
 from fastapi import status
 
 from src.core.interfaces.services.authentication.interface import IAuthentication
+from src.domain.drive_wealth.kyc_status import KycStatus
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 
 # SPHINX
@@ -20,6 +23,7 @@ from src.infrastructures.env_config import config
 from src.repositories.client_register.repository import ClientRegisterRepository
 from src.repositories.user.repository import UserRepository
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
+from src.services.drive_wealth.service import DriveWealthService
 from src.services.email_builder.email import HtmlModifier
 from src.services.email_sender.grid_email_sender import EmailSender as SendGridEmail
 from src.services.jwts.service import JwtService
@@ -146,15 +150,30 @@ class AuthenticationService(IAuthentication):
         if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        br_third_part_synchronization_status = (
-            await AuthenticationService._dtvm_client_has_br_trade_allowed(
-                user=user_data
-            )
-        )
-
         user_data_update = {}
         must_update = False
+
+        br_third_part_synchronization_status_task = (
+            AuthenticationService._dtvm_client_has_br_trade_allowed(user=user_data)
+        )
+
+        us_third_part_synchronization_status_task = (
+            AuthenticationService._dtvm_client_has_us_trade_allowed(user=user_data)
+        )
+        (
+            br_third_part_synchronization_status,
+            us_third_part_synchronization_status,
+        ) = await asyncio.gather(
+            br_third_part_synchronization_status_task,
+            us_third_part_synchronization_status_task,
+        )
+
         for key, value in br_third_part_synchronization_status.items():
+            if value["status_changed"]:
+                must_update = True
+                user_data_update.update({key: value["status"]})
+
+        for key, value in us_third_part_synchronization_status.items():
             if value["status_changed"]:
                 must_update = True
                 user_data_update.update({key: value["status"]})
@@ -258,6 +277,34 @@ class AuthenticationService(IAuthentication):
         return {"status_code": status.HTTP_200_OK, "message_key": "email.logout"}
 
     @staticmethod
+    async def _dtvm_client_has_us_trade_allowed(
+        user: dict, dw_service=DriveWealthService
+    ) -> dict:
+        user_dw_status_from_database = user.get("dw")
+        if user_dw_status_from_database is None:
+            return {}
+
+        client_map_requirements_to_allow_us_trade_from_database = (
+            AuthenticationService._get_client_map_requirements_to_allow_us_trade(
+                user_dw_status_from_database=user_dw_status_from_database
+            )
+        )
+        if (
+            user_dw_status_from_database is not None
+            and user_dw_status_from_database != KycStatus.KYC_APPROVED.value
+        ):
+            user_dw_id = user["portfolios"]["default"].get("us", {}).get("dw_id")
+            kyc_status_from_dw = await dw_service.validate_kyc_status(
+                user_dw_id=user_dw_id
+            )
+            AuthenticationService._update_client_has_trade_us_allowed_status_with_dw_status_response(
+                client_map_requirements_to_allow_trade_from_database=client_map_requirements_to_allow_us_trade_from_database,
+                user_dw_status_from_database=user_dw_status_from_database,
+                user_dw_status_from_check_status_request=kyc_status_from_dw,
+            )
+        return client_map_requirements_to_allow_us_trade_from_database
+
+    @staticmethod
     async def _dtvm_client_has_br_trade_allowed(
         user: dict, solutiontech=Solutiontech
     ) -> dict:
@@ -278,18 +325,19 @@ class AuthenticationService(IAuthentication):
                 user_sincad_status_from_database is None,
                 user_sinacor_status_from_database is None,
                 user_bmf_account_from_database is None,
-                user_cpf_from_database is None,
             ]
         ):
             return {}
 
-        client_map_requirements_to_allow_trade_from_database = AuthenticationService._get_client_map_requirements_to_allow_trade(
+        client_map_requirements_to_allow_br_trade_from_database = AuthenticationService._get_client_map_requirements_to_allow_br_trade(
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             user_sincad_status_from_database=user_sincad_status_from_database,
             user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
-        user_solutiontech_status_is_synced = user.get("solutiontech") == SolutiontechClientImportStatus.SYNC.value
+        user_solutiontech_status_is_synced = (
+            user.get("solutiontech") == SolutiontechClientImportStatus.SYNC.value
+        )
         if not user_solutiontech_status_is_synced:
             if user.get("solutiontech") == SolutiontechClientImportStatus.FAILED.value:
                 await solutiontech.request_client_sync(
@@ -300,8 +348,8 @@ class AuthenticationService(IAuthentication):
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             )
 
-            client_map_requirements_to_allow_trade_from_database = AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
-                client_map_requirements_to_allow_trade_from_database=client_map_requirements_to_allow_trade_from_database,
+            client_map_requirements_to_allow_br_trade_from_database = AuthenticationService._update_client_has_trade_allowed_status_with_solutiontech_status_response(
+                client_map_requirements_to_allow_trade_from_database=client_map_requirements_to_allow_br_trade_from_database,
                 user_solutiontech_status_from_database=user_solutiontech_status_from_database,
                 user_solutiontech_status_from_check_status_request=user_solutiontech_status_from_check_status_request,
             )
@@ -318,27 +366,29 @@ class AuthenticationService(IAuthentication):
             )
 
             AuthenticationService._update_client_has_trade_allowed_status_with_sincad_status_response(
-                client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_trade_from_database,
+                client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_br_trade_from_database,
                 sincad_status_from_sinacor=sincad_status_from_sinacor,
                 user_sincad_status_from_database=user_sincad_status_from_database,
             )
 
         sinacor_status_from_sinacor = (
             await AuthenticationService._client_sinacor_is_blocked(
-                user_cpf=user_cpf_from_database
+                user_cpf=user_cpf_from_database,
+                user_bmf_account_from_database=user_bmf_account_from_database
+
             )
         )
 
         AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
-            client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_trade_from_database,
+            client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_br_trade_from_database,
             sinacor_status_from_sinacor=sinacor_status_from_sinacor,
             user_sinacor_status_from_database=user_sinacor_status_from_database,
         )
 
-        return client_map_requirements_to_allow_trade_from_database
+        return client_map_requirements_to_allow_br_trade_from_database
 
     @staticmethod
-    def _get_client_map_requirements_to_allow_trade(
+    def _get_client_map_requirements_to_allow_br_trade(
         user_solutiontech_status_from_database: str,
         user_sincad_status_from_database: bool,
         user_sinacor_status_from_database: bool,
@@ -359,6 +409,39 @@ class AuthenticationService(IAuthentication):
         }
 
         return client_has_trade_allowed_status_with_database_user
+
+    @staticmethod
+    def _get_client_map_requirements_to_allow_us_trade(
+        user_dw_status_from_database: bool,
+    ):
+        client_has_trade_allowed_status_with_database_user = {
+            "dw": {
+                "status": user_dw_status_from_database,
+                "status_changed": False,
+            }
+        }
+
+        return client_has_trade_allowed_status_with_database_user
+
+    @staticmethod
+    def _update_client_has_trade_us_allowed_status_with_dw_status_response(
+        client_map_requirements_to_allow_trade_from_database: dict,
+        user_dw_status_from_database: str,
+        user_dw_status_from_check_status_request: str,
+    ):
+
+        dw_status_changed = (
+            user_dw_status_from_database != user_dw_status_from_check_status_request
+        )
+
+        client_map_requirements_to_allow_trade_from_database["dw"][
+            "status"
+        ] = user_dw_status_from_check_status_request
+        client_map_requirements_to_allow_trade_from_database["dw"][
+            "status_changed"
+        ] = dw_status_changed
+
+        return client_map_requirements_to_allow_trade_from_database
 
     @staticmethod
     def _update_client_has_trade_allowed_status_with_solutiontech_status_response(
@@ -430,9 +513,10 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     async def _client_sinacor_is_blocked(
-        user_cpf: int, client_register_repository=ClientRegisterRepository
+        user_cpf: str, user_bmf_account_from_database: str, client_register_repository=ClientRegisterRepository
     ) -> bool:
         sincad_status = await client_register_repository.get_sinacor_status(
-            user_cpf=user_cpf
+            user_cpf=user_cpf,
+            user_bmf_account=user_bmf_account_from_database
         )
         return sincad_status and sincad_status[0] in ["A"]

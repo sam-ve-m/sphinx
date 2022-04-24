@@ -71,7 +71,7 @@ from src.domain.sinacor.work_in_some_company import WorkInSomeCompany
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
 
 
-class ClientRegisterBuilder:
+class ClientRegisterBuilderBr:
     def __init__(self):
         self._fields_added = dict()
 
@@ -86,11 +86,23 @@ class ClientRegisterBuilder:
         return self
 
     def add_dt_criacao(self, user_data: dict):
-        self._fields_added.update({"DT_CRIACAO": user_data["created_at"]})
+        self._fields_added.update(
+            {
+                "DT_CRIACAO": user_data["created_at"].astimezone(
+                    timezone(timedelta(minutes=-180))
+                )
+            }
+        )
         return self
 
     def add_dt_atualiz(self):
-        self._fields_added.update({"DT_ATUALIZ": datetime.utcnow()})
+        self._fields_added.update(
+            {
+                "DT_ATUALIZ": datetime.utcnow().astimezone(
+                    timezone(timedelta(minutes=-180))
+                )
+            }
+        )
         return self
 
     def add_cd_cpfcgc(self, user_data: dict):
@@ -487,8 +499,16 @@ class ClientRegisterBuilder:
         return self
 
     def add_data_cfin(self, user_data: dict):
-        data_in_gmt_minus_3: datetime = user_data["assets"]["date"] + timedelta(minutes=-180)
-        self._fields_added.update({"DATA_CFIN": data_in_gmt_minus_3.replace(minute=0, hour=0, second=0, microsecond=0)})
+        data_in_gmt_minus_3: datetime = user_data["assets"]["date"].astimezone(
+            timezone(timedelta(minutes=-180))
+        )
+        self._fields_added.update(
+            {
+                "DATA_CFIN": data_in_gmt_minus_3.replace(
+                    minute=0, hour=0, second=0, microsecond=0
+                )
+            }
+        )
         return self
 
     def add_cd_cpf_conjuge(self, user_data: dict):

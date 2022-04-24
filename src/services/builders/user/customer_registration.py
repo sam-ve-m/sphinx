@@ -6,6 +6,7 @@ class CustomerRegistrationBuilder:
             "marital": {"spouse": {}},
             "documents": {},
             "address": {},
+            "external_exchange_account_us": {},
         }
 
     def personal_name(self):
@@ -214,6 +215,62 @@ class CustomerRegistrationBuilder:
     def address_phone(self):
         state = self.__personal_data.get("address", {}).get("phone")
         self.__buffer["address"].update({"phone": state})
+        return self
+
+    def external_exchange_account_politically_exposed_us(self):
+        is_politically_exposed = (
+            self.__personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_politically_exposed")
+        )
+        if is_politically_exposed is not None:
+            self.__buffer["external_exchange_account_us"].update(
+                {"is_politically_exposed": is_politically_exposed}
+            )
+        return self
+
+    def external_exchange_account_exchange_member_us(self):
+        is_exchange_member = (
+            self.__personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_exchange_member")
+        )
+        if is_exchange_member is not None:
+            self.__buffer["external_exchange_account_us"].update(
+                {"is_exchange_member": is_exchange_member}
+            )
+        return self
+
+    def external_exchange_account_time_experience_us(self):
+        time_experience = (
+            self.__personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("time_experience")
+        )
+        if time_experience is not None:
+            self.__buffer["external_exchange_account_us"].update(
+                {"time_experience": time_experience}
+            )
+        return self
+
+    def external_exchange_account_company_director_us(self):
+        is_company_director = (
+            self.__personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_company_director")
+        )
+        is_company_director_of = (
+            self.__personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("is_company_director_of")
+        )
+        if is_company_director is not None:
+            self.__buffer["external_exchange_account_us"].update(
+                {"is_company_director": is_company_director}
+            )
+            self.__buffer["external_exchange_account_us"].update(
+                {"is_company_director_of": is_company_director_of}
+            )
         return self
 
     def build(self) -> dict:

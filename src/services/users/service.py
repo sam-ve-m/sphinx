@@ -33,8 +33,13 @@ from src.services.builders.user.customer_registration import CustomerRegistratio
 from src.services.builders.user.customer_registration_update import (
     UpdateCustomerRegistrationBuilder,
 )
-from src.services.builders.user.onboarding_steps_builder_br import OnboardingStepBuilderBR
-from src.services.builders.user.onboarding_steps_builder_us import OnboardingStepBuilderUS
+from src.services.builders.user.onboarding_steps_builder_br import (
+    OnboardingStepBuilderBR,
+)
+from src.services.builders.user.onboarding_steps_builder_us import (
+    OnboardingStepBuilderUS,
+)
+from src.services.drive_wealth.service import DriveWealthService
 from src.services.jwts.service import JwtService
 from persephone_client import Persephone
 from src.services.persephone.templates.persephone_templates import (
@@ -44,9 +49,12 @@ from src.services.persephone.templates.persephone_templates import (
     get_user_update_register_schema_template_with_data,
     get_user_identifier_data_schema_template_with_data,
     get_user_complementary_data_schema_template_with_data,
-    get_user_set_electronic_signature_schema_template_with_data, get_user_signed_terms_template_with_data,
-    get_user_document_schema_template_with_data, get_user_politically_exposed_schema_template_with_data,
-    get_user_exchange_member_schema_template_with_data, get_user_time_experience_schema_template_with_data,
+    get_user_set_electronic_signature_schema_template_with_data,
+    get_user_signed_terms_template_with_data,
+    get_user_document_schema_template_with_data,
+    get_user_politically_exposed_schema_template_with_data,
+    get_user_exchange_member_schema_template_with_data,
+    get_user_time_experience_schema_template_with_data,
     get_user_company_director_schema_template_with_data,
 )
 from src.services.sinacor.service import SinacorService
@@ -62,7 +70,7 @@ class UserService(IUser):
         user: dict,
         user_repository=UserRepository,
         authentication_service=AuthenticationService,
-        social_client=ValhallaService.get_social_client(),
+        valhalla_service=ValhallaService,
         jwt_handler=JwtService,
     ) -> dict:
         user_from_database = await user_repository.find_one(
@@ -90,12 +98,11 @@ class UserService(IUser):
         if was_user_inserted is False:
             raise InternalServerError("common.process_issue")
 
-        # was_user_created_on_social_network = social_client.create_social_network_user(
-        #     msg={"email": user.get("email"), "name": user.get("nick_name")}
-        # )
-        #
-        # if not was_user_created_on_social_network:
-        #     raise InternalServerError("common.process_issue")
+        await valhalla_service.register_user(
+            unique_id=user["unique_id"],
+            nickname=user["nick_name"],
+            user_type=user["scope"]["user_level"],
+        )
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user, ttl=10
@@ -387,7 +394,7 @@ class UserService(IUser):
             file_type=UserFileType.SELFIE,
             content=payload.get("file_or_base64"),
             unique_id=thebes_answer["user"].get("unique_id"),
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
 
         (
@@ -422,15 +429,17 @@ class UserService(IUser):
             file_type=UserFileType.DOCUMENT_FRONT,
             content=payload["user_document"].get("document_front"),
             unique_id=thebes_answer["user"].get("unique_id"),
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         save_document_back = file_repository.save_user_file(
             file_type=UserFileType.DOCUMENT_BACK,
             content=payload["user_document"].get("document_back"),
             unique_id=thebes_answer["user"].get("unique_id"),
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
-        (path_document_front, path_document_back) = await asyncio.gather(save_document_front, save_document_back)
+        (path_document_front, path_document_back) = await asyncio.gather(
+            save_document_front, save_document_back
+        )
 
         (
             sent_to_persephone,
@@ -441,7 +450,7 @@ class UserService(IUser):
             message=get_user_document_schema_template_with_data(
                 path_document_front=path_document_front,
                 path_document_back=path_document_back,
-                unique_id=thebes_answer["user"]["unique_id"]
+                unique_id=thebes_answer["user"]["unique_id"],
             ),
             schema_name="user_document_schema",
         )
@@ -455,10 +464,10 @@ class UserService(IUser):
 
     @staticmethod
     async def sign_terms(
-            payload: dict,
-            file_repository=FileRepository,
-            user_repository=UserRepository,
-            token_service=JwtService,
+        payload: dict,
+        file_repository=FileRepository,
+        user_repository=UserRepository,
+        token_service=JwtService,
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         user_data = await user_repository.find_one(
@@ -478,9 +487,7 @@ class UserService(IUser):
             if not term_version:
                 raise BadRequestError("files.not_exists")
             await UserService.fill_term_signed(
-                file_type=file_type.value,
-                version=term_version,
-                terms=terms_update
+                file_type=file_type.value, version=term_version, terms=terms_update
             )
 
         (
@@ -490,7 +497,7 @@ class UserService(IUser):
             topic=config("PERSEPHONE_TOPIC_USER"),
             partition=PersephoneQueue.TERM_QUEUE.value,
             message=get_user_signed_terms_template_with_data(
-                terms_update=terms_update,
+                terms_update=deepcopy(terms_update),
                 payload=thebes_answer_user,
                 files_type=file_types,
             ),
@@ -543,16 +550,20 @@ class UserService(IUser):
         )
 
     @staticmethod
-    async def fill_term_signed(file_type: str, version: int, terms: dict = None) -> dict:
+    async def fill_term_signed(
+        file_type: str, version: int, terms: dict = None
+    ) -> dict:
         if terms is None:
             terms = dict()
-        terms.update({
-            f"terms.{file_type}": {
-                "version": version,
-                "date": datetime.utcnow(),
-                "is_deprecated": False,
+        terms.update(
+            {
+                f"terms.{file_type}": {
+                    "version": version,
+                    "date": datetime.utcnow(),
+                    "is_deprecated": False,
+                }
             }
-        })
+        )
         return terms
 
     @staticmethod
@@ -742,19 +753,21 @@ class UserService(IUser):
         user_file_exists = await file_repository.user_file_exists(
             file_type=UserFileType.SELFIE,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         user_document_front_exists = file_repository.user_file_exists(
             file_type=UserFileType.DOCUMENT_FRONT,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         user_document_back_exists = file_repository.user_file_exists(
             file_type=UserFileType.DOCUMENT_BACK,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
-        user_document_exists = all(await asyncio.gather(user_document_front_exists, user_document_back_exists))
+        user_document_exists = all(
+            await asyncio.gather(user_document_front_exists, user_document_back_exists)
+        )
 
         current_user = await user_repository.find_one({"unique_id": user_unique_id})
         if current_user is None:
@@ -765,7 +778,9 @@ class UserService(IUser):
             .user_identifier_step(current_user=current_user)
             .user_selfie_step(user_file_exists=user_file_exists)
             .user_complementary_step(current_user=current_user)
-            .user_document_validator_step(current_user=current_user, document_exists=user_document_exists)
+            .user_document_validator_step(
+                current_user=current_user, document_exists=user_document_exists
+            )
             .user_data_validation_step(current_user=current_user)
             .user_electronic_signature_step(current_user=current_user)
             .build()
@@ -790,14 +805,16 @@ class UserService(IUser):
         user_document_front_exists = file_repository.user_file_exists(
             file_type=UserFileType.DOCUMENT_FRONT,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
         user_document_back_exists = file_repository.user_file_exists(
             file_type=UserFileType.DOCUMENT_BACK,
             unique_id=user_unique_id,
-            bucket_name=config("AWS_BUCKET_USERS_SELF"),
+            bucket_name=config("AWS_BUCKET_USERS_FILES"),
         )
-        user_document_exists = all(await asyncio.gather(user_document_front_exists, user_document_back_exists))
+        user_document_exists = all(
+            await asyncio.gather(user_document_front_exists, user_document_back_exists)
+        )
 
         onboarding_steps = await (
             onboarding_step_builder.terms_step(current_user=current_user)
@@ -830,6 +847,7 @@ class UserService(IUser):
         if old.get("electronic_signature"):
             raise BadRequestError("user.electronic_signature.already_set")
         new_data = {
+            "scope.user_level": UserLevel.CLIENT.value,
             "electronic_signature": encrypted_electronic_signature,
             "is_blocked_electronic_signature": False,
             "electronic_signature_wrong_attempts": 0,
@@ -956,13 +974,17 @@ class UserService(IUser):
             .address_zip_code()
             .address_state()
             .address_phone()
+            .external_exchange_account_politically_exposed_us()
+            .external_exchange_account_exchange_member_us()
+            .external_exchange_account_time_experience_us()
+            .external_exchange_account_company_director_us()
         ).build()
 
         return {
             "status_code": status.HTTP_200_OK,
             "payload": customer_registration_data_built,
         }
-    
+
     @staticmethod
     async def update_politically_exposed_us(
         payload: dict, user_repository=UserRepository
@@ -986,16 +1008,18 @@ class UserService(IUser):
             partition=PersephoneQueue.USER_POLITICALLY_EXPOSED_IN_US.value,
             message=get_user_politically_exposed_schema_template_with_data(
                 politically_exposed=user_is_politically_exposed,
-                unique_id=thebes_answer["user"]["unique_id"]
+                unique_id=thebes_answer["user"]["unique_id"],
             ),
             schema_name="user_politically_exposed_us_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
-        
+
         was_updated = await user_repository.update_one(
             old={"unique_id": thebes_answer_user["unique_id"]},
-            new={"external_exchange_requirements.us.is_politically_exposed": user_is_politically_exposed}
+            new={
+                "external_exchange_requirements.us.is_politically_exposed": user_is_politically_exposed
+            },
         )
         if not was_updated:
             raise InternalServerError("common.unable_to_process")
@@ -1007,7 +1031,7 @@ class UserService(IUser):
 
     @staticmethod
     async def update_exchange_member_us(
-            payload: dict, user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         thebes_answer = payload["x-thebes-answer"]
         thebes_answer_user = thebes_answer["user"]
@@ -1028,7 +1052,7 @@ class UserService(IUser):
             partition=PersephoneQueue.USER_EXCHANGE_MEMBER_IN_US.value,
             message=get_user_exchange_member_schema_template_with_data(
                 exchange_member=user_is_exchange_member,
-                unique_id=thebes_answer["user"]["unique_id"]
+                unique_id=thebes_answer["user"]["unique_id"],
             ),
             schema_name="user_exchange_member_us_schema",
         )
@@ -1037,7 +1061,9 @@ class UserService(IUser):
 
         was_updated = await user_repository.update_one(
             old={"unique_id": thebes_answer_user["unique_id"]},
-            new={"external_exchange_requirements.us.is_exchange_member": user_is_exchange_member}
+            new={
+                "external_exchange_requirements.us.is_exchange_member": user_is_exchange_member
+            },
         )
         if not was_updated:
             raise InternalServerError("common.unable_to_process")
@@ -1049,7 +1075,7 @@ class UserService(IUser):
 
     @staticmethod
     async def update_time_experience_us(
-            payload: dict, user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         thebes_answer = payload["x-thebes-answer"]
         thebes_answer_user = thebes_answer["user"]
@@ -1058,7 +1084,7 @@ class UserService(IUser):
             payload=payload, onboard_step=["finished"]
         )
         us_step_validator = UserService.onboarding_us_step_validator(
-            payload=payload, onboard_step=["time_experience_step"]
+            payload=payload, onboard_step=["time_experience_step", "finished"]
         )
         await asyncio.gather(br_step_validator, us_step_validator)
 
@@ -1070,19 +1096,25 @@ class UserService(IUser):
             partition=PersephoneQueue.USER_TRADE_TIME_EXPERIENCE_IN_US.value,
             message=get_user_time_experience_schema_template_with_data(
                 time_experience=user_time_experience,
-                unique_id=thebes_answer["user"]["unique_id"]
+                unique_id=thebes_answer["user"]["unique_id"],
             ),
             schema_name="user_time_experience_us_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
+        unique_id = thebes_answer_user["unique_id"]
         was_updated = await user_repository.update_one(
-            old={"unique_id": thebes_answer_user["unique_id"]},
-            new={"external_exchange_requirements.us.time_experience": user_time_experience}
+            old={"unique_id": unique_id},
+            new={
+                "external_exchange_requirements.us.time_experience": user_time_experience
+            },
         )
         if not was_updated:
             raise InternalServerError("common.unable_to_process")
+
+        user_data = await user_repository.find_one({"unique_id": unique_id})
+        await DriveWealthService.registry_update_client(user_data=user_data)
 
         return {
             "status_code": status.HTTP_200_OK,
@@ -1091,12 +1123,12 @@ class UserService(IUser):
 
     @staticmethod
     async def update_company_director_us(
-            payload: dict, user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         thebes_answer = payload["x-thebes-answer"]
         thebes_answer_user = thebes_answer["user"]
         user_is_company_director = payload["is_company_director"]
-        user_is_company_director_from = payload.get("company_name")
+        user_is_company_director_of = payload.get("company_name")
         br_step_validator = UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["finished"]
         )
@@ -1113,21 +1145,20 @@ class UserService(IUser):
             partition=PersephoneQueue.USER_COMPANY_DIRECTOR_IN_US.value,
             message=get_user_company_director_schema_template_with_data(
                 company_director=user_is_company_director,
-                company_director_from=user_is_company_director_from,
-                unique_id=thebes_answer["user"]["unique_id"]
+                user_is_company_director_of=user_is_company_director_of,
+                unique_id=thebes_answer["user"]["unique_id"],
             ),
             schema_name="user_company_director_us_schema",
         )
         if sent_to_persephone is False:
             raise InternalServerError("common.process_issue")
 
-
         was_updated = await user_repository.update_one(
             old={"unique_id": thebes_answer_user["unique_id"]},
             new={
                 "external_exchange_requirements.us.is_company_director": user_is_company_director,
-                "external_exchange_requirements.us.is_company_director_from": user_is_company_director_from,
-            }
+                "external_exchange_requirements.us.is_company_director_of": user_is_company_director_of,
+            },
         )
         if not was_updated:
             raise InternalServerError("common.unable_to_process")
@@ -1139,7 +1170,7 @@ class UserService(IUser):
 
     @staticmethod
     async def update_customer_registration_data(
-        payload: dict, user_repository=UserRepository
+        payload: dict, user_repository=UserRepository, valhalla_service=ValhallaService
     ):
         await UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["finished", "user_data_validation"]
@@ -1196,6 +1227,10 @@ class UserService(IUser):
             .address_neighborhood()
             .address_state()
             .address_phone()
+            .external_exchange_account_politically_exposed_us()
+            .external_exchange_account_exchange_member_us()
+            .external_exchange_account_time_experience_us()
+            .external_exchange_account_company_director_us()
         ).build()
 
         user_update_register_schema = (
@@ -1227,20 +1262,40 @@ class UserService(IUser):
         ):
             raise InternalServerError("common.process_issue")
 
-        await SinacorService.save_or_update_client_data(
-            user_data=new_customer_registration_data
+        user_data = await user_repository.find_one(
+            {"unique_id": unique_id}, project={"_id": False}
         )
-
+        await SinacorService.save_or_update_client_data(user_data=user_data)
+        await UserService.update_external_exchange_account(user_data=user_data)
+        # OnLy if is create
         if not await user_repository.update_one(
             old={"unique_id": unique_id},
             new={
-                "scope.user_level": UserLevel.CLIENT.value,
                 "is_bureau_data_validated": True,
             },
         ):
             raise InternalServerError("common.process_issue")
 
+        user = await user_repository.find_one({"unique_id": unique_id})
+        # Se da pau aki oq ue fazer?
+        await valhalla_service.update_user(
+            unique_id=user["unique_id"],
+            nickname=user["nick_name"],
+            user_type=user["scope"]["user_level"],
+        )
+
         return {
             "status_code": status.HTTP_200_OK,
             "message_key": "requests.updated",
         }
+
+    @staticmethod
+    async def update_external_exchange_account(user_data: dict):
+        user_dw_id = (
+            user_data.get("portfolios", {})
+            .get("default", {})
+            .get("us", {})
+            .get("dw_id")
+        )
+        if user_dw_id:
+            await DriveWealthService.registry_update_client(user_data=user_data)

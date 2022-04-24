@@ -52,31 +52,22 @@ class ViewRepository(MongoDbBaseRepository):
         if not await cls.find_one({"_id": view_id}):
             raise BadRequestError("common.register_not_exists")
         link_feature_view_was_added = await cls.add_one_in_array(
-            old={"_id": view_id},
-            new={"features": feature_id},
-            upsert=True
+            old={"_id": view_id}, new={"features": feature_id}, upsert=True
         )
         return link_feature_view_was_added
 
     @classmethod
     async def delete_link_feature_view(cls, feature_id: str, view_id: str):
         link_feature_view_was_deleted = await cls.delete_one_in_array(
-            old={"_id": view_id},
-            new={"features": feature_id},
-            upsert=True
+            old={"_id": view_id}, new={"features": feature_id}, upsert=True
         )
         return link_feature_view_was_deleted
 
     @classmethod
     async def is_feature_linked_with_view(cls, feature_id: str, view_id: str) -> bool:
-        view = await cls.find_one({
-            "_id": view_id,
-            "features": {
-                "$elemMatch": {
-                    "$eq": feature_id
-                }
-            }
-        })
+        view = await cls.find_one(
+            {"_id": view_id, "features": {"$elemMatch": {"$eq": feature_id}}}
+        )
         return bool(view)
 
     @classmethod

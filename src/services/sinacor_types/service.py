@@ -53,7 +53,6 @@ class SinaCorTypes:
             },
         }
 
-
     @staticmethod
     async def all_in_one(sinacor_types_repository=SinacorTypesRepository):
         return {
@@ -126,7 +125,7 @@ class SinaCorTypes:
         }
 
     @staticmethod
-    def  convert_description_to_title(enum: List[dict]) -> List[dict]:
+    def convert_description_to_title(enum: List[dict]) -> List[dict]:
         titled_enum = [
             {"code": item["code"], "value": item["description"].title()}
             for item in enum

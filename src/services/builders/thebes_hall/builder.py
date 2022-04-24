@@ -6,6 +6,7 @@ import asyncio
 # Third part
 import nest_asyncio
 
+from src.domain.drive_wealth.kyc_status import KycStatus
 from src.repositories.file.enum.term_file import TermsFileType
 
 nest_asyncio.apply()
@@ -81,6 +82,7 @@ class ThebesHallBuilder:
             .add_scope()
             .add_nick_name()
             .add_terms()
+            .add_using_suitability_or_refuse_term()
             .add_last_modified_date_months_past()
         )
 
@@ -205,7 +207,7 @@ class ThebesHallBuilder:
             self._jwt_payload_user_data.update({"portfolios": dict()})
         if self._jwt_payload_user_data["portfolios"].get("us") is None:
             self._jwt_payload_user_data["portfolios"].update({"us": dict()})
-        self.add_dw_account()
+        (self.add_dw_account().add_dw_id())
         return self
 
     def add_bovespa_account(self):
@@ -241,6 +243,17 @@ class ThebesHallBuilder:
         )
         return self
 
+    def add_dw_id(self):
+        self._jwt_payload_user_data["portfolios"]["us"].update(
+            {
+                "dw_id": self._user_data.get("portfolios", {})
+                .get("default", {})
+                .get("us", {})
+                .get("dw_id")
+            }
+        )
+        return self
+
     def add_client_has_br_trade_allowed(
         self, suitability_months_past: int, last_modified_date_months_past: int
     ):
@@ -269,7 +282,15 @@ class ThebesHallBuilder:
     def add_client_has_us_trade_allowed(
         self,
     ):
-        self._jwt_payload_user_data.update({"client_has_us_trade_allowed": False})
+        if current_dw_status := self._user_data.get("dw"):
+            if current_dw_status == KycStatus.KYC_APPROVED.value:
+                self._jwt_payload_user_data.update(
+                    {"client_has_us_trade_allowed": True}
+                )
+            else:
+                self._jwt_payload_user_data.update(
+                    {"client_has_us_trade_allowed": False}
+                )
         return self
 
     def add_client_profile(self):
