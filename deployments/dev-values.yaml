@@ -4,7 +4,7 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.2.26
+    image: nexus.sigame.com.br/sphinx:1.2.27
     ports:
     - containerPort: 8000
     env:
@@ -201,7 +201,7 @@ virtualService:
     hosts:
       - dev.api.siga.me 
     gateways:
-      - default/dev-istio-gateway
+      - dev-istio-gateway
     http:
     - match:
       - uri:
