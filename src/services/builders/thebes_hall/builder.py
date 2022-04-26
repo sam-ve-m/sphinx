@@ -283,7 +283,13 @@ class ThebesHallBuilder:
         self,
     ):
         if current_dw_status := self._user_data.get("dw"):
-            if current_dw_status == KycStatus.KYC_APPROVED.value:
+            kyc_is_approved = current_dw_status == KycStatus.KYC_APPROVED.value
+            w8_confirmation = (
+                self._user_data.get("external_exchange_requirements", {})
+                .get("us", {})
+                .get("w8_confirmation")
+            )
+            if kyc_is_approved and w8_confirmation:
                 self._jwt_payload_user_data.update(
                     {"client_has_us_trade_allowed": True}
                 )

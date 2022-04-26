@@ -58,6 +58,45 @@ class DWTransport:
         return response
 
     @classmethod
+    async def call_list_all_physical_get(
+        cls,
+        user_id: str,
+    ):
+        url = config("DW_USER_PHYSICAL_DOCUMENTS_URL")
+        formatted_url = url.format(user_id)
+        http_response = await cls.dw_caller_transport.execute_get(
+            url=formatted_url, query_params={}
+        )
+        response = await cls._build_response(http_response=http_response)
+        return response
+
+    @classmethod
+    async def call_get_physical_get(
+        cls,
+        doc_id: str,
+    ):
+        url = config("DW_USER_PHYSICAL_DOCUMENT_URL")
+        formatted_url = url.format(doc_id)
+        http_response = await cls.dw_caller_transport.execute_get(
+            url=formatted_url, query_params={}
+        )
+        response = await cls._build_response(http_response=http_response)
+        return response
+
+    @classmethod
+    async def call_kyc_status_get(
+        cls,
+        user_id: str,
+    ):
+        url = config("DW_KYC_USER_URL")
+        formatted_url = url.format(user_id)
+        http_response = await cls.dw_caller_transport.execute_get(
+            url=formatted_url, query_params={}
+        )
+        response = await cls._build_response(http_response=http_response)
+        return response
+
+    @classmethod
     async def call_registry_user_patch(cls, user_register_data: dict, user_dw_id: str):
         url = config("DW_UPDATE_USER_URL")
         formatted_url = url.format(user_dw_id)

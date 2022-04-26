@@ -11,7 +11,10 @@ class OnboardingStepBuilderUS:
             "is_politically_exposed_step": False,
             "is_exchange_member_step": False,
             "is_company_director_step": False,
+            "external_fiscal_tax_confirmation_step": False,
+            "employ_step": False,
             "time_experience_step": False,
+            "w8_confirmation_step": False,
             "finished": False,
         }
         self.__steps: list = [
@@ -20,7 +23,10 @@ class OnboardingStepBuilderUS:
             "is_politically_exposed_step",
             "is_exchange_member_step",
             "is_company_director_step",
+            "external_fiscal_tax_confirmation_step",
+            "employ_step",
             "time_experience_step",
+            "w8_confirmation_step",
         ]
         self.bureau_status = None
 
@@ -108,6 +114,36 @@ class OnboardingStepBuilderUS:
         )
         if is_valid_onbaording_step and is_exchange_member is not None:
             self.__onboarding_steps["is_company_director_step"] = True
+            self.__onboarding_steps["current_onboarding_step"] = "external_fiscal_tax_confirmation_step"
+        return self
+
+    def external_fiscal_tax_confirmation_step(self, current_user: dict):
+        is_exchange_member = (
+            current_user.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("external_fiscal_tax_confirmation")
+        )
+        is_valid_onbaording_step = (
+            self.__onboarding_steps["current_onboarding_step"]
+            == "external_fiscal_tax_confirmation_step"
+        )
+        if is_valid_onbaording_step and is_exchange_member:
+            self.__onboarding_steps["external_fiscal_tax_confirmation_step"] = True
+            self.__onboarding_steps["current_onboarding_step"] = "employ_step"
+        return self
+
+    def employ_step(self, current_user: dict):
+        user_employ_status = (
+            current_user.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("user_employ_status")
+        )
+        is_valid_onbaording_step = (
+            self.__onboarding_steps["current_onboarding_step"]
+            == "employ_step"
+        )
+        if is_valid_onbaording_step and user_employ_status:
+            self.__onboarding_steps["employ_step"] = True
             self.__onboarding_steps["current_onboarding_step"] = "time_experience_step"
         return self
 
@@ -122,6 +158,22 @@ class OnboardingStepBuilderUS:
         )
         if is_valid_onbaording_step and is_exchange_member:
             self.__onboarding_steps["time_experience_step"] = True
+            self.__onboarding_steps[
+                "current_onboarding_step"
+            ] = "w8_confirmation_step"
+        return self
+
+    def w8_confirmation_step(self, current_user: dict):
+        is_exchange_member = (
+            current_user.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("w8_confirmation")
+        )
+        is_valid_onbaording_step = (
+            self.__onboarding_steps["current_onboarding_step"] == "w8_confirmation_step"
+        )
+        if is_valid_onbaording_step and is_exchange_member:
+            self.__onboarding_steps["w8_confirmation_step"] = True
             self.__onboarding_steps["current_onboarding_step"] = "finished"
         return self
 

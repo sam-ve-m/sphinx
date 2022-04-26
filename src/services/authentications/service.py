@@ -374,8 +374,7 @@ class AuthenticationService(IAuthentication):
         sinacor_status_from_sinacor = (
             await AuthenticationService._client_sinacor_is_blocked(
                 user_cpf=user_cpf_from_database,
-                user_bmf_account_from_database=user_bmf_account_from_database
-
+                user_bmf_account_from_database=user_bmf_account_from_database,
             )
         )
 
@@ -513,10 +512,11 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     async def _client_sinacor_is_blocked(
-        user_cpf: str, user_bmf_account_from_database: str, client_register_repository=ClientRegisterRepository
+        user_cpf: str,
+        user_bmf_account_from_database: str,
+        client_register_repository=ClientRegisterRepository,
     ) -> bool:
         sincad_status = await client_register_repository.get_sinacor_status(
-            user_cpf=user_cpf,
-            user_bmf_account=user_bmf_account_from_database
+            user_cpf=user_cpf, user_bmf_account=user_bmf_account_from_database
         )
         return sincad_status and sincad_status[0] in ["A"]

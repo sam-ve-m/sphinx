@@ -96,3 +96,30 @@ async def get_marital_status_update(request: Request):
         payload={},
         request=request,
     )
+
+
+@router.get("/client_update_enums/employ_status_us", tags=["client_update_enums"])
+async def get_marital_status_update(request: Request):
+    return await BaseController.run(
+        ClientRegisterEnumsController.get_employ_status_us_update,
+        payload={},
+        request=request,
+    )
+
+
+@router.get("/client_update_enums/employ_type_us", tags=["client_update_enums"])
+async def get_marital_status_update(request: Request):
+    return await BaseController.run(
+        ClientRegisterEnumsController.get_employ_type_us_update,
+        payload={},
+        request=request,
+    )
+
+
+@router.get("/client_update_enums/employ_position_us", tags=["client_update_enums"])
+async def get_marital_status_update(request: Request):
+    return await BaseController.run(
+        ClientRegisterEnumsController.get_employ_position_us_update,
+        payload={},
+        request=request,
+    )

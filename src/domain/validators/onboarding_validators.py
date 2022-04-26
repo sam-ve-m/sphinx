@@ -8,6 +8,9 @@ from typing import List, Optional, Dict, Any
 from fastapi import Form
 from pydantic import BaseModel, constr, validator, root_validator
 
+from src.domain.drive_wealth.employed_position import EmployedPosition
+from src.domain.drive_wealth.employed_status import EmployedStatus
+from src.domain.drive_wealth.employed_type import EmployedType
 from src.domain.validators.brazil_register_number_validator import is_cpf_valid
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
@@ -89,10 +92,22 @@ class ValueText(BaseModel):
 
 class PoliticallyExposed(BaseModel):
     is_politically_exposed: bool
+    politically_exposed_names: List[constr(min_length=1, max_length=100)]
 
 
 class ExchangeMember(BaseModel):
     is_exchange_member: bool
+
+
+class W8FormConfirmation(BaseModel):
+    w8_confirmation: bool
+
+
+class EmployForUs(BaseModel):
+    user_employ_status: EmployedStatus
+    user_employ_type: EmployedType
+    user_employ_position: EmployedPosition
+    user_employ_company_name: Optional[constr(min_length=1, max_length=100)]
 
 
 class TimeExperience(BaseModel):
@@ -102,14 +117,16 @@ class TimeExperience(BaseModel):
 class CompanyDirector(BaseModel):
     is_company_director: bool
     company_name: Optional[str]
+    company_ticker: Optional[str]
 
     @root_validator()
     def validate_cpf(cls, values: Dict[str, Any]):
         is_company_director = values.get("is_company_director")
         company_name = values.get("company_name")
-        if is_company_director and not company_name:
+        company_ticker = values.get("company_ticker")
+        if is_company_director and (not company_name or not company_ticker):
             raise ValueError(
-                "need inform the field campany_name is you are a company director"
+                "need inform the field campany_name and company_ticker is you are a company director"
             )
         return values
 

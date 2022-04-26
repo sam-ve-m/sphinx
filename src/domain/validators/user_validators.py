@@ -20,11 +20,15 @@ class Country(BaseModel):
         sinacor_types_repository = SinacorTypesRepository()
         if sinacor_types_repository.validate_country(value=e):
             return e
-        raise ValueError("nationality not exists")
+        raise ValueError("country not exists")
 
 
 class TaxResidence(Country):
     tax_number: str
+
+
+class TaxResidences(BaseModel):
+    tax_residences: List[TaxResidence]
 
 
 class UserIdentifierData(Cpf, CelPhone):

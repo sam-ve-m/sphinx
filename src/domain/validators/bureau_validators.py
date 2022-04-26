@@ -5,6 +5,9 @@ from typing import Optional, List, Dict, Any
 from email_validator import validate_email
 from pydantic import BaseModel, validator, constr, root_validator
 
+from src.domain.drive_wealth.employed_position import EmployedPosition
+from src.domain.drive_wealth.employed_status import EmployedStatus
+from src.domain.drive_wealth.employed_type import EmployedType
 from src.domain.sinacor.decision import Decisions
 from src.domain.sinacor.document_type import DocumentTypes
 from src.domain.sinacor.person_gender import PersonGender
@@ -393,24 +396,39 @@ class RegistrationRepresentativeOfNonresidentInvestorsSecuritiesCommissionSource
 
 
 class PoliticallyExposed(Source):
-    is_politically_exposed: bool
+    value: bool
 
 
 class ExchangeMember(Source):
-    is_exchange_member: bool
+    value: bool
 
 
 class TimeExperience(Source):
-    time_experience: TimeExperienceEnum
+    value: TimeExperienceEnum
 
 
 class CompanyDirector(Source):
-    is_company_director: bool
-    company_name: str
+    value: bool
 
 
 class CompanyDirectorOf(Source):
-    company_name: str
+    value: str
+
+
+class EmployedStatusSource(Source):
+    value: EmployedStatus
+
+
+class EmployedTypeSource(Source):
+    value: EmployedType
+
+
+class EmployedPositionSource(Source):
+    value: EmployedPosition
+
+
+class EmployCompanyName(Source):
+    value: str
 
 
 class SpouseSource(BaseModel):
@@ -511,6 +529,10 @@ class ExternalExchangeAccountUs(BaseModel):
     time_experience: TimeExperience
     is_company_director: CompanyDirector
     is_company_director_of: Optional[CompanyDirectorOf]
+    user_employ_status: EmployedStatusSource
+    user_employ_type: Optional[EmployedTypeSource]
+    user_employ_position: Optional[EmployedPositionSource]
+    user_employ_company_name: Optional[EmployCompanyName]
 
     @root_validator()
     def validate(cls, values: Dict[str, Any]):
@@ -531,6 +553,10 @@ class ExternalExchangeAccountUsUpdate(BaseModel):
     time_experience: Optional[TimeExperience]
     is_company_director: Optional[CompanyDirector]
     is_company_director_of: Optional[CompanyDirectorOf]
+    user_employ_status: Optional[EmployedStatusSource]
+    user_employ_type: Optional[EmployedTypeSource]
+    user_employ_position: Optional[EmployedPositionSource]
+    user_employ_company_name: Optional[EmployCompanyName]
 
     @root_validator()
     def validate(cls, values: Dict[str, Any]):
