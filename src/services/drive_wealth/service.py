@@ -79,11 +79,29 @@ class DriveWealthService:
         status, response = await cls.dw_transport.call_kyc_status_get(
             user_id=user_dw_id
         )
-        # TODO PERSEPHONE LOG AKI
         if not status:
             raise InternalServerError("common.unable_to_process")
         kyc_status = response["kyc"]["status"]["name"]
         return kyc_status
+
+    @classmethod
+    async def get_w8_pdf(cls, user_dw_id: str) -> str:
+        status, response = await cls.dw_transport.call_list_all_physical_get(
+            user_id=user_dw_id
+        )
+        if not status:
+            raise InternalServerError("common.unable_to_process")
+        w8_file = list(filter(lambda x: x["type"]["name"] == "TAX", response))
+        if not w8_file:
+            raise InternalServerError("common.unable_to_process")
+        w8_file_id = w8_file[0]["documentID"]
+        status, response = await cls.dw_transport.call_get_physical_get(
+            doc_id=w8_file_id
+        )
+        if not status:
+            raise InternalServerError("common.unable_to_process")
+        w8_file_link = response["url"]
+        return w8_file_link
 
     @classmethod
     async def _create_user_account(cls, user_dw_id: str):
@@ -94,7 +112,6 @@ class DriveWealthService:
             trading_type=DriveWealthAccountTradingType.MARGIN,
             ignore_buying_power=False,
         )
-        # TODO PERSEPHONE LOG AKI
         if not status:
             raise InternalServerError("common.unable_to_process")
         user_id = response["accountNo"]
@@ -152,7 +169,6 @@ class DriveWealthService:
         status, response = await cls.dw_transport.call_registry_user_post(
             user_register_data=registry_body
         )
-        # TODO PERSEPHONE LOG AKI
         if not status:
             raise InternalServerError("common.unable_to_process")
         user_id = response["id"]
@@ -165,7 +181,6 @@ class DriveWealthService:
         status, response = await cls.dw_transport.call_registry_user_patch(
             user_register_data=registry_body, user_dw_id=user_dw_id
         )
-        # TODO PERSEPHONE LOG AKI
         if not status:
             raise InternalServerError("common.unable_to_process")
 

@@ -16,7 +16,7 @@ from src.domain.validators.onboarding_validators import (
     PoliticallyExposed,
     ExchangeMember,
     CompanyDirector,
-    TimeExperience,
+    TimeExperience, W8FormConfirmation,
 )
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
@@ -27,7 +27,7 @@ from src.domain.validators.bureau_validators import (
     ClientValidationData,
     UserMaritalData,
 )
-from src.domain.validators.user_validators import UserIdentifierData
+from src.domain.validators.user_validators import UserIdentifierData, TaxResidences
 
 router = UserRouter.instance()
 
@@ -243,6 +243,60 @@ async def put_time_experience_us(
     payload.update(time_experience.dict())
     return await BaseController.run(
         UserController.update_time_experience_us, payload, request
+    )
+
+
+@router.get("/user/external_fiscal_tax", tags=["user"])
+async def get_customer_registration_data(request: Request):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    return await BaseController.run(
+        UserController.get_external_fiscal_tax_residence, payload, request
+    )
+
+
+@router.put("/user/external_fiscal_tax_confirmation", tags=["user"])
+async def put_time_experience_us(
+    tax_residences: TaxResidences,
+    request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data
+    }
+    payload.update(tax_residences.dict())
+    return await BaseController.run(
+        UserController.update_external_fiscal_tax_residence, payload, request
+    )
+
+
+@router.get("/user/w8_form", tags=["user"])
+async def get_customer_registration_data(request: Request):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+    payload = {
+        "x-thebes-answer": jwt_data,
+    }
+    return await BaseController.run(
+        UserController.get_w8_form, payload, request
+    )
+
+
+@router.put("/user/w8_form_confirmation", tags=["user"])
+async def put_time_experience_us(
+    w8_form_confirmation: W8FormConfirmation,
+    request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+
+    payload = {
+        "x-thebes-answer": jwt_data
+    }
+    payload.update(w8_form_confirmation.dict())
+    return await BaseController.run(
+        UserController.update_w8_form_confirmation, payload, request
     )
 
 

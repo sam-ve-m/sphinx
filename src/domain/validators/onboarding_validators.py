@@ -89,10 +89,15 @@ class ValueText(BaseModel):
 
 class PoliticallyExposed(BaseModel):
     is_politically_exposed: bool
+    politically_exposed_names: List[constr(min_length=1, max_length=100)]
 
 
 class ExchangeMember(BaseModel):
     is_exchange_member: bool
+
+
+class W8FormConfirmation(BaseModel):
+    w8_confirmation: bool
 
 
 class TimeExperience(BaseModel):
@@ -102,14 +107,16 @@ class TimeExperience(BaseModel):
 class CompanyDirector(BaseModel):
     is_company_director: bool
     company_name: Optional[str]
+    company_ticker: Optional[str]
 
     @root_validator()
     def validate_cpf(cls, values: Dict[str, Any]):
         is_company_director = values.get("is_company_director")
         company_name = values.get("company_name")
-        if is_company_director and not company_name:
+        company_ticker = values.get("company_ticker")
+        if is_company_director and (not company_name or not company_ticker):
             raise ValueError(
-                "need inform the field campany_name is you are a company director"
+                "need inform the field campany_name and company_ticker is you are a company director"
             )
         return values
 
