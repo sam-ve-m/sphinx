@@ -55,8 +55,10 @@ from src.services.persephone.templates.persephone_templates import (
     get_user_politically_exposed_schema_template_with_data,
     get_user_exchange_member_schema_template_with_data,
     get_user_time_experience_schema_template_with_data,
-    get_user_company_director_schema_template_with_data, get_user_tax_residences_schema_template_with_data,
+    get_user_company_director_schema_template_with_data,
+    get_user_tax_residences_schema_template_with_data,
     get_w8_form_confirmation_schema_template_with_data,
+    get_user_employ_for_schema_template_with_data,
 )
 from src.services.sinacor.service import SinacorService
 from src.services.valhalla.service import ValhallaService
@@ -823,8 +825,9 @@ class UserService(IUser):
             .is_politically_exposed_step(current_user=current_user)
             .is_exchange_member_step(current_user=current_user)
             .is_company_director_step(current_user=current_user)
-            .time_experience_step(current_user=current_user)
             .external_fiscal_tax_confirmation_step(current_user=current_user)
+            .employ_step(current_user=current_user)
+            .time_experience_step(current_user=current_user)
             .w8_confirmation_step(current_user=current_user)
             .build()
         )
@@ -930,18 +933,20 @@ class UserService(IUser):
 
     @staticmethod
     async def get_external_fiscal_tax_residence(
-            payload: dict,
-            user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         x_thebes_answer = payload.get("x-thebes-answer")
         user_unique_id = x_thebes_answer["user"]["unique_id"]
         user = await user_repository.find_one({"unique_id": user_unique_id})
         tax_residences = user["tax_residences"]
-        return {"status_code": status.HTTP_200_OK, "payload": {"tax_residences": tax_residences}}
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"tax_residences": tax_residences},
+        }
 
     @staticmethod
     async def update_external_fiscal_tax_residence(
-            payload: dict, user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         thebes_answer = payload["x-thebes-answer"]
         thebes_answer_user = thebes_answer["user"]
@@ -950,7 +955,8 @@ class UserService(IUser):
             payload=payload, onboard_step=["finished"]
         )
         us_step_validator = UserService.onboarding_us_step_validator(
-            payload=payload, onboard_step=["external_fiscal_tax_confirmation_step", "finished"]
+            payload=payload,
+            onboard_step=["external_fiscal_tax_confirmation_step", "finished"],
         )
         await asyncio.gather(br_step_validator, us_step_validator)
 
@@ -974,7 +980,7 @@ class UserService(IUser):
             old={"unique_id": unique_id},
             new={
                 "external_exchange_requirements.us.external_fiscal_tax_confirmation": True,
-                "tax_residences": user_tax_residences
+                "tax_residences": user_tax_residences,
             },
         )
         if not was_updated:
@@ -986,10 +992,7 @@ class UserService(IUser):
         }
 
     @staticmethod
-    async def get_w8_form(
-            payload: dict,
-            user_repository=UserRepository
-    ) -> dict:
+    async def get_w8_form(payload: dict, user_repository=UserRepository) -> dict:
         x_thebes_answer = payload.get("x-thebes-answer")
         user_unique_id = x_thebes_answer["user"]["unique_id"]
         user = await user_repository.find_one({"unique_id": user_unique_id})
@@ -999,7 +1002,7 @@ class UserService(IUser):
 
     @staticmethod
     async def update_w8_form_confirmation(
-            payload: dict, user_repository=UserRepository
+        payload: dict, user_repository=UserRepository
     ) -> dict:
         thebes_answer = payload["x-thebes-answer"]
         thebes_answer_user = thebes_answer["user"]
@@ -1032,6 +1035,62 @@ class UserService(IUser):
             old={"unique_id": unique_id},
             new={
                 "external_exchange_requirements.us.w8_confirmation": user_w8_form_confirmation,
+            },
+        )
+        if not was_updated:
+            raise InternalServerError("common.unable_to_process")
+
+        return {
+            "status_code": status.HTTP_200_OK,
+            "message_key": "requests.updated",
+        }
+
+    @staticmethod
+    async def update_employ_for_us(
+        payload: dict, user_repository=UserRepository
+    ) -> dict:
+        Sindri.dict_to_primitive_types(payload)
+        thebes_answer = payload["x-thebes-answer"]
+        thebes_answer_user = thebes_answer["user"]
+        user_employ_status = payload["user_employ_status"]
+        user_employ_type = payload["user_employ_type"]
+        user_employ_position = payload["user_employ_position"]
+        user_employ_company_name = payload["user_employ_company_name"]
+
+        br_step_validator = UserService.onboarding_br_step_validator(
+            payload=payload, onboard_step=["finished"]
+        )
+        us_step_validator = UserService.onboarding_us_step_validator(
+            payload=payload, onboard_step=["employ_step", "finished"]
+        )
+        await asyncio.gather(br_step_validator, us_step_validator)
+
+        (
+            sent_to_persephone,
+            status_sent_to_persephone,
+        ) = await UserService.persephone_client.send_to_persephone(
+            topic=config("PERSEPHONE_TOPIC_USER"),
+            partition=PersephoneQueue.USER_EMPLOY_US.value,
+            message=get_user_employ_for_schema_template_with_data(
+                employ_status=user_employ_status,
+                employ_type=user_employ_type,
+                employ_position=user_employ_position,
+                employ_company_name=user_employ_company_name,
+                unique_id=thebes_answer["user"]["unique_id"],
+            ),
+            schema_name="user_employ_form",
+        )
+        if sent_to_persephone is False:
+            raise InternalServerError("common.process_issue")
+
+        unique_id = thebes_answer_user["unique_id"]
+        was_updated = await user_repository.update_one(
+            old={"unique_id": unique_id},
+            new={
+                "external_exchange_requirements.us.user_employ_status": user_employ_status,
+                "external_exchange_requirements.us.user_employ_type": user_employ_type,
+                "external_exchange_requirements.us.user_employ_position": user_employ_position,
+                "external_exchange_requirements.us.user_employ_company_name": user_employ_company_name,
             },
         )
         if not was_updated:
@@ -1095,6 +1154,10 @@ class UserService(IUser):
             .external_exchange_account_exchange_member_us()
             .external_exchange_account_time_experience_us()
             .external_exchange_account_company_director_us()
+            .external_exchange_account_user_employ_company_name_us()
+            .external_exchange_account_user_employ_position_us()
+            .external_exchange_account_user_employ_type_us()
+            .external_exchange_account_user_employ_status_us()
         ).build()
 
         return {
@@ -1138,7 +1201,7 @@ class UserService(IUser):
             old={"unique_id": thebes_answer_user["unique_id"]},
             new={
                 "external_exchange_requirements.us.is_politically_exposed": user_is_politically_exposed,
-                "external_exchange_requirements.us.politically_exposed_names": user_politically_exposed_names
+                "external_exchange_requirements.us.politically_exposed_names": user_politically_exposed_names,
             },
         )
         if not was_updated:
@@ -1354,6 +1417,10 @@ class UserService(IUser):
             .external_exchange_account_exchange_member_us()
             .external_exchange_account_time_experience_us()
             .external_exchange_account_company_director_us()
+            .external_exchange_account_user_employ_company_name_us()
+            .external_exchange_account_user_employ_position_us()
+            .external_exchange_account_user_employ_type_us()
+            .external_exchange_account_user_employ_status_us()
         ).build()
 
         user_update_register_schema = (

@@ -184,7 +184,10 @@ class ClientUpdateRegisterBuilderUs:
     def add_personal_information_politically_exposed_names(self, user_data: dict):
         value = None
         if user_data["external_exchange_requirements"]["us"]["is_politically_exposed"]:
-            value = user_data["name"].split(" ")[-1]
+            politically_exposed_names = user_data["external_exchange_requirements"][
+                "us"
+            ]["politically_exposed_names"]
+            value = ", ".join(politically_exposed_names)
         self._personal_information["data"].update({"politicallyExposedNames": value})
         return self
 
@@ -200,11 +203,8 @@ class ClientUpdateRegisterBuilderUs:
         self._address["data"].update({"street1": street})
         return self
 
-    def add_address_city(self, user_data: dict):
-        # TODO PEGAR DO SINACOR
-        address = user_data["address"]
-        city = address["city"]
-        self._address["data"].update({"city": city})
+    def add_address_city(self, city_name: str):
+        self._address["data"].update({"city": city_name})
         return self
 
     def add_address_province(self, user_data: dict):
@@ -226,36 +226,25 @@ class ClientUpdateRegisterBuilderUs:
         return self
 
     def add_employment_status(self, user_data: dict):
-        occupation = user_data["occupation"]
-        activity = occupation["activity"]
-        # TODO MAPA MISSING
-        value = None
+        value = user_data["external_exchange_requirements"]["us"]["user_employ_status"]
         self._employment["data"].update({"status": value})
         return self
 
     def add_employment_company(self, user_data: dict):
         if self._employment["data"]["status"] in ["EMPLOYED", "SELF_EMPLOYED"]:
-            occupation = user_data["occupation"]
-            company_name = occupation["company"]["name"]
-            # TODO CONDIFITNAL IF EMPLOYED ad SELF_EMPLOYED
+            company_name = user_data["external_exchange_requirements"]["us"]["user_employ_company_name"]
             self._employment["data"].update({"company": company_name})
         return self
 
     def add_employment_type(self, user_data: dict):
         if self._employment["data"]["status"] in ["EMPLOYED", "SELF_EMPLOYED"]:
-            occupation = user_data["occupation"]
-            # TODO MAPA MISSING
-            # TODO CONDIFITNAL IF EMPLOYED ad SELF_EMPLOYED
-            value = None
+            value = user_data["external_exchange_requirements"]["us"]["user_employ_type"]
             self._employment["data"].update({"type": value})
         return self
 
     def add_employment_position(self, user_data: dict):
         if self._employment["data"]["status"] in ["EMPLOYED", "SELF_EMPLOYED"]:
-            occupation = user_data["occupation"]
-            # TODO MAPA MISSING
-            # TODO CONDIFITNAL IF EMPLOYED ad SELF_EMPLOYED
-            value = None
+            value = user_data["external_exchange_requirements"]["us"]["user_employ_position"]
             self._employment["data"].update({"position": value})
         return self
 

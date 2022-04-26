@@ -5,6 +5,7 @@ from src.domain.drive_wealth.kyc_status import KycStatus
 from src.repositories.file.enum.user_file import UserFileType
 from src.repositories.file.repository import FileRepository
 from src.repositories.protfolio.repository import PortfolioRepository
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.services.builders.client_register.us.builder import (
     ClientUpdateRegisterBuilderUs,
 )
@@ -186,6 +187,7 @@ class DriveWealthService:
 
     @staticmethod
     def __get_registry_body(user_data: dict) -> ClientUpdateRegisterBuilderUs:
+        city_name = SinacorTypesRepository.get_county_name_by_id(id=user_data["address"]["city"])
         client_register_builder_us = ClientUpdateRegisterBuilderUs()
         (
             client_register_builder_us.add_parent_ibid()
@@ -208,7 +210,7 @@ class DriveWealthService:
             .add_personal_information_politically_exposed_names(user_data=user_data)
             .add_personal_information_irs_backup_withholdings()
             .add_address_street1(user_data=user_data)
-            .add_address_city(user_data=user_data)
+            .add_address_city(city_name=city_name)
             .add_address_province(user_data=user_data)
             .add_address_zip_code(user_data=user_data)
             .add_address_country(user_data=user_data)
@@ -236,6 +238,7 @@ class DriveWealthService:
 
     @staticmethod
     def __get_update_body(user_data: dict) -> ClientUpdateRegisterBuilderUs:
+        city_name = SinacorTypesRepository.get_county_name_by_id(id=user_data["address"]["city"])
         client_update_builder_us = ClientUpdateRegisterBuilderUs()
         (
             client_update_builder_us.add_basic_information_first_name(
@@ -257,7 +260,7 @@ class DriveWealthService:
             .add_personal_information_politically_exposed_names(user_data=user_data)
             .add_personal_information_irs_backup_withholdings()
             .add_address_street1(user_data=user_data)
-            .add_address_city(user_data=user_data)
+            .add_address_city(city_name=city_name)
             .add_address_province(user_data=user_data)
             .add_address_zip_code(user_data=user_data)
             .add_address_country(user_data=user_data)

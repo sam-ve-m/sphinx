@@ -70,3 +70,15 @@ class ClientRegisterEnumsController:
     @staticmethod
     async def get_time_experience_update(payload: dict):
         return await SinaCorTypes.get_time_experience()
+
+    @staticmethod
+    async def get_employ_status_us_update(payload: dict):
+        return await SinaCorTypes.get_employ_status()
+
+    @staticmethod
+    async def get_employ_type_us_update(payload: dict):
+        return await SinaCorTypes.get_employ_type()
+
+    @staticmethod
+    async def get_employ_position_us_update(payload: dict):
+        return await SinaCorTypes.get_employ_position()

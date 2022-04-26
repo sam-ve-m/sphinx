@@ -8,6 +8,9 @@ from typing import List, Optional, Dict, Any
 from fastapi import Form
 from pydantic import BaseModel, constr, validator, root_validator
 
+from src.domain.drive_wealth.employed_position import EmployedPosition
+from src.domain.drive_wealth.employed_status import EmployedStatus
+from src.domain.drive_wealth.employed_type import EmployedType
 from src.domain.validators.brazil_register_number_validator import is_cpf_valid
 from src.repositories.file.enum.term_file import TermsFileType
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
@@ -98,6 +101,13 @@ class ExchangeMember(BaseModel):
 
 class W8FormConfirmation(BaseModel):
     w8_confirmation: bool
+
+
+class EmployForUs(BaseModel):
+    user_employ_status: EmployedStatus
+    user_employ_type: EmployedType
+    user_employ_position: EmployedPosition
+    user_employ_company_name: Optional[constr(min_length=1, max_length=100)]
 
 
 class TimeExperience(BaseModel):

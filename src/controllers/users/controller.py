@@ -116,5 +116,9 @@ class UserController:
         return await UserService.update_w8_form_confirmation(payload=payload)
 
     @staticmethod
+    async def update_employ_for_us(payload: dict):
+        return await UserService.update_employ_for_us(payload=payload)
+
+    @staticmethod
     async def update_customer_registration_data(payload: dict):
         return await UserService.update_customer_registration_data(payload=payload)

@@ -579,6 +579,70 @@ class UpdateCustomerRegistrationBuilder:
             )
         return self
 
+    def external_exchange_account_user_employ_company_name_us(self):
+        old_time_experience = (
+            self.__old_personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("user_employ_company_name")
+        )
+        if new_time_experience := self._get_new_value(
+            "external_exchange_account_us", "user_employ_company_name"
+        ):
+            self._update_modified_data(
+                levels=("external_exchange_requirements", "us", "user_employ_company_name"),
+                old_field=old_time_experience,
+                new_filed=new_time_experience,
+            )
+        return self
+
+    def external_exchange_account_user_employ_position_us(self):
+        old_time_experience = (
+            self.__old_personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("user_employ_position")
+        )
+        if new_time_experience := self._get_new_value(
+            "external_exchange_account_us", "user_employ_position"
+        ):
+            self._update_modified_data(
+                levels=("external_exchange_requirements", "us", "user_employ_position"),
+                old_field=old_time_experience,
+                new_filed=new_time_experience,
+            )
+        return self
+
+    def external_exchange_account_user_employ_type_us(self):
+        old_time_experience = (
+            self.__old_personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("user_employ_type")
+        )
+        if new_time_experience := self._get_new_value(
+            "external_exchange_account_us", "user_employ_type"
+        ):
+            self._update_modified_data(
+                levels=("external_exchange_requirements", "us", "user_employ_type"),
+                old_field=old_time_experience,
+                new_filed=new_time_experience,
+            )
+        return self
+
+    def external_exchange_account_user_employ_status_us(self):
+        old_time_experience = (
+            self.__old_personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("user_employ_status")
+        )
+        if new_time_experience := self._get_new_value(
+            "external_exchange_account_us", "user_employ_status"
+        ):
+            self._update_modified_data(
+                levels=("external_exchange_requirements", "us", "user_employ_status"),
+                old_field=old_time_experience,
+                new_filed=new_time_experience,
+            )
+        return self
+
     def build(self) -> Tuple[dict, dict]:
         modified_register = {
             "unique_id": self.__unique_id,

@@ -273,5 +273,53 @@ class CustomerRegistrationBuilder:
             )
         return self
 
+    def external_exchange_account_user_employ_company_name_us(self):
+        time_experience = (
+            self.__personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("user_employ_company_name")
+        )
+        if time_experience is not None:
+            self.__buffer["external_exchange_account_us"].update(
+                {"user_employ_company_name": time_experience}
+            )
+        return self
+
+    def external_exchange_account_user_employ_position_us(self):
+        time_experience = (
+            self.__personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("user_employ_position")
+        )
+        if time_experience is not None:
+            self.__buffer["external_exchange_account_us"].update(
+                {"user_employ_position": time_experience}
+            )
+        return self
+
+    def external_exchange_account_user_employ_type_us(self):
+        time_experience = (
+            self.__personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("user_employ_type")
+        )
+        if time_experience is not None:
+            self.__buffer["external_exchange_account_us"].update(
+                {"user_employ_type": time_experience}
+            )
+        return self
+
+    def external_exchange_account_user_employ_status_us(self):
+        time_experience = (
+            self.__personal_data.get("external_exchange_requirements", {})
+            .get("us", {})
+            .get("user_employ_status")
+        )
+        if time_experience is not None:
+            self.__buffer["external_exchange_account_us"].update(
+                {"user_employ_status": time_experience}
+            )
+        return self
+
     def build(self) -> dict:
         return self.__buffer

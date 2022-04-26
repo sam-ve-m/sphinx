@@ -16,7 +16,9 @@ from src.domain.validators.onboarding_validators import (
     PoliticallyExposed,
     ExchangeMember,
     CompanyDirector,
-    TimeExperience, W8FormConfirmation,
+    TimeExperience,
+    W8FormConfirmation,
+    EmployForUs,
 )
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
@@ -264,9 +266,7 @@ async def put_time_experience_us(
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
-    payload = {
-        "x-thebes-answer": jwt_data
-    }
+    payload = {"x-thebes-answer": jwt_data}
     payload.update(tax_residences.dict())
     return await BaseController.run(
         UserController.update_external_fiscal_tax_residence, payload, request
@@ -279,9 +279,7 @@ async def get_customer_registration_data(request: Request):
     payload = {
         "x-thebes-answer": jwt_data,
     }
-    return await BaseController.run(
-        UserController.get_w8_form, payload, request
-    )
+    return await BaseController.run(UserController.get_w8_form, payload, request)
 
 
 @router.put("/user/w8_form_confirmation", tags=["user"])
@@ -291,12 +289,23 @@ async def put_time_experience_us(
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
-    payload = {
-        "x-thebes-answer": jwt_data
-    }
+    payload = {"x-thebes-answer": jwt_data}
     payload.update(w8_form_confirmation.dict())
     return await BaseController.run(
         UserController.update_w8_form_confirmation, payload, request
+    )
+
+
+@router.put("/user/employ_for_us", tags=["user"])
+async def put_employ_for_us(
+    employ_for_us: EmployForUs,
+    request: Request,
+):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+    payload = {"x-thebes-answer": jwt_data}
+    payload.update(employ_for_us.dict())
+    return await BaseController.run(
+        UserController.update_employ_for_us, payload, request
     )
 
 
