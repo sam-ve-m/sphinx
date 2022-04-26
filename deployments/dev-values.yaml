@@ -50,6 +50,8 @@ containers:
       value: "no-reply@lionx.ai"
     - name: TARGET_LINK
       value: "https://app.lionx.com.br/public/deeplink"
+    - name: REDIS_URL
+      value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
     - name: REDIS_HOST_URL
       value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
     - name: REDIS_CACHE_DB
@@ -240,7 +242,7 @@ virtualService:
     hosts:
       - dev.api.siga.me 
     gateways:
-      - default/dev-istio-gateway
+      - dev-istio-gateway
     http:
     - match:
       - uri:
