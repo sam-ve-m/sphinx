@@ -35,8 +35,7 @@ class FileRepository(IFile):
         "term_retail_liquid_provider": ".pdf",
         "term_open_account_dw": ".pdf",
         "term_application_dw": ".pdf",
-        "term_privacy_policy_dw": ".pdf",
-        "term_data_sharing_policy_dw": ".pdf",
+        "term_and_privacy_policy_data_sharing_policy_dw": ".pdf"
     }
 
     @classmethod
