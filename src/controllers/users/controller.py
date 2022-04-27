@@ -100,5 +100,25 @@ class UserController:
         return await UserService.get_customer_registration_data(payload=payload)
 
     @staticmethod
+    async def get_external_fiscal_tax_residence(payload: dict):
+        return await UserService.get_external_fiscal_tax_residence(payload=payload)
+
+    @staticmethod
+    async def update_external_fiscal_tax_residence(payload: dict):
+        return await UserService.update_external_fiscal_tax_residence(payload=payload)
+
+    @staticmethod
+    async def get_w8_form(payload: dict):
+        return await UserService.get_w8_form(payload=payload)
+
+    @staticmethod
+    async def update_w8_form_confirmation(payload: dict):
+        return await UserService.update_w8_form_confirmation(payload=payload)
+
+    @staticmethod
+    async def update_employ_for_us(payload: dict):
+        return await UserService.update_employ_for_us(payload=payload)
+
+    @staticmethod
     async def update_customer_registration_data(payload: dict):
         return await UserService.update_customer_registration_data(payload=payload)

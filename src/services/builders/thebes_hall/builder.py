@@ -207,7 +207,7 @@ class ThebesHallBuilder:
             self._jwt_payload_user_data.update({"portfolios": dict()})
         if self._jwt_payload_user_data["portfolios"].get("us") is None:
             self._jwt_payload_user_data["portfolios"].update({"us": dict()})
-        self.add_dw_account()
+        (self.add_dw_account().add_dw_id())
         return self
 
     def add_bovespa_account(self):
@@ -243,6 +243,17 @@ class ThebesHallBuilder:
         )
         return self
 
+    def add_dw_id(self):
+        self._jwt_payload_user_data["portfolios"]["us"].update(
+            {
+                "dw_id": self._user_data.get("portfolios", {})
+                .get("default", {})
+                .get("us", {})
+                .get("dw_id")
+            }
+        )
+        return self
+
     def add_client_has_br_trade_allowed(
         self, suitability_months_past: int, last_modified_date_months_past: int
     ):
@@ -272,7 +283,13 @@ class ThebesHallBuilder:
         self,
     ):
         if current_dw_status := self._user_data.get("dw"):
-            if current_dw_status == KycStatus.KYC_APPROVED.value:
+            kyc_is_approved = current_dw_status == KycStatus.KYC_APPROVED.value
+            w8_confirmation = (
+                self._user_data.get("external_exchange_requirements", {})
+                .get("us", {})
+                .get("w8_confirmation")
+            )
+            if kyc_is_approved and w8_confirmation:
                 self._jwt_payload_user_data.update(
                     {"client_has_us_trade_allowed": True}
                 )

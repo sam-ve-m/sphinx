@@ -5,6 +5,7 @@ from src.domain.drive_wealth.kyc_status import KycStatus
 from src.repositories.file.enum.user_file import UserFileType
 from src.repositories.file.repository import FileRepository
 from src.repositories.protfolio.repository import PortfolioRepository
+from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.services.builders.client_register.us.builder import (
     ClientUpdateRegisterBuilderUs,
 )
@@ -79,11 +80,29 @@ class DriveWealthService:
         status, response = await cls.dw_transport.call_kyc_status_get(
             user_id=user_dw_id
         )
-        # TODO PERSEPHONE LOG AKI
         if not status:
             raise InternalServerError("common.unable_to_process")
         kyc_status = response["kyc"]["status"]["name"]
         return kyc_status
+
+    @classmethod
+    async def get_w8_pdf(cls, user_dw_id: str) -> str:
+        status, response = await cls.dw_transport.call_list_all_physical_get(
+            user_id=user_dw_id
+        )
+        if not status:
+            raise InternalServerError("common.unable_to_process")
+        w8_file = list(filter(lambda x: x["type"]["name"] == "TAX", response))
+        if not w8_file:
+            raise InternalServerError("common.unable_to_process")
+        w8_file_id = w8_file[0]["documentID"]
+        status, response = await cls.dw_transport.call_get_physical_get(
+            doc_id=w8_file_id
+        )
+        if not status:
+            raise InternalServerError("common.unable_to_process")
+        w8_file_link = response["url"]
+        return w8_file_link
 
     @classmethod
     async def _create_user_account(cls, user_dw_id: str):
@@ -94,7 +113,6 @@ class DriveWealthService:
             trading_type=DriveWealthAccountTradingType.MARGIN,
             ignore_buying_power=False,
         )
-        # TODO PERSEPHONE LOG AKI
         if not status:
             raise InternalServerError("common.unable_to_process")
         user_id = response["accountNo"]
@@ -152,7 +170,6 @@ class DriveWealthService:
         status, response = await cls.dw_transport.call_registry_user_post(
             user_register_data=registry_body
         )
-        # TODO PERSEPHONE LOG AKI
         if not status:
             raise InternalServerError("common.unable_to_process")
         user_id = response["id"]
@@ -165,12 +182,12 @@ class DriveWealthService:
         status, response = await cls.dw_transport.call_registry_user_patch(
             user_register_data=registry_body, user_dw_id=user_dw_id
         )
-        # TODO PERSEPHONE LOG AKI
         if not status:
             raise InternalServerError("common.unable_to_process")
 
     @staticmethod
     def __get_registry_body(user_data: dict) -> ClientUpdateRegisterBuilderUs:
+        city_name = SinacorTypesRepository.get_county_name_by_id(id=user_data["address"]["city"])
         client_register_builder_us = ClientUpdateRegisterBuilderUs()
         (
             client_register_builder_us.add_parent_ibid()
@@ -193,7 +210,7 @@ class DriveWealthService:
             .add_personal_information_politically_exposed_names(user_data=user_data)
             .add_personal_information_irs_backup_withholdings()
             .add_address_street1(user_data=user_data)
-            .add_address_city(user_data=user_data)
+            .add_address_city(city_name=city_name)
             .add_address_province(user_data=user_data)
             .add_address_zip_code(user_data=user_data)
             .add_address_country(user_data=user_data)
@@ -221,6 +238,7 @@ class DriveWealthService:
 
     @staticmethod
     def __get_update_body(user_data: dict) -> ClientUpdateRegisterBuilderUs:
+        city_name = SinacorTypesRepository.get_county_name_by_id(id=user_data["address"]["city"])
         client_update_builder_us = ClientUpdateRegisterBuilderUs()
         (
             client_update_builder_us.add_basic_information_first_name(
@@ -242,7 +260,7 @@ class DriveWealthService:
             .add_personal_information_politically_exposed_names(user_data=user_data)
             .add_personal_information_irs_backup_withholdings()
             .add_address_street1(user_data=user_data)
-            .add_address_city(user_data=user_data)
+            .add_address_city(city_name=city_name)
             .add_address_province(user_data=user_data)
             .add_address_zip_code(user_data=user_data)
             .add_address_country(user_data=user_data)
