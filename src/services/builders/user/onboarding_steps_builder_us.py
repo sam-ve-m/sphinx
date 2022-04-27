@@ -41,8 +41,7 @@ class OnboardingStepBuilderUS:
         terms_that_needs_be_signed = {
             TermsFileType.TERM_OPEN_ACCOUNT_DW.value,
             TermsFileType.TERM_APPLICATION_DW.value,
-            TermsFileType.TERM_PRIVACY_POLICY_DW.value,
-            TermsFileType.TERM_DATA_SHARING_POLICY_DW.value,
+            TermsFileType.TERM_PRIVACY_POLICY_AND_DATA_SHARING_POLICY_DW.value,
         }
         all_terms_is_signed = not terms_that_needs_be_signed - user_signed_terms
         is_valid_onbaording_step = (

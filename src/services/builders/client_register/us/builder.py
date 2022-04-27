@@ -1,5 +1,6 @@
 from typing import List
 from src.infrastructures.env_config import config
+from src.repositories.file.enum.term_file import TermsFileType
 
 
 class ClientUpdateRegisterBuilderUs:
@@ -296,30 +297,31 @@ class ClientUpdateRegisterBuilderUs:
 
     def add_disclosures_customer_agreement(self, user_data: dict):
         value = False
-        if user_data["terms"]["term_open_account_dw"]:
+        if user_data["terms"][TermsFileType.TERM_OPEN_ACCOUNT_DW.value]:
             value = True
         self._disclosures["data"].update({"customerAgreement": value})
         return self
 
     def add_disclosures_terms_of_use(self, user_data: dict):
         value = False
-        if user_data["terms"]["term_application_dw"]:
+        if user_data["terms"][TermsFileType.TERM_APPLICATION_DW.value]:
             value = True
         self._disclosures["data"].update({"termsOfUse": value})
         return self
 
     def add_disclosures_data_sharing(self, user_data: dict):
         value = False
-        if user_data["terms"]["term_data_sharing_policy_dw"]:
+        if user_data["terms"][TermsFileType.TERM_PRIVACY_POLICY_AND_DATA_SHARING_POLICY_DW.value]:
             value = True
         self._disclosures["data"].update({"dataSharing": value})
         return self
 
     def add_disclosures_privacy_policy(self, user_data: dict):
         value = False
-        if user_data["terms"]["term_privacy_policy_dw"]:
+        if user_data["terms"][TermsFileType.TERM_PRIVACY_POLICY_AND_DATA_SHARING_POLICY_DW.value]:
             value = True
         self._disclosures["data"].update({"privacyPolicy": value})
+
         return self
 
     def add_disclosures_name(self, user_data: dict):
@@ -329,9 +331,8 @@ class ClientUpdateRegisterBuilderUs:
 
     def add_disclosures_rule14b(self, user_data: dict):
         value = False
-        # TODO PRECISA IMPLEMENTAR ISSO AKI
-        # if user_data["terms"]['term_rule14b_dw']:
-        #     value = True
+        if user_data["terms"][TermsFileType.TERM_APPLICATION.value]:
+            value = True
         self._disclosures["data"].update({"rule14b": value})
         return self
 
