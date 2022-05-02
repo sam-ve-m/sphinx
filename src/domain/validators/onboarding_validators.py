@@ -90,12 +90,9 @@ class ValueText(BaseModel):
     value_text: constr(min_length=1, max_length=520)
 
 
-class PoliticallyExposed(BaseModel):
+class PoliticallyExposedCondition(BaseModel):
     is_politically_exposed: bool
-    politically_exposed_names: Optional[List[constr(min_length=1, max_length=100)]]
-
-
-class PoliticallyExposedCondition(PoliticallyExposed):
+    politically_exposed_names: Optional[List[constr(min_length=1, max_length=100)]] = []
 
     @root_validator()
     def validate_cpf(cls, values: Dict[str, Any]):
@@ -105,7 +102,7 @@ class PoliticallyExposedCondition(PoliticallyExposed):
             raise ValueError(
                 "You need inform the field politically_exposed_names if you are politically exposed person"
             )
-        return PoliticallyExposed(**values)
+        return values
 
 
 class ExchangeMember(BaseModel):
