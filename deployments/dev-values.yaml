@@ -4,7 +4,7 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.3.0
+    image: nexus.sigame.com.br/sphinx:1.4.3
     ports:
     - containerPort: 8000
     env:
@@ -50,6 +50,8 @@ containers:
       value: "no-reply@lionx.ai"
     - name: TARGET_LINK
       value: "https://app.lionx.com.br/public/deeplink"
+    - name: REDIS_URL
+      value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
     - name: REDIS_HOST_URL
       value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
     - name: REDIS_CACHE_DB
