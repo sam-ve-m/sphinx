@@ -115,7 +115,7 @@ class DriveWealthService:
         )
         if not status:
             raise InternalServerError("common.unable_to_process")
-        user_id = response["accountNo"]
+        user_id = response["id"]
         return user_id
 
     @classmethod
