@@ -13,7 +13,7 @@ from src.domain.validators.onboarding_validators import (
     FileBase64,
     TermsFile,
     UserDocument,
-    PoliticallyExposed,
+    PoliticallyExposedCondition,
     ExchangeMember,
     CompanyDirector,
     TimeExperience,
@@ -186,7 +186,7 @@ async def get_onboarding_user_current_step_us(
 
 @router.put("/user/politically_exposed_us", tags=["user"])
 async def put_politically_exposed_us(
-    politically_exposed: PoliticallyExposed,
+    politically_exposed: PoliticallyExposedCondition,
     request: Request,
 ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
