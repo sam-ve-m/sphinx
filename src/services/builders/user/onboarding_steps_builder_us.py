@@ -152,10 +152,11 @@ class OnboardingStepBuilderUS:
             .get("us", {})
             .get("time_experience")
         )
+        user_was_created_on_dw = current_user["portfolios"]["default"].get("us", {}).get("dw_id")
         is_valid_onbaording_step = (
             self.__onboarding_steps["current_onboarding_step"] == "time_experience_step"
         )
-        if is_valid_onbaording_step and is_exchange_member:
+        if is_valid_onbaording_step and user_was_created_on_dw and is_exchange_member:
             self.__onboarding_steps["time_experience_step"] = True
             self.__onboarding_steps[
                 "current_onboarding_step"
