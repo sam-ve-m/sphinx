@@ -41,25 +41,28 @@ class DriveWealthService:
         account_id = user_data["portfolios"]["default"].get("us", {}).get("dw_account")
         is_update = bool(user_dw_id)
         need_create_account = not bool(account_id)
-        update_user = {}
         if is_update:
             await cls._update_user_and_get_id(
                 user_data=user_data, user_dw_id=user_dw_id
             )
         else:
             user_dw_id = await cls._save_user_and_get_id(user_data=user_data)
-            update_user.update(
-                {
-                    "portfolios.default.us.dw_id": user_dw_id,
-                    "dw": KycStatus.KYC_PROCESSING.value,
-                }
+            update_user = {
+                "portfolios.default.us.dw_id": user_dw_id,
+                "dw": KycStatus.KYC_PROCESSING.value,
+            }
+
+            was_updated = await user_repository.update_one(
+                old={"unique_id": user_data["unique_id"]}, new=update_user
             )
+            if was_updated is False:
+                raise InternalServerError("common.process_issue")
 
         await cls._send_user_document(user_data=user_data, user_dw_id=user_dw_id)
 
         if need_create_account:
             account_id = await cls._create_user_account(user_dw_id=user_dw_id)
-            update_user.update({"portfolios.default.us.dw_account": account_id})
+            update_user = {"portfolios.default.us.dw_account": account_id}
             unique_id = user_data["unique_id"]
             await social_network_service.register_user_portfolio_us(
                 unique_id=unique_id, dw_account=account_id, dw_id=user_dw_id
@@ -67,8 +70,6 @@ class DriveWealthService:
             await portfolio_repository.save_unique_id_by_account(
                 account=account_id, unique_id=unique_id
             )
-
-        if update_user:
             was_updated = await user_repository.update_one(
                 old={"unique_id": user_data["unique_id"]}, new=update_user
             )
