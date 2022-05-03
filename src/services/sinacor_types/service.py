@@ -126,7 +126,7 @@ class SinaCorTypes:
         return {
             "status_code": status.HTTP_200_OK,
             "payload": {
-                "enums": {
+                "enums": [
                     {"code": EmployedPosition.ACCOUNTANT.value, "value": "CONTADOR"},
                     {"code": EmployedPosition.ACTUARY.value, "value": "ATUÁRIO"},
                     {"code": EmployedPosition.ADJUSTER.value, "value": "AJUSTADOR"},
@@ -261,7 +261,7 @@ class SinaCorTypes:
                     },
                     {"code": EmployedPosition.UNDERWRITER.value, "value": "SEGURADOR"},
                     {"code": EmployedPosition.WRITER.value, "value": "ESCRITOR"},
-                }
+                ]
             },
         }
 
