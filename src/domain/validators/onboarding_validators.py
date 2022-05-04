@@ -115,10 +115,22 @@ class W8FormConfirmation(BaseModel):
 
 class EmployForUs(BaseModel):
     user_employ_status: EmployedStatus
-    user_employ_type: EmployedType
-    user_employ_position: EmployedPosition
+    user_employ_type: Optional[EmployedType]
+    user_employ_position: Optional[EmployedPosition]
     user_employ_company_name: Optional[constr(min_length=1, max_length=100)]
 
+    @root_validator()
+    def validate_composition(cls, values: Dict[str, Any]):
+        user_employ_status = values.get("user_employ_status")
+        user_employ_type = values.get("user_employ_type")
+        user_employ_position = values.get("user_employ_position")
+        user_employ_company_name = values.get("user_employ_position")
+
+        if user_employ_status in [EmployedStatus.EMPLOYED.value, EmployedStatus.SELF_EMPLOYED.value] and (not user_employ_type or not user_employ_position or not user_employ_company_name):
+            raise ValueError(
+                "You are EMPLOYED/SELF_EMPLOYED you must inform user_employ_type, user_employ_position and user_employ_position"
+            )
+        return values
 
 class TimeExperience(BaseModel):
     time_experience: TimeExperienceEnum
@@ -130,7 +142,7 @@ class CompanyDirector(BaseModel):
     company_ticker: Optional[str]
 
     @root_validator()
-    def validate_cpf(cls, values: Dict[str, Any]):
+    def validate_composition(cls, values: Dict[str, Any]):
         is_company_director = values.get("is_company_director")
         company_name = values.get("company_name")
         company_ticker = values.get("company_ticker")
