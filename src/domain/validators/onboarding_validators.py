@@ -128,7 +128,7 @@ class EmployForUs(BaseModel):
 
         if user_employ_status in [EmployedStatus.EMPLOYED, EmployedStatus.SELF_EMPLOYED] and (user_employ_type is None or user_employ_position is None or user_employ_company_name is None):
             raise ValueError(
-                "You are EMPLOYED/SELF_EMPLOYED you must inform user_employ_type, user_employ_position and user_employ_position"
+                "You are EMPLOYED/SELF_EMPLOYED you must inform user_employ_type, user_employ_position and user_employ_company_name"
             )
         if user_employ_status not in [EmployedStatus.EMPLOYED.value, EmployedStatus.SELF_EMPLOYED.value]:
             values["user_employ_type"] = None
