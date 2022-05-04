@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class EmployedPosition(Enum):
-    NA = "N/A"
     ACCOUNTANT = "ACCOUNTANT"
     ACTUARY = "ACTUARY"
     ADJUSTER = "ADJUSTER"
