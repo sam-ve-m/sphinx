@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class EmployedType(Enum):
-    NA = "N/A"
     AGRICULTURE = "AGRICULTURE"
     MINING = "MINING"
     UTILITIES = "UTILITIES"
