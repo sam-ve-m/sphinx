@@ -4,228 +4,230 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.4.6
+    image: nexus.sigame.com.br/sphinx:1.4.10
     ports:
-    - containerPort: 8000
+      - containerPort: 8000
     env:
-    - name: SPHINX_PORT
-      value: "8000"
-    - name: ETRIA_LOG_LEVEL
-      value: "INFO"
-    - name: ROOT_LOG_LEVEL
-      value: "WARNING"
-    - name: PERSEPHONE_KAFKA_BROKERS
-      value: "172.30.10.105:9092"
-    - name: PRODUCTION
-      value: "False"
-    - name: MONGO_CONNECTION
-      value: "mongodb"
-    - name: LOG_NAME
-      value: "uvicorn.info"
-    - name: COMPANY_OPERATION_CODE
-      value: "7029"
-    - name: MONGO_IS_SERVER
-      value: "False"
-    - name: MONGO_CONNECTION_URL
-      value: "mongodb://bnd:jkl321pqr@172.30.10.75:41000/?authSource=admin&replicaSet=rslionx&readPreference=secondary"
-    - name: MONGODB_DATABASE_NAME
-      value: "lionx"
-    - name: MONGODB_FEATURE_COLLECTION
-      value: "features"
-    - name: MONGODB_USER_COLLECTION
-      value: "users"
-    - name: MONGODB_VIEW_COLLECTION
-      value: "views"
-    - name: MONGODB_JWT_COLLECTION
-      value: "jwts"
-    - name: MONGODB_SUITABILITY_COLLECTION
-      value: "suitability"
-    - name: MONGODB_SUITABILITY_USER_PROFILE_COLLECTION
-      value: "suitability_user_profile"
-    - name: MONGODB_SUITABILITY_ANSWERS_COLLECTION
-      value: "suitability_answers"
-    - name: MAIL_KEY
-      value: "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"
-    - name: MAIL_SENDER
-      value: "no-reply@lionx.ai"
-    - name: TARGET_LINK
-      value: "https://app.lionx.com.br/public/deeplink"
-    - name: REDIS_URL
-      value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
-    - name: REDIS_HOST_URL
-      value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
-    - name: REDIS_CACHE_DB
-      value: "1"
-    - name: REDIS_PORTFOLIO_DB
-      value: "0"
-    - name: AWS_ACCESS_KEY_ID
-      value: "AKIATZVFXI25USQWCS5O"
-    - name: AWS_SECRET_ACCESS_KEY
-      value: "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"
-    - name: REGION_NAME
-      value: "sa-east-1"
-    - name: AWS_BUCKET_USERS_FILES
-      value: "dtvm-users-files-dev"
-    - name: AWS_BUCKET_TERMS
-      value: "dtvm-terms-dev"
-    - name: ORACLE_BASE_DSN
-      value: "172.30.10.227"
-    - name: ORACLE_USER
-      value: "corrwin"
-    - name: ORACLE_PASSWORD
-      value: "5VUn2yD5"
-    - name: ORACLE_SERVICE
-      value: "OPDBDEV.SUBPRIV.VCNDEV.ORACLEVCN.COM"
-    - name: ORACLE_ENCODING
-      value: "UTF-8"
-    - name: ORACLE_PORT
-      value: "1521"
-    - name: LD_LIBRARY_PATH
-      value: "/opt/instantclient"
-    - name: PERSEPHONE_QUEUE_HOST
-      value: "172.30.10.105"
-    - name: PERSEPHONE_QUEUE_PORT
-      value: "9092"
-    - name: PERSEPHONE_TOPIC
-      value: "thebes.sphinx_persephone.topic"
-    - name: PERSEPHONE_TOPIC_USER
-      value: "sphinx_persephone.user.crud"
-    - name: PERSEPHONE_TOPIC_AUTHENTICATION
-      value: "sphinx_persephone.user.authentication"
-    - name: SOLUTIONTECH_BASE_URL
-      value: "https://hml-serviceportal.lionx.com.br/STImportaCliente/"
-    - name: SOLUTIONTECH_VERIFY_DTVM_CLIENT
-      value: "STImportaCliente/VerificaClienteImportado"
-    - name: SOLUTIONTECH_SYNC_DTVM_CLIENT
-      value: "STImportaCliente/InsereAgendamentoImportacao"
-    - name: REDIS_POOL_MIN_CONNECTIONS
-      value: "5"
-    - name: REDIS_POOL_MAX_CONNECTIONS
-      value: "500"
-    - name: BUCKET_NAME_KEY
-      value: "auth-gateway-keys-dev"
-    - name: FILE_BUCKET_NAME
-      value: "heimdall_rsa"
-    - name: VALHALLA_QUEUE_HOST
-      value: "172.30.10.105:9092"
-    - name: HEIMDALL_FILE_BUCKET_NAME
-      value: "heimdall_rsa"
-    - name: HEIMDALL_AWS_ACCESS_KEY_ID
-      value: "AKIATZVFXI25USQWCS5O"
-    - name: HEIMDALL_AWS_SECRET_ACCESS_KEY
-      value: "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"
-    - name: HEIMDALL_REGION_NAME
-      value: "sa-east-1"
-    - name: HEIMDALL_BUCKET_NAME_KEY
-      value: "auth-gateway-keys-dev"
-    - name: HEIMDALL_AWS_BUCKET_USERS_FILES
-      value: "dtvm-users-files-dev"
-    - name: HEIMDALL_AWS_BUCKET_TERMS
-      value: "dtvm-terms-dev"
-    - name: HEIMDALL_JWT_REQUIRED_FIELDS
-      value: "[]"
-    - name: HEIMDALL_REDIS_HOST
-      value: "172.30.11.235"
-    - name: HEIMDALL_REDIS_PORT
-      value: "6379"
-    - name: HEIMDALL_REDIS_DB
-      value: "1"
-    - name: HEIMDALL_REDIS_USER
-      value: "bnd"
-    - name: HEIMDALL_REDIS_PASSWORD
-      value: "jkl321pqr"
-    - name: MIST_REDIS_HOST
-      value: "172.30.11.235"
-    - name: MIST_REDIS_PORT
-      value: "6379"
-    - name: MIST_REDIS_DB
-      value: "1"
-    - name: MIST_REDIS_USER
-      value: "bnd"
-    - name: MIST_REDIS_PASSWORD
-      value: "jkl321pqr"
-    - name: MIST_AWS_ACCESS_KEY_ID
-      value: "AKIATZVFXI25USQWCS5O"
-    - name: MIST_AWS_SECRET_ACCESS_KEY
-      value: "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"
-    - name: MIST_REGION_NAME
-      value: "sa-east-1"
-    - name: MIST_BUCKET_NAME_KEY
-      value: "auth-gateway-keys-dev"
-    - name: MIST_JWT_FILE_BUCKET_NAME
-      value: "mist_rsa"
-    - name: MIST_ELECTRONIC_SIGNATURE_FILE_BUCKET_NAME
-      value: "eletronic-signature-key"
-    - name: MIST_JWT_REQUIRED_FIELDS
-      value: "[]"
-    - name: MIST_MONGODB_CONNECTION
-      value: "mongodb://bnd:jkl321pqr@172.30.10.75:41000/?authSource=admin&replicaSet=rslionx&readPreference=secondary&appname=MongoDB%20Compass&ssl=false"
-    - name: MIST_AUTH_DATABASE_MONGO_CONNECTION
-      value: "mongodb"
-    - name: MIST_AUTH_DATABASE_HOST
-      value: "172.30.10.75"
-    - name: MIST_AUTH_DATABASE_PORT
-      value: "41000"
-    - name: MIST_AUTH_DATABASE_USER
-      value: "bnd"
-    - name: MIST_AUTH_DATABASE_PASSWORD
-      value: "jkl321pqr"
-    - name: MIST_ELECTRONIC_SIGNATURE_MAX_ATTEMPTS
-      value: "5"
-    - name: MIST_ENCRYPT_KEY
-      value: "c_-e_-e_-e_-i_-i"
-    - name: MIST_FILE_BUCKET_NAME
-      value: "mist_rsa"
-    - name: MIST_AUTH_DATABASE_NAME
-      value: "lionx"
-    - name: MIST_AUTH_DATABASE_USER_COLLECTION
-      value: "users"
-    - name: ROOT_PATH
-      value: "/sphinx"
-    - name: JWT_FILE_BUCKET_NAME
-      value: "heimdall_rsa"
-    - name: MEPHO_DW_APP_KEY
-      value: "93d6184b-4692-4058-b32d-82624be89cb1"
-    - name: MEPHO_DW_USER
-      value: "bo.lionx.api"
-    - name: MEPHO_DW_PASSWORD
-      value: "passw0rd"
-    - name: MEPHO_DW_AUTHENTICATION_URL
-      value: "https://bo-api.drivewealth.io/back-office/auth"
-    - name: MEPHO_REDIS_HOST
-      value: "redis://bnd:93uOKu5H@172.30.19.183:6379"
-    - name: MEPHO_REDIS_DB
-      value: "1"
-    - name: DW_APP_KEY
-      value: "93d6184b-4692-4058-b32d-82624be89cb1"
-    - name: DW_USER
-      value: "bo.lionx.api"
-    - name: DW_PASSWORD
-      value: "passw0rd"
-    - name: DW_IGNORE_MARKET_HOURS_FOR_TEST
-      value: "True"
-    - name: DW_AUTHENTICATION_URL
-      value: "https://bo-api.drivewealth.io/back-office/auth"
-    - name: DW_CREATE_USER_URL
-      value: "https://bo-api.drivewealth.io/back-office/users"
-    - name: DW_USER_FILE_UPLOAD_URL
-      value: "https://bo-api.drivewealth.io/back-office/documents/"
-    - name: DW_CREATE_ACCOUNT_URL
-      value: "https://bo-api.drivewealth.io/back-office/accounts"
-    - name: DW_UPDATE_USER_URL
-      value: "https://bo-api.drivewealth.io/back-office/users/{}"
-    - name: DW_KYC_USER_URL
-      value: "https://bo-api.drivewealth.io/back-office/users/{}/kyc-status"
-    - name: DW_PARENT_IBID
-      value: "ebeb53d6-9130-4537-ae63-fbfe6c6026b1"
-    - name: DW_WLP_ID
-      value: "LION"
-    - name: VALHALLA_HOST
-      value: "172.30.19.32"
-    - name: VALHALLA_PORT
-      value: "9092"
-
-
+      - name: SPHINX_PORT
+        value: "8000"
+      - name: ETRIA_LOG_LEVEL
+        value: "INFO"
+      - name: ROOT_LOG_LEVEL
+        value: "WARNING"
+      - name: PERSEPHONE_KAFKA_BROKERS
+        value: "172.30.10.105:9092"
+      - name: PRODUCTION
+        value: "False"
+      - name: MONGO_CONNECTION
+        value: "mongodb"
+      - name: LOG_NAME
+        value: "uvicorn.info"
+      - name: COMPANY_OPERATION_CODE
+        value: "7029"
+      - name: MONGO_IS_SERVER
+        value: "False"
+      - name: MONGO_CONNECTION_URL
+        value: "mongodb://bnd:jkl321pqr@172.30.10.75:41000/?authSource=admin&replicaSet=rslionx&readPreference=secondary"
+      - name: MONGODB_DATABASE_NAME
+        value: "lionx"
+      - name: MONGODB_FEATURE_COLLECTION
+        value: "features"
+      - name: MONGODB_USER_COLLECTION
+        value: "users"
+      - name: MONGODB_VIEW_COLLECTION
+        value: "views"
+      - name: MONGODB_JWT_COLLECTION
+        value: "jwts"
+      - name: MONGODB_SUITABILITY_COLLECTION
+        value: "suitability"
+      - name: MONGODB_SUITABILITY_USER_PROFILE_COLLECTION
+        value: "suitability_user_profile"
+      - name: MONGODB_SUITABILITY_ANSWERS_COLLECTION
+        value: "suitability_answers"
+      - name: MAIL_KEY
+        value: "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"
+      - name: MAIL_SENDER
+        value: "no-reply@lionx.ai"
+      - name: TARGET_LINK
+        value: "https://app.lionx.com.br/public/deeplink"
+      - name: REDIS_URL
+        value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
+      - name: REDIS_HOST_URL
+        value: "redis://bnd:jkl321pqr@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
+      - name: REDIS_CACHE_DB
+        value: "1"
+      - name: REDIS_PORTFOLIO_DB
+        value: "0"
+      - name: AWS_ACCESS_KEY_ID
+        value: "AKIATZVFXI25USQWCS5O"
+      - name: AWS_SECRET_ACCESS_KEY
+        value: "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"
+      - name: REGION_NAME
+        value: "sa-east-1"
+      - name: AWS_BUCKET_USERS_FILES
+        value: "dtvm-users-files-dev"
+      - name: AWS_BUCKET_TERMS
+        value: "dtvm-terms-dev"
+      - name: ORACLE_BASE_DSN
+        value: "172.30.10.227"
+      - name: ORACLE_USER
+        value: "corrwin"
+      - name: ORACLE_PASSWORD
+        value: "5VUn2yD5"
+      - name: ORACLE_SERVICE
+        value: "OPDBDEV.SUBPRIV.VCNDEV.ORACLEVCN.COM"
+      - name: ORACLE_ENCODING
+        value: "UTF-8"
+      - name: ORACLE_PORT
+        value: "1521"
+      - name: LD_LIBRARY_PATH
+        value: "/opt/instantclient"
+      - name: PERSEPHONE_QUEUE_HOST
+        value: "172.30.10.105"
+      - name: PERSEPHONE_QUEUE_PORT
+        value: "9092"
+      - name: PERSEPHONE_TOPIC
+        value: "thebes.sphinx_persephone.topic"
+      - name: PERSEPHONE_TOPIC_USER
+        value: "sphinx_persephone.user.crud"
+      - name: PERSEPHONE_TOPIC_AUTHENTICATION
+        value: "sphinx_persephone.user.authentication"
+      - name: SOLUTIONTECH_BASE_URL
+        value: "https://hml-serviceportal.lionx.com.br/STImportaCliente/"
+      - name: SOLUTIONTECH_VERIFY_DTVM_CLIENT
+        value: "STImportaCliente/VerificaClienteImportado"
+      - name: SOLUTIONTECH_SYNC_DTVM_CLIENT
+        value: "STImportaCliente/InsereAgendamentoImportacao"
+      - name: REDIS_POOL_MIN_CONNECTIONS
+        value: "5"
+      - name: REDIS_POOL_MAX_CONNECTIONS
+        value: "500"
+      - name: BUCKET_NAME_KEY
+        value: "auth-gateway-keys-dev"
+      - name: FILE_BUCKET_NAME
+        value: "heimdall_rsa"
+      - name: VALHALLA_QUEUE_HOST
+        value: "172.30.10.105:9092"
+      - name: HEIMDALL_FILE_BUCKET_NAME
+        value: "heimdall_rsa"
+      - name: HEIMDALL_AWS_ACCESS_KEY_ID
+        value: "AKIATZVFXI25USQWCS5O"
+      - name: HEIMDALL_AWS_SECRET_ACCESS_KEY
+        value: "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"
+      - name: HEIMDALL_REGION_NAME
+        value: "sa-east-1"
+      - name: HEIMDALL_BUCKET_NAME_KEY
+        value: "auth-gateway-keys-dev"
+      - name: HEIMDALL_AWS_BUCKET_USERS_FILES
+        value: "dtvm-users-files-dev"
+      - name: HEIMDALL_AWS_BUCKET_TERMS
+        value: "dtvm-terms-dev"
+      - name: HEIMDALL_JWT_REQUIRED_FIELDS
+        value: "[]"
+      - name: HEIMDALL_REDIS_HOST
+        value: "172.30.11.235"
+      - name: HEIMDALL_REDIS_PORT
+        value: "6379"
+      - name: HEIMDALL_REDIS_DB
+        value: "1"
+      - name: HEIMDALL_REDIS_USER
+        value: "bnd"
+      - name: HEIMDALL_REDIS_PASSWORD
+        value: "jkl321pqr"
+      - name: MIST_REDIS_HOST
+        value: "172.30.11.235"
+      - name: MIST_REDIS_PORT
+        value: "6379"
+      - name: MIST_REDIS_DB
+        value: "1"
+      - name: MIST_REDIS_USER
+        value: "bnd"
+      - name: MIST_REDIS_PASSWORD
+        value: "jkl321pqr"
+      - name: MIST_AWS_ACCESS_KEY_ID
+        value: "AKIATZVFXI25USQWCS5O"
+      - name: MIST_AWS_SECRET_ACCESS_KEY
+        value: "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"
+      - name: MIST_REGION_NAME
+        value: "sa-east-1"
+      - name: MIST_BUCKET_NAME_KEY
+        value: "auth-gateway-keys-dev"
+      - name: MIST_JWT_FILE_BUCKET_NAME
+        value: "mist_rsa"
+      - name: MIST_ELECTRONIC_SIGNATURE_FILE_BUCKET_NAME
+        value: "eletronic-signature-key"
+      - name: MIST_JWT_REQUIRED_FIELDS
+        value: "[]"
+      - name: MIST_MONGODB_CONNECTION
+        value: "mongodb://bnd:jkl321pqr@172.30.10.75:41000/?authSource=admin&replicaSet=rslionx&readPreference=secondary&appname=MongoDB%20Compass&ssl=false"
+      - name: MIST_AUTH_DATABASE_MONGO_CONNECTION
+        value: "mongodb"
+      - name: MIST_AUTH_DATABASE_HOST
+        value: "172.30.10.75"
+      - name: MIST_AUTH_DATABASE_PORT
+        value: "41000"
+      - name: MIST_AUTH_DATABASE_USER
+        value: "bnd"
+      - name: MIST_AUTH_DATABASE_PASSWORD
+        value: "jkl321pqr"
+      - name: MIST_ELECTRONIC_SIGNATURE_MAX_ATTEMPTS
+        value: "5"
+      - name: MIST_ENCRYPT_KEY
+        value: "c_-e_-e_-e_-i_-i"
+      - name: MIST_FILE_BUCKET_NAME
+        value: "mist_rsa"
+      - name: MIST_AUTH_DATABASE_NAME
+        value: "lionx"
+      - name: MIST_AUTH_DATABASE_USER_COLLECTION
+        value: "users"
+      - name: ROOT_PATH
+        value: "/sphinx"
+      - name: JWT_FILE_BUCKET_NAME
+        value: "heimdall_rsa"
+      - name: MEPHO_DW_APP_KEY
+        value: "93d6184b-4692-4058-b32d-82624be89cb1"
+      - name: MEPHO_DW_USER
+        value: "bo.lionx.api"
+      - name: MEPHO_DW_PASSWORD
+        value: "passw0rd"
+      - name: MEPHO_DW_AUTHENTICATION_URL
+        value: "https://bo-api.drivewealth.io/back-office/auth"
+      - name: MEPHO_REDIS_HOST
+        value: "redis://bnd:93uOKu5H@172.30.19.183:6379"
+      - name: MEPHO_REDIS_DB
+        value: "1"
+      - name: DW_APP_KEY
+        value: "93d6184b-4692-4058-b32d-82624be89cb1"
+      - name: DW_USER
+        value: "bo.lionx.api"
+      - name: DW_PASSWORD
+        value: "passw0rd"
+      - name: DW_IGNORE_MARKET_HOURS_FOR_TEST
+        value: "True"
+      - name: DW_AUTHENTICATION_URL
+        value: "https://bo-api.drivewealth.io/back-office/auth"
+      - name: DW_CREATE_USER_URL
+        value: "https://bo-api.drivewealth.io/back-office/users"
+      - name: DW_USER_FILE_UPLOAD_URL
+        value: "https://bo-api.drivewealth.io/back-office/documents/"
+      - name: DW_CREATE_ACCOUNT_URL
+        value: "https://bo-api.drivewealth.io/back-office/accounts"
+      - name: DW_UPDATE_USER_URL
+        value: "https://bo-api.drivewealth.io/back-office/users/{}"
+      - name: DW_KYC_USER_URL
+        value: "https://bo-api.drivewealth.io/back-office/users/{}/kyc-status"
+      - name: DW_PARENT_IBID
+        value: "ebeb53d6-9130-4537-ae63-fbfe6c6026b1"
+      - name: DW_WLP_ID
+        value: "LION"
+      - name: VALHALLA_HOST
+        value: "172.30.19.32"
+      - name: VALHALLA_PORT
+        value: "9092"
+      - name: DW_USER_PHYSICAL_DOCUMENTS_URL
+        value: "https://bo-api.drivewealth.io/back-office/users/{}/documents"
+      - name: DW_USER_PHYSICAL_DOCUMENT_URL
+        value: "https://bo-api.drivewealth.io/back-office/documents/{}/url"
 imagePullSecrets:
   - name: nexus-v3
 
@@ -240,35 +242,35 @@ virtualService:
   name: sphinx-vs
   spec:
     hosts:
-      - dev.api.siga.me 
+      - dev.api.siga.me
     gateways:
       - dev-istio-gateway
     http:
-    - match:
-      - uri:
-          prefix: "/sphinx/"
-      - uri:
-          prefix: "/sphinx"
-      rewrite:
-        uri: "/"
-      route:
-      - destination:
-          host: sphinx-service.develop.svc.cluster.local
-          port:
-            number: 8000
-      corsPolicy:
-        allowOrigins:
-        - regex: "."
-        allowMethods:
-        - GET
-        - POST
-        - PUT
-        - DELETE
-        - PATCH
-        - OPTIONS
-        allowHeaders:
-        - x-thebes-answer
-        - content-type
+      - match:
+          - uri:
+              prefix: "/sphinx/"
+          - uri:
+              prefix: "/sphinx"
+        rewrite:
+          uri: "/"
+        route:
+          - destination:
+              host: sphinx-service.develop.svc.cluster.local
+              port:
+                number: 8000
+        corsPolicy:
+          allowOrigins:
+            - regex: "."
+          allowMethods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            - OPTIONS
+          allowHeaders:
+            - x-thebes-answer
+            - content-type
 
 labels:
   app: sphinx
