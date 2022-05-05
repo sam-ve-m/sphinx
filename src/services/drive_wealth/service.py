@@ -68,7 +68,7 @@ class DriveWealthService:
                 unique_id=unique_id, dw_account=account_id, dw_id=user_dw_id
             )
             await portfolio_repository.save_unique_id_by_account(
-                account=account_id, unique_id=unique_id
+                account=account_id, unique_id=unique_id, region="us"
             )
             was_updated = await user_repository.update_one(
                 old={"unique_id": user_data["unique_id"]}, new=update_user

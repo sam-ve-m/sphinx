@@ -47,7 +47,7 @@ class OnboardingStepBuilderUS:
             TermsFileType.TERM_GRINGO_WORLD.value,
             TermsFileType.TERM_GRINGO_WORLD_GENERAL_ADVICES.value,
         }
-        all_terms_is_signed = not terms_that_needs_be_signed - user_signed_terms
+        all_terms_is_signed = not (terms_that_needs_be_signed - user_signed_terms)
         is_valid_onbaording_step = (
             self.__onboarding_steps["current_onboarding_step"] == "terms_step"
         )

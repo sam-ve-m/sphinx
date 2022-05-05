@@ -59,6 +59,7 @@ class SinacorService:
             await portfolio_repository.save_unique_id_by_account(
                 account=user_data["portfolios.default.br"]["bmf_account"],
                 unique_id=user_data["unique_id"],
+                region="br"
             )
 
             await SinacorService.__crete_reference_to_allow_cash_transfer(
@@ -87,7 +88,7 @@ class SinacorService:
         unique_id = user_data["unique_id"]
 
         await portfolio_repository.save_unique_id_by_account(
-            account=bmf_account, unique_id=unique_id
+            account=bmf_account, unique_id=unique_id, region="br"
         )
 
         await social_network_service.register_user_portfolio_br(
