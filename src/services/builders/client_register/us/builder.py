@@ -331,7 +331,7 @@ class ClientUpdateRegisterBuilderUs:
 
     def add_disclosures_rule14b(self, user_data: dict):
         value = False
-        if user_data["terms"][TermsFileType.TERM_APPLICATION.value]:
+        if user_data["terms"][TermsFileType.TERM_APPLICATION_DW.value]:
             value = True
         self._disclosures["data"].update({"rule14b": value})
         return self
