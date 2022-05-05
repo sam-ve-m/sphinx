@@ -42,6 +42,10 @@ class OnboardingStepBuilderUS:
             TermsFileType.TERM_OPEN_ACCOUNT_DW.value,
             TermsFileType.TERM_APPLICATION_DW.value,
             TermsFileType.TERM_PRIVACY_POLICY_AND_DATA_SHARING_POLICY_DW.value,
+            TermsFileType.TERM_DISCLOSURES_AND_DISCLAIMERS.value,
+            TermsFileType.TERM_MONEY_CORP.value,
+            TermsFileType.TERM_GRINGO_WORLD.value,
+            TermsFileType.TERM_GRINGO_WORLD_GENERAL_ADVICES.value,
         }
         all_terms_is_signed = not terms_that_needs_be_signed - user_signed_terms
         is_valid_onbaording_step = (

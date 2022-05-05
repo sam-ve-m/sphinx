@@ -35,7 +35,11 @@ class FileRepository(IFile):
         "term_retail_liquid_provider": ".pdf",
         "term_open_account_dw": ".pdf",
         "term_application_dw": ".pdf",
-        "term_and_privacy_policy_data_sharing_policy_dw": ".pdf"
+        "term_and_privacy_policy_data_sharing_policy_dw": ".pdf",
+        "term_disclosures_and_disclaimers": ".pdf",
+        "term_money_corp": ".pdf",
+        "term_gringo_world": ".pdf",
+        "term_gringo_world_general_advices": ".pdf",
     }
 
     @classmethod
