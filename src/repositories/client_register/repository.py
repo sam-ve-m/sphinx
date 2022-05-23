@@ -7,8 +7,8 @@ from src.exceptions.exceptions import InternalServerError
 from src.repositories.base_repository.oracle.base import OracleBaseRepository
 from src.services.builders.client_register.br.builder import ClientRegisterBuilderBr
 from src.repositories.sinacor_types.repository import SinacorTypesRepository
-from src.domain.validators.marital_status_stone_age_to_sphinx import (
-    MaritalStatusStoneAgeToSphinxEnum,
+from src.domain.validators.marital_status_sinacor import (
+    MaritalStatusSinacor,
 )
 from src.infrastructures.env_config import config
 
@@ -171,12 +171,11 @@ class ClientRegisterRepository(OracleBaseRepository):
     @staticmethod
     def is_married(user_data: dict):
         is_married = user_data["marital"]["status"] in [
-            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_BRAZILIAN.value,
-            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_NATURALIZED_BRAZILIAN.value,
-            MaritalStatusStoneAgeToSphinxEnum.MARRIED_TO_A_FOREIGN.value,
-            MaritalStatusStoneAgeToSphinxEnum.STABLE_UNION.value,
+            MaritalStatusSinacor.MARRIED_TO_BRAZILIAN.value,
+            MaritalStatusSinacor.MARRIED_TO_A_NATURALIZED_BRAZILIAN.value,
+            MaritalStatusSinacor.MARRIED_TO_A_FOREIGN.value,
+            MaritalStatusSinacor.STABLE_UNION.value,
         ]
-
         return is_married
 
     @classmethod
