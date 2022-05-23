@@ -2,7 +2,7 @@
 from enum import Enum
 
 
-class MaritalStatusStoneAgeToSphinxEnum(Enum):
+class MaritalStatusSinacor(Enum):
     SINGLE = 1
     DISCHARGED = 2
     WIDOWER = 3
