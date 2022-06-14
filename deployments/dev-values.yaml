@@ -1,10 +1,10 @@
 replicaCount: 1
-name: sphinx
+name: sphinx-teste
 namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.4.10
+    image: nexus.sigame.com.br/sphinx:1.5.0
     ports:
       - containerPort: 8000
     env:
@@ -179,7 +179,7 @@ containers:
       - name: MIST_AUTH_DATABASE_USER_COLLECTION
         value: "users"
       - name: ROOT_PATH
-        value: "/sphinx"
+        value: "/"
       - name: JWT_FILE_BUCKET_NAME
         value: "heimdall_rsa"
       - name: MEPHO_DW_APP_KEY
@@ -230,30 +230,36 @@ imagePullSecrets:
   - name: nexus-v3
 
 service:
-  name: sphinx-service
+  name: sphinx-service-teste
   type: ClusterIP
   ports:
     - protocol: TCP
       port: 8000
 
+gateway:
+  tlsEnabled: true
+  metadata:
+    name: sphinx-istio-gateway-teste
+  spec:
+    hosts: sphinx.dev-lionx.com.br
+    credentialName: sphinx-dev-lionx-tls
+
 virtualService:
-  name: sphinx-vs
+  name: sphinx-vs-teste
   spec:
     hosts:
-      - dev.api.siga.me
+      - sphinx.dev-lionx.com.br
     gateways:
-      - dev-istio-gateway
+      - sphinx-istio-gateway-teste
     http:
       - match:
           - uri:
-              prefix: "/sphinx/"
-          - uri:
-              prefix: "/sphinx"
+              prefix: /          
         rewrite:
           uri: "/"
         route:
           - destination:
-              host: sphinx-service.develop.svc.cluster.local
+              host: sphinx-service-teste.develop.svc.cluster.local
               port:
                 number: 8000
         corsPolicy:
@@ -269,6 +275,16 @@ virtualService:
           allowHeaders:
             - x-thebes-answer
             - content-type
+
+certificate:
+  name: sphinx-dev-lionx-tls
+  spec:
+    commonName: sphinx.dev-lionx.com.br
+    dnsNames:
+      - sphinx.dev-lionx.com.br
+    issuerRef:
+      name: letsencrypt-dns-dev   
+    secretName: sphinx-dev-lionx-tls
 
 labels:
   app: sphinx
