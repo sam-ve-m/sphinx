@@ -143,7 +143,7 @@ class ThebesHallBuilder:
 
     def add_has_finished_us_onboarding(self):
         has_w8_confirmation = bool(self._user_data.get("external_exchange_requirements", {}).get("us", {}).get("w8_confirmation"))
-        self._control_data.update({"has_has_finished_us_onboarding": has_w8_confirmation})
+        self._control_data.update({"has_finished_us_onboarding": has_w8_confirmation})
         return self
 
     def add_suitability_months_past(self):
