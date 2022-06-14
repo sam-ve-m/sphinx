@@ -4,7 +4,7 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.4.10
+    image: nexus.sigame.com.br/sphinx:1.5.1
     ports:
       - containerPort: 8000
     env:
@@ -15,7 +15,7 @@ containers:
       - name: ROOT_LOG_LEVEL
         value: "WARNING"
       - name: PERSEPHONE_KAFKA_BROKERS
-        value: "172.30.10.105:9092"
+        value: "cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
       - name: PRODUCTION
         value: "False"
       - name: MONGO_CONNECTION
