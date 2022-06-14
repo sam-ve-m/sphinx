@@ -84,12 +84,10 @@ containers:
         value: "sigbrvnlkafka-uat.subpriv.vcnuat.oraclevcn.com"
       - name: PERSEPHONE_QUEUE_PORT
         value: "9092"
-      - name: PERSEPHONE_TOPIC
-        value: "thebes.sphinx_persephone.topic"
       - name: PERSEPHONE_TOPIC_USER
-        value: "sphinx_persephone.user.crud"
+        value: "sphinx-persephone.user.crud"
       - name: PERSEPHONE_TOPIC_AUTHENTICATION
-        value: "sphinx_persephone.user.authentication"
+        value: "sphinx-persephone.user.authentication"
       - name: SOLUTIONTECH_BASE_URL
         value: "https://hml-serviceportal.lionx.com.br/STImportaCliente/"
       - name: SOLUTIONTECH_VERIFY_DTVM_CLIENT

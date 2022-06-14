@@ -84,6 +84,8 @@ class ThebesHallBuilder:
             .add_terms()
             .add_using_suitability_or_refuse_term()
             .add_last_modified_date_months_past()
+            .add_has_finished_br_onboarding()
+            .add_has_finished_us_onboarding()
         )
 
     def _build_client_jwt(self):
@@ -108,6 +110,8 @@ class ThebesHallBuilder:
             .add_client_has_us_trade_allowed()
             .add_client_profile()
             .add_terms()
+            .add_has_finished_br_onboarding()
+            .add_has_finished_us_onboarding()
         )
 
     def add_expiration_date_and_created_at(self):
@@ -130,6 +134,16 @@ class ThebesHallBuilder:
                 term_metadata = {}
             terms_map.append({"name": term.value, **term_metadata})
         self._control_data.update({"terms": terms_map})
+        return self
+
+    def add_has_finished_br_onboarding(self):
+        has_electronic = bool(self._user_data.get("electronic_signature"))
+        self._control_data.update({"has_finished_br_onboarding": has_electronic})
+        return self
+
+    def add_has_finished_us_onboarding(self):
+        has_w8_confirmation = bool(self._user_data.get("external_exchange_requirements", {}).get("us", {}).get("w8_confirmation"))
+        self._control_data.update({"has_finished_us_onboarding": has_w8_confirmation})
         return self
 
     def add_suitability_months_past(self):
