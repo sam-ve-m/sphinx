@@ -263,6 +263,7 @@ class SinacorService:
                 "portfolios.default.br": {
                     "bovespa_account": bovespa_account,
                     "bmf_account": bmf_account,
+                    "created_at": datetime.datetime.utcnow()
                 }
             }
         )

@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 
 from src.domain.drive_wealth.file_type import DriveWealthFileSide, DriveWealthFileType
 from src.domain.drive_wealth.kyc_status import KycStatus
@@ -62,7 +63,10 @@ class DriveWealthService:
 
         if need_create_account:
             account_id = await cls._create_user_account(user_dw_id=user_dw_id)
-            update_user = {"portfolios.default.us.dw_account": account_id}
+            update_user = {
+                "portfolios.default.us.dw_account": account_id,
+                "portfolios.default.us.created_at": datetime.datetime.utcnow()
+            }
             unique_id = user_data["unique_id"]
             await social_network_service.register_user_portfolio_us(
                 unique_id=unique_id, dw_account=account_id, dw_id=user_dw_id
