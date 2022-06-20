@@ -117,7 +117,9 @@ class OnboardingStepBuilderUS:
         )
         if is_valid_onbaording_step and is_exchange_member is not None:
             self.__onboarding_steps["is_company_director_step"] = True
-            self.__onboarding_steps["current_onboarding_step"] = "external_fiscal_tax_confirmation_step"
+            self.__onboarding_steps[
+                "current_onboarding_step"
+            ] = "external_fiscal_tax_confirmation_step"
         return self
 
     def external_fiscal_tax_confirmation_step(self, current_user: dict):
@@ -142,8 +144,7 @@ class OnboardingStepBuilderUS:
             .get("user_employ_status")
         )
         is_valid_onbaording_step = (
-            self.__onboarding_steps["current_onboarding_step"]
-            == "employ_step"
+            self.__onboarding_steps["current_onboarding_step"] == "employ_step"
         )
         if is_valid_onbaording_step and user_employ_status:
             self.__onboarding_steps["employ_step"] = True
@@ -156,15 +157,15 @@ class OnboardingStepBuilderUS:
             .get("us", {})
             .get("time_experience")
         )
-        user_was_created_on_dw = current_user["portfolios"]["default"].get("us", {}).get("dw_id")
+        user_was_created_on_dw = (
+            current_user["portfolios"]["default"].get("us", {}).get("dw_id")
+        )
         is_valid_onbaording_step = (
             self.__onboarding_steps["current_onboarding_step"] == "time_experience_step"
         )
         if is_valid_onbaording_step and user_was_created_on_dw and is_exchange_member:
             self.__onboarding_steps["time_experience_step"] = True
-            self.__onboarding_steps[
-                "current_onboarding_step"
-            ] = "w8_confirmation_step"
+            self.__onboarding_steps["current_onboarding_step"] = "w8_confirmation_step"
         return self
 
     def w8_confirmation_step(self, current_user: dict):

@@ -44,6 +44,8 @@ containers:
         value: "suitability_user_profile"
       - name: MONGODB_SUITABILITY_ANSWERS_COLLECTION
         value: "suitability_answers"
+      - name : MONGODB_ALLOWED_CPF
+        value: "allowed_cpf"
       - name: MAIL_KEY
         value: "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"
       - name: MAIL_SENDER

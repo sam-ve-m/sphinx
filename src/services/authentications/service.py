@@ -21,6 +21,7 @@ from src.exceptions.exceptions import (
 from src.i18n.i18n_resolver import i18nResolver as i18n
 from src.infrastructures.env_config import config
 from src.repositories.client_register.repository import ClientRegisterRepository
+from src.repositories.cpf.repository import AllowedCpf
 from src.repositories.user.repository import UserRepository
 from src.services.builders.thebes_hall.builder import ThebesHallBuilder
 from src.services.drive_wealth.service import DriveWealthService
@@ -35,6 +36,7 @@ from src.services.persephone.templates.persephone_templates import (
 )
 from src.services.third_part_integration.solutiontech import Solutiontech
 from persephone_client import Persephone
+from src.domain.validators.authenticate_validators import Cpf
 
 
 class AuthenticationService(IAuthentication):
@@ -91,6 +93,15 @@ class AuthenticationService(IAuthentication):
 
         response.update({"payload": {"jwt": jwt, "control_data": control_data}})
 
+        return response
+
+    @staticmethod
+    async def validate_cpf(cpf: str, allowed_cpf=AllowedCpf()) -> dict:
+        is_allowed = await allowed_cpf.is_cpf_allowed(cpf=cpf)
+        response = {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"is_allowed": is_allowed},
+        }
         return response
 
     @staticmethod
