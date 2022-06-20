@@ -1,5 +1,5 @@
 # Third part
-from fastapi import Request, status, Response
+from fastapi import Request, status, Response, Depends
 from etria_logger import Gladsheim
 import json
 
@@ -10,6 +10,7 @@ from src.controllers.authentications.controller import AuthenticationController
 from src.routers.routes_registers.public import PublicRouter
 from src.services.jwts.service import JwtService
 from src.i18n.i18n_resolver import i18nResolver as i18n
+from src.domain.validators.authenticate_validators import Cpf
 
 router = PublicRouter.instance()
 
@@ -18,6 +19,13 @@ router = PublicRouter.instance()
 async def login(user_credentials: Login, request: Request):
     return await BaseController.run(
         AuthenticationController.login, dict(user_credentials), request
+    )
+
+
+@router.get("/validate_cpf", tags=["authentication"])
+async def login(request: Request, cpf: Cpf = Depends(Cpf)):
+    return await BaseController.run(
+        AuthenticationController.validate_cpf, cpf.dict()["cpf"], request
     )
 
 

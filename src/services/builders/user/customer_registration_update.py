@@ -589,7 +589,11 @@ class UpdateCustomerRegistrationBuilder:
             "external_exchange_account_us", "user_employ_company_name"
         ):
             self._update_modified_data(
-                levels=("external_exchange_requirements", "us", "user_employ_company_name"),
+                levels=(
+                    "external_exchange_requirements",
+                    "us",
+                    "user_employ_company_name",
+                ),
                 old_field=old_time_experience,
                 new_filed=new_time_experience,
             )

@@ -233,19 +233,25 @@ class ClientUpdateRegisterBuilderUs:
 
     def add_employment_company(self, user_data: dict):
         if self._employment["data"]["status"] in ["EMPLOYED", "SELF_EMPLOYED"]:
-            company_name = user_data["external_exchange_requirements"]["us"]["user_employ_company_name"]
+            company_name = user_data["external_exchange_requirements"]["us"][
+                "user_employ_company_name"
+            ]
             self._employment["data"].update({"company": company_name})
         return self
 
     def add_employment_type(self, user_data: dict):
         if self._employment["data"]["status"] in ["EMPLOYED", "SELF_EMPLOYED"]:
-            value = user_data["external_exchange_requirements"]["us"]["user_employ_type"]
+            value = user_data["external_exchange_requirements"]["us"][
+                "user_employ_type"
+            ]
             self._employment["data"].update({"type": value})
         return self
 
     def add_employment_position(self, user_data: dict):
         if self._employment["data"]["status"] in ["EMPLOYED", "SELF_EMPLOYED"]:
-            value = user_data["external_exchange_requirements"]["us"]["user_employ_position"]
+            value = user_data["external_exchange_requirements"]["us"][
+                "user_employ_position"
+            ]
             self._employment["data"].update({"position": value})
         return self
 
@@ -311,14 +317,18 @@ class ClientUpdateRegisterBuilderUs:
 
     def add_disclosures_data_sharing(self, user_data: dict):
         value = False
-        if user_data["terms"][TermsFileType.TERM_PRIVACY_POLICY_AND_DATA_SHARING_POLICY_DW.value]:
+        if user_data["terms"][
+            TermsFileType.TERM_PRIVACY_POLICY_AND_DATA_SHARING_POLICY_DW.value
+        ]:
             value = True
         self._disclosures["data"].update({"dataSharing": value})
         return self
 
     def add_disclosures_privacy_policy(self, user_data: dict):
         value = False
-        if user_data["terms"][TermsFileType.TERM_PRIVACY_POLICY_AND_DATA_SHARING_POLICY_DW.value]:
+        if user_data["terms"][
+            TermsFileType.TERM_PRIVACY_POLICY_AND_DATA_SHARING_POLICY_DW.value
+        ]:
             value = True
         self._disclosures["data"].update({"privacyPolicy": value})
 
