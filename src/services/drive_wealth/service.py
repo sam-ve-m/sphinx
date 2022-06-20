@@ -62,9 +62,10 @@ class DriveWealthService:
         await cls._send_user_document(user_data=user_data, user_dw_id=user_dw_id)
 
         if need_create_account:
-            account_id = await cls._create_user_account(user_dw_id=user_dw_id)
+            account_id, account_number = await cls._create_user_account(user_dw_id=user_dw_id)
             update_user = {
                 "portfolios.default.us.dw_account": account_id,
+                "portfolios.default.us.dw_display_account": account_number,
                 "portfolios.default.us.created_at": datetime.datetime.utcnow(),
             }
             unique_id = user_data["unique_id"]
@@ -121,7 +122,8 @@ class DriveWealthService:
         if not status:
             raise InternalServerError("common.unable_to_process")
         user_id = response["id"]
-        return user_id
+        user_id_number = response["accountNo"]
+        return user_id, user_id_number
 
     @classmethod
     async def _send_user_document(cls, user_data: dict, user_dw_id: str) -> str:
