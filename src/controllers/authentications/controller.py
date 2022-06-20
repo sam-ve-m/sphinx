@@ -11,6 +11,10 @@ class AuthenticationController:
         return await AuthenticationService.login(user_credentials=user_credentials)
 
     @staticmethod
+    async def validate_cpf(cpf: str):
+        return await AuthenticationService.validate_cpf(cpf=cpf)
+
+    @staticmethod
     async def thebes_hall(device_and_thebes_answer_from_request: dict):
         return await AuthenticationService.thebes_hall(
             device_and_thebes_answer_from_request=device_and_thebes_answer_from_request

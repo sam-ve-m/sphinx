@@ -59,7 +59,7 @@ class SinacorService:
             await portfolio_repository.save_unique_id_by_account(
                 account=user_data["portfolios.default.br"]["bmf_account"],
                 unique_id=user_data["unique_id"],
-                region="br"
+                region="br",
             )
 
             await SinacorService.__crete_reference_to_allow_cash_transfer(
@@ -263,7 +263,7 @@ class SinacorService:
                 "portfolios.default.br": {
                     "bovespa_account": bovespa_account,
                     "bmf_account": bmf_account,
-                    "created_at": datetime.datetime.utcnow()
+                    "created_at": datetime.datetime.utcnow(),
                 }
             }
         )

@@ -65,7 +65,7 @@ class DriveWealthService:
             account_id = await cls._create_user_account(user_dw_id=user_dw_id)
             update_user = {
                 "portfolios.default.us.dw_account": account_id,
-                "portfolios.default.us.created_at": datetime.datetime.utcnow()
+                "portfolios.default.us.created_at": datetime.datetime.utcnow(),
             }
             unique_id = user_data["unique_id"]
             await social_network_service.register_user_portfolio_us(
@@ -192,7 +192,9 @@ class DriveWealthService:
 
     @staticmethod
     def __get_registry_body(user_data: dict) -> ClientUpdateRegisterBuilderUs:
-        city_name = SinacorTypesRepository.get_county_name_by_id(id=user_data["address"]["city"])
+        city_name = SinacorTypesRepository.get_county_name_by_id(
+            id=user_data["address"]["city"]
+        )
         client_register_builder_us = ClientUpdateRegisterBuilderUs()
         (
             client_register_builder_us.add_parent_ibid()
@@ -243,7 +245,9 @@ class DriveWealthService:
 
     @staticmethod
     def __get_update_body(user_data: dict) -> ClientUpdateRegisterBuilderUs:
-        city_name = SinacorTypesRepository.get_county_name_by_id(id=user_data["address"]["city"])
+        city_name = SinacorTypesRepository.get_county_name_by_id(
+            id=user_data["address"]["city"]
+        )
         client_update_builder_us = ClientUpdateRegisterBuilderUs()
         (
             client_update_builder_us.add_basic_information_first_name(

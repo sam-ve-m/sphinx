@@ -24,6 +24,7 @@ from src.exceptions.exceptions import (
 )
 from src.infrastructures.env_config import config
 from src.repositories.client_register.repository import ClientRegisterRepository
+from src.repositories.cpf.repository import AllowedCpf
 from src.repositories.file.enum.user_file import UserFileType
 from src.repositories.file.repository import FileRepository
 from src.repositories.user.repository import UserRepository
@@ -600,7 +601,7 @@ class UserService(IUser):
 
     @staticmethod
     async def user_identifier_data(
-        payload: dict, user_repository=UserRepository
+        payload: dict, user_repository=UserRepository, allowed_cpf=AllowedCpf
     ) -> dict:
         thebes_answer = payload.get("x-thebes-answer")
         unique_id = thebes_answer["user"]["unique_id"]
@@ -608,6 +609,11 @@ class UserService(IUser):
         user_identifier_data = payload.get("user_identifier")
 
         user_cpf = user_identifier_data.get("cpf")
+        is_allowed = await allowed_cpf.is_cpf_allowed(cpf=user_cpf)
+
+        if not is_allowed:
+            raise InternalServerError("common.process_issue")
+
         user_by_cpf = await user_repository.find_one(
             {"identifier_document.cpf": user_cpf}
         )
