@@ -181,7 +181,7 @@ containers:
       - name: MIST_AUTH_DATABASE_USER_COLLECTION
         value: "users"
       - name: ROOT_PATH
-        value: "/sphinx"
+        value: "/"
       - name: JWT_FILE_BUCKET_NAME
         value: "heimdall_rsa"
       - name: MEPHO_DW_APP_KEY
@@ -228,6 +228,7 @@ containers:
         value: "https://bo-api.drivewealth.io/back-office/users/{}/documents"
       - name: DW_USER_PHYSICAL_DOCUMENT_URL
         value: "https://bo-api.drivewealth.io/back-office/documents/{}/url"
+
 imagePullSecrets:
   - name: nexus-v3
 
@@ -247,7 +248,7 @@ gateway:
     credentialName: sphinx-dev-lionx-tls
 
 virtualService:
-  name: sphinx-vs-teste
+  name: sphinx-vs
   spec:
     hosts:
       - sphinx.dev-lionx.com.br
