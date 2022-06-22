@@ -238,19 +238,25 @@ service:
     - protocol: TCP
       port: 8000
 
+gateway:
+  tlsEnabled: true
+  metadata:
+    name: sphinx-istio-gateway
+  spec:
+    hosts: sphinx.dev-lionx.com.br
+    credentialName: sphinx-dev-lionx-tls
+
 virtualService:
-  name: sphinx-vs
+  name: sphinx-vs-teste
   spec:
     hosts:
-      - dev.api.siga.me
+      - sphinx.dev-lionx.com.br
     gateways:
-      - dev-istio-gateway
+      - sphinx-istio-gateway
     http:
       - match:
           - uri:
-              prefix: "/sphinx/"
-          - uri:
-              prefix: "/sphinx"
+              prefix: /          
         rewrite:
           uri: "/"
         route:
@@ -271,6 +277,16 @@ virtualService:
           allowHeaders:
             - x-thebes-answer
             - content-type
+
+certificate:
+  name: sphinx-dev-lionx-tls
+  spec:
+    commonName: sphinx.dev-lionx.com.br
+    dnsNames:
+      - sphinx.dev-lionx.com.br
+    issuerRef:
+      name: letsencrypt-dns-dev   
+    secretName: sphinx-dev-lionx-tls
 
 labels:
   app: sphinx
