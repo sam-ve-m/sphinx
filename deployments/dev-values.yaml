@@ -1,5 +1,5 @@
 replicaCount: 1
-name: sphinx-teste
+name: sphinx
 namespace: develop
 
 containers:
@@ -230,7 +230,7 @@ imagePullSecrets:
   - name: nexus-v3
 
 service:
-  name: sphinx-service-teste
+  name: sphinx-service
   type: ClusterIP
   ports:
     - protocol: TCP
@@ -239,18 +239,18 @@ service:
 gateway:
   tlsEnabled: true
   metadata:
-    name: sphinx-istio-gateway-teste
+    name: sphinx-istio-gateway
   spec:
     hosts: sphinx.dev-lionx.com.br
     credentialName: sphinx-dev-lionx-tls
 
 virtualService:
-  name: sphinx-vs-teste
+  name: sphinx-vs
   spec:
     hosts:
       - sphinx.dev-lionx.com.br
     gateways:
-      - sphinx-istio-gateway-teste
+      - sphinx-istio-gateway
     http:
       - match:
           - uri:
@@ -259,7 +259,7 @@ virtualService:
           uri: "/"
         route:
           - destination:
-              host: sphinx-service-teste.develop.svc.cluster.local
+              host: sphinx-service.develop.svc.cluster.local
               port:
                 number: 8000
         corsPolicy:
