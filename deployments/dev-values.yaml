@@ -1,10 +1,10 @@
 replicaCount: 1
-name: sphinx-teste
+name: sphinx
 namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.5.0
+    image: nexus.sigame.com.br/sphinx:1.4.10
     ports:
       - containerPort: 8000
     env:
@@ -179,7 +179,7 @@ containers:
       - name: MIST_AUTH_DATABASE_USER_COLLECTION
         value: "users"
       - name: ROOT_PATH
-        value: "/"
+        value: "/sphinx"
       - name: JWT_FILE_BUCKET_NAME
         value: "heimdall_rsa"
       - name: MEPHO_DW_APP_KEY
@@ -230,7 +230,7 @@ imagePullSecrets:
   - name: nexus-v3
 
 service:
-  name: sphinx-service-teste
+  name: sphinx-service
   type: ClusterIP
   ports:
     - protocol: TCP
@@ -239,7 +239,7 @@ service:
 gateway:
   tlsEnabled: true
   metadata:
-    name: sphinx-istio-gateway-teste
+    name: sphinx-istio-gateway
   spec:
     hosts: sphinx.dev-lionx.com.br
     credentialName: sphinx-dev-lionx-tls
@@ -250,7 +250,7 @@ virtualService:
     hosts:
       - sphinx.dev-lionx.com.br
     gateways:
-      - sphinx-istio-gateway-teste
+      - sphinx-istio-gateway
     http:
       - match:
           - uri:
@@ -259,7 +259,7 @@ virtualService:
           uri: "/"
         route:
           - destination:
-              host: sphinx-service-teste.develop.svc.cluster.local
+              host: sphinx-service.develop.svc.cluster.local
               port:
                 number: 8000
         corsPolicy:
