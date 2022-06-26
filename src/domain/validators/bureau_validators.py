@@ -72,11 +72,11 @@ class BirthDateSource(Source):
 
 
 class CelPhoneSource(Source):
-    value: constr(regex=r"^\+\d+", min_length=5)
+    value: constr(regex=r"^\+\d+", min_length=13, max_length=14)
 
 
 class PhoneSource(Source):
-    value: constr(regex=r"^\+\d+", min_length=5)
+    value: constr(regex=r"^\+\d+", min_length=13, max_length=14)
 
 
 class EmailSource(Source):
