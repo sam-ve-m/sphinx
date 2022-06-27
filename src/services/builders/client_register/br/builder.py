@@ -582,20 +582,8 @@ class ClientRegisterBuilderBr:
         self._fields_added.update({"CD_CEP2": value})
         return self
 
-    def add_cd_ddd_celular12(self, value=None):
-        self._fields_added.update({"CD_DDD_CELULAR12": value})
-        return self
-
-    def add_cd_ddd_celular22(self, value=None):
-        self._fields_added.update({"CD_DDD_CELULAR22": value})
-        return self
-
     def add_cd_ddd_fax12(self, value=None):
         self._fields_added.update({"CD_DDD_FAX12": value})
-        return self
-
-    def add_cd_ddd_fax22(self, value=None):
-        self._fields_added.update({"CD_DDD_FAX22": value})
         return self
 
     def add_cd_ddd_tel2(self, value=None):
