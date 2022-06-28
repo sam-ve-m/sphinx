@@ -23,6 +23,7 @@ class Email(BaseModel):
         try:
             is_valid = validate_email(value)
             if is_valid:
+                value = value.lower()
                 return value
             raise ValueError("The given email is invalid")
         except Exception as e:
