@@ -78,7 +78,7 @@ class UserService(IUser):
         jwt_handler=JwtService,
     ) -> dict:
         user_from_database = await user_repository.find_one(
-            {"email": user.get("email")}
+            {"email": user.get("email").lower()}
         )
         is_email_in_use = user_from_database is not None
         if is_email_in_use:
