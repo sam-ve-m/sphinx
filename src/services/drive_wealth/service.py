@@ -62,7 +62,9 @@ class DriveWealthService:
         await cls._send_user_document(user_data=user_data, user_dw_id=user_dw_id)
 
         if need_create_account:
-            account_id, account_number = await cls._create_user_account(user_dw_id=user_dw_id)
+            account_id, account_number = await cls._create_user_account(
+                user_dw_id=user_dw_id
+            )
             update_user = {
                 "portfolios.default.us.dw_account": account_id,
                 "portfolios.default.us.dw_display_account": account_number,
