@@ -1,6 +1,7 @@
 # STANDARD LIBS
 from etria_logger import Gladsheim
 from typing import Optional
+from datetime import datetime
 
 # SPHINX
 from src.exceptions.exceptions import InternalServerError
@@ -25,6 +26,24 @@ class ClientRegisterRepository(OracleBaseRepository):
         }
         await cls.execute(
             sql="call PROC_IMPCLIH_V2_LIONX.EXECIMPH(:cd_empresa, :cd_usuario, :tp_ocorrencia, :cd_cliente_padrao, :cpf)",
+            values=values,
+        )
+
+    @classmethod
+    async def register_users_register_update(cls, user_cpf: str, birth_date: datetime):
+        values = {
+            "birth_date": birth_date,
+            "cpf": str(user_cpf),
+        }
+        await cls.execute(
+            sql="""
+                MERGE INTO CORRWIN.tscdocs USING dual ON (cd_cpfcgc=:cpf)
+                WHEN NOT MATCHED THEN INSERT (
+                    cd_cpfcgc, dt_nasc_fund, cd_con_dep, dt_validade, in_fich_cad, in_cpfcgc, in_doc_ident, in_comp_res, in_procur, in_contr_bolsa, in_contr_bmf, in_contr_social, in_contr_opc, in_contr_ter, dt_val_cgc, in_ata_contrat, dt_val_procur, dt_val_mandir, in_ficha_bmf, in_cgc, in_rg, in_proposta, in_aut_oper, in_doc_adm, in_autentic, in_contr_internet, in_situac_financ, in_bal_patrimonial, in_regulamento, dt_val_rg, in_contr_tst, in_contr_btc, dt_contr_bolsa, dt_contr_bmf, dt_fich_cad, dt_fich_bmf, in_web_trading, dt_bal_patrimonial, in_conta_margem, dt_conta_margem, tm_stamp, tp_situac
+                ) VALUES (
+                    :cpf, :birth_date, (SELECT CD_CON_DEP from CORRWIN.tsccliger where CD_CPFCGC = :cpf fetch first 1 row only), add_months(SYSDATE, 24), 'S', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', NULL, 'N', NULL, NULL, 'S', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', NULL, 'N', 'N', NULL, NULL, SYSDATE, SYSDATE, 'N', NULL, 'N', NULL, SYSDATE, NULL
+                )
+            """,
             values=values,
         )
 
