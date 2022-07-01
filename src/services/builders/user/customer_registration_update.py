@@ -48,7 +48,9 @@ class UpdateCustomerRegistrationBuilder:
         sub_partition = self.__new_personal_data.get(sub_partition)
         if sub_partition:
             if source := sub_partition.get(field_name):
-                return source.get("value")
+                if "value" in source:
+                    return source.get("value")
+                return source
 
     def personal_name(self):
         old_name = self.__old_personal_data.get("name")
@@ -244,7 +246,8 @@ class UpdateCustomerRegistrationBuilder:
 
     def personal_tax_residences(self):
         old_tax_residences = self.__old_personal_data.get("tax_residences")
-        if new_tax_residences := self._get_new_value("personal", "tax_residences"):
+        new_tax_residences = self._get_new_value("personal", "tax_residences")
+        if new_tax_residences is not None:
             self._update_modified_data(
                 levels=("tax_residences",),
                 old_field=old_tax_residences,
@@ -266,46 +269,49 @@ class UpdateCustomerRegistrationBuilder:
 
     def marital_cpf(self):
         spouse = self.__old_personal_data.get("marital", {}).get("spouse", {})
+        old_marital_cpf = None
         if spouse:
             old_marital_cpf = spouse.get("cpf")
-            if new_marital_spouse := self._get_new_value("marital", "spouse"):
-                new_marital_cpf = new_marital_spouse.get("cpf").get("value")
-                self._update_modified_data(
-                    levels=("marital", "spouse", "cpf"),
-                    old_field=old_marital_cpf,
-                    new_filed=new_marital_cpf,
-                )
+        if new_marital_spouse := self._get_new_value("marital", "spouse"):
+            new_marital_cpf = new_marital_spouse.get("cpf").get("value")
+            self._update_modified_data(
+                levels=("marital", "spouse", "cpf"),
+                old_field=old_marital_cpf,
+                new_filed=new_marital_cpf,
+            )
 
         return self
 
     def marital_nationality(self):
         spouse = self.__old_personal_data.get("marital", {}).get("spouse", {})
-        if spouse:
+        old_marital_nationality =  None
+        if old_marital_nationality:
             old_marital_nationality = spouse.get("nationality")
-            if new_marital_spouse := self._get_new_value("marital", "spouse"):
-                new_marital_nationality = new_marital_spouse.get("nationality", {}).get(
-                    "value"
-                )
-                self._update_modified_data(
-                    levels=("marital", "spouse", "nationality"),
-                    old_field=old_marital_nationality,
-                    new_filed=new_marital_nationality,
-                )
+        if new_marital_spouse := self._get_new_value("marital", "spouse"):
+            new_marital_nationality = new_marital_spouse.get("nationality", {}).get(
+                "value"
+            )
+            self._update_modified_data(
+                levels=("marital", "spouse", "nationality"),
+                old_field=old_marital_nationality,
+                new_filed=new_marital_nationality,
+            )
         return self
 
     def marital_spouse_name(self):
         spouse = self.__old_personal_data.get("marital", {}).get("spouse", {})
-        if spouse:
+        old_spouse_name = None
+        if old_spouse_name:
             old_spouse_name = spouse.get("name")
-            if new_marital_spouse := self._get_new_value("marital", "spouse"):
-                new_marital_spouse_name = new_marital_spouse.get("name", {}).get(
-                    "value"
-                )
-                self._update_modified_data(
-                    levels=("marital", "spouse", "name"),
-                    old_field=old_spouse_name,
-                    new_filed=new_marital_spouse_name,
-                )
+        if new_marital_spouse := self._get_new_value("marital", "spouse"):
+            new_marital_spouse_name = new_marital_spouse.get("name", {}).get(
+                "value"
+            )
+            self._update_modified_data(
+                levels=("marital", "spouse", "name"),
+                old_field=old_spouse_name,
+                new_filed=new_marital_spouse_name,
+            )
         return self
 
     def documents_cpf(self):

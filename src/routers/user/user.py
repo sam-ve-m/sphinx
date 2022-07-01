@@ -249,7 +249,7 @@ async def put_time_experience_us(
 
 
 @router.get("/user/external_fiscal_tax", tags=["user"])
-async def get_customer_registration_data(request: Request):
+async def get_external_fiscal_tax(request: Request):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
     payload = {
         "x-thebes-answer": jwt_data,
@@ -274,7 +274,7 @@ async def put_time_experience_us(
 
 
 @router.get("/user/w8_form", tags=["user"])
-async def get_customer_registration_data(request: Request):
+async def get_w8_form(request: Request):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
     payload = {
         "x-thebes-answer": jwt_data,
@@ -283,7 +283,7 @@ async def get_customer_registration_data(request: Request):
 
 
 @router.put("/user/w8_form_confirmation", tags=["user"])
-async def put_time_experience_us(
+async def put_w8_form_confirmation(
     w8_form_confirmation: W8FormConfirmation,
     request: Request,
 ):

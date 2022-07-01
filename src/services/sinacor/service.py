@@ -140,7 +140,11 @@ class SinacorService:
         cpf_client = database_and_bureau_dtvm_client_data_merged.get(
             "identifier_document"
         ).get("cpf")
-        birth_date = database_and_bureau_dtvm_client_data_merged.get("birth_date")
+        birth_date = database_and_bureau_dtvm_client_data_merged.get("birth_date").replace(
+            hour=0,
+            minute=0,
+            second=0
+        )
         await client_register_repository.register_validated_users(user_cpf=cpf_client)
         await client_register_repository.register_users_register_update(
             user_cpf=cpf_client, birth_date=birth_date
