@@ -1462,8 +1462,6 @@ class UserService(IUser):
             {"unique_id": unique_id}, project={"_id": False}
         )
         await SinacorService.save_or_update_client_data(user_data=user_data)
-        await UserService.update_external_exchange_account(user_data=user_data)
-        # OnLy if is create
         if not await user_repository.update_one(
             old={"unique_id": unique_id},
             new={
@@ -1473,7 +1471,6 @@ class UserService(IUser):
             raise InternalServerError("common.process_issue")
 
         user = await user_repository.find_one({"unique_id": unique_id})
-        # Se da pau aki oq ue fazer?
         await valhalla_service.update_user(
             unique_id=user["unique_id"],
             nickname=user["nick_name"],
