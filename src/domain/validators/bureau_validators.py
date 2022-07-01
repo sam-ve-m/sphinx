@@ -593,7 +593,7 @@ class UserPersonalDataUpdate(BaseModel):
     company_cnpj: Optional[CnpjSource]
     patrimony: Optional[PatrimonySource]
     income: Optional[IncomeSource]
-    tax_residences: Optional[TaxResidenceSource]
+    tax_residences: Optional[TaxResidenceSource] = []
     birth_place_country: Optional[CountrySource]
     birth_place_state: Optional[StateSource]
     birth_place_city: Optional[CountySource]
