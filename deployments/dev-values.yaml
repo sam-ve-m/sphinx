@@ -4,7 +4,7 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.5.1
+    image: nexus.sigame.com.br/sphinx:1.6.1
     ports:
       - containerPort: 8000
     env:
@@ -179,7 +179,7 @@ containers:
       - name: MIST_AUTH_DATABASE_USER_COLLECTION
         value: "users"
       - name: ROOT_PATH
-        value: "/sphinx"
+        value: "/"
       - name: JWT_FILE_BUCKET_NAME
         value: "heimdall_rsa"
       - name: MEPHO_DW_APP_KEY
@@ -226,6 +226,7 @@ containers:
         value: "https://bo-api.drivewealth.io/back-office/users/{}/documents"
       - name: DW_USER_PHYSICAL_DOCUMENT_URL
         value: "https://bo-api.drivewealth.io/back-office/documents/{}/url"
+
 imagePullSecrets:
   - name: nexus-v3
 
@@ -236,19 +237,25 @@ service:
     - protocol: TCP
       port: 8000
 
+gateway:
+  tlsEnabled: true
+  metadata:
+    name: sphinx-istio-gateway
+  spec:
+    hosts: sphinx.dev-lionx.com.br
+    credentialName: sphinx-dev-lionx-tls
+
 virtualService:
   name: sphinx-vs
   spec:
     hosts:
-      - dev.api.siga.me
+      - sphinx.dev-lionx.com.br
     gateways:
-      - dev-istio-gateway
+      - sphinx-istio-gateway
     http:
       - match:
           - uri:
-              prefix: "/sphinx/"
-          - uri:
-              prefix: "/sphinx"
+              prefix: /          
         rewrite:
           uri: "/"
         route:
@@ -269,6 +276,16 @@ virtualService:
           allowHeaders:
             - x-thebes-answer
             - content-type
+
+certificate:
+  name: sphinx-dev-lionx-tls
+  spec:
+    commonName: sphinx.dev-lionx.com.br
+    dnsNames:
+      - sphinx.dev-lionx.com.br
+    issuerRef:
+      name: letsencrypt-dns-dev   
+    secretName: sphinx-dev-lionx-tls
 
 labels:
   app: sphinx
