@@ -23,3 +23,7 @@ class Cpf(BaseModel):
         if is_cpf_valid(cpf=e):
             return e.replace(".", "").replace("-", "").replace("/", "")
         raise ValueError("invalid cpf")
+
+
+class AllowedCpf(BaseModel):
+    cpf: str
