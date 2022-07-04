@@ -8,6 +8,7 @@ from fastapi import status
 from src.core.interfaces.services.authentication.interface import IAuthentication
 from src.domain.drive_wealth.kyc_status import KycStatus
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
+from src.domain.validators.authenticate_validators import Cpf
 
 # SPHINX
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
@@ -96,13 +97,17 @@ class AuthenticationService(IAuthentication):
         return response
 
     @staticmethod
-    async def validate_cpf(cpf: str, allowed_cpf=AllowedCpf()) -> dict:
-        is_allowed = await allowed_cpf.is_cpf_allowed(cpf=cpf)
-        response = {
-            "status_code": status.HTTP_200_OK,
-            "payload": {"is_allowed": is_allowed},
-        }
-        return response
+    async def validate_cpf(cpf: str, allowed_cpf=AllowedCpf) -> dict:
+        try:
+            cpf_validated = Cpf(cpf=cpf)
+            is_allowed = await allowed_cpf.is_cpf_allowed(cpf=cpf_validated.cpf)
+            response = {
+                "status_code": status.HTTP_200_OK,
+                "payload": {"is_allowed": is_allowed},
+            }
+            return response
+        except Exception as e:
+            raise BadRequestError("common.invalid_params")
 
     @staticmethod
     async def login(

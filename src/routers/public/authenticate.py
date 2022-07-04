@@ -5,12 +5,11 @@ import json
 
 # Sphinx
 from src.controllers.base_controller import BaseController
-from src.domain.validators.authenticate_validators import Login
+from src.domain.validators.authenticate_validators import Login, AllowedCpf
 from src.controllers.authentications.controller import AuthenticationController
 from src.routers.routes_registers.public import PublicRouter
 from src.services.jwts.service import JwtService
 from src.i18n.i18n_resolver import i18nResolver as i18n
-from src.domain.validators.authenticate_validators import Cpf
 
 router = PublicRouter.instance()
 
@@ -23,9 +22,9 @@ async def login(user_credentials: Login, request: Request):
 
 
 @router.get("/validate_cpf", tags=["authentication"])
-async def login(request: Request, cpf: Cpf = Depends(Cpf)):
+async def login(request: Request, allowed_cpf: AllowedCpf = Depends(AllowedCpf)):
     return await BaseController.run(
-        AuthenticationController.validate_cpf, cpf.dict()["cpf"], request
+        AuthenticationController.validate_cpf, allowed_cpf.dict()["cpf"], request
     )
 
 
