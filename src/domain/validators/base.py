@@ -11,7 +11,7 @@ from src.domain.validators.onboarding_validators import *
 from src.repositories.view.repository import ViewRepository
 from src.repositories.feature.repository import FeatureRepository
 
-signature_regex = r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{8,}$"
+signature_regex = r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9!\"#$%&'\(\)\*\+,-\.\/:;<=>?@\[\\\]_\{\}]{8,}$"
 
 
 class Email(BaseModel):
