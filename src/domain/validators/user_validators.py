@@ -32,4 +32,4 @@ class TaxResidences(BaseModel):
 
 
 class UserIdentifierData(Cpf, CelPhone):
-    tax_residences: Optional[List[TaxResidence]]
+    tax_residences: Optional[List[TaxResidence]] = []
