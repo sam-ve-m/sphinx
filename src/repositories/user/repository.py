@@ -1,9 +1,11 @@
 # OUTSIDE LIBRARIES
+from datetime import datetime, timedelta
 
 from src.infrastructures.env_config import config
 
 # SPHINX
 from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
+from src.services.builders.thebes_hall.validators.months_past import months_past
 
 
 class UserRepository(MongoDbBaseRepository):
@@ -41,7 +43,8 @@ class UserRepository(MongoDbBaseRepository):
 
     @staticmethod
     def suitability_and_refusal_term_callback(_suitability, _term_refusal):
-        last_trade_profile_signed = (
-            _suitability["submission_date"] > _term_refusal["date"]
-        )
-        return "suitability" if last_trade_profile_signed else "term_refusal"
+        suitability_months_past = months_past(_suitability["submission_date"])
+        if suitability_months_past < 24:
+            return "suitability"
+        else:
+            return "term_refusal"
