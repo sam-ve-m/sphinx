@@ -41,12 +41,12 @@ en:
   email:
     login: We sent an email to the registered account, to conclude login
     logout: Logout saved.
-    forgot_password: We sent an email to login and change your PIN
     forgot_electronic_signature: We sent an email to login and change your electrionic signature
     subject:
-      created: Account confirmation
-      login: Conclude your login
-      forgot_password: Reconvery PIN
+      wellcome: REPLACEEEEE
+      login: REPLACEEEEE
+      forgot_electronic_signature: REPLACEEEEE
+      broker_nome: REPLACEEEEE
     body:
       created: Wellcome! Use the link bellow to access and confirm your account.
       forgot_password: Hi! Use the link bellow to change your PIN.
