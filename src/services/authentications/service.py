@@ -7,6 +7,7 @@ from fastapi import status
 
 from src.core.interfaces.services.authentication.interface import IAuthentication
 from src.domain.drive_wealth.kyc_status import KycStatus
+from src.domain.email.templates.enum import EmailTemplate
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.domain.validators.authenticate_validators import Cpf
 
@@ -132,9 +133,10 @@ class AuthenticationService(IAuthentication):
 
         jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         AuthenticationService.send_authentication_email(
+            email_template=EmailTemplate.LOGIN,
             email=user_data["email"],
             payload_jwt=jwt,
-            body="email.body.created",
+            user_name=user_data["nick_name"]
         )
         return {
             "status_code": status.HTTP_200_OK,
@@ -143,17 +145,19 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def send_authentication_email(
-        email: str, payload_jwt: str, body: str, email_sender=SendGridEmail
+        email_template: EmailTemplate, email: str, payload_jwt: str, user_name: str, email_sender=SendGridEmail
     ) -> None:
         page = HtmlModifier(
-            "src/services/asset",
-            i18n.get_translate(key=body, locale="pt"),
-            config("TARGET_LINK") + f"?token={payload_jwt}",
+            email_template=email_template,
+            content={
+                "cta": config("TARGET_LINK") + f"?token={payload_jwt}",
+                "nome": user_name
+            }
         )()
         email_sender.send_email_to(
             target_email=email,
             message=page,
-            subject=i18n.get_translate(key="email.subject.created", locale="pt"),
+            subject=i18n.get_translate(key=f"email.subject.{email_template.value}", locale="pt"),
         )
 
     @staticmethod
