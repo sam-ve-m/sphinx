@@ -41,12 +41,12 @@ pt:
   email:
     login: Enviamos um email para a conta cadastrada, para concluir o login
     logout: Registramos sua saída.
-    forgot_password: Enviamos um email para efetuar login e mudança do PIN
     forgot_electronic_signature: Enviamos para você um e-mail de recuperação da sua assinatura eletrônica.
     subject:
-      created: Confirme a sua conta
-      login: Conclua seu login
-      forgot_password: Recuperação de PIN
+      wellcome: Queremos saber mais sobre você!
+      login: Comece a investir já!
+      forgot_electronic_signature: Vamos redefinir a sua assinatura eletrônica?
+      broker_nome: Sua nota de corretagem está disponível!
     body:
       created: Bem vindo! Clique no link para finalizar seu cadastro.
       forgot_password: Clique no link para alterar sua senha.

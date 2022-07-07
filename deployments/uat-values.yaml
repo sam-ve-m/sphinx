@@ -1,10 +1,10 @@
 replicaCount: 1
-name: sphinx-teste
+name: sphinx
 namespace: homolog
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.7.1
+    image: nexus.sigame.com.br/sphinx:1.7.6
     ports:
       - containerPort: 8000
     env:
@@ -226,11 +226,13 @@ containers:
         value: "https://bo-api.drivewealth.io/back-office/users/{}/documents"
       - name: DW_USER_PHYSICAL_DOCUMENT_URL
         value: "https://bo-api.drivewealth.io/back-office/documents/{}/url"
+      - name : MONGODB_ALLOWED_CPF
+        value: "allowed_cpf"
 imagePullSecrets:
   - name: nexus-v3
 
 service:
-  name: sphinx-service-teste
+  name: sphinx-service
   type: ClusterIP
   ports:
     - protocol: TCP
@@ -245,7 +247,7 @@ gateway:
     credentialName: sphinx-hom-lionx-tls
 
 virtualService:
-  name: sphinx-teste-vs
+  name: sphinx-vs
   spec:
     hosts:
       - sphinx.hom-lionx.com.br
@@ -259,7 +261,7 @@ virtualService:
           uri: "/"
         route:
           - destination:
-              host: sphinx-service-teste.homolog.svc.cluster.local
+              host: sphinx-service.homolog.svc.cluster.local
               port:
                 number: 8000
         corsPolicy:
@@ -287,7 +289,7 @@ certificate:
     secretName: sphinx-hom-lionx-tls
 
 labels:
-  app: sphinx-teste
+  app: sphinx
 
 podAnnotations: {}
 

@@ -14,6 +14,7 @@ from nidavellir import Sindri
 # SPHINX
 from src.core.interfaces.services.user.interface import IUser
 from src.domain.caf.status import CAFStatus
+from src.domain.email.templates.enum import EmailTemplate
 from src.domain.encrypt.password.util import PasswordEncrypt
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
 from src.domain.user_level.enum import UserLevel
@@ -113,9 +114,10 @@ class UserService(IUser):
         ).build()
         jwt = await jwt_handler.generate_token(jwt_payload_data=jwt_payload_data)
         authentication_service.send_authentication_email(
+            email_template=EmailTemplate.WELLCOME,
             email=user.get("email"),
             payload_jwt=jwt,
-            body="email.body.created",
+            user_name=user["nick_name"]
         )
         return {
             "status_code": status.HTTP_201_CREATED,
@@ -908,9 +910,10 @@ class UserService(IUser):
         jwt = await JwtService.generate_token(jwt_payload_data=jwt_payload_data)
 
         authentication_service.send_authentication_email(
+            email_template=EmailTemplate.FORGOT_ELECTRONIC_SIGNATURE,
             email=entity.get("email"),
             payload_jwt=jwt,
-            body="email.body.forgot_electronic_signature",
+            user_name=entity["nick_name"]
         )
         return {
             "status_code": status.HTTP_200_OK,
