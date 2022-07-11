@@ -69,7 +69,7 @@ class ClientRegisterRepository(OracleBaseRepository):
     @classmethod
     async def link_client_with_graphic_account(cls, cpf: int):
         insert_query = """
-            INSERT INTO TTSRELCTACLI (CD_CPFCGC, CD_CLIENTE_CC, CD_CLIENTE_CI, CD_CLIENTE_CP)
+            INSERT INTO CORRWIN.TTSRELCTACLI (CD_CPFCGC, CD_CLIENTE_CC, CD_CLIENTE_CI, CD_CLIENTE_CP)
             (
                 SELECT
                     CD_CPFCGC,
