@@ -15,7 +15,7 @@ containers:
       - name: ROOT_LOG_LEVEL
         value: "INFO"
       - name: PERSEPHONE_KAFKA_BROKERS
-        value: "sigbrvnlkafka-uat.subpriv.vcnuat.oraclevcn.com:9092"
+        value: "cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
       - name: PRODUCTION
         value: "False"
       - name: MONGO_CONNECTION
@@ -83,7 +83,7 @@ containers:
       - name: LD_LIBRARY_PATH
         value: "/opt/instantclient"
       - name: PERSEPHONE_QUEUE_HOST
-        value: "sigbrvnlkafka-uat.subpriv.vcnuat.oraclevcn.com"
+        value: "cluster-kafka-bootstrap.kafka.svc.cluster.local"
       - name: PERSEPHONE_QUEUE_PORT
         value: "9092"
       - name: PERSEPHONE_TOPIC_USER
@@ -105,7 +105,7 @@ containers:
       - name: FILE_BUCKET_NAME
         value: "heimdall_rsa"
       - name: VALHALLA_QUEUE_HOST
-        value: "sigbrvnlkafka-uat.subpriv.vcnuat.oraclevcn.com:9092"
+        value: "cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
       - name: HEIMDALL_FILE_BUCKET_NAME
         value: "heimdall_rsa"
       - name: HEIMDALL_AWS_ACCESS_KEY_ID
