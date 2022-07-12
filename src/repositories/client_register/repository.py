@@ -25,7 +25,7 @@ class ClientRegisterRepository(OracleBaseRepository):
             "cpf": str(user_cpf),
         }
         await cls.execute(
-            sql="call PROC_IMPCLIH_V2_LIONX.EXECIMPH(:cd_empresa, :cd_usuario, :tp_ocorrencia, :cd_cliente_padrao, :cpf)",
+            sql="call CORRWIN.PROC_IMPCLIH_V2_LIONX.EXECIMPH(:cd_empresa, :cd_usuario, :tp_ocorrencia, :cd_cliente_padrao, :cpf)",
             values=values,
         )
 

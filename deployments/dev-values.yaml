@@ -4,7 +4,7 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.7.8-vitao
+    image: nexus.sigame.com.br/sphinx:1.7.9-vitao
     ports:
       - containerPort: 8000
     env:
@@ -44,7 +44,7 @@ containers:
         value: "suitability_user_profile"
       - name: MONGODB_SUITABILITY_ANSWERS_COLLECTION
         value: "suitability_answers"
-      - name : MONGODB_ALLOWED_CPF
+      - name: MONGODB_ALLOWED_CPF
         value: "allowed_cpf"
       - name: MAIL_KEY
         value: "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"
