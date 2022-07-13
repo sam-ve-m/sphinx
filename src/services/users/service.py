@@ -117,7 +117,7 @@ class UserService(IUser):
             email_template=EmailTemplate.WELLCOME,
             email=user.get("email"),
             payload_jwt=jwt,
-            user_name=user["nick_name"]
+            user_name=user["nick_name"],
         )
         return {
             "status_code": status.HTTP_201_CREATED,
@@ -913,7 +913,7 @@ class UserService(IUser):
             email_template=EmailTemplate.FORGOT_ELECTRONIC_SIGNATURE,
             email=entity.get("email"),
             payload_jwt=jwt,
-            user_name=entity["nick_name"]
+            user_name=entity["nick_name"],
         )
         return {
             "status_code": status.HTTP_200_OK,

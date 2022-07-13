@@ -30,7 +30,11 @@ class IAuthentication(ABC):
     @staticmethod
     @abstractmethod
     def send_authentication_email(
-        email_template: EmailTemplate, email: str, payload_jwt: str, body: str, email_sender=SendGridEmail
+        email_template: EmailTemplate,
+        email: str,
+        payload_jwt: str,
+        body: str,
+        email_sender=SendGridEmail,
     ) -> None:
         pass
 

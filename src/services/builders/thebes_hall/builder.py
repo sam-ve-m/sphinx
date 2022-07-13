@@ -251,25 +251,29 @@ class ThebesHallBuilder:
         return self
 
     def add_dw_account(self):
-        self._jwt_payload_user_data["portfolios"]["us"].update(
-            {
-                "dw_account": self._user_data.get("portfolios", {})
-                .get("default", {})
-                .get("us", {})
-                .get("dw_account")
-            }
+        dw_account = (
+            self._user_data.get("portfolios", {})
+            .get("default", {})
+            .get("us", {})
+            .get("dw_account")
         )
+        if dw_account:
+            self._jwt_payload_user_data["portfolios"]["us"].update(
+                {"dw_account": dw_account}
+            )
         return self
 
     def add_dw_display_account(self):
-        self._jwt_payload_user_data["portfolios"]["us"].update(
-            {
-                "dw_display_account": self._user_data.get("portfolios", {})
-                .get("default", {})
-                .get("us", {})
-                .get("dw_display_account")
-            }
+        dw_display_account = (
+            self._user_data.get("portfolios", {})
+            .get("default", {})
+            .get("us", {})
+            .get("dw_display_account")
         )
+        if dw_display_account:
+            self._jwt_payload_user_data["portfolios"]["us"].update(
+                {"dw_display_account": dw_display_account}
+            )
         return self
 
     def add_client_has_br_trade_allowed(

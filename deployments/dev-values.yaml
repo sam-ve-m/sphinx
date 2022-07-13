@@ -4,7 +4,7 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.7.9-vitao
+    image: nexus.sigame.com.br/sphinx:1.7.10-vitao
     ports:
       - containerPort: 8000
     env:
