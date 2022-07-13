@@ -136,7 +136,7 @@ class AuthenticationService(IAuthentication):
             email_template=EmailTemplate.LOGIN,
             email=user_data["email"],
             payload_jwt=jwt,
-            user_name=user_data["nick_name"]
+            user_name=user_data["nick_name"],
         )
         return {
             "status_code": status.HTTP_200_OK,
@@ -145,19 +145,25 @@ class AuthenticationService(IAuthentication):
 
     @staticmethod
     def send_authentication_email(
-        email_template: EmailTemplate, email: str, payload_jwt: str, user_name: str, email_sender=SendGridEmail
+        email_template: EmailTemplate,
+        email: str,
+        payload_jwt: str,
+        user_name: str,
+        email_sender=SendGridEmail,
     ) -> None:
         page = HtmlModifier(
             email_template=email_template,
             content={
                 "cta": config("TARGET_LINK") + f"?token={payload_jwt}",
-                "nome": user_name
-            }
+                "nome": user_name,
+            },
         )()
         email_sender.send_email_to(
             target_email=email,
             message=page,
-            subject=i18n.get_translate(key=f"email.subject.{email_template.value}", locale="pt"),
+            subject=i18n.get_translate(
+                key=f"email.subject.{email_template.value}", locale="pt"
+            ),
         )
 
     @staticmethod

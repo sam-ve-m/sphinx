@@ -9,7 +9,9 @@ from src.domain.email.templates.enum import EmailTemplate
 class HtmlModifier:
     def __init__(self, email_template: EmailTemplate, content: dict):
         self.base = "src/services/asset"
-        with open(os.path.join(self.base, f"{email_template.value}.html")) as html_template:
+        with open(
+            os.path.join(self.base, f"{email_template.value}.html")
+        ) as html_template:
             self.html = html_template.read()
         self.content = content
 
