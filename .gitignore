@@ -57,3 +57,6 @@ venv/
 .env
 email.html
 instantclient/
+
+#git-crypt key
+crypt-prod
