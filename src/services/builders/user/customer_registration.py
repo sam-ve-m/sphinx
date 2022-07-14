@@ -42,8 +42,8 @@ class CustomerRegistrationBuilder:
         return self
 
     def personal_phone(self):
-        phone = self.__personal_data.get("cel_phone")
-        self.__buffer["personal"].update({"cel_phone": phone})
+        phone = self.__personal_data.get("phone")
+        self.__buffer["personal"].update({"phone": phone})
         return self
 
     def personal_nationality(self):
