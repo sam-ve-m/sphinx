@@ -60,3 +60,4 @@ instantclient/
 
 #git-crypt key
 crypt-prod
+sphinx
