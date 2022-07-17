@@ -11,6 +11,7 @@ en:
     register_not_exists: Register not exists.
     process_issue: Proccesses error.
     unable_to_process: Unable to proccess.
+    we_are_in_beta: We are in beta test, we will contact you.
   view:
     feature_not_exists: The provided features not exists.
   user:

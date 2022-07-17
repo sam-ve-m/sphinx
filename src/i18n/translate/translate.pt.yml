@@ -11,6 +11,7 @@ pt:
     register_not_exists: Registro não existe.
     process_issue: Erro no processo.
     unable_to_process: Impossivel processar.
+    we_are_in_beta: Entamos em beta teste, entraremos em contato.
   view:
     feature_not_exists: O serviços enviado não existe.
   user:
