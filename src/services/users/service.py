@@ -614,7 +614,7 @@ class UserService(IUser):
         is_allowed = await allowed_cpf.is_cpf_allowed(cpf=user_cpf)
 
         if not is_allowed:
-            raise InternalServerError("common.process_issue")
+            raise BadRequestError("common.we_are_in_beta")
 
         user_by_cpf = await user_repository.find_one(
             {"identifier_document.cpf": user_cpf}
