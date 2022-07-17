@@ -458,7 +458,7 @@ class UserPersonalDataValidation(BaseModel):
     father_name: Optional[NameSource]
     mother_name: NameSource
     email: EmailSource
-    cel_phone: CelPhoneSource
+    phone: CelPhoneSource
     nationality: NationalitySource
     occupation_activity: ActivitySource
     company_name: Optional[CompanyNameSource]
