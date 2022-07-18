@@ -63,7 +63,6 @@ from src.services.persephone.templates.persephone_templates import (
     get_user_employ_for_schema_template_with_data,
 )
 from src.services.sinacor.service import SinacorService
-from src.services.valhalla.service import ValhallaService
 
 
 class UserService(IUser):
@@ -75,7 +74,6 @@ class UserService(IUser):
         user: dict,
         user_repository=UserRepository,
         authentication_service=AuthenticationService,
-        valhalla_service=ValhallaService,
         jwt_handler=JwtService,
     ) -> dict:
         user_from_database = await user_repository.find_one(
@@ -102,12 +100,6 @@ class UserService(IUser):
         was_user_inserted = await user_repository.insert(user)
         if was_user_inserted is False:
             raise InternalServerError("common.process_issue")
-
-        await valhalla_service.register_user(
-            unique_id=user["unique_id"],
-            nickname=user["nick_name"],
-            user_type=user["scope"]["user_level"],
-        )
 
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user, ttl=10
@@ -1365,7 +1357,7 @@ class UserService(IUser):
 
     @staticmethod
     async def update_customer_registration_data(
-        payload: dict, user_repository=UserRepository, valhalla_service=ValhallaService
+        payload: dict, user_repository=UserRepository
     ):
         await UserService.onboarding_br_step_validator(
             payload=payload, onboard_step=["finished", "user_data_validation"]
@@ -1472,13 +1464,6 @@ class UserService(IUser):
             },
         ):
             raise InternalServerError("common.process_issue")
-
-        user = await user_repository.find_one({"unique_id": unique_id})
-        await valhalla_service.update_user(
-            unique_id=user["unique_id"],
-            nickname=user["nick_name"],
-            user_type=user["scope"]["user_level"],
-        )
 
         return {
             "status_code": status.HTTP_200_OK,
