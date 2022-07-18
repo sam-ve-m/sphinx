@@ -47,9 +47,11 @@ containers:
       - name: MONGODB_ALLOWED_CPF
         value: "allowed_cpf"
       - name: MAIL_KEY
-        value: "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"
+        value: "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"
       - name: MAIL_SENDER
-        value: "no-reply@lionx.ai"
+        value: "noreply@ligainvest.com.br"
+      - name: NAME_SENDER
+        value: "Liga Invest"
       - name: TARGET_LINK
         value: "https://app.lionx.com.br/public/deeplink"
       - name: REDIS_HOST_URL
@@ -200,6 +202,10 @@ containers:
         value: "https://bo-api.drivewealth.io/back-office/users/{}/documents"
       - name: DW_USER_PHYSICAL_DOCUMENT_URL
         value: "https://bo-api.drivewealth.io/back-office/documents/{}/url"
+      - name: MONGODB_ALLOWED_CPF
+        value: "allowed_cpf"
+      - name: MUST_VALIDATE_CPF
+        value: ""
 
 imagePullSecrets:
   - name: nexus-v3

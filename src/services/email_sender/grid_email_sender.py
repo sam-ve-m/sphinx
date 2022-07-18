@@ -9,7 +9,7 @@ from src.core.interfaces.email_sender.interface import IEmailSender
 
 class EmailSender(IEmailSender):
     sg = sendgrid.SendGridAPIClient(api_key=config("MAIL_KEY"))
-    sender_email = Email(config("MAIL_SENDER"))
+    sender_email = Email(email=config("MAIL_SENDER"), name=config("NAME_SENDER"))
 
     @staticmethod
     def send_email_to(target_email: str, message: str, subject: str) -> None:
