@@ -144,7 +144,7 @@ class UpdateCustomerRegistrationBuilder:
         old_email = self.__old_personal_data.get("email")
         if new_email := self._get_new_value("personal", "email"):
             self._update_modified_data(
-                levels=("email",), old_field=old_email, new_filed=new_email
+                levels=("email",), old_field=old_email, new_filed=new_email.lower()
             )
         return self
 
