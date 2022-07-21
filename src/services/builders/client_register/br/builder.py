@@ -85,10 +85,10 @@ class ClientRegisterBuilderBr:
         self._fields_added.update({"TP_REGISTRO": value})
         return self
 
-    def add_dt_criacao(self, user_data: dict):
+    def add_dt_criacao(self):
         self._fields_added.update(
             {
-                "DT_CRIACAO": user_data["created_at"].astimezone(
+                "DT_CRIACAO": datetime.utcnow().astimezone(
                     timezone(timedelta(minutes=-180))
                 )
             }
