@@ -10,7 +10,6 @@ from src.repositories.sinacor_types.repository import SinacorTypesRepository
 from src.services.builders.client_register.us.builder import (
     ClientUpdateRegisterBuilderUs,
 )
-from src.services.valhalla.service import ValhallaService
 from src.transports.dw.transport import DWTransport
 from src.infrastructures.env_config import config
 from src.repositories.user.repository import UserRepository
@@ -35,7 +34,6 @@ class DriveWealthService:
         cls,
         user_data: dict,
         user_repository=UserRepository,
-        social_network_service=ValhallaService,
         portfolio_repository=PortfolioRepository,
     ):
         user_dw_id = user_data["portfolios"]["default"].get("us", {}).get("dw_id")
@@ -71,9 +69,6 @@ class DriveWealthService:
                 "portfolios.default.us.created_at": datetime.datetime.utcnow(),
             }
             unique_id = user_data["unique_id"]
-            await social_network_service.register_user_portfolio_us(
-                unique_id=unique_id, dw_account=account_id, dw_id=user_dw_id
-            )
             await portfolio_repository.save_unique_id_by_account(
                 account=account_id, unique_id=unique_id, region="us"
             )

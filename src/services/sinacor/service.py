@@ -16,7 +16,6 @@ from src.repositories.protfolio.repository import PortfolioRepository
 from src.repositories.user.repository import UserRepository
 from persephone_client import Persephone
 from src.services.third_part_integration.solutiontech import Solutiontech
-from src.services.valhalla.service import ValhallaService
 
 
 class SinacorService:
@@ -28,8 +27,7 @@ class SinacorService:
         user_data: dict,
         client_register_repository=ClientRegisterRepository,
         user_repository=UserRepository,
-        portfolio_repository=PortfolioRepository,
-        social_network_service=ValhallaService,
+        portfolio_repository=PortfolioRepository
     ):
         user_data_to_update = bool(
             user_data.get("portfolios", {})
@@ -84,17 +82,10 @@ class SinacorService:
             {"unique_id": database_and_bureau_dtvm_client_data_merged["unique_id"]}
         )
         bmf_account = user_data["portfolios"]["default"]["br"]["bmf_account"]
-        bovespa_account = user_data["portfolios"]["default"]["br"]["bovespa_account"]
         unique_id = user_data["unique_id"]
 
         await portfolio_repository.save_unique_id_by_account(
             account=bmf_account, unique_id=unique_id, region="br"
-        )
-
-        await social_network_service.register_user_portfolio_br(
-            unique_id=unique_id,
-            bmf_account=bmf_account,
-            bovespa_account=bovespa_account,
         )
 
     @staticmethod

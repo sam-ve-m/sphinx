@@ -13,5 +13,7 @@ class AllowedCpf(MongoDbBaseRepository):
 
     @classmethod
     async def is_cpf_allowed(cls, cpf: str):
-        is_allowed = await cls.find_one({"cpf": cpf})
-        return bool(is_allowed)
+        if config("MUST_VALIDATE_CPF"):
+            is_allowed = await cls.find_one({"cpf": cpf})
+            return bool(is_allowed)
+        return True
