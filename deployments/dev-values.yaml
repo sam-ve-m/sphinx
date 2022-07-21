@@ -234,7 +234,7 @@ virtualService:
           uri: "/"
         route:
           - destination:
-              host: sphinx-service.develop.svc.cluster.local
+              host: sphinx-service
               port:
                 number: 8000
         corsPolicy:
@@ -278,11 +278,11 @@ podAnnotations: {}
 #   # runAsUser: 1000
 resources:
   requests: #Amount of resources kube-scheduler will look into nodes to alocate the given POD
-    cpu: 256m
-    memory: 256Mi
-  limits: #Amount of resources limited by kubelet (will not exceed)
-    cpu: 256m
+    cpu: 512m
     memory: 384Mi
+  limits: #Amount of resources limited by kubelet (will not exceed)
+    cpu: 1
+    memory: 512Mi
 
 autoscaling:
   enabled: true
