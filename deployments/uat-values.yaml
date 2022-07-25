@@ -197,7 +197,7 @@ containers:
       - name: DW_WLP_ID
         value: "LION"
       - name: VALHALLA_HOST
-        value: "172.30.19.32"
+        value: "cluster-kafka-bootstrap.kafka.svc.cluster.local"
       - name: VALHALLA_PORT
         value: "9092"
       - name: DW_USER_PHYSICAL_DOCUMENTS_URL

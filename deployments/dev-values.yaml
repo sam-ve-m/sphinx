@@ -4,7 +4,7 @@ namespace: develop
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.0.5-0
+    image: nexus.sigame.com.br/sphinx:1.0.2-0
     ports:
       - containerPort: 8000
     env:
@@ -107,7 +107,7 @@ containers:
       - name: FILE_BUCKET_NAME
         value: "heimdall_rsa"
       - name: VALHALLA_QUEUE_HOST
-        value: "172.30.10.105:9092"
+        value: "cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
       - name: HEIMDALL_FILE_BUCKET_NAME
         value: "heimdall_rsa"
       - name: HEIMDALL_AWS_ACCESS_KEY_ID
@@ -195,7 +195,7 @@ containers:
       - name: DW_WLP_ID
         value: "LION"
       - name: VALHALLA_HOST
-        value: "172.30.19.32"
+        value: "cluster-kafka-bootstrap.kafka.svc.cluster.local"
       - name: VALHALLA_PORT
         value: "9092"
       - name: DW_USER_PHYSICAL_DOCUMENTS_URL
