@@ -3,6 +3,10 @@ from src.services.authentications.service import AuthenticationService
 
 class AuthenticationController:
     @staticmethod
+    async def thebes_nock(data: dict):
+        return await AuthenticationService.thebes_nock(data)
+
+    @staticmethod
     async def thebes_gate(thebes_answer: dict):
         return await AuthenticationService.thebes_gate(thebes_answer=thebes_answer)
 

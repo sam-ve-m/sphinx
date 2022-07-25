@@ -10,6 +10,16 @@ from src.routers.routes_registers.user import UserRouter
 router = UserRouter.instance()
 
 
+@router.get("/thebes_nock", tags=["authentication"])
+async def thebes_hall(request: Request):
+    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
+    return await BaseController.run(
+        AuthenticationController.thebes_nock,
+        {},
+        request,
+    )
+
+
 @router.put("/thebes_hall", tags=["authentication"])
 async def thebes_hall(device_information: DeviceInformationOptional, request: Request):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)

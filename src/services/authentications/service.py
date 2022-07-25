@@ -167,6 +167,13 @@ class AuthenticationService(IAuthentication):
         )
 
     @staticmethod
+    async def thebes_nock(data: dict) -> dict:
+        return {
+            "status_code": status.HTTP_200_OK,
+            "payload": {"status": True},
+        }
+
+    @staticmethod
     async def thebes_hall(
         device_and_thebes_answer_from_request: dict,
         user_repository=UserRepository,
