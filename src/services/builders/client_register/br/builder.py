@@ -15,6 +15,7 @@ from src.domain.sinacor.brokerage_discount_percentage import (
 from src.domain.sinacor.brokerage_note_issuance_indicator import (
     BrokerageNoteIssuanceIndicator,
 )
+from src.domain.sinacor.can_be_operated_by_legal_attorney import CanBeOperatedByLegalAttorney
 from src.domain.sinacor.client_digit import ClientDigit
 from src.domain.sinacor.client_origin import ClientOrigin
 from src.domain.sinacor.client_registration_status import (
@@ -538,8 +539,11 @@ class ClientRegisterBuilderBr:
         self._fields_added.update({"SG_ESTADO_EMIS": value})
         return self
 
-    def add_nm_empresa(self, value=None):
-        self._fields_added.update({"NM_EMPRESA": value})
+    def add_nm_empresa(self, user_data: dict):
+        name = user_data["occupation"].get("company", {}).get("name")
+        if len(name) > 60:
+            name = name[:60]
+        self._fields_added.update({"NM_EMPRESA": name})
         return self
 
     def add_nm_pai(self, value=None):
@@ -962,7 +966,7 @@ class ClientRegisterBuilderBr:
         self._fields_added.update({"UF_ESTR2": value})
         return self
 
-    def add_num_aut_tra_orde_prcd(self, value=None):
+    def add_num_aut_tra_orde_prcd(self, value=CanBeOperatedByLegalAttorney.NO.value):
         self._fields_added.update({"NUM_AUT_TRA_ORDE_PRCD": value})
         return self
 

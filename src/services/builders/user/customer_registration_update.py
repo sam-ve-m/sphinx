@@ -187,14 +187,12 @@ class UpdateCustomerRegistrationBuilder:
             .get("company", {})
             .get("cnpj")
         )
-
-        if new_occupation_cnpj := self._get_new_value("personal", "company_cnpj"):
-            self._update_modified_data(
-                levels=("occupation", "company", "cnpj"),
-                old_field=old_occupation_cnpj,
-                new_filed=new_occupation_cnpj,
-            )
-
+        new_occupation_cnpj = self._get_new_value("personal", "company_cnpj")
+        self._update_modified_data(
+            levels=("occupation", "company", "cnpj"),
+            old_field=old_occupation_cnpj,
+            new_filed=new_occupation_cnpj,
+        )
         return self
 
     def personal_company_name(self):
@@ -203,14 +201,12 @@ class UpdateCustomerRegistrationBuilder:
             .get("company", {})
             .get("name")
         )
-
-        if new_company_name := self._get_new_value("personal", "company_name"):
-            self._update_modified_data(
-                levels=("occupation", "company", "name"),
-                old_field=old_company_name,
-                new_filed=new_company_name,
-            )
-
+        new_company_name = self._get_new_value("personal", "company_name")
+        self._update_modified_data(
+            levels=("occupation", "company", "name"),
+            old_field=old_company_name,
+            new_filed=new_company_name,
+        )
         return self
 
     def personal_patrimony(self):
