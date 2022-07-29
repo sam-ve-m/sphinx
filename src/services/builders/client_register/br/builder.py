@@ -541,7 +541,7 @@ class ClientRegisterBuilderBr:
 
     def add_nm_empresa(self, user_data: dict):
         name = user_data["occupation"].get("company", {}).get("name")
-        if len(name) > 60:
+        if name and len(name) > 60:
             name = name[:60]
         self._fields_added.update({"NM_EMPRESA": name})
         return self
