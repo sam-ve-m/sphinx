@@ -27,7 +27,7 @@ class SinacorService:
         user_data: dict,
         client_register_repository=ClientRegisterRepository,
         user_repository=UserRepository,
-        portfolio_repository=PortfolioRepository
+        portfolio_repository=PortfolioRepository,
     ):
         user_data_to_update = bool(
             user_data.get("portfolios", {})

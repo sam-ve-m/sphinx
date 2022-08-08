@@ -322,7 +322,7 @@ class EmailSource(Source):
 
 
 class NameSource(Source):
-    value: constr(regex=r'^[a-zA-Z\-]+?\s[a-zA-Z\s\-]+$')
+    value: constr(regex=r"^[a-zA-Z\-]+?\s[a-zA-Z\s\-]+$")
 
 
 class NickName(Source):

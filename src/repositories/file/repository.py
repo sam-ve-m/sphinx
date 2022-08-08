@@ -257,7 +257,9 @@ class FileRepository(IFile):
             async for s3_object in bucket.objects.filter(Prefix=path, Delimiter="/"):
                 objects.append(s3_object)
 
-        objects = sorted(objects, key=lambda x: x.meta.data["LastModified"], reverse=True)
+        objects = sorted(
+            objects, key=lambda x: x.meta.data["LastModified"], reverse=True
+        )
 
         if not len(objects) > 0:
             raise InternalServerError("files.is_empty")
