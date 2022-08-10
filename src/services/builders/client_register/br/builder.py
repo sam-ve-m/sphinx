@@ -15,7 +15,9 @@ from src.domain.sinacor.brokerage_discount_percentage import (
 from src.domain.sinacor.brokerage_note_issuance_indicator import (
     BrokerageNoteIssuanceIndicator,
 )
-from src.domain.sinacor.can_be_operated_by_legal_attorney import CanBeOperatedByLegalAttorney
+from src.domain.sinacor.can_be_operated_by_legal_attorney import (
+    CanBeOperatedByLegalAttorney,
+)
 from src.domain.sinacor.client_digit import ClientDigit
 from src.domain.sinacor.client_origin import ClientOrigin
 from src.domain.sinacor.client_registration_status import (

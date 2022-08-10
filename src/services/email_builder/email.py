@@ -18,7 +18,7 @@ class HtmlModifier:
     def modify(self):
         try:
             for field, value in self.content.items():
-                self.html = self.html.replace("{{"f"{field}""}}", value)
+                self.html = self.html.replace("{{" f"{field}" "}}", value)
         except Exception as e:
             Gladsheim.error(error=e)
 
