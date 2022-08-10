@@ -475,7 +475,7 @@ class UserDocumentsDataValidation(BaseModel):
     cpf: CpfSource
     identity_type: DocumentTypesSource
     identity_number: DocumentNumberSource
-    expedition_date: DateSource
+    expedition_date: Optional[DateSource]
     issuer: IssuerSource
     state: StateSource
 
