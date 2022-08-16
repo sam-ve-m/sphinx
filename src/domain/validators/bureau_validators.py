@@ -306,7 +306,7 @@ class AssetsDateSource(Source):
 
 
 class EmailSource(Source):
-    value: str
+    value: constr(max_length=80)
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, value):
