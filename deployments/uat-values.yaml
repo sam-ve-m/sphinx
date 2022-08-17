@@ -4,7 +4,7 @@ namespace: homolog
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.0.12
+    image: nexus.sigame.com.br/sphinx:1.0.13
     ports:
       - containerPort: 8000
     env:
@@ -27,7 +27,7 @@ containers:
       - name: MONGO_IS_SERVER
         value: "False"
       - name: MONGO_CONNECTION_URL
-        value: "mongodb://sphinx:LjfejudPdsah66532prwn76@172.30.18.223:41000,172.30.19.240:41000,172.30.19.71:41000/?authSource=admin&replicaSet=rslionx&readPreference=secondary"
+        value: "mongodb://sphinx:LjfejudPdsah66532prwn76@172.30.18.223:41000,172.30.19.240:41000,172.30.19.71:41000/?authSource=admin&replicaSet=rslionx&readPreference=primary"
       - name: MONGODB_DATABASE_NAME
         value: "lionx"
       - name: MONGODB_FEATURE_COLLECTION
@@ -145,7 +145,7 @@ containers:
       - name: MIST_JWT_REQUIRED_FIELDS
         value: "[]"
       - name: MIST_MONGODB_CONNECTION
-        value: "mongodb://mist:LLNnmsi9WEQuhdsamn@172.30.18.223:41000,172.30.19.240:41000,172.30.19.71:41000/?authSource=admin&replicaSet=rslionx&readPreference=secondary&appname=MongoDB%20Compass&ssl=false"
+        value: "mongodb://mist:LLNnmsi9WEQuhdsamn@172.30.18.223:41000,172.30.19.240:41000,172.30.19.71:41000/?authSource=admin&replicaSet=rslionx&readPreference=primary&appname=MongoDB%20Compass&ssl=false"
       - name: MIST_ELECTRONIC_SIGNATURE_MAX_ATTEMPTS
         value: "5"
       - name: MIST_ENCRYPT_KEY
