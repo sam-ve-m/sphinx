@@ -306,7 +306,7 @@ class AssetsDateSource(Source):
 
 
 class EmailSource(Source):
-    value: str
+    value: constr(max_length=80)
 
     @validator("value", always=True, allow_reuse=True)
     def validate_value(cls, value):
@@ -322,7 +322,7 @@ class EmailSource(Source):
 
 
 class NameSource(Source):
-    value: constr(regex=r"^[a-zA-Z\-]+?\s[a-zA-Z\s\-]+$")
+    value: constr(regex=r"^[a-zA-Z\-]+?\s[a-zA-Z\s\-]+$", max_length=60)
 
 
 class NickName(Source):
