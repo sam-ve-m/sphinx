@@ -12,7 +12,7 @@ containers:
       - name: SPHINX_PORT
         value: "8000"
       - name: ETRIA_LOG_LEVEL
-        value: "INFO"
+        value: "DEBUG"
       - name: ROOT_LOG_LEVEL
         value: "WARNING"
       - name: PERSEPHONE_KAFKA_BROKERS
