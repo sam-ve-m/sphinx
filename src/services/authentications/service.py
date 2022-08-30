@@ -55,13 +55,15 @@ class AuthenticationService(IAuthentication):
         if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        is_active_user = user_data.get("is_active_user")
+        email_validated = user_data.get("email_validated")
         response = {"status_code": status.HTTP_200_OK, "payload": {"jwt": None}}
-
-        if not is_active_user:
+        is_email_validation_token = thebes_answer["user"].get(
+            "is_email_validation_token", False
+        )
+        if not email_validated and is_email_validation_token:
             update_data = {
                 "is_active_user": True,
-                "must_do_first_login": False,
+                "email_validated": True,
                 "scope": {
                     "user_level": UserLevel.PROSPECT.value,
                     "view_type": "default",
@@ -127,8 +129,8 @@ class AuthenticationService(IAuthentication):
         ).build()
 
         is_active_user = user_data["is_active_user"]
-        must_do_first_login = user_data["must_do_first_login"]
-        if must_do_first_login is False and is_active_user is False:
+        email_validated = user_data["email_validated"]
+        if email_validated and is_active_user is False:
             raise UnauthorizedError("invalid_credential")
 
         jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)

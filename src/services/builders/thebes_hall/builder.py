@@ -86,6 +86,7 @@ class ThebesHallBuilder:
             .add_last_modified_date_months_past()
             .add_has_finished_br_onboarding()
             .add_has_finished_us_onboarding()
+            .add_need_validate_email()
         )
 
     def _build_client_jwt(self):
@@ -148,6 +149,13 @@ class ThebesHallBuilder:
             .get("w8_confirmation")
         )
         self._control_data.update({"has_finished_us_onboarding": has_w8_confirmation})
+        return self
+
+    def add_need_validate_email(self):
+        email_validated = bool(self._user_data.get("email_validated", False))
+        self._jwt_payload_user_data.update(
+            {"is_email_validation_token": not email_validated}
+        )
         return self
 
     def add_suitability_months_past(self):
