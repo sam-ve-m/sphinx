@@ -57,7 +57,9 @@ class AuthenticationService(IAuthentication):
 
         email_validated = user_data.get("email_validated")
         response = {"status_code": status.HTTP_200_OK, "payload": {"jwt": None}}
-        is_email_validation_token = thebes_answer["user"].get("is_email_validation_token", False)
+        is_email_validation_token = thebes_answer["user"].get(
+            "is_email_validation_token", False
+        )
         if not email_validated and is_email_validation_token:
             update_data = {
                 "is_active_user": True,
