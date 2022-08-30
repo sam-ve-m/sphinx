@@ -15,7 +15,7 @@ signature_regex = r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9!\"#$%&'\(\)\
 
 
 class Email(BaseModel):
-    email: constr(min_length=4, max_length=255)
+    email: constr(min_length=4, max_length=80)
 
     @validator("email", always=True, allow_reuse=True)
     def validate_email(cls, value):
