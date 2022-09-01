@@ -1,9 +1,6 @@
-# OUTSIDE LIBRARIES
-from datetime import datetime, timedelta
-
+from src.domain.suitability.profile import SuitabilityProfile, RiskDisclaimerType
 from src.infrastructures.env_config import config
 
-# SPHINX
 from src.repositories.base_repository.mongo_db.base import MongoDbBaseRepository
 from src.services.builders.thebes_hall.validators.months_past import months_past
 
@@ -14,7 +11,7 @@ class UserRepository(MongoDbBaseRepository):
     collection = config("MONGODB_USER_COLLECTION")
 
     @classmethod
-    async def is_user_using_suitability_or_refuse_term(cls, unique_id: str) -> str:
+    async def is_user_using_suitability_or_refuse_term(cls, unique_id: str) -> dict:
         user = await cls.find_one({"unique_id": unique_id})
         suitability = user.get("suitability")
         term_refusal = user["terms"].get("term_refusal")
@@ -29,8 +26,8 @@ class UserRepository(MongoDbBaseRepository):
 
         user_trade_match = {
             suitability_and_refusal_term: UserRepository.suitability_and_refusal_term_callback,
-            only_suitability: lambda _suitability, _term_refusal: "suitability",
-            only_refusal_term: lambda _suitability, _term_refusal: "term_refusal",
+            only_suitability: lambda _suitability, _term_refusal: RiskDisclaimerType.SUITABILITY.value,
+            only_refusal_term: lambda _suitability, _term_refusal: RiskDisclaimerType.TERM_REFUSAL.value,
             nothing: lambda _suitability, _term_refusal: None,
         }
 
@@ -38,13 +35,21 @@ class UserRepository(MongoDbBaseRepository):
             (has_suitability, has_term_refusal)
         )
         user_trade_profile = user_trade_profile_callback(suitability, term_refusal)
+        user_risk_option = {"option": user_trade_profile}
+        if user_trade_profile == RiskDisclaimerType.SUITABILITY.value:
+            user_risk_option["suitability_profile"] = cls.__get_user_suitability_profile(suitability)
+        return user_risk_option
 
-        return user_trade_profile
+    @classmethod
+    def __get_user_suitability_profile(cls, suitability: dict) -> str:
+        if suitability.get("score") == 1:
+            return SuitabilityProfile.HIGH_RISK.value
+        return SuitabilityProfile.LOW_RISK.value
 
     @staticmethod
     def suitability_and_refusal_term_callback(_suitability, _term_refusal):
         suitability_months_past = months_past(_suitability["submission_date"])
         if suitability_months_past < 24:
-            return "suitability"
+            return RiskDisclaimerType.SUITABILITY.value
         else:
-            return "term_refusal"
+            return RiskDisclaimerType.TERM_REFUSAL.value

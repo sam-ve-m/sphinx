@@ -1,20 +1,16 @@
-# STANDARD LIBS
-
-# OUTSIDE LIBRARIES
 import asyncio
 
 from fastapi import status
+from persephone_client import Persephone
 
 from src.core.interfaces.services.authentication.interface import IAuthentication
 from src.domain.drive_wealth.kyc_status import KycStatus
 from src.domain.email.templates.enum import EmailTemplate
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
-from src.domain.validators.authenticate_validators import Cpf
-
-# SPHINX
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 from src.domain.user_level.enum import UserLevel
+from src.domain.validators.authenticate_validators import Cpf
 from src.exceptions.exceptions import (
     BadRequestError,
     UnauthorizedError,
@@ -37,8 +33,6 @@ from src.services.persephone.templates.persephone_templates import (
     get_user_authentication_template_with_data,
 )
 from src.services.third_part_integration.solutiontech import Solutiontech
-from persephone_client import Persephone
-from src.domain.validators.authenticate_validators import Cpf
 
 
 class AuthenticationService(IAuthentication):

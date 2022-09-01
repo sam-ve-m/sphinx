@@ -186,7 +186,9 @@ class ThebesHallBuilder:
             )
         )
         value = current_event_loop.run_until_complete(task)
-        self._control_data.update({"using_suitability_or_refuse_term": value})
+        self._control_data.update({"using_suitability_or_refuse_term": value.get("option")})
+        if suitability_profile := value.get("suitability_profile"):
+            self._control_data.update({"suitability_profile": suitability_profile})
         return self
 
     def add_nick_name(self):
