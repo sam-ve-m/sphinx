@@ -5,9 +5,9 @@ from fastapi import Request
 from src.controllers.suitabilities.controller import SuitabilityController
 from src.controllers.base_controller import BaseController
 from src.services.jwts.service import JwtService
-from src.routers.routes_registers.user import UserRouter
+from src.routers.routes_registers.validated_user import ValidatedUserRouter
 
-router = UserRouter.instance()
+router = ValidatedUserRouter.instance()
 
 
 @router.post("/suitability/profile", tags=["suitability"])

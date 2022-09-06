@@ -5,9 +5,9 @@ from src.domain.validators.authenticate_validators import SignatureCheck
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
 from src.controllers.authentications.controller import AuthenticationController
-from src.routers.routes_registers.user import UserRouter
+from src.routers.routes_registers.validated_user import ValidatedUserRouter
 
-router = UserRouter.instance()
+router = ValidatedUserRouter.instance()
 
 
 @router.get("/thebes_nock", tags=["authentication"])

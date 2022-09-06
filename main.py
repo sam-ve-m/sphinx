@@ -12,7 +12,8 @@ from src.infrastructures.env_config import config
 
 
 from src.routers.routes_registers import (
-    UserRouter,
+    ValidatedUserRouter,
+    UnvalidatedUserRouter,
     ThirdPartRouter,
     AdminRouter,
     ClientRouter,
@@ -23,8 +24,11 @@ from src.routers.routes_registers import (
 
 app = FastAPI(root_path=config("ROOT_PATH"))
 
-UserRouter.apply_middleware(app)
-app.include_router(UserRouter.instance())
+ValidatedUserRouter.apply_middleware(app)
+app.include_router(ValidatedUserRouter.instance())
+
+UnvalidatedUserRouter.apply_middleware(app)
+app.include_router(UnvalidatedUserRouter.instance())
 
 ThirdPartRouter.apply_middleware(app)
 app.include_router(ThirdPartRouter.instance())

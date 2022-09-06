@@ -7,9 +7,9 @@ from src.domain.validators.client_register_validators import CountryState, Count
 from src.controllers.cliente_register_enums.controller import (
     ClientRegisterEnumsController,
 )
-from src.routers.routes_registers.user import UserRouter
+from src.routers.routes_registers.validated_user import ValidatedUserRouter
 
-router = UserRouter.instance()
+router = ValidatedUserRouter.instance()
 
 
 @router.get("/client_update_enums/gender", tags=["client_update_enums"])
