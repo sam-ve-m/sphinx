@@ -51,7 +51,7 @@ class AuthenticationService(IAuthentication):
 
         email_validated = user_data.get("email_validated")
         response = {"status_code": status.HTTP_200_OK, "payload": {"jwt": None}}
-        is_email_validation_token = thebes_answer["user"].get(
+        is_email_validation_token = thebes_answer.get(
             "is_email_validation_token", False
         )
         if not email_validated and is_email_validation_token:
@@ -123,9 +123,11 @@ class AuthenticationService(IAuthentication):
         ).build()
 
         is_active_user = user_data["is_active_user"]
-        email_validated = user_data["email_validated"]
+        email_validated = user_data.get("email_validated", False)
         if email_validated and is_active_user is False:
             raise UnauthorizedError("invalid_credential")
+        if not email_validated:
+            jwt_payload_data.update({"is_email_validation_token": True})
 
         jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         AuthenticationService.send_authentication_email(
