@@ -221,10 +221,14 @@ def get_create_electronic_signature_session_schema_template_with_data(
 def get_user_signed_terms_template_with_data(
     terms_update: dict, payload: dict, files_type: List[str]
 ) -> dict:
+    normalize_terms_update = {
+        key.replace("terms.", ""): value
+        for key, value in terms_update.items()
+    }
     return {
         "unique_id": payload.get("unique_id"),
         "terms_type": files_type,
-        "terms_update": terms_update,
+        "terms_update": normalize_terms_update,
         "user_accept": True,
         "term_answer_time_stamp": int(datetime.utcnow().timestamp()),
     }
