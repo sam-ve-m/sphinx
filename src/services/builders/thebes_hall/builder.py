@@ -153,9 +153,10 @@ class ThebesHallBuilder:
 
     def add_need_validate_email(self):
         email_validated = bool(self._user_data.get("email_validated", False))
-        self._jwt_payload_user_data.update(
-            {"is_email_validation_token": not email_validated}
-        )
+        if not email_validated:
+            self._jwt_payload_data.update(
+                {"is_email_validation_token": not email_validated}
+            )
         return self
 
     def add_suitability_months_past(self):
