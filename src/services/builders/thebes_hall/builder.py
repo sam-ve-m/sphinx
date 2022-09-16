@@ -150,6 +150,14 @@ class ThebesHallBuilder:
         self._control_data.update({"has_finished_us_onboarding": has_w8_confirmation})
         return self
 
+    def add_need_validate_email(self):
+        email_validated = bool(self._user_data.get("email_validated", False))
+        if not email_validated:
+            self._jwt_payload_data.update(
+                {"is_email_validation_token": not email_validated}
+            )
+        return self
+
     def add_suitability_months_past(self):
         SuitabilityValidator.run(user_data=self._user_data)
         suitability = self._user_data.get("suitability")
