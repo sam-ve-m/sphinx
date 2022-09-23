@@ -343,6 +343,7 @@ class ClientRegisterRepository(OracleBaseRepository):
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_num_aut_tra_orde_prcd()
             .add_cd_org_emit(user_data=user_data)
             .add_dt_doc_ident(user_data=user_data)
             .add_nr_rg(user_data=user_data)
@@ -428,6 +429,7 @@ class ClientRegisterRepository(OracleBaseRepository):
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_num_aut_tra_orde_prcd()
             .add_cd_org_emit(user_data=user_data)
             .add_dt_doc_ident(user_data=user_data)
             .add_nr_rg(user_data=user_data)
@@ -516,6 +518,7 @@ class ClientRegisterRepository(OracleBaseRepository):
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_num_aut_tra_orde_prcd()
             .add_cd_org_emit(user_data=user_data)
             .add_dt_doc_ident(user_data=user_data)
             .add_nr_rg(user_data=user_data)
@@ -603,6 +606,7 @@ class ClientRegisterRepository(OracleBaseRepository):
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_num_aut_tra_orde_prcd()
             .add_cd_org_emit(user_data=user_data)
             .add_dt_doc_ident(user_data=user_data)
             .add_nr_rg(user_data=user_data)
@@ -692,6 +696,7 @@ class ClientRegisterRepository(OracleBaseRepository):
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_num_aut_tra_orde_prcd()
             .add_cd_org_emit(user_data=user_data)
             .add_dt_doc_ident(user_data=user_data)
             .add_nr_rg(user_data=user_data)
@@ -784,6 +789,7 @@ class ClientRegisterRepository(OracleBaseRepository):
         (
             builder.add_tp_registro(sinacor_user_id=sinacor_user_control_data)
             .add_cd_cliente(sinacor_user_control_data=sinacor_user_control_data)
+            .add_num_aut_tra_orde_prcd()
             .add_cd_org_emit(user_data=user_data)
             .add_dt_doc_ident(user_data=user_data)
             .add_nr_rg(user_data=user_data)
