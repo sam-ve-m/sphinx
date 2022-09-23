@@ -4,7 +4,7 @@ namespace: homolog
 
 containers:
   - name: sphinx
-    image: nexus.sigame.com.br/sphinx:1.0.16
+    image: nexus.sigame.com.br/sphinx:1.0.17
     ports:
       - containerPort: 8000
     env:
