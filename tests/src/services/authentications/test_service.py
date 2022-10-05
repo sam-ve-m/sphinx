@@ -608,7 +608,7 @@ def test_client_sinacor_is_blocked_empty_return():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.get_sinacor_status = MagicMock(return_value=None)
     assert (
-        AuthenticationService._client_sinacor_is_blocked(
+        AuthenticationService._client_sinacor_status(
             user_cpf=1234567890,
             client_register_repository=stub_client_register_repository,
         )
@@ -622,7 +622,7 @@ def test_client_sinacor_is_blocked_not_synced():
         return_value=("AAA",)
     )
     assert (
-        AuthenticationService._client_sinacor_is_blocked(
+        AuthenticationService._client_sinacor_status(
             user_cpf=1234567890,
             client_register_repository=stub_client_register_repository,
         )
@@ -634,7 +634,7 @@ def test_client_sinacor_is_blocked_synced():
     stub_client_register_repository = StubClientRegisterRepository()
     stub_client_register_repository.get_sinacor_status = MagicMock(return_value=("A",))
     assert (
-        AuthenticationService._client_sinacor_is_blocked(
+        AuthenticationService._client_sinacor_status(
             user_cpf=1234567890,
             client_register_repository=stub_client_register_repository,
         )
