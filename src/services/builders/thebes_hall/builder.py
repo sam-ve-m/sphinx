@@ -322,7 +322,12 @@ class ThebesHallBuilder:
                 .get("us", {})
                 .get("w8_confirmation")
             )
-            if kyc_is_approved and w8_confirmation:
+            has_ouroinvest_account = (
+                self._user_data.get("ouro_invest", {})
+                .get("account", {})
+                .get("account_number")
+            )
+            if kyc_is_approved and w8_confirmation and has_ouroinvest_account:
                 self._jwt_payload_user_data.update(
                     {"client_has_us_trade_allowed": True}
                 )
