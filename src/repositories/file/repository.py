@@ -43,6 +43,7 @@ class FileRepository(IFile):
         TermsFileType.TERM_CUSTOMER_RELATIONSHIP_SUMMARY_DL_US.value: ".pdf",
         TermsFileType.TERM_GRINGO_WORLD.value: ".pdf",
         TermsFileType.TERM_GRINGO_WORLD_GENERAL_ADVICES.value: ".pdf",
+        TermsFileType.TERM_OUROINVEST.value: ".pdf",
     }
 
     @classmethod

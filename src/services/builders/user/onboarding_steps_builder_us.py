@@ -50,6 +50,7 @@ class OnboardingStepBuilderUS:
             TermsFileType.TERM_ALL_AGREEMENT_GRINGO_DL.value,
             TermsFileType.TERM_GRINGO_WORLD.value,
             TermsFileType.TERM_GRINGO_WORLD_GENERAL_ADVICES.value,
+            TermsFileType.TERM_OUROINVEST.value,
         }
         all_terms_is_signed = not (terms_that_needs_be_signed - user_signed_terms)
         is_valid_onbaording_step = (
