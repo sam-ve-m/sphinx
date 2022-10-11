@@ -39,11 +39,15 @@ class OnboardingStepBuilderUS:
             ]
         )
         terms_that_needs_be_signed = {
-            TermsFileType.TERM_OPEN_ACCOUNT_DW.value,
-            TermsFileType.TERM_APPLICATION_DW.value,
-            TermsFileType.TERM_PRIVACY_POLICY_AND_DATA_SHARING_POLICY_DW.value,
-            TermsFileType.TERM_DISCLOSURES_AND_DISCLAIMERS.value,
-            TermsFileType.TERM_MONEY_CORP.value,
+            TermsFileType.TERM_AND_PRIVACY_POLICY_DATA_SHARING_POLICY_DL_PT.value,
+            TermsFileType.TERM_AND_PRIVACY_POLICY_DATA_SHARING_POLICY_DL_US.value,
+            TermsFileType.TERM_OPEN_ACCOUNT_DL_PT.value,
+            TermsFileType.TERM_OPEN_ACCOUNT_DL_US.value,
+            TermsFileType.TERM_BUSINESS_CONTINUITY_PLAN_DL_PT.value,
+            TermsFileType.TERM_BUSINESS_CONTINUITY_PLAN_DL_US.value,
+            TermsFileType.TERM_CUSTOMER_RELATIONSHIP_SUMMARY_DL_PT.value,
+            TermsFileType.TERM_CUSTOMER_RELATIONSHIP_SUMMARY_DL_US.value,
+            TermsFileType.TERM_ALL_AGREEMENT_GRINGO_DL.value,
             TermsFileType.TERM_GRINGO_WORLD.value,
             TermsFileType.TERM_GRINGO_WORLD_GENERAL_ADVICES.value,
         }
