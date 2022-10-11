@@ -534,7 +534,7 @@ class UserService(IUser):
                     "features": ["default"],
                 },
                 "is_active_user": False,
-                "must_do_first_login": True,
+                "email_validated": False,
                 "use_magic_link": True,
                 "token_valid_after": datetime.utcnow(),
                 "terms": {

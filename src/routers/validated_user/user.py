@@ -23,7 +23,7 @@ from src.domain.validators.onboarding_validators import (
 from src.services.jwts.service import JwtService
 from src.controllers.base_controller import BaseController
 from src.controllers.users.controller import UserController
-from src.routers.routes_registers.user import UserRouter
+from src.routers.routes_registers.validated_user import ValidatedUserRouter
 from src.domain.validators.bureau_validators import (
     UpdateCustomerRegistrationData,
     ClientValidationData,
@@ -31,7 +31,7 @@ from src.domain.validators.bureau_validators import (
 )
 from src.domain.validators.user_validators import UserIdentifierData, TaxResidences
 
-router = UserRouter.instance()
+router = ValidatedUserRouter.instance()
 
 
 @router.put("/user/identifier_data", tags=["user"])
@@ -131,29 +131,6 @@ async def save_user_selfie(request: Request, user_document: UserDocument):
         "user_document": user_document.dict(),
     }
     return await BaseController.run(UserController.save_user_document, payload, request)
-
-
-@router.put("/user/sign_terms", tags=["user"])
-async def sign_term(
-    request: Request,
-    file_types: TermsFile,
-):
-    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
-
-    payload = file_types.dict()
-    payload.update({"x-thebes-answer": jwt_data})
-    return await BaseController.run(UserController.sign_terms, payload, request)
-
-
-@router.get("/user/signed_term", tags=["user"])
-async def get_assigned_term(
-    request: Request,
-    file_type: TermFile = Depends(TermFile),
-):
-    jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
-    payload = file_type.dict()
-    payload.update({"x-thebes-answer": jwt_data})
-    return await BaseController.run(UserController.get_signed_term, payload, request)
 
 
 @router.get("/user/onboarding_user_current_step_br", tags=["user"])

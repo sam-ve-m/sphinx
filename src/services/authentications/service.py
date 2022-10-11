@@ -1,20 +1,16 @@
-# STANDARD LIBS
-
-# OUTSIDE LIBRARIES
 import asyncio
 
 from fastapi import status
+from persephone_client import Persephone
 
 from src.core.interfaces.services.authentication.interface import IAuthentication
 from src.domain.drive_wealth.kyc_status import KycStatus
 from src.domain.email.templates.enum import EmailTemplate
 from src.domain.persephone_queue.persephone_queue import PersephoneQueue
-from src.domain.validators.authenticate_validators import Cpf
-
-# SPHINX
 from src.domain.sincad.client_sync_status import SincadClientImportStatus
 from src.domain.solutiontech.client_import_status import SolutiontechClientImportStatus
 from src.domain.user_level.enum import UserLevel
+from src.domain.validators.authenticate_validators import Cpf
 from src.exceptions.exceptions import (
     BadRequestError,
     UnauthorizedError,
@@ -37,8 +33,6 @@ from src.services.persephone.templates.persephone_templates import (
     get_user_authentication_template_with_data,
 )
 from src.services.third_part_integration.solutiontech import Solutiontech
-from persephone_client import Persephone
-from src.domain.validators.authenticate_validators import Cpf
 
 
 class AuthenticationService(IAuthentication):
@@ -55,13 +49,15 @@ class AuthenticationService(IAuthentication):
         if user_data is None:
             raise BadRequestError("common.register_not_exists")
 
-        is_active_user = user_data.get("is_active_user")
+        email_validated = user_data.get("email_validated")
         response = {"status_code": status.HTTP_200_OK, "payload": {"jwt": None}}
-
-        if not is_active_user:
+        is_email_validation_token = thebes_answer.get(
+            "is_email_validation_token", False
+        )
+        if not email_validated and is_email_validation_token:
             update_data = {
                 "is_active_user": True,
-                "must_do_first_login": False,
+                "email_validated": True,
                 "scope": {
                     "user_level": UserLevel.PROSPECT.value,
                     "view_type": "default",
@@ -127,9 +123,11 @@ class AuthenticationService(IAuthentication):
         ).build()
 
         is_active_user = user_data["is_active_user"]
-        must_do_first_login = user_data["must_do_first_login"]
-        if must_do_first_login is False and is_active_user is False:
+        email_validated = user_data.get("email_validated", False)
+        if email_validated and is_active_user is False:
             raise UnauthorizedError("invalid_credential")
+        if not email_validated:
+            jwt_payload_data.update({"is_email_validation_token": True})
 
         jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         AuthenticationService.send_authentication_email(

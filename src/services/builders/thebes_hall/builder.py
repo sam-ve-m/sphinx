@@ -86,6 +86,7 @@ class ThebesHallBuilder:
             .add_last_modified_date_months_past()
             .add_has_finished_br_onboarding()
             .add_has_finished_us_onboarding()
+            .add_need_validate_email()
         )
 
     def _build_client_jwt(self):
@@ -186,7 +187,9 @@ class ThebesHallBuilder:
             )
         )
         value = current_event_loop.run_until_complete(task)
-        self._control_data.update({"using_suitability_or_refuse_term": value})
+        self._control_data.update({"using_suitability_or_refuse_term": value.get("option")})
+        if suitability_profile := value.get("suitability_profile"):
+            self._control_data.update({"suitability_profile": suitability_profile})
         return self
 
     def add_nick_name(self):
@@ -319,7 +322,12 @@ class ThebesHallBuilder:
                 .get("us", {})
                 .get("w8_confirmation")
             )
-            if kyc_is_approved and w8_confirmation:
+            has_ouroinvest_account = (
+                self._user_data.get("ouro_invest", {})
+                .get("account", {})
+                .get("account_number")
+            )
+            if kyc_is_approved and w8_confirmation and has_ouroinvest_account:
                 self._jwt_payload_user_data.update(
                     {"client_has_us_trade_allowed": True}
                 )

@@ -6,7 +6,7 @@ from src.core.abstract_classes.routes_register.register import RoutesRegister
 from src.services.middleware.service import MiddlewareService
 
 
-class UserRouter(RoutesRegister):
+class ValidatedUserRouter(RoutesRegister):
 
     _instance = None
 
