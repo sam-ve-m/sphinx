@@ -14,6 +14,7 @@ class TermsFileType(Enum):
     TERM_AND_PRIVACY_POLICY_DATA_SHARING_POLICY_DL_US = (
         "term_and_privacy_policy_data_sharing_policy_dl_us"
     )
+    TERM_MISMATCH_PROFILE = "term_mismatch_profile"
     TERM_OPEN_ACCOUNT_DL_PT = "term_open_account_dl_pt"
     TERM_OPEN_ACCOUNT_DL_US = "term_open_account_dl_us"
     TERM_BUSINESS_CONTINUITY_PLAN_DL_PT = "term_business_continuity_plan_dl_pt"

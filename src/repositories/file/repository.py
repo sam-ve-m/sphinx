@@ -29,6 +29,7 @@ class FileRepository(IFile):
         "document_front": ".jpg",
         "document_back": ".jpg",
         TermsFileType.TERM_APPLICATION.value: ".pdf",
+        TermsFileType.TERM_MISMATCH_PROFILE.value: ".pdf",
         TermsFileType.TERM_OPEN_ACCOUNT.value: ".pdf",
         TermsFileType.TERM_REFUSAL.value: ".pdf",
         TermsFileType.TERM_NON_COMPLIANCE.value: ".pdf",
