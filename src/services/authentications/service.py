@@ -368,6 +368,8 @@ class AuthenticationService(IAuthentication):
             user_solutiontech_status_from_database=user_solutiontech_status_from_database,
             user_sincad_status_from_database=user_sincad_status_from_database,
             user_sinacor_status_from_database=user_sinacor_status_from_database,
+            user_sinacor_account_block_status_from_database=user_sinacor_account_block_status_from_database,
+
         )
 
         user_solutiontech_status_is_synced = (
@@ -443,6 +445,7 @@ class AuthenticationService(IAuthentication):
         user_solutiontech_status_from_database: str,
         user_sincad_status_from_database: bool,
         user_sinacor_status_from_database: bool,
+        user_sinacor_account_block_status_from_database: bool
     ):
         client_has_trade_allowed_status_with_database_user = {
             "solutiontech": {
@@ -455,6 +458,10 @@ class AuthenticationService(IAuthentication):
             },
             "sinacor": {
                 "status": user_sinacor_status_from_database,
+                "status_changed": False,
+            },
+            "sinacor_account_block_status": {
+                "status": user_sinacor_account_block_status_from_database,
                 "status_changed": False,
             },
         }
@@ -586,7 +593,7 @@ class AuthenticationService(IAuthentication):
         user_bmf_account_from_database: str,
         client_register_repository=ClientRegisterRepository,
     ) -> bool:
-        sincad_status, sinacor_block_status = await client_register_repository.get_sinacor_status(
+        sincad_status = await client_register_repository.get_sinacor_status(
             user_cpf=user_cpf, user_bmf_account=user_bmf_account_from_database
         )
         return sincad_status and sincad_status[0] in ["A"]
@@ -597,7 +604,7 @@ class AuthenticationService(IAuthentication):
         user_bmf_account_from_database: str,
         client_register_repository=ClientRegisterRepository,
     ) -> bool:
-        sincad_status, sinacor_block_status = await client_register_repository.get_sinacor_status(
+        sinacor_block_status = await client_register_repository.get_account_sinacor_is_blocked(
             user_cpf=user_cpf, user_bmf_account=user_bmf_account_from_database
         )
         return sinacor_block_status and sinacor_block_status[0] in ["BL"]

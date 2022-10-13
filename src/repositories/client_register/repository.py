@@ -181,10 +181,18 @@ class ClientRegisterRepository(OracleBaseRepository):
 
     @classmethod
     async def get_sinacor_status(cls, user_cpf: str, user_bmf_account: str):
-        sql = f"SELECT IN_SITUAC, TP_SITUAC FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf} AND CD_CLIENTE = '{user_bmf_account}'"
+        sql = f"SELECT IN_SITUAC FROM CORRWIN.TSCCLIBOL WHERE CD_CPFCGC = {user_cpf} AND CD_CLIENTE = '{user_bmf_account}'"
         result = await cls.query(sql=sql)
         if result and len(result) > 0:
-            return result[0], result[1]
+            return result[0]
+        return None
+
+    @classmethod
+    async def get_account_sinacor_is_blocked(cls, user_cpf: str, user_bmf_account: str):
+        sql = f"SELECT TP_SITUAC FROM CORRWIN.TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
+        result = await cls.query(sql=sql)
+        if result and len(result) > 0:
+            return result[0]
         return None
 
     @staticmethod
