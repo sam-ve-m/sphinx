@@ -897,7 +897,12 @@ class UserService(IUser):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=entity, ttl=10
         ).build()
+
         jwt_payload_data.update({"forgot_electronic_signature": True})
+        jwt_payload_data.update({"is_deeplink": True})
+        origin = entity.get("origin", "liga")
+        if entity.get("origin") and entity.get("origin") != "liga":
+            jwt_payload_data.update({"is_third_party_token": True})
 
         jwt = await JwtService.generate_token(jwt_payload_data=jwt_payload_data)
 
@@ -905,7 +910,8 @@ class UserService(IUser):
             email_template=EmailTemplate.FORGOT_ELECTRONIC_SIGNATURE,
             email=entity.get("email"),
             payload_jwt=jwt,
-            user_name=entity["nick_name"],
+            user_name=entity["name"],
+            origin=origin
         )
         return {
             "status_code": status.HTTP_200_OK,
