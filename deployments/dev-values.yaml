@@ -55,6 +55,8 @@ containers:
         value: "Liga Invest"
       - name: TARGET_LINK
         value: "https://app.lionx.com.br/public/deeplink"
+      - name: TARGET_LINK_PICPAY
+        value: "picpay://picpay/investment/liga/forgot_electronic_signature"
       - name: REDIS_HOST_URL
         value: "redis://sphinx:LLcdijundsaiheBDNAS@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
       - name: REDIS_CACHE_DB

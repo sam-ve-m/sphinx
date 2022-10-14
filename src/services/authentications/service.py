@@ -148,11 +148,17 @@ class AuthenticationService(IAuthentication):
         payload_jwt: str,
         user_name: str,
         email_sender=SendGridEmail,
+        origin: str = None
     ) -> None:
+        base_link = config("TARGET_LINK")
+        if origin is not None:
+            if origin == "picpay":
+                base_link = config("TARGET_LINK_PICPAY")
+
         page = HtmlModifier(
             email_template=email_template,
             content={
-                "cta": config("TARGET_LINK") + f"?token={payload_jwt}",
+                "cta": base_link + f"?token={payload_jwt}",
                 "nome": user_name,
             },
         )()
