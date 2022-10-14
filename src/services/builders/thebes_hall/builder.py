@@ -90,6 +90,10 @@ class ThebesHallBuilder:
         )
 
     def _build_client_jwt(self):
+
+        # TODO: Verificar se é necessário adicionar bloquio de conta us
+        # .add_client_us_account_is_blocked()
+
         (
             self.add_expiration_date_and_created_at()
             .add_unique_id()
@@ -102,6 +106,7 @@ class ThebesHallBuilder:
             .add_using_suitability_or_refuse_term()
             .add_last_modified_date_months_past()
             .add_suitability_months_past()
+            .add_account_br_is_blocked()
             .add_client_has_br_trade_allowed(
                 suitability_months_past=self._control_data["suitability_months_past"],
                 last_modified_date_months_past=self._control_data[
@@ -114,6 +119,16 @@ class ThebesHallBuilder:
             .add_has_finished_br_onboarding()
             .add_has_finished_us_onboarding()
         )
+
+    def add_account_br_is_blocked(self):
+        self._jwt_payload_user_data.update({"account_br_is_blocked": False})
+        sinacor_account_block_status = self._user_data.get("sinacor_account_block_status")
+        account_br_is_blocked = all([sinacor_account_block_status])
+        self._jwt_payload_user_data.update(
+            {"account_br_is_blocked": account_br_is_blocked}
+        )
+
+        return self
 
     def add_expiration_date_and_created_at(self):
         self._jwt_payload_data.update(
