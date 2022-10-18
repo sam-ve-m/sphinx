@@ -3,7 +3,7 @@ from pydantic import BaseModel, constr, validator
 from src.domain.validators.base import Email
 from src.domain.validators.brazil_register_number_validator import is_cpf_valid
 
-signature_regex = r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9]{8,}$"
+signature_regex = r"^(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[0-9])[a-zA-Z0-9!\"#$%&'\(\)\*\+,-\.\/:;<=>?@\[\\\]_\{\}]{8,}$"
 
 
 class Login(Email):
