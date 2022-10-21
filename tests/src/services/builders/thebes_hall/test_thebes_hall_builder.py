@@ -41,7 +41,7 @@ def test_builder_with_complete_dtvm_client_expect_valid_jwt_payload():
     copied_user_data = deepcopy(valid_client_data)
 
     user_repository = UserRepository()
-    user_repository.is_user_using_suitability_or_refuse_term = MagicMock(
+    user_repository.is_user_using_suitability_or_risk_acknowledged = MagicMock(
         return_value="suitability"
     )
 
@@ -79,7 +79,7 @@ def test_builder_with_complete_dtvm_client_expect_valid_jwt_payload():
 
 def test_builder_with_empty_user_and_kwargs_expect_valid_recovery_exception():
     user_repository = UserRepository()
-    user_repository.is_user_using_suitability_or_refuse_term = MagicMock(
+    user_repository.is_user_using_suitability_or_risk_acknowledged = MagicMock(
         return_value=None
     )
 

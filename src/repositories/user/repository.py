@@ -11,7 +11,7 @@ class UserRepository(MongoDbBaseRepository):
     collection = config("MONGODB_USER_COLLECTION")
 
     @classmethod
-    async def is_user_using_suitability_or_refuse_term(cls, unique_id: str) -> dict:
+    async def is_user_using_suitability_or_risk_acknowledged(cls, unique_id: str) -> dict:
         user = await cls.find_one({"unique_id": unique_id})
         suitability = user.get("suitability")
         term_refusal = user["terms"].get("term_refusal")
@@ -37,14 +37,8 @@ class UserRepository(MongoDbBaseRepository):
         user_trade_profile = user_trade_profile_callback(suitability, term_refusal)
         user_risk_option = {"option": user_trade_profile}
         if user_trade_profile == RiskDisclaimerType.SUITABILITY.value:
-            user_risk_option["suitability_profile"] = cls.__get_user_suitability_profile(suitability)
+            user_risk_option["suitability_profile"] = suitability.get("profile")
         return user_risk_option
-
-    @classmethod
-    def __get_user_suitability_profile(cls, suitability: dict) -> str:
-        if suitability.get("score") == 1:
-            return SuitabilityProfile.HIGH_RISK.value
-        return SuitabilityProfile.LOW_RISK.value
 
     @staticmethod
     def suitability_and_refusal_term_callback(_suitability, _term_refusal):
