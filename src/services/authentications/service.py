@@ -158,7 +158,7 @@ class AuthenticationService(IAuthentication):
         page = HtmlModifier(
             email_template=email_template,
             content={
-                "cta": base_link + f"?token={payload_jwt}",
+                "cta": base_link + f"token={payload_jwt}",
                 "nome": user_name,
             },
         )()

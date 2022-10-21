@@ -71,6 +71,10 @@ class ElectronicSignature(BaseModel):
     electronic_signature: constr(regex=signature_regex)
 
 
+class ForgotElectronicSignatureOrigin(BaseModel):
+    origin: Optional[str] = "liga"
+
+
 class NewElectronicSignature(BaseModel):
     new_electronic_signature: constr(regex=signature_regex)
 

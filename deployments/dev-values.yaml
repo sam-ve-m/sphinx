@@ -54,9 +54,9 @@ containers:
       - name: NAME_SENDER
         value: "Liga Invest"
       - name: TARGET_LINK
-        value: "https://app.lionx.com.br/public/deeplink"
+        value: "https://app.lionx.com.br/public/deeplink?"
       - name: TARGET_LINK_PICPAY
-        value: "picpay://picpay/investment/liga/forgot_electronic_signature"
+        value: "https://app.ligainvest.com.br/?env=dev&mode=picpay&"
       - name: REDIS_HOST_URL
         value: "redis://sphinx:LLcdijundsaiheBDNAS@lnxbrspkeydbdb01-dev.subpriv.vcndev.oraclevcn.com:6379"
       - name: REDIS_CACHE_DB
@@ -173,6 +173,18 @@ containers:
         value: "redis://mepho:LndhhhII565dsaadspoi@172.30.19.183:6379"
       - name: MEPHO_REDIS_DB
         value: "1"
+      - name: MEPHO_CLIENT_LOCK_MANAGER_REDIS_URLS
+        value: '["redis://:foobared@127.0.0.1:6379?db=1", "redis://:foobared@127.0.0.1:6378?db=1", "redis://:foobared@127.0.0.1:6377?db=1", "redis://:foobared@127.0.0.1:6376?db=1", "redis://:foobared@127.0.0.1:6375?db=1"]'
+      - name: MEPHO_CLIENT_AUTHENTICATION_RETRY_COUNT
+        value: "3"
+      - name: MEPHO_CLIENT_AUTHENTICATION_RETRY_DELAY_MIN
+        value: "10"
+      - name: MEPHO_CLIENT_AUTHENTICATION_RETRY_DELAY_MAX
+        value: "15"
+      - name: MEPHO_CLIENT_AUTHENTICATION_LOCK_MANAGER_TIMEOUT
+        value: "20"
+      - name: MEPHO_CLIENT_AUTHENTICATION_LOCK_MANAGER_IDENTIFIER
+        value: "mepho_authentication_sphinx"
       - name: DW_APP_KEY
         value: "93d6184b-4692-4058-b32d-82624be89cb1"
       - name: DW_USER

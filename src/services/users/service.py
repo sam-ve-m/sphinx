@@ -900,7 +900,7 @@ class UserService(IUser):
 
         jwt_payload_data.update({"forgot_electronic_signature": True})
         jwt_payload_data.update({"is_deeplink": True})
-        origin = entity.get("origin", "liga")
+        origin = payload.get("origin", "liga")
         if entity.get("origin") and entity.get("origin") != "liga":
             jwt_payload_data.update({"is_third_party_token": True})
 

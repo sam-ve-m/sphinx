@@ -1,5 +1,5 @@
 # OUTSIDE LIBRARIES
-import aioredis
+import redis.asyncio as aioredis
 
 
 class RedisInfrastructure:
