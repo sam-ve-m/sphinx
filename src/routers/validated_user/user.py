@@ -6,7 +6,7 @@ from src.domain.validators.base import (
     ElectronicSignature,
     ChangeElectronicSignature,
     View,
-    Feature,
+    Feature, ForgotElectronicSignatureOrigin,
 )
 from src.domain.validators.onboarding_validators import (
     TermFile,
@@ -302,11 +302,12 @@ async def set_user_electronic_signature(
 
 
 @router.get("/user/forgot_electronic_signature", tags=["user"])
-async def forgot_electronic_signature(request: Request):
+async def forgot_electronic_signature(request: Request, origin: ForgotElectronicSignatureOrigin = Depends(ForgotElectronicSignatureOrigin) ):
     jwt_data = await JwtService.get_thebes_answer_from_request(request=request)
 
     payload = {
         "x-thebes-answer": jwt_data,
+        "origin": origin.origin
     }
 
     return await BaseController.run(
