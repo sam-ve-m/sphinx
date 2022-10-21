@@ -230,7 +230,6 @@ class AuthenticationService(IAuthentication):
             user_data=user_data, ttl=525600
         ).build()
         jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
-
         (
             sent_to_persephone,
             status_sent_to_persephone,
