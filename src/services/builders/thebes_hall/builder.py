@@ -82,7 +82,7 @@ class ThebesHallBuilder:
             .add_scope()
             .add_nick_name()
             .add_terms()
-            .add_using_suitability_or_refuse_term()
+            .add_using_suitability_or_risk_acknowledged()
             .add_last_modified_date_months_past()
             .add_has_finished_br_onboarding()
             .add_has_finished_us_onboarding()
@@ -90,6 +90,10 @@ class ThebesHallBuilder:
         )
 
     def _build_client_jwt(self):
+
+        # TODO: Verificar se é necessário adicionar bloquio de conta us
+        # .add_client_us_account_is_blocked()
+
         (
             self.add_expiration_date_and_created_at()
             .add_unique_id()
@@ -99,9 +103,10 @@ class ThebesHallBuilder:
             .add_register_analyses()
             .add_br_accounts()
             .add_us_accounts()
-            .add_using_suitability_or_refuse_term()
+            .add_using_suitability_or_risk_acknowledged()
             .add_last_modified_date_months_past()
             .add_suitability_months_past()
+            .add_account_br_is_blocked()
             .add_client_has_br_trade_allowed(
                 suitability_months_past=self._control_data["suitability_months_past"],
                 last_modified_date_months_past=self._control_data[
@@ -114,6 +119,16 @@ class ThebesHallBuilder:
             .add_has_finished_br_onboarding()
             .add_has_finished_us_onboarding()
         )
+
+    def add_account_br_is_blocked(self):
+        self._jwt_payload_user_data.update({"account_br_is_blocked": False})
+        sinacor_account_block_status = self._user_data.get("sinacor_account_block_status")
+        account_br_is_blocked = all([sinacor_account_block_status])
+        self._jwt_payload_user_data.update(
+            {"account_br_is_blocked": account_br_is_blocked}
+        )
+
+        return self
 
     def add_expiration_date_and_created_at(self):
         self._jwt_payload_data.update(
@@ -179,17 +194,19 @@ class ThebesHallBuilder:
         )
         return self
 
-    def add_using_suitability_or_refuse_term(self):
+    def add_using_suitability_or_risk_acknowledged(self):
         current_event_loop = asyncio.get_running_loop()
         task = current_event_loop.create_task(
-            self.user_repository.is_user_using_suitability_or_refuse_term(
+            self.user_repository.is_user_using_suitability_or_risk_acknowledged(
                 unique_id=self._user_data.get("unique_id")
             )
         )
         value = current_event_loop.run_until_complete(task)
-        self._control_data.update({"using_suitability_or_refuse_term": value.get("option")})
+        self._control_data.update({"using_suitability_or_risk_acknowledged": value.get("option")})
+        self._jwt_payload_user_data.update({"using_suitability_or_risk_acknowledged": value.get("option")})
         if suitability_profile := value.get("suitability_profile"):
             self._control_data.update({"suitability_profile": suitability_profile})
+            self._jwt_payload_user_data.update(suitability={"profile": suitability_profile})
         return self
 
     def add_nick_name(self):

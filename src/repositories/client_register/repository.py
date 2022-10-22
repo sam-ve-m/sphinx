@@ -187,6 +187,14 @@ class ClientRegisterRepository(OracleBaseRepository):
             return result[0]
         return None
 
+    @classmethod
+    async def get_account_sinacor_is_blocked(cls, user_cpf: str, user_bmf_account: str):
+        sql = f"SELECT TP_SITUAC FROM CORRWIN.TSCCLIGER WHERE CD_CPFCGC = {user_cpf}"
+        result = await cls.query(sql=sql)
+        if result and len(result) > 0:
+            return result[0]
+        return None
+
     @staticmethod
     def is_married(user_data: dict):
         is_married = user_data["marital"]["status"] in [
