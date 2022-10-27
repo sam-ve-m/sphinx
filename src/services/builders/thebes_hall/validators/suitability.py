@@ -13,4 +13,5 @@ class Suitability(IValidator):
         if suitability := user_data.get("suitability"):
             total_months_past = months_past(date=suitability["submission_date"])
             user_data["suitability"]["months_past"] = total_months_past
+            user_data["suitability"]["remaining_months"] = 24 - total_months_past
         return user_data

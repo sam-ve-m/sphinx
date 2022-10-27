@@ -222,8 +222,7 @@ def get_user_signed_terms_template_with_data(
     terms_update: dict, payload: dict, files_type: List[str]
 ) -> dict:
     normalize_terms_update = {
-        key.replace("terms.", ""): value
-        for key, value in terms_update.items()
+        key.replace("terms.", ""): value for key, value in terms_update.items()
     }
     return {
         "unique_id": payload.get("unique_id"),
