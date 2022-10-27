@@ -11,7 +11,9 @@ class UserRepository(MongoDbBaseRepository):
     collection = config("MONGODB_USER_COLLECTION")
 
     @classmethod
-    async def is_user_using_suitability_or_risk_acknowledged(cls, unique_id: str) -> dict:
+    async def is_user_using_suitability_or_risk_acknowledged(
+        cls, unique_id: str
+    ) -> dict:
         user = await cls.find_one({"unique_id": unique_id})
         suitability = user.get("suitability")
         term_refusal = user["terms"].get("term_refusal")

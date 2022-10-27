@@ -24,8 +24,6 @@ class MiddlewareService:
         if user_data and user_data.get("is_active_user"):
             return user_data
 
-
-
     @staticmethod
     def is_user_token_life_time_valid(user_data: dict, token: dict) -> bool:
         try:

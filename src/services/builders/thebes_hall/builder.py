@@ -106,6 +106,7 @@ class ThebesHallBuilder:
             .add_using_suitability_or_risk_acknowledged()
             .add_last_modified_date_months_past()
             .add_suitability_months_past()
+            .add_suitability_remaining_months()
             .add_account_br_is_blocked()
             .add_client_has_br_trade_allowed(
                 suitability_months_past=self._control_data["suitability_months_past"],
@@ -122,7 +123,9 @@ class ThebesHallBuilder:
 
     def add_account_br_is_blocked(self):
         self._jwt_payload_user_data.update({"account_br_is_blocked": False})
-        sinacor_account_block_status = self._user_data.get("sinacor_account_block_status")
+        sinacor_account_block_status = self._user_data.get(
+            "sinacor_account_block_status"
+        )
         account_br_is_blocked = all([sinacor_account_block_status])
         self._jwt_payload_user_data.update(
             {"account_br_is_blocked": account_br_is_blocked}
@@ -183,9 +186,20 @@ class ThebesHallBuilder:
         self._control_data.update({"suitability_months_past": suitability_months_past})
         return self
 
+    def add_suitability_remaining_months(self):
+        SuitabilityValidator.run(user_data=self._user_data)
+        suitability = self._user_data.get("suitability")
+        remaining_months = 0
+        if suitability:
+            remaining_months = suitability.get("remaining_months")
+        self._control_data.update({"suitability_remaining_months": remaining_months})
+        return self
+
     def add_last_modified_date_months_past(self):
         AccountDataValidator.run(user_data=self._user_data)
-        last_modified_date = self._user_data.get("last_modified_date")
+        last_modified_date = self._user_data.get("record_date_control", {}).get(
+            "registry_updates", {}
+        )
         last_modified_date_months_past = 0
         if last_modified_date:
             last_modified_date_months_past = last_modified_date.get("months_past")
@@ -202,11 +216,17 @@ class ThebesHallBuilder:
             )
         )
         value = current_event_loop.run_until_complete(task)
-        self._control_data.update({"using_suitability_or_risk_acknowledged": value.get("option")})
-        self._jwt_payload_user_data.update({"using_suitability_or_risk_acknowledged": value.get("option")})
+        self._control_data.update(
+            {"using_suitability_or_risk_acknowledged": value.get("option")}
+        )
+        self._jwt_payload_user_data.update(
+            {"using_suitability_or_risk_acknowledged": value.get("option")}
+        )
         if suitability_profile := value.get("suitability_profile"):
             self._control_data.update({"suitability_profile": suitability_profile})
-            self._jwt_payload_user_data.update(suitability={"profile": suitability_profile})
+            self._jwt_payload_user_data.update(
+                suitability={"profile": suitability_profile}
+            )
         return self
 
     def add_nick_name(self):

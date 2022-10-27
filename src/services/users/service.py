@@ -911,7 +911,7 @@ class UserService(IUser):
             email=entity.get("email"),
             payload_jwt=jwt,
             user_name=entity["name"],
-            origin=origin
+            origin=origin,
         )
         return {
             "status_code": status.HTTP_200_OK,

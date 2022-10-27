@@ -148,7 +148,7 @@ class AuthenticationService(IAuthentication):
         payload_jwt: str,
         user_name: str,
         email_sender=SendGridEmail,
-        origin: str = None
+        origin: str = None,
     ) -> None:
         base_link = config("TARGET_LINK")
         if origin is not None:
@@ -349,7 +349,9 @@ class AuthenticationService(IAuthentication):
     ) -> dict:
         user_solutiontech_status_from_database = user.get("solutiontech")
         user_sincad_status_from_database = user.get("sincad")
-        user_sinacor_account_block_status_from_database = user.get("sinacor_account_block_status")
+        user_sinacor_account_block_status_from_database = user.get(
+            "sinacor_account_block_status"
+        )
         user_sinacor_status_from_database = user.get("sinacor")
         user_bmf_account_from_database = (
             user.get("portfolios", {})
@@ -374,7 +376,6 @@ class AuthenticationService(IAuthentication):
             user_sincad_status_from_database=user_sincad_status_from_database,
             user_sinacor_status_from_database=user_sinacor_status_from_database,
             user_sinacor_account_block_status_from_database=user_sinacor_account_block_status_from_database,
-
         )
 
         user_solutiontech_status_is_synced = (
@@ -420,12 +421,10 @@ class AuthenticationService(IAuthentication):
             )
         )
 
-        client_map_requirements_to_allow_br_trade_from_database = (
-            AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
-                client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_br_trade_from_database,
-                sinacor_status_from_sinacor=sinacor_status_from_sinacor,
-                sinacor_status_from_user_database=user_sinacor_status_from_database
-            )
+        client_map_requirements_to_allow_br_trade_from_database = AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_status_response(
+            client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_br_trade_from_database,
+            sinacor_status_from_sinacor=sinacor_status_from_sinacor,
+            sinacor_status_from_user_database=user_sinacor_status_from_database,
         )
 
         sinacor_account_block_status = (
@@ -435,12 +434,10 @@ class AuthenticationService(IAuthentication):
             )
         )
 
-        client_map_requirements_to_allow_br_trade_from_database = (
-            AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_account_block_status_response(
-                client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_br_trade_from_database,
-                sinacor_account_block_status_from_sinacor=sinacor_account_block_status,
-                sinacor_account_block_status_from_user_database=user_sinacor_account_block_status_from_database
-            )
+        client_map_requirements_to_allow_br_trade_from_database = AuthenticationService._update_client_has_trade_allowed_status_with_sinacor_account_block_status_response(
+            client_has_trade_allowed_status_with_database_user=client_map_requirements_to_allow_br_trade_from_database,
+            sinacor_account_block_status_from_sinacor=sinacor_account_block_status,
+            sinacor_account_block_status_from_user_database=user_sinacor_account_block_status_from_database,
         )
 
         return client_map_requirements_to_allow_br_trade_from_database
@@ -450,7 +447,7 @@ class AuthenticationService(IAuthentication):
         user_solutiontech_status_from_database: str,
         user_sincad_status_from_database: bool,
         user_sinacor_status_from_database: bool,
-        user_sinacor_account_block_status_from_database: bool
+        user_sinacor_account_block_status_from_database: bool,
     ):
         client_has_trade_allowed_status_with_database_user = {
             "solutiontech": {
@@ -571,15 +568,15 @@ class AuthenticationService(IAuthentication):
         sinacor_account_block_status_from_user_database: bool,
     ):
         sinacor_account_block_status_changed = (
-                sinacor_account_block_status_from_sinacor != sinacor_account_block_status_from_user_database
-
+            sinacor_account_block_status_from_sinacor
+            != sinacor_account_block_status_from_user_database
         )
-        client_has_trade_allowed_status_with_database_user["sinacor_account_block_status"][
-            "status"
-        ] = sinacor_account_block_status_from_sinacor
-        client_has_trade_allowed_status_with_database_user["sinacor_account_block_status"][
-            "status_changed"
-        ] = sinacor_account_block_status_changed
+        client_has_trade_allowed_status_with_database_user[
+            "sinacor_account_block_status"
+        ]["status"] = sinacor_account_block_status_from_sinacor
+        client_has_trade_allowed_status_with_database_user[
+            "sinacor_account_block_status"
+        ]["status_changed"] = sinacor_account_block_status_changed
 
         return client_has_trade_allowed_status_with_database_user
 
@@ -609,7 +606,9 @@ class AuthenticationService(IAuthentication):
         user_bmf_account_from_database: str,
         client_register_repository=ClientRegisterRepository,
     ) -> bool:
-        sinacor_block_status = await client_register_repository.get_account_sinacor_is_blocked(
-            user_cpf=user_cpf, user_bmf_account=user_bmf_account_from_database
+        sinacor_block_status = (
+            await client_register_repository.get_account_sinacor_is_blocked(
+                user_cpf=user_cpf, user_bmf_account=user_bmf_account_from_database
+            )
         )
         return sinacor_block_status and sinacor_block_status[0] in ["BL"]
