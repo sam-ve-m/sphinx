@@ -8,6 +8,7 @@ import nest_asyncio
 
 from src.domain.drive_wealth.kyc_status import KycStatus
 from src.repositories.file.enum.term_file import TermsFileType
+from tests.src.services.builders.thebes_hall.test_thebes_hall_builder_validator import Terms
 
 nest_asyncio.apply()
 
@@ -327,6 +328,15 @@ class ThebesHallBuilder:
     def add_client_has_br_trade_allowed(
         self, suitability_months_past: int, last_modified_date_months_past: int
     ):
+        if not self._control_data.get("using_suitability_or_risk_acknowledged"):
+            self.add_using_suitability_or_risk_acknowledged()
+
+        using_suitability_or_risk_acknowledged = self._control_data.get("using_suitability_or_risk_acknowledged")
+        if using_suitability_or_risk_acknowledged == TermsFileType.TERM_REFUSAL.value:
+            valid_suitability_or_risk_acknowledged_status = True
+        else:
+            valid_suitability_or_risk_acknowledged_status = suitability_months_past < 24
+
         self._jwt_payload_user_data.update({"client_has_br_trade_allowed": False})
         solutiontech = self._user_data.get("solutiontech")
         sincad = self._user_data.get("sincad")
@@ -340,7 +350,7 @@ class ThebesHallBuilder:
                 sinacor,
                 is_active_client,
                 client_has_electronic_signature,
-                suitability_months_past < 24,
+                valid_suitability_or_risk_acknowledged_status,
                 last_modified_date_months_past < 24,
             ]
         )
