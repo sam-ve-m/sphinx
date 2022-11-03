@@ -109,6 +109,7 @@ class ThebesHallBuilder:
             .add_suitability_months_past()
             .add_suitability_remaining_months()
             .add_account_br_is_blocked()
+            .add_client_is_awaiting_br_account_to_be_created()
             .add_client_has_br_trade_allowed(
                 suitability_months_past=self._control_data["suitability_months_past"],
                 last_modified_date_months_past=self._control_data[
@@ -323,6 +324,27 @@ class ThebesHallBuilder:
             self._jwt_payload_user_data["portfolios"]["us"].update(
                 {"dw_display_account": dw_display_account}
             )
+        return self
+
+    def add_client_is_awaiting_br_account_to_be_created(self):
+        solutiontech = self._user_data.get("solutiontech")
+        sincad = self._user_data.get("sincad")
+        sinacor = self._user_data.get("sinacor")
+        has_all_attributes = (
+            solutiontech is not None and
+            sincad is not None and
+            sinacor is not None
+        )
+        client_has_br_account = all(
+            [
+                solutiontech == SolutiontechClientImportStatus.SYNC.value,
+                sincad,
+                sinacor
+            ]
+        )
+        self._jwt_payload_user_data.update(
+            {"client_is_awaiting_br_account_to_be_created": not client_has_br_account if has_all_attributes else None}
+        )
         return self
 
     def add_client_has_br_trade_allowed(
