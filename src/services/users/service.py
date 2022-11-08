@@ -898,10 +898,11 @@ class UserService(IUser):
             user_data=entity, ttl=10
         ).build()
 
-        jwt_payload_data.update({"forgot_electronic_signature": True})
-        jwt_payload_data.update({"is_deeplink": True})
+        jwt_payload_data.update({"forgot_electronic_signature": True, "is_deeplink": True})
+
         origin = payload.get("origin", "liga")
-        if entity.get("origin") and entity.get("origin") != "liga":
+        is_third_party_token = thebes_answer.get("is_third_party_token")
+        if entity.get("origin") and entity.get("origin") != "liga" or is_third_party_token:
             jwt_payload_data.update({"is_third_party_token": True})
 
         jwt = await JwtService.generate_token(jwt_payload_data=jwt_payload_data)
