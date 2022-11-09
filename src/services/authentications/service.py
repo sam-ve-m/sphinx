@@ -87,6 +87,9 @@ class AuthenticationService(IAuthentication):
             user_data=user_data, ttl=525600
         ).build()
 
+        if is_third_party_token := thebes_answer.get("is_third_party_token"):
+            jwt_payload_data.update({"is_third_party_token": is_third_party_token})
+
         jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
 
         response.update({"payload": {"jwt": jwt, "control_data": control_data}})
@@ -229,6 +232,10 @@ class AuthenticationService(IAuthentication):
         jwt_payload_data, control_data = ThebesHallBuilder(
             user_data=user_data, ttl=525600
         ).build()
+
+        if is_third_party_token := x_thebes_answer.get("is_third_party_token"):
+            jwt_payload_data.update({"is_third_party_token": is_third_party_token})
+
         jwt = await token_service.generate_token(jwt_payload_data=jwt_payload_data)
         (
             sent_to_persephone,
