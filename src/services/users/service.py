@@ -902,7 +902,7 @@ class UserService(IUser):
 
         origin = payload.get("origin", "liga")
         is_third_party_token = thebes_answer.get("is_third_party_token")
-        if entity.get("origin") and entity.get("origin") != "liga" or is_third_party_token:
+        if is_third_party_token or (entity.get("origin") and entity.get("origin") != "liga"):
             jwt_payload_data.update({"is_third_party_token": True})
 
         jwt = await JwtService.generate_token(jwt_payload_data=jwt_payload_data)

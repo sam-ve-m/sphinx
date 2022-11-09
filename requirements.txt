@@ -4,7 +4,7 @@ cx-oracle-async==0.3.2
 email-validator==1.1.3
 fastapi==0.74.1
 heimdall-client==2.3.3
-mepho==0.2.1
+mepho==0.2.2
 mist-client==2.3.4
 nest-asyncio==1.5.4
 persephone-client==1.6.1
